@@ -20,6 +20,7 @@ namespace PrismTester
             SevModelData modelData = model.SevModelData();
             SevModelEnumerator modelEnum = model.SevModelEnumerator();
             PreRunChecks myPreRunChecks = new PreRunChecks(model);
+            ModelModifiers myModelModifiers = new ModelModifiers(model);
              
             if (model.GetConnectionStatus())
             {
@@ -32,10 +33,17 @@ namespace PrismTester
 
             myPreRunChecks.CheckDrawingsAreUpToDate(modelEnum.drawingEnum);
             myFolderManager.CreateFolders();
-            //myReportManager.CreateReports(modelEnum.selectedModelParts, modelEnum.selectedModelBolts);
+            myReportManager.CreateReports(modelEnum.selectedModelParts, modelEnum.selectedModelBolts);
 
-            //myDrawingManager.PrintDrawings(modelEnum.drawingEnum);              
-         
+            myDrawingManager.DummyPrintDrawings(modelEnum.drawingEnum);
+            myModelModifiers.FabPackComplete(modelEnum);
+            myModelModifiers.RunThroughDetailingChecksComplete(modelEnum);
+            myModelModifiers.RunThroughDetailingChecks(modelEnum);
+            myModelModifiers.MaterialOrderComplete(modelEnum);
+            myModelModifiers.MaterialChecksComplete(modelEnum);
+            myModelModifiers.RunThroughMaterialChecks(modelEnum);
+            myModelModifiers.DrawingsCreated(modelEnum);
+
             Console.WriteLine("Press enter to close");
             Console.ReadLine();
         }

@@ -72,6 +72,11 @@
     <Compile Include="FolderManager.cs" />
     <Compile Include="ModelModifiers.cs" />
     <Compile Include="PreRunChecks.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="ReportManager.cs" />
     <Compile Include="ModelData.cs" />
     <Compile Include="ModelEnumerator.cs" />
@@ -86,6 +91,10 @@
   <ItemGroup>
     <EmbeddedResource Include="PrismForm.resx">
       <DependentUpon>PrismForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,22 +15,79 @@ namespace Prism
             return new ModelModifiers(model);
         }
     }
-
     public class ModelModifiers
     {
         public SevModelData modelData;
+        public SevModelEnumerator modelEnum;
 
         public ModelModifiers(Model model)
         {
             modelData = model.SevModelData();
-
+            modelEnum = model.SevModelEnumerator();
         }
-
-        public void FabPackComplete(Part myPart)
+        public void FabPackComplete(SevModelEnumerator modelEnum)
         {
-            myPart.SetUserProperty("SEV-UDA-16", modelData.Full);
-            myPart.SetUserProperty("SEV-UDA-17", modelData.date);
-            myPart.SetUserProperty("SEV-UDA-18", myPart.GetPartMark());
+            foreach (Part part in modelEnum.selectedModelParts)
+            {
+                part.SetUserProperty("PRISM-FAB-1-NAME", modelData.Full);
+                part.SetUserProperty("PRISM-FAB-1-DATE", modelData.date);
+                part.SetUserProperty("PRISM-FAB-1-NUMBER", modelEnum.myParts.GetPartMark());
+                part.Modify();
+            }
+        }
+        public void RunThroughMaterialChecks(SevModelEnumerator modelEnum)
+        {      
+            foreach (Part part in modelEnum.selectedModelParts)
+            {
+                part.SetUserProperty("PRISM-MAT-1-NAME", modelData.Full);
+                part.SetUserProperty("PRISM-MAT-1-DATE", modelData.date);
+                part.Modify();                
+            }
+        }
+        public void MaterialChecksComplete(SevModelEnumerator modelEnum)
+        {
+            foreach (Part part in modelEnum.selectedModelParts)
+            {
+                part.SetUserProperty("PRISM-MAT-2-NAME", modelData.Full);
+                part.SetUserProperty("PRISM-MAT-2-DATE", modelData.date);
+                part.Modify();
+            }
+        }
+        public void MaterialOrderComplete(SevModelEnumerator modelEnum)
+        {
+            foreach (Part part in modelEnum.selectedModelParts)
+            {
+                part.SetUserProperty("PRISM-MAT-3-NAME", modelData.Full);
+                part.SetUserProperty("PRISM-MAT-3-DATE", modelData.date);
+                part.Modify();
+            }
+        }
+        public void RunThroughDetailingChecks(SevModelEnumerator modelEnum)
+        {
+            foreach (Part part in modelEnum.selectedModelParts)
+            {
+                part.SetUserProperty("PRISM-DET-1-NAME", modelData.Full);
+                part.SetUserProperty("PRISM-DET-1-DATE", modelData.date);
+                part.Modify();
+            }
+        }
+        public void RunThroughDetailingChecksComplete(SevModelEnumerator modelEnum)
+        {
+            foreach (Part part in modelEnum.selectedModelParts)
+            {
+                part.SetUserProperty("PRISM-DET-2-NAME", modelData.Full);
+                part.SetUserProperty("PRISM-DET-2-DATE", modelData.date);
+                part.Modify();
+            }
+        }
+        public void DrawingsCreated(SevModelEnumerator modelEnum)
+        {
+            foreach (Part part in modelEnum.selectedModelParts)
+            {
+                part.SetUserProperty("PRISM-DET-3-NAME", modelData.Full);
+                part.SetUserProperty("PRISM-DET-3-DATE", modelData.date);
+                part.Modify();
+            }
         }
     }
 }

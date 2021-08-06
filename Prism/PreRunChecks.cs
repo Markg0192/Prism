@@ -47,7 +47,6 @@ namespace Prism
                         {
                             return false;                            
                         }
-
                     }                    
                 }
             }

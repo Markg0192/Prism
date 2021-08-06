@@ -16,7 +16,6 @@ namespace Prism
             return new SevModelEnumerator(model);
         }
     }
-
     public class SevModelEnumerator
     {
         public ArrayList selectedModelParts;
