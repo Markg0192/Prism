@@ -39,14 +39,12 @@ namespace Prism
             foreach (object myObject in moe)
             {
                 myParts = myObject as Tekla.Structures.Model.Part;
-                myBolts = myObject as BoltGroup;
-                
+                myBolts = myObject as BoltGroup;                
                 if (myParts != null)
                 {
                     selectedModelParts.Add(myParts);
                     myMarks.Add(myParts.GetPartMark());
-                }
-                
+                }                
                 if (myBolts !=null)
                 {
                     selectedModelBolts.Add(myBolts);

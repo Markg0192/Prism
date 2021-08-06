@@ -16,7 +16,6 @@ namespace Prism
             return new SevFolders(model, phaseNum, issueNum);
         }
     }
-
     public class SevFolders
     {  
         public const string AssFolder = "ASS Folder";
@@ -50,7 +49,6 @@ namespace Prism
             ReportPath = Path.Combine(FabPath, ReportFolder);
             DspPath = Path.Combine(FabPath, DspFolder);
             IFCPath = Path.Combine(FabPath, IFCFolder);
-
             folderNames = new List<string>
                 {AssPath, FitPath, PrtPath, DspPath, NCPath, ReportPath, IFCPath};
         }
@@ -67,10 +65,17 @@ namespace Prism
         }     
         public void RemoveUnusedFolders()
         {
-            // var possibleFolders = PossibleFolderNames();
+            if (Directory.Exists(FabPath))
+            {
+                foreach (string subdirectory in Directory.GetDirectories(FabPath))
+                {
+                    string[] file = Directory.GetFiles(subdirectory, "*.*");
+                    if (file.Length == 0)
 
-            // foreach(string folder in myFoldernames)
-            // if its empty delete it
-        }
+                        Directory.Delete(subdirectory);
+                }
+            }
+        }      
     }
 }
+

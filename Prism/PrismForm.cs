@@ -74,6 +74,7 @@ namespace Prism
                 myReportManager.CreateReports(modelEnum.selectedModelParts, modelEnum.selectedModelBolts);
                 myDrawingManager.PrintDrawings(modelEnum.drawingEnum, StatusLabel);
                 myModelModifiers.FabPackComplete(modelEnum);
+                myFolderManager.RemoveUnusedFolders();
             }
             if (packageSUK)
             {

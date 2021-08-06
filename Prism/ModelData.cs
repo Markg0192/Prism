@@ -34,7 +34,6 @@ namespace Prism
             Full = First + " " + Last;
             Initials = new string(new char[] { First.ToCharArray()[0], Last.ToCharArray()[0] }).ToUpper();
         }
-
         public string Capitalise(string original)
         {
             char[] chars = original.ToLower().ToCharArray();

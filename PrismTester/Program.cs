@@ -34,7 +34,6 @@ namespace PrismTester
             myPreRunChecks.CheckDrawingsAreUpToDate(modelEnum.drawingEnum);
             myFolderManager.CreateFolders();
             myReportManager.CreateReports(modelEnum.selectedModelParts, modelEnum.selectedModelBolts);
-
             myDrawingManager.DummyPrintDrawings(modelEnum.drawingEnum);
             myModelModifiers.FabPackComplete(modelEnum);
             myModelModifiers.RunThroughDetailingChecksComplete(modelEnum);
@@ -43,7 +42,7 @@ namespace PrismTester
             myModelModifiers.MaterialChecksComplete(modelEnum);
             myModelModifiers.RunThroughMaterialChecks(modelEnum);
             myModelModifiers.DrawingsCreated(modelEnum);
-
+            myFolderManager.RemoveUnusedFolders();
             Console.WriteLine("Press enter to close");
             Console.ReadLine();
         }

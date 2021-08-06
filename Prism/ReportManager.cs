@@ -22,8 +22,7 @@ namespace Prism
         public string Title2;
         public string Title3;
         public readonly string firmFolderReportPath = "C:/Sev_Firm_2019i/Roles/SNI/Reports";
-        // public readonly string Report3;
-        public  string Report3name = "-3-SNI-HotRolledMemList.xsr";
+        public string Report3name = "-3-SNI-HotRolledMemList.xsr";
         public string Report3;
         public const string Report2QS = "-2QS-SNI-AssemblyBreakdownList.rpt";
         public const string Report3PG = "-3_PG-SNI-HotRolledPlateGirderList.rpt";
@@ -52,18 +51,14 @@ namespace Prism
             phaseNumber = phaseNum;
             issueNumber = issueNum;
             Report3 = Path.Combine(firmFolderReportPath, Report3name);
-           // <Path>File:///%XS_TEMPLATE_DIRECTORY%/-3-SNI-HotRolledMemList.rpt</Path>
-           // Report3 = Path.Combine"XS_TEMPLATE_DIRECTORY-3-SNI-HotRolledMemList.rpt";
             Folders = model.SevFolders(phaseNumber, issueNumber);
             ModelData = model.SevModelData();
             ModelEnum = model.SevModelEnumerator();
-
             ReportPrefix = ($"{ModelData.projNumber}-{phaseNumber}-FAB-ISSUE{issueNumber}");
             Title1 = phaseNumber.ToString();
             Title2 = ModelData.Initials;
             Title3 = issueNumber.ToString();
         }
-
         public void CreateReports(ArrayList partsList, ArrayList boltList)
         {
             bool create3Report = false;
@@ -73,7 +68,6 @@ namespace Prism
             bool create7sReport = false;
             bool create8Report = false;
             bool create8sReport = false;
-
             string sectionSize;
             LibraryProfileItem myProfileItem = new LibraryProfileItem();           
 
@@ -81,7 +75,6 @@ namespace Prism
             {
                 bool isFitting = false;
                 bool isPlateGirder;
-
                 myProfileItem.Select(part.Profile.ProfileString);                
                 sectionSize = new string(new char[] { myProfileItem.ProfileName.ToCharArray()[0], myProfileItem.ProfileName.ToCharArray()[1] });
                 isPlateGirder = sectionSize == "PG";
@@ -90,7 +83,6 @@ namespace Prism
                 if (isPlateGirder) create3PGReport = true;
                 if (isFitting) create4Report = true;
             }
-
             foreach (BoltGroup bolt in boltList)
             {
                 bool isSiteBolt;
@@ -104,10 +96,8 @@ namespace Prism
                 if (isSiteBolt && !isShearStud) create8Report = true;
                 if (isSiteBolt && isShearStud) create8sReport = true;
             }
-
             Operation.CreateReportFromSelected(Report2QS, Path.Combine(Folders.DspPath, $"{ReportPrefix}{Output2QS}"), Title1, Title2, Title3);
             Operation.CreateReportFromSelected(Report9, Path.Combine(Folders.ReportPath, $"{ReportPrefix}{Output9}"), Title1, Title2, Title3);
-
             if (create3Report)
             {
                 Console.WriteLine("3 List Produced");
@@ -128,13 +118,11 @@ namespace Prism
                 Console.WriteLine("7 List Produced");
                 Operation.CreateReportFromSelected(Report7, Path.Combine(Folders.ReportPath, $"{ReportPrefix}{Output7}"), Title1, Title2, Title3);
             }
-
             if (create7sReport)
             {
                 Console.WriteLine("7s List Produced");
                 Operation.CreateReportFromSelected(Report7s, Path.Combine(Folders.ReportPath, $"{ReportPrefix}{Output7s}"), Title1, Title2, Title3);
             }
-
             if (create8Report)
             {
                 Console.WriteLine("8 List Produced");
@@ -146,10 +134,8 @@ namespace Prism
                 Console.WriteLine("8s List Produced");
                 Operation.CreateReportFromSelected(Report8s, Path.Combine(Folders.ReportPath, $"{ReportPrefix}{Output8s}"), Title1, Title2, Title3);
             }
-
             Operation.CreateNCFilesFromSelected("-SNI-PROFILES", Path.Combine(Folders.NCPath, " "));
-            Operation.CreateNCFilesFromSelected("-SNI-PLATES", Path.Combine(Folders.NCPath, " "));
-            
+            Operation.CreateNCFilesFromSelected("-SNI-PLATES", Path.Combine(Folders.NCPath, " "));            
         }
     }
 }

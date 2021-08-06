@@ -11,18 +11,15 @@ namespace Prism
         public SevFolders Folders;       
         public const string notRequired = "Not Required";
         public string[] mark;
-
         public DrawingManager(Model model, string phaseNum, string issueNum)
         {
             ModelEnum = model.SevModelEnumerator();
             Folders = model.SevFolders(phaseNum, issueNum);
-        }
-        
+        }        
         public void UpdateStatusLabel (ToolStripStatusLabel StatusLabel,  int currentNumber, int TotalNumber)
         {        
           StatusLabel.Text = $"Processing Drawing {currentNumber} of {TotalNumber}";           
-        }     
-    
+        }         
         public void PrintDrawings(DrawingEnumerator drawingsList, ToolStripStatusLabel StatusLabel)
         {
             int weldNumberCounter = 0;
@@ -35,7 +32,6 @@ namespace Prism
                     p.GetReportProperty("DRAWING.REVISON.MARK", ref revMark);
                 }
             }
-
             foreach (Drawing currentDrawing in drawingsList)
             {          
                 if (currentDrawing != null)
