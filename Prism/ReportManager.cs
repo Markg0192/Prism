@@ -21,18 +21,27 @@ namespace Prism
         public string Title1;
         public string Title2;
         public string Title3;
-        public readonly string firmFolderReportPath = "C:/Sev_Firm_2019i/Roles/SNI/Reports";
-        public string Report3name = "-3-SNI-HotRolledMemList.xsr";
-        public string Report3;
-        public const string Report2QS = "-2QS-SNI-AssemblyBreakdownList.rpt";
-        public const string Report3PG = "-3_PG-SNI-HotRolledPlateGirderList.rpt";
-        public const string Report4 = "-4-SNI-HotRolledFitList.rpt";
-        public const string Report7 = "-7-SNI-ShopBoltList.rpt";
-        public const string Report7s = "-7S-SNI-ShopSTUDList.rpt";
-        public const string Report8 = "-8-SNI-SiteBoltList.rpt";
-        public const string Report8L = "-8L-SNI-SiteBoltLocationList.rpt";
-        public const string Report8s = "-8s-SNI-SiteSTUDList.rpt";
-        public const string Report9 = "-9-SNI-SiteDeliveryBatchList.rpt";
+        public string Report2QS;
+        public string Report3;        
+        public string Report3PG;
+        public string Report4;
+        public string Report7;
+        public string Report7s;
+        public string Report8;
+        public string Report8L;
+        public string Report8s;
+        public string Report9;
+        public readonly string niFirmFolderReportPath = "C:/Sev_Firm_2019i/Roles/SNI/Reports";
+        public const string Report2QSname = "-2QS-SNI-AssemblyBreakdownList.rpt";
+        public const string Report3name = "-3-SNI-HotRolledMemList.rpt";
+        public const string Report3PGname = "-3_PG-SNI-HotRolledPlateGirderList.rpt";
+        public const string Report4name = "-4-SNI-HotRolledFitList.rpt";
+        public const string Report7name = "-7-SNI-ShopBoltList.rpt";
+        public const string Report7sname = "-7S-SNI-ShopSTUDList.rpt";
+        public const string Report8name = "-8-SNI-SiteBoltList.rpt";
+        public const string Report8Lname = "-8L-SNI-SiteBoltLocationList.rpt";
+        public const string Report8sname = "-8s-SNI-SiteSTUDList.rpt";
+        public const string Report9name = "-9-SNI-SiteDeliveryBatchList.rpt";
         public const string Output2QS = "-2QS-SNI-AssemblyBreakdownList.xsr";
         public const string Output3 = "-3-SNI-HotRolledMemList.xsr";
         public const string Output3PG = "-3_PG-SNI-HotRolledPlateGirderList.xsr";
@@ -50,7 +59,16 @@ namespace Prism
         {
             phaseNumber = phaseNum;
             issueNumber = issueNum;
-            Report3 = Path.Combine(firmFolderReportPath, Report3name);
+            Report2QS = Path.Combine(niFirmFolderReportPath, Report2QSname);
+            Report3 = Path.Combine(niFirmFolderReportPath, Report3name);            
+            Report3PG = Path.Combine(niFirmFolderReportPath, Report3PGname);
+            Report4 = Path.Combine(niFirmFolderReportPath, Report4name);
+            Report7 = Path.Combine(niFirmFolderReportPath, Report7name);
+            Report7s = Path.Combine(niFirmFolderReportPath, Report7sname);
+            Report8 = Path.Combine(niFirmFolderReportPath, Report8name);
+            Report8L = Path.Combine(niFirmFolderReportPath, Report8Lname);
+            Report8s = Path.Combine(niFirmFolderReportPath, Report8sname);
+            Report9 = Path.Combine(niFirmFolderReportPath, Report9name);
             Folders = model.SevFolders(phaseNumber, issueNumber);
             ModelData = model.SevModelData();
             ModelEnum = model.SevModelEnumerator();
@@ -100,6 +118,10 @@ namespace Prism
             Operation.CreateReportFromSelected(Report9, Path.Combine(Folders.ReportPath, $"{ReportPrefix}{Output9}"), Title1, Title2, Title3);
             if (create3Report)
             {
+                if(!File.Exists(Report3))
+                {
+                    Console.WriteLine("message here");
+                }
                 Console.WriteLine("3 List Produced");
                 Operation.CreateReportFromSelected(Report3, Path.Combine(Folders.ReportPath, $"{ReportPrefix}{Output3}"), Title1, Title2, Title3);
             }
