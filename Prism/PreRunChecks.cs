@@ -1,52 +1,45 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 using Tekla.Structures.Drawing;
 using Tekla.Structures.Model;
-using Tekla.Structures.Dialog;
 
 namespace Prism
 {
+    /// <summary>
+    /// The pre run checks class is used to check the model for any issues in the model that may cause the program to crash.
+    /// These are ran before the main program and warns the user of the problem and closes the app before it crashes.
+    /// </summary>
     public class PreRunChecks
     {
-        string[] mark;
-        SevModelEnumerator ModelEnum;
-        DrawingUpToDateStatus updateStatus;
-        string notUpToDateMessage;
-        string notUpToDateTitle;
-        MessageBoxIcon warning;
-        MessageBoxButtons okButton;
+        private string[] mark;
+        private SevModelEnumerator modelEnum;
+        private DrawingUpToDateStatus updateStatus;  
 
         public PreRunChecks(Model model)
         {
-            ModelEnum = model.SevModelEnumerator();
-            notUpToDateMessage = "Some drawings are not up to date, please update and try again";
-            notUpToDateTitle = "Drawings not up to date";
-            warning = MessageBoxIcon.Warning;
-            okButton = MessageBoxButtons.OK;
+            modelEnum = model.SevModelEnumerator();
         }
 
         public bool CheckDrawingsAreUpToDate(DrawingEnumerator drawingsList)
         {
+            const string notUpToDateMessage = "Some drawings are not up to date, please update and try again";
+            const string notUpToDateTitle = "Drawings not up to date";
+
             foreach (Drawing currentDrawing in drawingsList)
             {
                 mark = currentDrawing.Mark.Split(new char[] { '[', '.', ']' });
                 string drawingName = "";
-                foreach (string s in mark) drawingName = drawingName + s;
+                foreach (string s in mark)
+                {
+                    drawingName = drawingName + s;
+                }
                 updateStatus = currentDrawing.UpToDateStatus;
 
-                if (ModelEnum.myMarks != null)
+                if (modelEnum.MyMarks != null)
                 {
-                    if (ModelEnum.myMarks.Contains(drawingName) && updateStatus.ToString() != "DrawingIsUpToDate")
+                    if (modelEnum.MyMarks.Contains(drawingName) && updateStatus!=DrawingUpToDateStatus.DrawingIsUpToDate)
                     {
-                        DialogResult result = MessageBox.Show(notUpToDateMessage, notUpToDateTitle, okButton, warning);
-                        if (result == DialogResult.OK)
-                        {
-                            return false;                            
-                        }
+                        MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return false;
                     }                    
                 }
             }

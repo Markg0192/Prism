@@ -67,7 +67,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="PrismPlugin.cs" />
     <Compile Include="DrawingManager.cs" />
     <Compile Include="FolderManager.cs" />
     <Compile Include="ModelModifiers.cs" />
@@ -91,6 +91,7 @@
   <ItemGroup>
     <EmbeddedResource Include="PrismForm.resx">
       <DependentUpon>PrismForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

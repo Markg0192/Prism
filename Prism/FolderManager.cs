@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Tekla.Structures.Model;
-using System.Windows.Forms;
 
 namespace Prism
-{    
+{
+    /// <summary>
+    /// The folder manager class is where all folders required for a package is created.
+    /// The Create folders method creates all folders that may be required (even if they aren't) because of this we also have he remove 
+    /// unused folders method which runs at the end of the process to clear out any unused folders.
+    /// </summary>
     public static class FolderExtension
     {
         public static SevFolders SevFolders(this Model model, string phaseNum, string issueNum)
@@ -16,42 +17,45 @@ namespace Prism
             return new SevFolders(model, phaseNum, issueNum);
         }
     }
+
     public class SevFolders
     {  
-        public const string AssFolder = "ASS Folder";
-        public const string FitFolder = "FIT Folder";
-        public const string PrtFolder = "PRT Folder";
-        public const string DspFolder = "DSP";
-        public const string NCFolder = "NC";
-        public const string ReportFolder = "Reports";
-        public const string IFCFolder = "IFC";
-        public readonly string FabFolder;
-        public readonly string ModelPath;
-        public readonly string FabPath;
-        public readonly string AssPath;
-        public readonly string FitPath;
-        public readonly string PrtPath;
-        public readonly string NCPath;
-        public readonly string ReportPath;
-        public readonly string DspPath;
-        public readonly string IFCPath;
-        public List<string> folderNames;
+        private const string assFolder = "ASS Folder";
+        private const string fitFolder = "FIT Folder";
+        private const string prtFolder = "PRT Folder";
+        private const string dspFolder = "DSP";
+        private const string ncFolder = "NC";
+        private const string reportFolder = "Reports";
+        private const string ifcFolder = "IFC";
+        private readonly string fabFolder;
+        private readonly string modelPath;
+        public readonly string fabPath;
+        private readonly string assPath;
+        private readonly string fitPath;
+        private readonly string prtPath;
+        public readonly string ncPath;
+        public readonly string reportPath;
+        public readonly string dspPath;
+        private readonly string ifcPath;
+        private List<string> folderNames;
+
         public SevFolders(Model model, string phaseNum, string issueNum)
         {  
             SevModelData modelData = model.SevModelData();
-            ModelPath = model.GetInfo().ModelPath;
-            FabFolder = $"{modelData.projNumber}-{phaseNum}-FAB-ISSUE{issueNum}";
-            FabPath = Path.Combine(ModelPath, FabFolder);
-            AssPath = Path.Combine(FabPath, AssFolder);
-            FitPath = Path.Combine(FabPath, FitFolder);
-            PrtPath = Path.Combine(FabPath, PrtFolder);
-            NCPath = Path.Combine(FabPath, NCFolder);
-            ReportPath = Path.Combine(FabPath, ReportFolder);
-            DspPath = Path.Combine(FabPath, DspFolder);
-            IFCPath = Path.Combine(FabPath, IFCFolder);
+            modelPath = model.GetInfo().ModelPath;
+            fabFolder = $"{modelData.ProjNumber}-{phaseNum}-FAB-ISSUE{issueNum}";
+            fabPath = Path.Combine(modelPath, fabFolder);
+            assPath = Path.Combine(fabPath, assFolder);
+            fitPath = Path.Combine(fabPath, fitFolder);
+            prtPath = Path.Combine(fabPath, prtFolder);
+            ncPath = Path.Combine(fabPath, ncFolder);
+            reportPath = Path.Combine(fabPath, reportFolder);
+            dspPath = Path.Combine(fabPath, dspFolder);
+            ifcPath = Path.Combine(fabPath, ifcFolder);
             folderNames = new List<string>
-                {AssPath, FitPath, PrtPath, DspPath, NCPath, ReportPath, IFCPath};
+                {assPath, fitPath, prtPath, dspPath, ncPath, reportPath, ifcPath};
         }
+
         public void CreateFolders()
         {        
             foreach (string folder in folderNames)
@@ -63,11 +67,12 @@ namespace Prism
                 }
             }
         }     
+
         public void RemoveUnusedFolders()
         {
-            if (Directory.Exists(FabPath))
+            if (Directory.Exists(fabPath))
             {
-                foreach (string subdirectory in Directory.GetDirectories(FabPath))
+                foreach (string subdirectory in Directory.GetDirectories(fabPath))
                 {
                     string[] file = Directory.GetFiles(subdirectory, "*.*");
                     if (file.Length == 0)

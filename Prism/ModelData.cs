@@ -3,6 +3,10 @@ using Tekla.Structures.Model;
 
 namespace Prism
 {
+    /// <summary>
+    /// The model data class gathers all the information that is being read from the model.
+    /// This is then used to inform folder and report names.
+    /// </summary>
     public static class TeklaExtensions
     {
         public static SevModelData SevModelData(this Model model)
@@ -10,12 +14,12 @@ namespace Prism
             return new SevModelData(model);
         }
     }
+
     public class SevModelData
     {     
-        public readonly string projName;
-        public readonly string projNumber;
-        public readonly string date;        
-        public readonly string EnvironmentName;
+        public readonly string ProjName;
+        public readonly string ProjNumber;
+        public readonly string Date;      
         public readonly string First;
         public readonly string Last;
         public readonly string Full;
@@ -24,16 +28,16 @@ namespace Prism
         public SevModelData(Model model)
         {
             ProjectInfo projectName = model.GetProjectInfo();
-            projName = projectName.Name.ToString();
-            projNumber = projectName.ProjectNumber.ToString();
-            date = DateTime.Now.ToString("dd/MM/yyyy");           
-            EnvironmentName = Environment.UserName;
+            ProjName = projectName.Name;
+            ProjNumber = projectName.ProjectNumber;
+            Date = DateTime.Now.ToString("dd/MM/yyyy");          
             string[] NameArray = Environment.UserName.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
             First = Capitalise(NameArray[0]);
             Last = Capitalise(NameArray[1]);
             Full = First + " " + Last;
             Initials = new string(new char[] { First.ToCharArray()[0], Last.ToCharArray()[0] }).ToUpper();
         }
+
         public string Capitalise(string original)
         {
             char[] chars = original.ToLower().ToCharArray();

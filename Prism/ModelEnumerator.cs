@@ -1,53 +1,53 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Tekla.Structures.Drawing;
 using Tekla.Structures.Model;
 
 namespace Prism
 {
+    /// <summary>
+    /// The model Enumerator class is the central area for all model enumeration, outputting model parts, bolts, drawings etc.
+    /// </summary>
     public static class EnumExtension
     {
         public static SevModelEnumerator SevModelEnumerator(this Model model)
         {
-            return new SevModelEnumerator(model);
+            return new SevModelEnumerator();
         }
     }
     public class SevModelEnumerator
     {
-        public ArrayList selectedModelParts;
-        public ArrayList selectedModelBolts;
-        public Tekla.Structures.Model.Part myParts;
-        public BoltGroup myBolts;
-        public List<string> myMarks;
-        public ModelObjectEnumerator moe;
-        public DrawingHandler myDrawingHandler;
-        public DrawingEnumerator drawingEnum;       
+        public ArrayList SelectedModelParts;
+        public ArrayList SelectedModelBolts;
+        public Tekla.Structures.Model.Part MyPart;
+        public List<string> MyMarks;
+        private ModelObjectEnumerator Moe;
+        public DrawingHandler MyDrawingHandler;
+        public DrawingEnumerator DrawingEnum;
+        public int Ndrawings;
 
-        public SevModelEnumerator(Model model)
-        {
-            selectedModelParts = new ArrayList();
-            selectedModelBolts = new ArrayList();
-            myDrawingHandler = new DrawingHandler();
-            moe = new Tekla.Structures.Model.UI.ModelObjectSelector().GetSelectedObjects();            
-            drawingEnum = myDrawingHandler.GetDrawings();
-            myMarks = new List<string>();
+        public SevModelEnumerator()
+        {           
+            SelectedModelParts = new ArrayList();
+            SelectedModelBolts = new ArrayList();
+            MyDrawingHandler = new DrawingHandler();
+            Moe = new Tekla.Structures.Model.UI.ModelObjectSelector().GetSelectedObjects();            
+            DrawingEnum = MyDrawingHandler.GetDrawings();
+            Ndrawings = DrawingEnum.GetSize();
+            MyMarks = new List<string>();
 
-            foreach (object myObject in moe)
+            foreach (object myObject in Moe)
             {
-                myParts = myObject as Tekla.Structures.Model.Part;
-                myBolts = myObject as BoltGroup;                
-                if (myParts != null)
+                MyPart = myObject as Tekla.Structures.Model.Part;                              
+                if (MyPart != null)
                 {
-                    selectedModelParts.Add(myParts);
-                    myMarks.Add(myParts.GetPartMark());
-                }                
-                if (myBolts !=null)
+                    SelectedModelParts.Add(MyPart);
+                    MyMarks.Add(MyPart.GetPartMark());
+                }
+                BoltGroup MyBolts = myObject as BoltGroup;                 
+                if (MyBolts !=null)
                 {
-                    selectedModelBolts.Add(myBolts);
+                    SelectedModelBolts.Add(MyBolts);
                 }
             }
         }

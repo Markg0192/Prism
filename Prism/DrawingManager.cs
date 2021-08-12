@@ -5,109 +5,87 @@ using System.Windows.Forms;
 
 namespace Prism
 {
+    /// <summary>
+    /// The Drawing Manager class takes care of all drawing related tasks.
+    /// This includes updating status label with current drawing print status and Printing drawings
+    /// </summary>
     public class DrawingManager
     {
-        public SevModelEnumerator ModelEnum;
-        public SevFolders Folders;       
-        public const string notRequired = "Not Required";
-        public string[] mark;
+        private SevModelEnumerator ModelEnum;
+        private SevFolders Folders;
+        private const string NotRequired = "Not Required";
+        private Model model;
+
         public DrawingManager(Model model, string phaseNum, string issueNum)
         {
             ModelEnum = model.SevModelEnumerator();
             Folders = model.SevFolders(phaseNum, issueNum);
-        }        
-        public void UpdateStatusLabel (ToolStripStatusLabel StatusLabel,  int currentNumber, int TotalNumber)
-        {        
-          StatusLabel.Text = $"Processing Drawing {currentNumber} of {TotalNumber}";           
-        }         
-        public void PrintDrawings(DrawingEnumerator drawingsList, ToolStripStatusLabel StatusLabel)
+            this.model = model;
+        }
+
+        private void UpdateStatusLabel(ToolStripStatusLabel statusLabel, int currentNumber, int totalNumber)
         {
-            int weldNumberCounter = 0;
+            statusLabel.Text = $"Processing Drawing {currentNumber} of {totalNumber}";
+        }
+
+        private string GetDrawingRevison(Drawing currentDrawing)
+        {
+            AssemblyDrawing assDraw = currentDrawing as AssemblyDrawing;
+            SinglePartDrawing singDraw = currentDrawing as SinglePartDrawing;
+            Tekla.Structures.Identifier drawingID = null;
             string revMark = string.Empty;
-            foreach (var item in ModelEnum.moe)
+            if (assDraw != null)
             {
-                var p = item as Tekla.Structures.Model.Part;
-                if (p != null)
-                {                    
-                    p.GetReportProperty("DRAWING.REVISON.MARK", ref revMark);
-                }
+                drawingID = assDraw.AssemblyIdentifier;
+                Assembly myAssembly = model.SelectModelObject(drawingID) as Assembly;
+                myAssembly.GetReportProperty("DRAWING.REVISION.MARK", ref revMark);
             }
-            foreach (Drawing currentDrawing in drawingsList)
-            {          
+            if (singDraw != null)
+            {
+                drawingID = singDraw.PartIdentifier;
+                Tekla.Structures.Model.Part myPart = model.SelectModelObject(drawingID) as Tekla.Structures.Model.Part;
+                myPart.GetReportProperty("DRAWING.REVISION.MARK", ref revMark);
+            }
+            return revMark;
+        }
+
+        public void PrintDrawings(DrawingHandler myDrawingHandler, ToolStripStatusLabel statusLabel)
+        {            
+            int drawingProcessCounter = 0;
+            DrawingEnumerator drawingsList = myDrawingHandler.GetDrawings();
+            while (drawingsList.MoveNext())
+            {
+                Drawing currentDrawing = drawingsList.Current as Drawing;
                 if (currentDrawing != null)
                 {
-                    if (currentDrawing.Title1 == notRequired)
+                    if (currentDrawing.Title1 == NotRequired)
                     {
                         currentDrawing.Delete();
                     }
-                    mark = currentDrawing.Mark.Split(new char[] { '[', '.', ']' });
+                    string[] Mark = currentDrawing.Mark.Split(new char[] { '[', '.', ']' });
                     string drawingName = "";
-                    foreach (string s in mark) drawingName = drawingName + s;                   
-                    int totalDrawings = ModelEnum.myMarks.Count;
-
-                    if (ModelEnum.myMarks != null)
+                    foreach (string s in Mark)
                     {
-                        if (ModelEnum.myMarks.Contains(drawingName))
-                        {     
-                            weldNumberCounter++;       
-                            ModelEnum.myDrawingHandler.IssueDrawing(currentDrawing);
-                            string PDFname = ($"{drawingName}-{revMark}.pdf");
-                            DPMPrinterAttributes MyPDF = new DPMPrinterAttributes();
-                            MyPDF.ColorMode = DotPrintColor.BlackAndWhite;
-                            MyPDF.OpenFileWhenFinished = false;
-                            MyPDF.Orientation = DotPrintOrientationType.Landscape;
-                            MyPDF.OutputFileName = $"{Folders.FabPath}/{currentDrawing.Title1}/{PDFname}";
-                            MyPDF.OutputType = DotPrintOutputType.PDF;
-                            MyPDF.PaperSize = DotPrintPaperSize.Auto;
-                            UpdateStatusLabel(StatusLabel, weldNumberCounter, ModelEnum.myMarks.Count);
-                            ModelEnum.myDrawingHandler.PrintDrawing(currentDrawing, MyPDF);                         
-                        }                                            
+                        drawingName = drawingName + s;
                     }
-                }
-            }
-        }           
-        public void DummyPrintDrawings(DrawingEnumerator drawingsList)
-        {
-            int weldNumberCounter = 0;
-            string revMark = string.Empty;
-            foreach (var item in ModelEnum.moe)
-            {
-                var p = item as Tekla.Structures.Model.Part;
-                if (p != null)
-                {
-                   p.GetReportProperty("DRAWING.REVISON.MARK", ref revMark);
-                }
-            }
-            foreach (Drawing currentDrawing in drawingsList)
-            {          
-                if (currentDrawing != null)
-                {
-                    if (currentDrawing.Title1 == notRequired)
+                    if (ModelEnum.MyMarks != null)
                     {
-                        currentDrawing.Delete();
-                    }
-                    mark = currentDrawing.Mark.Split(new char[] { '[', '.', ']' });
-                    string drawingName = "";
-                    foreach (string s in mark) drawingName = drawingName + s;                   
-                    int totalDrawings = ModelEnum.myMarks.Count;
-
-                    if (ModelEnum.myMarks != null)
-                    {
-                        if (ModelEnum.myMarks.Contains(drawingName))
-                        {     
-                            weldNumberCounter++;       
-                            ModelEnum.myDrawingHandler.IssueDrawing(currentDrawing);
+                        if (ModelEnum.MyMarks.Contains(drawingName))
+                        {                            
+                            string revMark = GetDrawingRevison(currentDrawing);
+                            drawingProcessCounter++;
+                            ModelEnum.MyDrawingHandler.IssueDrawing(currentDrawing);
                             string PDFname = ($"{drawingName}-{revMark}.pdf");
-                            DPMPrinterAttributes MyPDF = new DPMPrinterAttributes();
-                            MyPDF.ColorMode = DotPrintColor.BlackAndWhite;
-                            MyPDF.OpenFileWhenFinished = false;
-                            MyPDF.Orientation = DotPrintOrientationType.Landscape;
-                            MyPDF.OutputFileName = $"{Folders.FabPath}/{currentDrawing.Title1}/{PDFname}";
-                            MyPDF.OutputType = DotPrintOutputType.PDF;
-                            MyPDF.PaperSize = DotPrintPaperSize.Auto;
-                            Console.WriteLine(PDFname);
-                            ModelEnum.myDrawingHandler.PrintDrawing(currentDrawing, MyPDF);                         
-                        }                                            
+                            DPMPrinterAttributes myPDF = new DPMPrinterAttributes();
+                            myPDF.ColorMode = DotPrintColor.BlackAndWhite;
+                            myPDF.OpenFileWhenFinished = false;
+                            myPDF.Orientation = DotPrintOrientationType.Landscape;
+                            myPDF.OutputFileName = $"{Folders.fabPath}/{currentDrawing.Title1}/{PDFname}";
+                            myPDF.OutputType = DotPrintOutputType.PDF;
+                            myPDF.PaperSize = DotPrintPaperSize.Auto;
+                            UpdateStatusLabel(statusLabel, drawingProcessCounter, ModelEnum.MyMarks.Count);
+                            ModelEnum.MyDrawingHandler.PrintDrawing(currentDrawing, myPDF);
+                        }
                     }
                 }
             }

@@ -7,81 +7,89 @@ namespace Prism
 {
     public partial class PrismForm : PluginFormBase
     {
-        private Model model;
-        private ReportManager myReportManager;
-        private DrawingManager myDrawingManager;
-        private SevFolders myFolderManager;
-        private SevModelData modelData;
-        private SevModelEnumerator modelEnum;
-        private PreRunChecks myPreRunChecks;
-        private ModelModifiers myModelModifiers;
+        private Model Model;
+        private ReportManager MyReportManager;
+        private DrawingManager MyDrawingManager;
+        private SevFolders MyFolderManager;
+        private SevModelData ModelData;
+        private SevModelEnumerator ModelEnum;
+        private PreRunChecks MyPreRunChecks;
+        private ModelModifiers MyModelModifiers;
 
         public PrismForm()
         {
             InitializeComponent();
-            model = new Model();
-            myPreRunChecks = new PreRunChecks(model);
-            modelData = model.SevModelData();            
-            myModelModifiers = new ModelModifiers(model);
+            Model = new Model();
+            MyPreRunChecks = new PreRunChecks(Model);
+            ModelData = Model.SevModelData();            
+            MyModelModifiers = new ModelModifiers(Model);
         }       
+
         private void btnRunThroughMaterialChecks_Click(object sender, EventArgs e)
         {
-            modelEnum = model.SevModelEnumerator();
-            myModelModifiers.RunThroughMaterialChecks(modelEnum);
+            ModelEnum = Model.SevModelEnumerator();
+            MyModelModifiers.MaterialCheckModifier(ModelEnum, 1);
         }
+
         public void btnMaterialChecksComplete_Click(object sender, EventArgs e)
         {
-            modelEnum = model.SevModelEnumerator();
-            myModelModifiers.MaterialChecksComplete(modelEnum);
+            ModelEnum = Model.SevModelEnumerator();
+            MyModelModifiers.MaterialCheckModifier(ModelEnum, 2);
         }
+
         private void btnMaterialOrdered_Click(object sender, EventArgs e)
         {
-            modelEnum = model.SevModelEnumerator();
-            myModelModifiers.MaterialOrderComplete(modelEnum);
+            ModelEnum = Model.SevModelEnumerator();
+            MyModelModifiers.MaterialCheckModifier(ModelEnum, 3);
         }
+
         private void btnRunThroughDetailingChecks_Click(object sender, EventArgs e)
         {
-            modelEnum = model.SevModelEnumerator();
-            myModelModifiers.RunThroughDetailingChecks(modelEnum);
+            ModelEnum = Model.SevModelEnumerator();
+            MyModelModifiers.DetailingCheckModifier(ModelEnum, 1);
         }
+
         private void btnDetailingChecksComplete_Click(object sender, EventArgs e)
         {
-            modelEnum = model.SevModelEnumerator();
-            myModelModifiers.RunThroughDetailingChecksComplete(modelEnum);
+            ModelEnum = Model.SevModelEnumerator();
+            MyModelModifiers.DetailingCheckModifier(ModelEnum, 2);
         }
+
         private void btnDrawingsCreated_Click(object sender, EventArgs e)
         {
-            modelEnum = model.SevModelEnumerator();
-            myModelModifiers.DrawingsCreated(modelEnum);
-        }        
+            ModelEnum = Model.SevModelEnumerator();
+            MyModelModifiers.DetailingCheckModifier(ModelEnum, 3);
+        }    
+        
         private void btnCreatePackage_Click(object sender, EventArgs e)
         {
-            myReportManager = new ReportManager(model, phaseNumber.Text, issueNumber.Text);
-            myDrawingManager = new DrawingManager(model, phaseNumber.Text, issueNumber.Text);
-            myFolderManager = new SevFolders(model, phaseNumber.Text, issueNumber.Text);            
+            ModelEnum = Model.SevModelEnumerator();
+            MyReportManager = new ReportManager(Model, phaseNumber.Text, issueNumber.Text);
+            MyDrawingManager = new DrawingManager(Model, phaseNumber.Text, issueNumber.Text);
+            MyFolderManager = new SevFolders(Model, phaseNumber.Text, issueNumber.Text);            
             Cursor = Cursors.AppStarting;
             bool packageSNI = cmbPackageLocation.Text == "SNI";
             bool packageSUK = cmbPackageLocation.Text == "SUK";
 
             if (packageSNI)
             {
-                if (!myPreRunChecks.CheckDrawingsAreUpToDate(modelEnum.drawingEnum))
+                if (!MyPreRunChecks.CheckDrawingsAreUpToDate(ModelEnum.DrawingEnum))
                 {
                     this.Close();
                     return;
                 }
-                myFolderManager.CreateFolders();
-                myReportManager.CreateReports(modelEnum.selectedModelParts, modelEnum.selectedModelBolts);
-                myDrawingManager.PrintDrawings(modelEnum.drawingEnum, StatusLabel);
-                myModelModifiers.FabPackComplete(modelEnum);
-                myFolderManager.RemoveUnusedFolders();
+                MyFolderManager.CreateFolders();
+                MyReportManager.CreateReports(ModelEnum.SelectedModelParts, ModelEnum.SelectedModelBolts, cmbPackageLocation.Text);
+                MyDrawingManager.PrintDrawings(ModelEnum.MyDrawingHandler, StatusLabel);
+                MyModelModifiers.MarkAsFabPackComplete(ModelEnum);
+                MyFolderManager.RemoveUnusedFolders();
             }
             if (packageSUK)
             {
                 MessageBox.Show("Sorry, this function has not been added yet, please try again later.");
             }
             Cursor = Cursors.Default;
-            DialogResult finishBox = MessageBox.Show($"Thanks {modelData.First}, your fab package is now complete", "Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            DialogResult finishBox = MessageBox.Show($"Thanks {ModelData.First}, your fab package is now complete", "Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
             if (finishBox == DialogResult.OK)
             {
                 this.Close();

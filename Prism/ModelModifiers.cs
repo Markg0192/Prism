@@ -8,6 +8,10 @@ using Tekla.Structures.Model;
 
 namespace Prism
 {
+    /// <summary>
+    /// The Model modifiers class is where all changes to the model take place.
+    /// This is usually adding stamps to member and drawing user fields.
+    /// </summary>
     public static class Modifiers
     {
         public static ModelModifiers ModelMods(this Model model)
@@ -17,75 +21,41 @@ namespace Prism
     }
     public class ModelModifiers
     {
-        public SevModelData modelData;
-        public SevModelEnumerator modelEnum;
+        public SevModelData ModelData;
+        public SevModelEnumerator ModelEnum;
 
         public ModelModifiers(Model model)
         {
-            modelData = model.SevModelData();
-            modelEnum = model.SevModelEnumerator();
+            ModelData = model.SevModelData();
+            ModelEnum = model.SevModelEnumerator();
         }
-        public void FabPackComplete(SevModelEnumerator modelEnum)
+
+        public void MarkAsFabPackComplete(SevModelEnumerator modelEnum)
         {
-            foreach (Part part in modelEnum.selectedModelParts)
+            foreach (Part part in modelEnum.SelectedModelParts)
             {
-                part.SetUserProperty("PRISM-FAB-1-NAME", modelData.Full);
-                part.SetUserProperty("PRISM-FAB-1-DATE", modelData.date);
-                part.SetUserProperty("PRISM-FAB-1-NUMBER", modelEnum.myParts.GetPartMark());
+                part.SetUserProperty("PRISM-FAB-1-NAME", ModelData.Full);
+                part.SetUserProperty("PRISM-FAB-1-DATE", ModelData.Date);
+                part.SetUserProperty("PRISM-FAB-1-NUMBER", ModelEnum.MyPart.GetPartMark());
                 part.Modify();
             }
         }
-        public void RunThroughMaterialChecks(SevModelEnumerator modelEnum)
-        {      
-            foreach (Part part in modelEnum.selectedModelParts)
-            {
-                part.SetUserProperty("PRISM-MAT-1-NAME", modelData.Full);
-                part.SetUserProperty("PRISM-MAT-1-DATE", modelData.date);
-                part.Modify();                
-            }
-        }
-        public void MaterialChecksComplete(SevModelEnumerator modelEnum)
+        
+        public void MaterialCheckModifier(SevModelEnumerator modelEnum, int StageNumber)
         {
-            foreach (Part part in modelEnum.selectedModelParts)
+            foreach (Part part in modelEnum.SelectedModelParts)
             {
-                part.SetUserProperty("PRISM-MAT-2-NAME", modelData.Full);
-                part.SetUserProperty("PRISM-MAT-2-DATE", modelData.date);
+                part.SetUserProperty($"PRISM-MAT-{StageNumber}-NAME", ModelData.Full);
+                part.SetUserProperty($"PRISM-MAT-{StageNumber}-DATE", ModelData.Date);
                 part.Modify();
             }
         }
-        public void MaterialOrderComplete(SevModelEnumerator modelEnum)
+        public void DetailingCheckModifier(SevModelEnumerator modelEnum, int StageNumber)
         {
-            foreach (Part part in modelEnum.selectedModelParts)
+            foreach (Part part in modelEnum.SelectedModelParts)
             {
-                part.SetUserProperty("PRISM-MAT-3-NAME", modelData.Full);
-                part.SetUserProperty("PRISM-MAT-3-DATE", modelData.date);
-                part.Modify();
-            }
-        }
-        public void RunThroughDetailingChecks(SevModelEnumerator modelEnum)
-        {
-            foreach (Part part in modelEnum.selectedModelParts)
-            {
-                part.SetUserProperty("PRISM-DET-1-NAME", modelData.Full);
-                part.SetUserProperty("PRISM-DET-1-DATE", modelData.date);
-                part.Modify();
-            }
-        }
-        public void RunThroughDetailingChecksComplete(SevModelEnumerator modelEnum)
-        {
-            foreach (Part part in modelEnum.selectedModelParts)
-            {
-                part.SetUserProperty("PRISM-DET-2-NAME", modelData.Full);
-                part.SetUserProperty("PRISM-DET-2-DATE", modelData.date);
-                part.Modify();
-            }
-        }
-        public void DrawingsCreated(SevModelEnumerator modelEnum)
-        {
-            foreach (Part part in modelEnum.selectedModelParts)
-            {
-                part.SetUserProperty("PRISM-DET-3-NAME", modelData.Full);
-                part.SetUserProperty("PRISM-DET-3-DATE", modelData.date);
+                part.SetUserProperty($"PRISM-DET-{StageNumber}-NAME", ModelData.Full);
+                part.SetUserProperty($"PRISM-DET-{StageNumber}-DATE", ModelData.Date);
                 part.Modify();
             }
         }
