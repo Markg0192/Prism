@@ -50,6 +50,7 @@ namespace Prism
                 part.Modify();
             }
         }
+
         public void DetailingCheckModifier(SevModelEnumerator modelEnum, int StageNumber)
         {
             foreach (Part part in modelEnum.SelectedModelParts)
@@ -57,6 +58,14 @@ namespace Prism
                 part.SetUserProperty($"PRISM-DET-{StageNumber}-NAME", ModelData.Full);
                 part.SetUserProperty($"PRISM-DET-{StageNumber}-DATE", ModelData.Date);
                 part.Modify();
+            }
+        }
+
+        public void LockSelected(SevModelEnumerator modelEnum)
+        {
+            foreach (Part part in modelEnum.SelectedModelParts)
+            {
+                part.SetUserProperty("OBJECT_LOCKED", 1);
             }
         }
     }

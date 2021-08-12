@@ -83,13 +83,17 @@ namespace Prism
                 MyDrawingManager.PrintDrawings(ModelEnum.MyDrawingHandler, StatusLabel);
                 MyModelModifiers.MarkAsFabPackComplete(ModelEnum);
                 MyFolderManager.RemoveUnusedFolders();
+                MyModelModifiers.LockSelected(ModelEnum);
             }
+
             if (packageSUK)
             {
                 MessageBox.Show("Sorry, this function has not been added yet, please try again later.");
             }
+
             Cursor = Cursors.Default;
             DialogResult finishBox = MessageBox.Show($"Thanks {ModelData.First}, your fab package is now complete", "Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            
             if (finishBox == DialogResult.OK)
             {
                 this.Close();

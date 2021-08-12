@@ -52,6 +52,7 @@ namespace PrismTester
                 //myDrawingManager.DummyPrintDrawings(modelEnum.MyDrawingHandler);
                 myModelModifiers.MarkAsFabPackComplete(modelEnum);
                 myFolderManager.RemoveUnusedFolders();
+                myModelModifiers.LockSelected(modelEnum);
             }
             if (packageSUK)
             {
