@@ -1,6 +1,9 @@
-﻿using System.Windows.Forms;
+﻿using System;
+using System.Collections;
+using System.Windows.Forms;
 using Tekla.Structures.Drawing;
 using Tekla.Structures.Model;
+using Tekla.Structures.Model.Operations;
 
 namespace Prism
 {
@@ -16,11 +19,11 @@ namespace Prism
 
         public PreRunChecks(Model model)
         {
-            modelEnum = model.SevModelEnumerator();
+            modelEnum = model.CreateSevModelEnumerator();
         }
 
         public bool CheckDrawingsAreUpToDate(DrawingEnumerator drawingsList)
-        {
+        {      
             const string notUpToDateMessage = "Some drawings are not up to date, please update and try again";
             const string notUpToDateTitle = "Drawings not up to date";
 
@@ -41,6 +44,22 @@ namespace Prism
                         MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         return false;
                     }                    
+                }
+            }
+            return true;
+        }
+
+        public bool CheckNumberingIsUpToDate(ArrayList selectedParts)
+        {
+            const string notUpToDateMessage = "Your member numbering is not up to date, please update and try again";
+            const string notUpToDateTitle = "Numbers not up to date";
+
+            foreach (Tekla.Structures.Model.Part part in selectedParts)
+            {                
+                if (!Operation.IsNumberingUpToDate(part)) 
+                { 
+                    MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return false;
                 }
             }
             return true;

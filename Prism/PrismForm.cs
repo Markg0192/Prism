@@ -21,49 +21,49 @@ namespace Prism
             InitializeComponent();
             Model = new Model();
             MyPreRunChecks = new PreRunChecks(Model);
-            ModelData = Model.SevModelData();            
+            ModelData = Model.CreateSevModelData();            
             MyModelModifiers = new ModelModifiers(Model);
         }       
 
         private void btnRunThroughMaterialChecks_Click(object sender, EventArgs e)
         {
-            ModelEnum = Model.SevModelEnumerator();
+            ModelEnum = Model.CreateSevModelEnumerator();
             MyModelModifiers.MaterialCheckModifier(ModelEnum, 1);
         }
 
         public void btnMaterialChecksComplete_Click(object sender, EventArgs e)
         {
-            ModelEnum = Model.SevModelEnumerator();
+            ModelEnum = Model.CreateSevModelEnumerator();
             MyModelModifiers.MaterialCheckModifier(ModelEnum, 2);
         }
 
         private void btnMaterialOrdered_Click(object sender, EventArgs e)
         {
-            ModelEnum = Model.SevModelEnumerator();
+            ModelEnum = Model.CreateSevModelEnumerator();
             MyModelModifiers.MaterialCheckModifier(ModelEnum, 3);
         }
 
         private void btnRunThroughDetailingChecks_Click(object sender, EventArgs e)
         {
-            ModelEnum = Model.SevModelEnumerator();
+            ModelEnum = Model.CreateSevModelEnumerator();
             MyModelModifiers.DetailingCheckModifier(ModelEnum, 1);
         }
 
         private void btnDetailingChecksComplete_Click(object sender, EventArgs e)
         {
-            ModelEnum = Model.SevModelEnumerator();
+            ModelEnum = Model.CreateSevModelEnumerator();
             MyModelModifiers.DetailingCheckModifier(ModelEnum, 2);
         }
 
         private void btnDrawingsCreated_Click(object sender, EventArgs e)
         {
-            ModelEnum = Model.SevModelEnumerator();
+            ModelEnum = Model.CreateSevModelEnumerator();
             MyModelModifiers.DetailingCheckModifier(ModelEnum, 3);
         }    
         
         private void btnCreatePackage_Click(object sender, EventArgs e)
         {
-            ModelEnum = Model.SevModelEnumerator();
+            ModelEnum = Model.CreateSevModelEnumerator();
             MyReportManager = new ReportManager(Model, phaseNumber.Text, issueNumber.Text);
             MyDrawingManager = new DrawingManager(Model, phaseNumber.Text, issueNumber.Text);
             MyFolderManager = new SevFolders(Model, phaseNumber.Text, issueNumber.Text);            
@@ -74,6 +74,11 @@ namespace Prism
             if (packageSNI)
             {
                 if (!MyPreRunChecks.CheckDrawingsAreUpToDate(ModelEnum.DrawingEnum))
+                {
+                    this.Close();
+                    return;
+                }
+                if (!MyPreRunChecks.CheckNumberingIsUpToDate(ModelEnum.SelectedModelParts))
                 {
                     this.Close();
                     return;

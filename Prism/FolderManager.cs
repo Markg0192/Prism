@@ -10,14 +10,6 @@ namespace Prism
     /// The Create folders method creates all folders that may be required (even if they aren't) because of this we also have he remove 
     /// unused folders method which runs at the end of the process to clear out any unused folders.
     /// </summary>
-    public static class FolderExtension
-    {
-        public static SevFolders SevFolders(this Model model, string phaseNum, string issueNum)
-        {
-            return new SevFolders(model, phaseNum, issueNum);
-        }
-    }
-
     public class SevFolders
     {  
         private const string assFolder = "ASS Folder";
@@ -41,7 +33,7 @@ namespace Prism
 
         public SevFolders(Model model, string phaseNum, string issueNum)
         {  
-            SevModelData modelData = model.SevModelData();
+            SevModelData modelData = model.CreateSevModelData();
             modelPath = model.GetInfo().ModelPath;
             fabFolder = $"{modelData.ProjNumber}-{phaseNum}-FAB-ISSUE{issueNum}";
             fabPath = Path.Combine(modelPath, fabFolder);

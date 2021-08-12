@@ -67,6 +67,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Extensions.cs" />
     <Compile Include="PrismPlugin.cs" />
     <Compile Include="DrawingManager.cs" />
     <Compile Include="FolderManager.cs" />

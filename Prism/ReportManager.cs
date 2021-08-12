@@ -58,9 +58,9 @@ namespace Prism
         {
             phaseNumber = phaseNum;
             issueNumber = issueNum;
-            folders = model.SevFolders(phaseNumber, issueNumber);
-            modelData = model.SevModelData();
-            modelEnum = model.SevModelEnumerator();
+            folders = model.CreateSevFolders(phaseNumber, issueNumber);
+            modelData = model.CreateSevModelData();
+            modelEnum = model.CreateSevModelEnumerator();
             reportPrefix = ($"{modelData.ProjNumber}-{phaseNumber}-FAB-ISSUE{issueNumber}");
             title1 = phaseNumber.ToString();
             title2 = modelData.Initials;
@@ -103,13 +103,14 @@ namespace Prism
 
             foreach (BoltGroup bolt in boltList)
             {
-                bool isSiteBolt = bolt.BoltType == BoltGroup.BoltTypeEnum.BOLT_TYPE_WORKSHOP;
-                bool isShopBolt = bolt.BoltType != BoltGroup.BoltTypeEnum.BOLT_TYPE_WORKSHOP;
+                bool isSiteBolt = bolt.BoltType != BoltGroup.BoltTypeEnum.BOLT_TYPE_WORKSHOP;
+                bool isShopBolt = bolt.BoltType == BoltGroup.BoltTypeEnum.BOLT_TYPE_WORKSHOP;
                 bool isShearStud = bolt.BoltStandard == "SHEAR-STUD";
                 if (isShopBolt && !isShearStud) create7Report = true;
                 if (isShopBolt && isShearStud) create7sReport = true;
                 if (isSiteBolt && !isShearStud) create8Report = true;
                 if (isSiteBolt && isShearStud) create8sReport = true;
+                
             }
 
             Operation.CreateReportFromSelected(report2QS, Path.Combine(folders.dspPath, $"{reportPrefix}{output2QS}"), title1, title2, title3);

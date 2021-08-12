@@ -18,8 +18,8 @@ namespace Prism
 
         public DrawingManager(Model model, string phaseNum, string issueNum)
         {
-            ModelEnum = model.SevModelEnumerator();
-            Folders = model.SevFolders(phaseNum, issueNum);
+            ModelEnum = model.CreateSevModelEnumerator();
+            Folders = model.CreateSevFolders(phaseNum, issueNum);
             this.model = model;
         }
 

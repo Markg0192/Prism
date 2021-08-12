@@ -7,14 +7,6 @@ namespace Prism
     /// The model data class gathers all the information that is being read from the model.
     /// This is then used to inform folder and report names.
     /// </summary>
-    public static class TeklaExtensions
-    {
-        public static SevModelData SevModelData(this Model model)
-        {
-            return new SevModelData(model);
-        }
-    }
-
     public class SevModelData
     {     
         public readonly string ProjName;

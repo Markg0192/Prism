@@ -26,14 +26,14 @@ namespace PrismTester
 
             model = new Model();
             myPreRunChecks = new PreRunChecks(model);
-            modelData = model.SevModelData();
+            modelData = model.CreateSevModelData();
             myModelModifiers = new ModelModifiers(model);
 
             string phaseNumber = "100";
             string issueNumber = "01";
             string testPackageLocation = "SNI";
 
-            modelEnum = model.SevModelEnumerator();
+            modelEnum = model.CreateSevModelEnumerator();
             myReportManager = new ReportManager(model, phaseNumber, issueNumber);
             myDrawingManager = new DrawingManager(model, phaseNumber, issueNumber);
             myFolderManager = new SevFolders(model, phaseNumber, issueNumber);
@@ -43,6 +43,11 @@ namespace PrismTester
             if (packageSNI)
             {
                 if (!myPreRunChecks.CheckDrawingsAreUpToDate(modelEnum.DrawingEnum))
+                {
+                    //this.Close();
+                    return;
+                }
+                if (!myPreRunChecks.CheckNumberingIsUpToDate(modelEnum.SelectedModelParts))
                 {
                     //this.Close();
                     return;
