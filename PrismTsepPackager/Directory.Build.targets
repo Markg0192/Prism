@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+
+	<UsingTask TaskName="ReplaceFileText" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+		<ParameterGroup>
+			<InputFilename ParameterType="System.String" Required="true" />
+			<OutputFilename ParameterType="System.String" Required="true" />
+			<MatchExpression ParameterType="System.String" Required="true" />
+			<ReplacementText ParameterType="System.String" Required="true" />
+		</ParameterGroup>
+		<Task>
+			<Reference Include="System.Core" />
+			<Using Namespace="System" />
+			<Using Namespace="System.IO" />
+			<Using Namespace="System.Text.RegularExpressions" />
+			<Code Type="Fragment" Language="cs">
+				<![CDATA[
+            File.WriteAllText(
+                OutputFilename,
+                Regex.Replace(File.ReadAllText(InputFilename), MatchExpression, ReplacementText)
+                );
+          ]]>
+			</Code>
+		</Task>
+	</UsingTask>
+
+	<Target Name="TeklaPackaging"  AfterTargets="AfterBuild" >
+		<PropertyGroup>
+			<PluginName>Prism</PluginName>
+			<PluginFileName>Prism.dll</PluginFileName>
+			<Builder>..\packages\TeklaExtensionPackage.BatchBuilder.1.1.0\lib\net451\TeklaExtensionPackage.BatchBuilder.exe</Builder>
+			<param1>$(TargetDir)TsepPackagingFiles\TepInstaller\TsepDefinition.xml</param1>
+			<param2>$(TargetDir)packageoutput\Severfield$(PluginName)Plugin.tsep</param2>
+			<param3>$(TargetDir)packageoutput</param3>
+			<ExecArgs1>-i</ExecArgs1>
+			<ExecArgs2>-o</ExecArgs2>
+			<ExecArgs3>-l</ExecArgs3>
+		</PropertyGroup>
+
+		<Message Importance="high" Text="Copying the packaging files from $(ProjectDir)TsepPackagingFiles to $(TargetDir)TsepPackagingFiles" />
+		<ItemGroup>
+			<_CopyItems Include="$(ProjectDir)TsepPackagingFiles\**" />
+		</ItemGroup>
+		<Copy
+			SourceFiles="@(_CopyItems)"
+			DestinationFiles="@(_CopyItems->'$(TargetDir)TsepPackagingFiles\%(RecursiveDir)%(Filename)%(Extension)')"/>
+
+		<Message Importance="high" Text="Update the Tsep package version" />
+		<GetAssemblyIdentity
+			AssemblyFiles="$(TargetDir)$(PluginFileName)">
+			<Output
+				TaskParameter="Assemblies"
+				ItemName="MyAssemblyIdentities"/>
+		</GetAssemblyIdentity>
+		<Message Importance="high" Text="Assembly Version: %(MyAssemblyIdentities.Version)"/>
+		<ReplaceFileText
+			InputFilename="$(TargetDir)TsepPackagingFiles\TepInstaller\TsepDefinition.xml"
+			OutputFilename="$(TargetDir)TsepPackagingFiles\TepInstaller\TsepDefinition.xml"
+			MatchExpression="\$version\$"
+			ReplacementText="$([System.Version]::Parse(%(MyAssemblyIdentities.Version)).ToString(2))" />
+
+		<Message Importance="high" Text="Creating Tekla Structures extension package file..." />
+		<Exec Command="$(Builder) $(ExecArgs1) $(param1) $(ExecArgs2) $(param2) $(ExecArgs3) $(param3)"></Exec>
+	</Target>
+
+</Project>
