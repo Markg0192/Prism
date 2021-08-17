@@ -44,6 +44,7 @@ namespace PrismTester
             {
                 if (!myPreRunChecks.CheckDrawingsAreUpToDate(modelEnum.DrawingEnum))
                 {
+
                     return;
                 }
                 if (!myPreRunChecks.CheckNumberingIsUpToDate(modelEnum.SelectedModelParts))
