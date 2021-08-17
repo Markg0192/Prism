@@ -99,5 +99,11 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\PrismTrans.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Severfield blue RGB PNG.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
