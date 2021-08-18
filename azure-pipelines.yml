@@ -1,0 +1,76 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+  branches:
+    include:
+    - master
+    - main
+  paths:
+    exclude:
+    - '*azure-pipelines.yml'
+    - 'GitVersion.yml'
+    - 'README.md'
+    - '.gitignore'
+
+
+pool:
+  vmImage: windows-latest
+
+variables:
+  - name: solution
+    value: '**/*.sln'
+  - name: buildPlatform
+    value: 'Any CPU'
+  - name: buildConfiguration
+    value: 'Release'
+
+
+steps:
+
+- task: NuGetCommand@2
+  inputs:
+    restoreSolution: '$(solution)'
+    feedsToUse: 'config'
+    nugetConfigPath: 'nuget.config'   
+
+- task: NuGetToolInstaller@1
+
+- task: VSBuild@1
+  inputs:
+    solution: '$(solution)'
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+    clean: true
+
+- task: VSBuild@1
+  displayName: 'Publish'
+  inputs:
+    solution: '**/PrismTsepPackager.csproj'
+    msbuildArgs: '/t:build  /p:DebugSymbols=false /p:DebugType=None /p:DeleteExistingFiles=True /p:OutputPath="$(System.DefaultWorkingDirectory)\publish"'
+    platform: 'AnyCPU'
+    configuration: '$(buildConfiguration)'
+
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: '$(System.DefaultWorkingDirectory)\publish\packageoutput'
+    Contents: 'SeverfieldPrismPlugin.tsep'
+    OverWrite: true
+    TargetFolder: '$(build.artifactStagingDirectory)/output'
+
+- task: ArchiveFiles@2
+  inputs:
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)\publish'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(build.artifactStagingDirectory)/output/publishedFiles.zip'
+        replaceExistingArchive: true
+
+- task: PublishPipelineArtifact@1
+  inputs:
+        targetPath: '$(build.artifactStagingDirectory)/output'
+        artifact: 'Prism'
+        publishLocation: 'pipeline'
+

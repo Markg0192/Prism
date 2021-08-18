@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TEP Version="1.0">
+
+	<Product Id="SeverfieldPrism" UpgradeCode="6AD2E545-415D-4CF8-B120-726DEFEE8B69" Version="$version$" Language="1033"
+		Name="Severfield Prism Extension" Manufacturer="Severfield Corporation"  Description= "Detailing process assistant"
+		IconPath="%TEPDEFINITIONFILEFOLDER%\Icon.png">
+		<TeklaVersions>
+			<TeklaVersion Name="2099.1"/>
+			<MinTeklaVersion Name="2016.0"/>
+			<MaxTeklaVersion Name="2099.1"/>
+		</TeklaVersions>
+	</Product>
+
+	<SourcePathVariables>
+		<SourcePathVariable Id="TepOutputFolder" Value="%TEPDEFINITIONFILEFOLDER%\output" Comment="This provides the location where the package builder is to save the package."/>
+		<SourcePathVariable Id="BinariesFolder" Value="%TEPDEFINITIONFILEFOLDER%\..\..\"/>
+		<SourcePathVariable Id="MessagesFolder" Value="%TEPDEFINITIONFILEFOLDER%\..\messages"/>
+		<SourcePathVariable Id="BitmapsFolder" Value="%TEPDEFINITIONFILEFOLDER%\..\bitmaps"/>
+		<SourcePathVariable Id="CatalogFileFolder" Value="%TEPDEFINITIONFILEFOLDER%\..\ComponentCatalogFile"/>
+	</SourcePathVariables>
+
+	<TargetPathVariables>
+		<PathVariable Id="ModelPluginsDirectory" Value="%ENVDIR%\extensions\plugins\tekla\model\"/>
+		<PathVariable Id="ModelApplicationsDirectory" Value="%ENVDIR%\extensions\applications\tekla\model\"/>
+		<PathVariable Id="ExtensionsDir" Value="%commonEnvFolder%\extensions\"/>
+		<PathVariable Id="BinariesTargetDirectory" Value="%ExtensionsDir%\Fusion\"/>
+		<PathVariable Id="BitmapsDirectory" Value="%ENVDIR%\..\bitmaps\"/>
+		<PathVariable Id="AttributeFileDirectory" Value="%commonEnvFolder%\system\"/>
+		<PathVariable Id="CommonMacroDirectory" Value="%commonEnvFolder%\macros\modeling\"/>
+	</TargetPathVariables>
+
+	<Component Id="TheExtensionComponent" Guid="BF8A8E3D-3D67-4E55-A1D2-D65FCE7931C7">
+		<File Id="Icon" Source="%BitmapsFolder%\et_element_prism.png" Target="%BitmapsDirectory%"/>
+		<File Id="Fusion" Source="%BinariesFolder%\Prism.dll" Target="%BinariesTargetDirectory%"/>
+		<File Id="ComponentCatalogFile" Source="%CatalogFileFolder%\Prism_ComponentCatalog.ac.xml" Target="%BinariesTargetDirectory%"/>
+	</Component>
+
+	<Feature Id="TheExtensionFeature" Title="ExtensionFeature">
+		<ComponentRef ReferenceId="TheExtensionComponent" />
+	</Feature>
+</TEP>
