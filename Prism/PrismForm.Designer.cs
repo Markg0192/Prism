@@ -121,7 +121,7 @@ namespace Prism
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage1.Size = new System.Drawing.Size(311, 300);
             this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "Material";
+            this.tabPage1.Text = "Material Checks";
             // 
             // label8
             // 
@@ -133,7 +133,7 @@ namespace Prism
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(180, 13);
             this.label8.TabIndex = 22;
-            this.label8.Text = "Version 1.0.0 Release date 02.08.21";
+            this.label8.Text = "Version 1.0.0 Release date 19.08.21";
             // 
             // label7
             // 
@@ -156,7 +156,7 @@ namespace Prism
             this.pictureBox6.InitialImage = ((System.Drawing.Image)(resources.GetObject("pictureBox6.InitialImage")));
             this.pictureBox6.Location = new System.Drawing.Point(237, 6);
             this.pictureBox6.Name = "pictureBox6";
-            this.pictureBox6.Size = new System.Drawing.Size(68, 68);
+            this.pictureBox6.Size = new System.Drawing.Size(68, 82);
             this.pictureBox6.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox6.TabIndex = 20;
             this.pictureBox6.TabStop = false;
@@ -283,7 +283,7 @@ namespace Prism
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage2.Size = new System.Drawing.Size(311, 300);
             this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "Checking";
+            this.tabPage2.Text = "Detailing Checks";
             // 
             // statusStrip3
             // 
@@ -306,7 +306,7 @@ namespace Prism
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(180, 13);
             this.label9.TabIndex = 25;
-            this.label9.Text = "Version 1.0.0 Release date 02.08.21";
+            this.label9.Text = "Version 1.0.0 Release date 19.08.21";
             // 
             // label10
             // 
@@ -329,7 +329,7 @@ namespace Prism
             this.pictureBox5.InitialImage = ((System.Drawing.Image)(resources.GetObject("pictureBox5.InitialImage")));
             this.pictureBox5.Location = new System.Drawing.Point(237, 6);
             this.pictureBox5.Name = "pictureBox5";
-            this.pictureBox5.Size = new System.Drawing.Size(68, 68);
+            this.pictureBox5.Size = new System.Drawing.Size(68, 82);
             this.pictureBox5.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox5.TabIndex = 23;
             this.pictureBox5.TabStop = false;
@@ -446,7 +446,7 @@ namespace Prism
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage3.Size = new System.Drawing.Size(311, 300);
             this.tabPage3.TabIndex = 2;
-            this.tabPage3.Text = "Fab Package";
+            this.tabPage3.Text = "Fab Package Creation";
             // 
             // label11
             // 
@@ -458,7 +458,7 @@ namespace Prism
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(180, 13);
             this.label11.TabIndex = 24;
-            this.label11.Text = "Version 1.0.0 Release date 02.08.21";
+            this.label11.Text = "Version 1.0.0 Release date 19.08.21";
             // 
             // label12
             // 
@@ -481,7 +481,7 @@ namespace Prism
             this.pictureBox4.InitialImage = ((System.Drawing.Image)(resources.GetObject("pictureBox4.InitialImage")));
             this.pictureBox4.Location = new System.Drawing.Point(237, 6);
             this.pictureBox4.Name = "pictureBox4";
-            this.pictureBox4.Size = new System.Drawing.Size(68, 68);
+            this.pictureBox4.Size = new System.Drawing.Size(68, 82);
             this.pictureBox4.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox4.TabIndex = 21;
             this.pictureBox4.TabStop = false;
@@ -538,7 +538,10 @@ namespace Prism
             this.cmbPackageLocation.FormattingEnabled = true;
             this.cmbPackageLocation.Items.AddRange(new object[] {
             "SNI",
-            "SUK"});
+            "SUK",
+            "SDB",
+            "Harry Peers",
+            "DAM Structures"});
             this.cmbPackageLocation.Location = new System.Drawing.Point(18, 136);
             this.cmbPackageLocation.Name = "cmbPackageLocation";
             this.cmbPackageLocation.Size = new System.Drawing.Size(121, 21);
@@ -552,9 +555,9 @@ namespace Prism
             this.structuresExtender.SetBindPropertyName(this.lblIssueNumber, null);
             this.lblIssueNumber.Location = new System.Drawing.Point(15, 67);
             this.lblIssueNumber.Name = "lblIssueNumber";
-            this.lblIssueNumber.Size = new System.Drawing.Size(72, 13);
+            this.lblIssueNumber.Size = new System.Drawing.Size(118, 13);
             this.lblIssueNumber.TabIndex = 14;
-            this.lblIssueNumber.Text = "Issue Number";
+            this.lblIssueNumber.Text = "Package Issue Number";
             // 
             // lblPhaseNumber
             // 
@@ -564,9 +567,9 @@ namespace Prism
             this.structuresExtender.SetBindPropertyName(this.lblPhaseNumber, null);
             this.lblPhaseNumber.Location = new System.Drawing.Point(15, 16);
             this.lblPhaseNumber.Name = "lblPhaseNumber";
-            this.lblPhaseNumber.Size = new System.Drawing.Size(77, 13);
+            this.lblPhaseNumber.Size = new System.Drawing.Size(103, 13);
             this.lblPhaseNumber.TabIndex = 13;
-            this.lblPhaseNumber.Text = "Phase Number";
+            this.lblPhaseNumber.Text = "Package Reference";
             // 
             // phaseNumber
             // 
@@ -612,6 +615,7 @@ namespace Prism
             this.structuresExtender.SetBindPropertyName(this, null);
             this.ClientSize = new System.Drawing.Size(321, 328);
             this.Controls.Add(this.tabControl1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximumSize = new System.Drawing.Size(337, 367);
             this.MinimumSize = new System.Drawing.Size(337, 367);
             this.Name = "PrismForm";

@@ -44,12 +44,11 @@ namespace PrismTester
             {
                 if (!myPreRunChecks.CheckDrawingsAreUpToDate(modelEnum.DrawingEnum))
                 {
-                    //this.Close();
+
                     return;
                 }
                 if (!myPreRunChecks.CheckNumberingIsUpToDate(modelEnum.SelectedModelParts))
                 {
-                    //this.Close();
                     return;
                 }
                 myFolderManager.CreateFolders();

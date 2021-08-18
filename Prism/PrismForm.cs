@@ -67,12 +67,16 @@ namespace Prism
             MyReportManager = new ReportManager(Model, phaseNumber.Text, issueNumber.Text);
             MyDrawingManager = new DrawingManager(Model, phaseNumber.Text, issueNumber.Text);
             MyFolderManager = new SevFolders(Model, phaseNumber.Text, issueNumber.Text);            
-            Cursor = Cursors.AppStarting;
+            
             bool packageSNI = cmbPackageLocation.Text == "SNI";
             bool packageSUK = cmbPackageLocation.Text == "SUK";
+            bool packageSDB = cmbPackageLocation.Text == "SDB";
+            bool packageHarryPeers = cmbPackageLocation.Text == "Harry Peers";
+            bool packageDAMStructures = cmbPackageLocation.Text == "DAM Structures";
 
             if (packageSNI)
             {
+                Cursor = Cursors.AppStarting;
                 if (!MyPreRunChecks.CheckDrawingsAreUpToDate(ModelEnum.DrawingEnum))
                 {
                     this.Close();
@@ -89,20 +93,33 @@ namespace Prism
                 MyModelModifiers.MarkAsFabPackComplete(ModelEnum);
                 MyFolderManager.RemoveUnusedFolders();
                 MyModelModifiers.LockSelected(ModelEnum);
+                Cursor = Cursors.Default;
+                DialogResult finishBox = MessageBox.Show($"Thanks {ModelData.First}, your fab package is now complete", "Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                if (finishBox == DialogResult.OK)
+                {
+                    this.Close();
+                }
             }
 
             if (packageSUK)
             {
-                MessageBox.Show("Sorry, this function has not been added yet, please try again later.");
+                MessageBox.Show("Sorry, this package location has not been added yet, please try another location.");
             }
 
-            Cursor = Cursors.Default;
-            DialogResult finishBox = MessageBox.Show($"Thanks {ModelData.First}, your fab package is now complete", "Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            
-            if (finishBox == DialogResult.OK)
+            if (packageSDB)
             {
-                this.Close();
+                MessageBox.Show("Sorry, this package location has not been added yet, please try another location.");
             }
+
+            if (packageHarryPeers)
+            {
+                MessageBox.Show("Sorry, this package location has not been added yet, please try another location.");
+            }
+
+            if (packageDAMStructures)
+            {
+                MessageBox.Show("Sorry, this package location has not been added yet, please try another location.");
+            }           
         }
     }
 }
