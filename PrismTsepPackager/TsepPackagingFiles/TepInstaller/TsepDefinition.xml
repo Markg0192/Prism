@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TEP Version="1.0">
 
-	<Product Id="SeverfieldPrism" UpgradeCode="6AD2E545-415D-4CF8-B120-726DEFEE8B69" Version="$version$" Language="1033"
+	<Product Id="SeverfieldPrism" UpgradeCode="565A70BB-217B-4796-B91E-32DD98C91F8C" Version="$version$" Language="1033"
 		Name="Severfield Prism Extension" Manufacturer="Severfield Corporation"  Description= "Detailing process assistant"
 		IconPath="%TEPDEFINITIONFILEFOLDER%\Icon.png">
 		<TeklaVersions>
