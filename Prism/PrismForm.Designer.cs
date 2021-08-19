@@ -152,8 +152,8 @@ namespace Prism
             this.structuresExtender.SetAttributeName(this.pictureBox6, null);
             this.structuresExtender.SetAttributeTypeName(this.pictureBox6, null);
             this.structuresExtender.SetBindPropertyName(this.pictureBox6, null);
-            this.pictureBox6.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox6.Image")));
-            this.pictureBox6.InitialImage = ((System.Drawing.Image)(resources.GetObject("pictureBox6.InitialImage")));
+            this.pictureBox6.Image = global::Prism.Properties.Resources.PrismTrans;
+            this.pictureBox6.InitialImage = null;
             this.pictureBox6.Location = new System.Drawing.Point(237, 6);
             this.pictureBox6.Name = "pictureBox6";
             this.pictureBox6.Size = new System.Drawing.Size(68, 82);
@@ -252,8 +252,8 @@ namespace Prism
             this.structuresExtender.SetAttributeName(this.pictureBox1, null);
             this.structuresExtender.SetAttributeTypeName(this.pictureBox1, null);
             this.structuresExtender.SetBindPropertyName(this.pictureBox1, null);
-            this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
-            this.pictureBox1.InitialImage = ((System.Drawing.Image)(resources.GetObject("pictureBox1.InitialImage")));
+            this.pictureBox1.Image = global::Prism.Properties.Resources.Severfield_blue_RGB_PNG;
+            this.pictureBox1.InitialImage = null;
             this.pictureBox1.Location = new System.Drawing.Point(72, 176);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(161, 54);
@@ -325,8 +325,8 @@ namespace Prism
             this.structuresExtender.SetAttributeName(this.pictureBox5, null);
             this.structuresExtender.SetAttributeTypeName(this.pictureBox5, null);
             this.structuresExtender.SetBindPropertyName(this.pictureBox5, null);
-            this.pictureBox5.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox5.Image")));
-            this.pictureBox5.InitialImage = ((System.Drawing.Image)(resources.GetObject("pictureBox5.InitialImage")));
+            this.pictureBox5.Image = global::Prism.Properties.Resources.PrismTrans;
+            this.pictureBox5.InitialImage = null;
             this.pictureBox5.Location = new System.Drawing.Point(237, 6);
             this.pictureBox5.Name = "pictureBox5";
             this.pictureBox5.Size = new System.Drawing.Size(68, 82);
@@ -414,8 +414,8 @@ namespace Prism
             this.structuresExtender.SetAttributeName(this.pictureBox2, null);
             this.structuresExtender.SetAttributeTypeName(this.pictureBox2, null);
             this.structuresExtender.SetBindPropertyName(this.pictureBox2, null);
-            this.pictureBox2.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox2.Image")));
-            this.pictureBox2.InitialImage = ((System.Drawing.Image)(resources.GetObject("pictureBox2.InitialImage")));
+            this.pictureBox2.Image = global::Prism.Properties.Resources.Severfield_blue_RGB_PNG;
+            this.pictureBox2.InitialImage = null;
             this.pictureBox2.Location = new System.Drawing.Point(72, 176);
             this.pictureBox2.Name = "pictureBox2";
             this.pictureBox2.Size = new System.Drawing.Size(161, 54);
@@ -477,8 +477,8 @@ namespace Prism
             this.structuresExtender.SetAttributeName(this.pictureBox4, null);
             this.structuresExtender.SetAttributeTypeName(this.pictureBox4, null);
             this.structuresExtender.SetBindPropertyName(this.pictureBox4, null);
-            this.pictureBox4.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox4.Image")));
-            this.pictureBox4.InitialImage = ((System.Drawing.Image)(resources.GetObject("pictureBox4.InitialImage")));
+            this.pictureBox4.Image = global::Prism.Properties.Resources.PrismTrans;
+            this.pictureBox4.InitialImage = null;
             this.pictureBox4.Location = new System.Drawing.Point(237, 6);
             this.pictureBox4.Name = "pictureBox4";
             this.pictureBox4.Size = new System.Drawing.Size(68, 82);
@@ -576,17 +576,18 @@ namespace Prism
             this.structuresExtender.SetAttributeName(this.phaseNumber, null);
             this.structuresExtender.SetAttributeTypeName(this.phaseNumber, null);
             this.structuresExtender.SetBindPropertyName(this.phaseNumber, null);
+            this.phaseNumber.Cursor = System.Windows.Forms.Cursors.IBeam;
             this.phaseNumber.Location = new System.Drawing.Point(18, 33);
             this.phaseNumber.Name = "phaseNumber";
             this.phaseNumber.Size = new System.Drawing.Size(124, 20);
             this.phaseNumber.TabIndex = 11;
-            this.phaseNumber.UseWaitCursor = true;
             // 
             // issueNumber
             // 
             this.structuresExtender.SetAttributeName(this.issueNumber, null);
             this.structuresExtender.SetAttributeTypeName(this.issueNumber, null);
             this.structuresExtender.SetBindPropertyName(this.issueNumber, null);
+            this.issueNumber.Cursor = System.Windows.Forms.Cursors.IBeam;
             this.issueNumber.Location = new System.Drawing.Point(18, 84);
             this.issueNumber.Name = "issueNumber";
             this.issueNumber.Size = new System.Drawing.Size(124, 20);
@@ -597,8 +598,8 @@ namespace Prism
             this.structuresExtender.SetAttributeName(this.pictureBox3, null);
             this.structuresExtender.SetAttributeTypeName(this.pictureBox3, null);
             this.structuresExtender.SetBindPropertyName(this.pictureBox3, null);
-            this.pictureBox3.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox3.Image")));
-            this.pictureBox3.InitialImage = ((System.Drawing.Image)(resources.GetObject("pictureBox3.InitialImage")));
+            this.pictureBox3.Image = global::Prism.Properties.Resources.Severfield_blue_RGB_PNG;
+            this.pictureBox3.InitialImage = null;
             this.pictureBox3.Location = new System.Drawing.Point(72, 176);
             this.pictureBox3.Name = "pictureBox3";
             this.pictureBox3.Size = new System.Drawing.Size(161, 54);
