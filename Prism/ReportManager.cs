@@ -15,7 +15,7 @@ namespace Prism
     {
         public SevFolders folders;
         private SevModelData modelData;
-        private SevModelEnumerator modelEnum;
+        // private SevModelEnumerator modelEnum;
         private readonly string reportPrefix;
         private string title1;
         private string title2;
@@ -30,6 +30,9 @@ namespace Prism
         private string report8L;
         private string report8s;
         private string report9;
+
+        private string PDFpocListOutput;
+
         private string niFirmFolderReportPath;
         private const string report2QSname = "-2QS-SNI-AssemblyBreakdownList.rpt";
         private const string report3name = "-3-SNI-HotRolledMemList.rpt";
@@ -51,6 +54,8 @@ namespace Prism
         private const string output8L = "-8L-SNI-SiteBoltLocationList.xsr";
         private const string output8s = "-8s-SNI-SiteSTUDList.xsr";
         private const string output9 = "-9-SNI-SiteDeliveryBatchList.xsr";
+        private const string PDFpocList = "-00-Prism-PDF-POC.pdf.rpt";
+        private const string PDFpocListName = "-00-Prism-PDF-POC.pdf";
         private readonly string phaseNumber;
         private readonly string issueNumber;
 
@@ -60,7 +65,7 @@ namespace Prism
             issueNumber = issueNum;
             folders = model.CreateSevFolders(phaseNumber, issueNumber);
             modelData = model.CreateSevModelData();
-            modelEnum = model.CreateSevModelEnumerator();
+            //modelEnum = model.CreateSevModelEnumerator();
             reportPrefix = ($"{modelData.ProjNumber}-{phaseNumber}-FAB-ISSUE{issueNumber}");
             title1 = phaseNumber.ToString();
             title2 = modelData.Initials;
@@ -80,6 +85,9 @@ namespace Prism
             report8L = Path.Combine(niFirmFolderReportPath, report8Lname);
             report8s = Path.Combine(niFirmFolderReportPath, report8sname);
             report9 = Path.Combine(niFirmFolderReportPath, report9name);
+
+            PDFpocListOutput = Path.Combine(folders.modelPath, PDFpocList);
+
             bool create3Report = false;
             bool create3PGReport = false;
             bool create4Report = false;
@@ -110,7 +118,7 @@ namespace Prism
                 if (isShopBolt && isShearStud) create7sReport = true;
                 if (isSiteBolt && !isShearStud) create8Report = true;
                 if (isSiteBolt && isShearStud) create8sReport = true;
-                
+
             }
 
             Operation.CreateReportFromSelected(report2QS, Path.Combine(folders.dspPath, $"{reportPrefix}{output2QS}"), title1, title2, title3);
@@ -118,40 +126,41 @@ namespace Prism
 
             if (create3Report)
             {
-                Console.WriteLine("3 List Produced");
+                // Console.WriteLine("3 List Produced");
                 Operation.CreateReportFromSelected(report3, Path.Combine(folders.reportPath, $"{reportPrefix}{output3}"), title1, title2, title3);
+                Operation.CreateReportFromSelected(PDFpocListOutput, Path.Combine(folders.reportPath, $"{reportPrefix}{PDFpocListName}"), title1, title2, title3);
             }
             if (create3PGReport)
             {
-                Console.WriteLine("3PG List Produced");
+                //Console.WriteLine("3PG List Produced");
                 Operation.CreateReportFromSelected(report3PG, Path.Combine(folders.reportPath, $"{reportPrefix}{output3PG}"), title1, title2, title3);
             }
             if (create4Report)
             {
-                Console.WriteLine("4 List Produced");
+                //Console.WriteLine("4 List Produced");
                 Operation.CreateReportFromSelected(report4, Path.Combine(folders.reportPath, $"{reportPrefix}{output4}"), title1, title2, title3);
             }
             if (create7Report)
             {
-                Console.WriteLine("7 List Produced");
+                //Console.WriteLine("7 List Produced");
                 Operation.CreateReportFromSelected(report7, Path.Combine(folders.reportPath, $"{reportPrefix}{output7}"), title1, title2, title3);
             }
             if (create7sReport)
             {
-                Console.WriteLine("7s List Produced");
+                //Console.WriteLine("7s List Produced");
                 Operation.CreateReportFromSelected(report7s, Path.Combine(folders.reportPath, $"{reportPrefix}{output7s}"), title1, title2, title3);
             }
             if (create8Report)
             {
-                Console.WriteLine("8 List Produced");
+                //Console.WriteLine("8 List Produced");
                 Operation.CreateReportFromSelected(report8, Path.Combine(folders.reportPath, $"{reportPrefix}{output8}"), title1, title2, title3);
                 Operation.CreateReportFromSelected(report8L, Path.Combine(folders.reportPath, $"{reportPrefix}{output8L}"), title1, title2, title3);
             }
             if (create8sReport)
             {
-                Console.WriteLine("8s List Produced");
+                //Console.WriteLine("8s List Produced");
                 Operation.CreateReportFromSelected(report8s, Path.Combine(folders.reportPath, $"{reportPrefix}{output8s}"), title1, title2, title3);
-            }
+            }           
             Operation.CreateNCFilesFromSelected("-SNI-PROFILES", Path.Combine(folders.ncPath, " "));
             Operation.CreateNCFilesFromSelected("-SNI-PLATES", Path.Combine(folders.ncPath, " "));
         }

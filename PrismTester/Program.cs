@@ -4,112 +4,157 @@ using Prism;
 using Tekla.Structures.Model;
 using System.Windows.Forms;
 using Tekla.Structures.Drawing;
+using System.Diagnostics;
 
 namespace PrismTester
 {
     class Program
     {
-        
-
         public static void Main(string[] args)
         {
-             Model model;
-             ReportManager myReportManager;
-             DrawingManager myDrawingManager;
-             SevFolders myFolderManager;
-             SevModelData modelData;
-             SevModelEnumerator modelEnum;
-             PreRunChecks myPreRunChecks;
-             ModelModifiers myModelModifiers;
+            
+            var watch = new System.Diagnostics.Stopwatch();
+            watch.Start();
 
-
+            Model model;
+            ReportManager myReportManager;
+            DrawingManager myDrawingManager;
+            SevFolders myFolderManager;
+            SevModelData modelData;
+            SevModelEnumerator modelEnum;
+            PreRunChecks myPreRunChecks;
+            ModelModifiers myModelModifiers;
 
             model = new Model();
             myPreRunChecks = new PreRunChecks(model);
+
             modelData = model.CreateSevModelData();
             myModelModifiers = new ModelModifiers(model);
+
+            watch.Stop();
+            Console.WriteLine($"Stage 1.0 complete, runtime: {watch.ElapsedMilliseconds} ms");
+            watch.Restart();
 
             string phaseNumber = "100";
             string issueNumber = "01";
             string testPackageLocation = "SNI";
 
             modelEnum = model.CreateSevModelEnumerator();
+
+            watch.Stop();
+            Console.WriteLine($"Stage 1.1 complete, runtime: {watch.ElapsedMilliseconds} ms");
+            watch.Restart();
+
             myReportManager = new ReportManager(model, phaseNumber, issueNumber);
-            myDrawingManager = new DrawingManager(model, phaseNumber, issueNumber);
+
+            watch.Stop();
+            Console.WriteLine($"Stage 1.2 complete, runtime: {watch.ElapsedMilliseconds} ms");
+            watch.Restart();
+
+            myDrawingManager = new DrawingManager(model, phaseNumber, issueNumber, modelEnum);
+
+            watch.Stop();
+            Console.WriteLine($"Stage 1.3 complete, runtime: {watch.ElapsedMilliseconds} ms");
+            watch.Restart();
+
             myFolderManager = new SevFolders(model, phaseNumber, issueNumber);
+
+            watch.Stop();
+            Console.WriteLine($"Stage 1.4 complete, runtime: {watch.ElapsedMilliseconds} ms");
+            watch.Restart();
+
             bool packageSNI = true;
             bool packageSUK = false;
 
+            watch.Stop();
+            Console.WriteLine($"Stage 2.0 complete, runtime: {watch.ElapsedMilliseconds} ms");
+            watch.Restart();
+
+            ToolStripStatusLabel DummyStrip = new ToolStripStatusLabel();
+            myDrawingManager.CreateDrawingList(DummyStrip);
+
+            watch.Stop();
+            Console.WriteLine($"Stage 3.0 complete, runtime: {watch.ElapsedMilliseconds} ms");
+            watch.Restart();
+
             if (packageSNI)
             {
-                if (!myPreRunChecks.CheckDrawingsAreUpToDate(modelEnum.DrawingEnum))
+                if (!myPreRunChecks.CheckDrawingsAreUpToDate(myDrawingManager.PrismDrawingList))
                 {
-
                     return;
                 }
                 if (!myPreRunChecks.CheckNumberingIsUpToDate(modelEnum.SelectedModelParts))
                 {
                     return;
                 }
+
+                watch.Stop();
+                Console.WriteLine($"Stage 4.0 complete, runtime: {watch.ElapsedMilliseconds} ms");
+                watch.Restart();
+
                 myFolderManager.CreateFolders();
                 myReportManager.CreateReports(modelEnum.SelectedModelParts, modelEnum.SelectedModelBolts, testPackageLocation);
-                //myDrawingManager.DummyPrintDrawings(modelEnum.MyDrawingHandler);
+
+                watch.Stop();
+                Console.WriteLine($"Stage 5.0 complete, runtime: {watch.ElapsedMilliseconds} ms");
+                watch.Restart();
+
+                DummyPrintDrawings(modelEnum.MyDrawingHandler, myFolderManager, myDrawingManager, modelEnum);
+
+                watch.Stop();
+                Console.WriteLine($"Stage 6.0 complete, runtime: {watch.ElapsedMilliseconds} ms");
+                watch.Restart();
+
                 myModelModifiers.MarkAsFabPackComplete(modelEnum);
                 myFolderManager.RemoveUnusedFolders();
                 myModelModifiers.LockSelected(modelEnum);
+
+                watch.Stop();
+                Console.WriteLine($"Stage 7.0 complete, runtime: {watch.ElapsedMilliseconds} ms");
+                watch.Restart();
+
             }
             if (packageSUK)
             {
                 MessageBox.Show("Sorry, this function has not been added yet, please try again later.");
             }
+
+            Console.WriteLine("This is the end of the program, press enter to close");
+            Console.ReadLine();
+
+            FormIssueEmail("Test@email.com", "Test Subject", "Some test text for the body");
+
             DialogResult finishBox = MessageBox.Show($"Thanks {modelData.First}, your fab package is now complete", "Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
             if (finishBox == DialogResult.OK)
             {
-                //this.Close();
                 return;
             }
+        }
 
-           /* public void DummyPrintDrawings(DrawingHandler myDrawingHandler)
+        public static void DummyPrintDrawings(DrawingHandler myDrawingHandler, SevFolders myFolderManager, DrawingManager myDrawingManager, SevModelEnumerator modelEnum)
+        {
+            Console.WriteLine($"You have {myDrawingManager.PrismDrawingList.Count} drawings to print");
+            int printNumber = 1;
+            foreach (PrismDrawing myDrawing in myDrawingManager.PrismDrawingList)
             {
-                int drawingProcessCounter = 0;
-                DrawingEnumerator drawingsList = myDrawingHandler.GetDrawings();
-                while (drawingsList.MoveNext())
-                {
-                    Drawing currentDrawing = drawingsList.Current as Drawing;
-                    if (currentDrawing != null)
-                    {
-
-                        if (currentDrawing.Title1 == NotRequired)
-                        {
-                            currentDrawing.Delete();
-                        }
-                        string[] Mark = currentDrawing.Mark.Split(new char[] { '[', '.', ']' });
-                        string drawingName = "";
-                        foreach (string s in Mark)
-                        {
-                            drawingName = drawingName + s;
-                        }
-                        if (ModelEnum.MyMarks != null)
-                        {
-                            if (ModelEnum.MyMarks.Contains(drawingName))
-                            {
-                                string revMark = GetDrawingRevison(currentDrawing);
-                                drawingProcessCounter++;
-                                ModelEnum.MyDrawingHandler.IssueDrawing(currentDrawing);
-                                string PDFname = ($"{drawingName}-{revMark}.pdf");
-                                DPMPrinterAttributes myPDF = new DPMPrinterAttributes();
-                                myPDF.ColorMode = DotPrintColor.BlackAndWhite;
-                                myPDF.OpenFileWhenFinished = false;
-                                myPDF.Orientation = DotPrintOrientationType.Landscape;
-                                myPDF.OutputFileName = $"{Folders.fabPath}/{currentDrawing.Title1}/{PDFname}";
-                                myPDF.OutputType = DotPrintOutputType.PDF;
-                                myPDF.PaperSize = DotPrintPaperSize.Auto;
-                                ModelEnum.MyDrawingHandler.PrintDrawing(currentDrawing, myPDF);
-                            }
-                        }
-                    }
-                }
-            }*/
+                Console.WriteLine($"Printing drawing {printNumber} of {myDrawingManager.PrismDrawingList.Count}");
+                modelEnum.MyDrawingHandler.IssueDrawing(myDrawing.TeklaDrawing);
+                DPMPrinterAttributes myPDF = new DPMPrinterAttributes();
+                myPDF.ColorMode = DotPrintColor.BlackAndWhite;
+                myPDF.OpenFileWhenFinished = false;
+                myPDF.Orientation = DotPrintOrientationType.Landscape;
+                myPDF.OutputFileName = $"{myFolderManager.fabPath}/{myDrawing.DrawingFolderName}/{myDrawing.PdfName}";
+                myPDF.OutputType = DotPrintOutputType.PDF;
+                myPDF.PaperSize = DotPrintPaperSize.Auto;
+                // UpdateStatusLabel(statusLabel, drawingProcessCounter, _modelEnum.MyMarks.Count);
+                modelEnum.MyDrawingHandler.PrintDrawing(myDrawing.TeklaDrawing, myPDF);
+                printNumber++;
+            }
+        }
+     
+        public static void FormIssueEmail(string emailAddress, string subject, string body)
+        {
+            Process.Start("mailto:" + emailAddress + "?subject=" + subject + "&body=" + body + "&Attachment=" + @"C:\Users\mark.gibson\Desktop\Pdf\Book1.pdf");
         }
     }
 }

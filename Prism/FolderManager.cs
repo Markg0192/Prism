@@ -12,15 +12,15 @@ namespace Prism
     /// </summary>
     public class SevFolders
     {  
-        private const string assFolder = "ASS Folder";
-        private const string fitFolder = "FIT Folder";
-        private const string prtFolder = "PRT Folder";
+        private const string assFolder = "ASS";
+        private const string fitFolder = "FIT";
+        private const string prtFolder = "PRT";
         private const string dspFolder = "DSP";
         private const string ncFolder = "NC";
-        private const string reportFolder = "Reports";
+        private const string reportFolder = "Lists";
         private const string ifcFolder = "IFC";
         private readonly string fabFolder;
-        private readonly string modelPath;
+        public readonly string modelPath;
         public readonly string fabPath;
         private readonly string assPath;
         private readonly string fitPath;
@@ -55,7 +55,7 @@ namespace Prism
                 if (!Directory.Exists(folder))
                 {
                     Directory.CreateDirectory(folder);
-                    Console.WriteLine($"{folder} folder created");
+                    //Console.WriteLine($"{folder} folder created");
                 }
             }
         }     
@@ -70,6 +70,13 @@ namespace Prism
                     if (file.Length == 0)
 
                         Directory.Delete(subdirectory);
+                }
+                foreach (string subFile in Directory.GetFiles(reportPath))
+                {
+                    if (subFile.Substring(subFile.Length - 3) == "dpm")
+                    {
+                           File.Delete(subFile);
+                    }
                 }
             }
         }      

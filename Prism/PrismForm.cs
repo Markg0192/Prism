@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Windows.Forms;
 using Tekla.Structures.Dialog;
 using Tekla.Structures.Model;
@@ -21,9 +22,9 @@ namespace Prism
             InitializeComponent();
             Model = new Model();
             MyPreRunChecks = new PreRunChecks(Model);
-            ModelData = Model.CreateSevModelData();            
+            ModelData = Model.CreateSevModelData();
             MyModelModifiers = new ModelModifiers(Model);
-        }       
+        }
 
         private void btnRunThroughMaterialChecks_Click(object sender, EventArgs e)
         {
@@ -59,15 +60,16 @@ namespace Prism
         {
             ModelEnum = Model.CreateSevModelEnumerator();
             MyModelModifiers.DetailingCheckModifier(ModelEnum, 3);
-        }    
-        
+        }
+
         private void btnCreatePackage_Click(object sender, EventArgs e)
         {
+            Cursor = Cursors.AppStarting;
             ModelEnum = Model.CreateSevModelEnumerator();
             MyReportManager = new ReportManager(Model, phaseNumber.Text, issueNumber.Text);
-            MyDrawingManager = new DrawingManager(Model, phaseNumber.Text, issueNumber.Text);
-            MyFolderManager = new SevFolders(Model, phaseNumber.Text, issueNumber.Text);            
-            
+            MyDrawingManager = new DrawingManager(Model, phaseNumber.Text, issueNumber.Text, ModelEnum);
+            MyFolderManager = new SevFolders(Model, phaseNumber.Text, issueNumber.Text);
+
             bool packageSNI = cmbPackageLocation.Text == "SNI";
             bool packageSUK = cmbPackageLocation.Text == "SUK";
             bool packageSDB = cmbPackageLocation.Text == "SDB";
@@ -76,27 +78,34 @@ namespace Prism
 
             if (packageSNI)
             {
-                Cursor = Cursors.AppStarting;
-                if (!MyPreRunChecks.CheckDrawingsAreUpToDate(ModelEnum.DrawingEnum))
-                {
-                    this.Close();
-                    return;
-                }
+                StatusLabel.Text = "Checking numbering is up to date";
                 if (!MyPreRunChecks.CheckNumberingIsUpToDate(ModelEnum.SelectedModelParts))
                 {
                     this.Close();
                     return;
                 }
+
+                StatusLabel.Text = "Getting drawings from model selection";
+                MyDrawingManager.CreateDrawingList(StatusLabel);
+
+                StatusLabel.Text = "Checking all drawings are up to date";
+                if (!MyPreRunChecks.CheckDrawingsAreUpToDate(MyDrawingManager.PrismDrawingList))
+                {
+                    this.Close();
+                    return;
+                }
+
                 MyFolderManager.CreateFolders();
                 MyReportManager.CreateReports(ModelEnum.SelectedModelParts, ModelEnum.SelectedModelBolts, cmbPackageLocation.Text);
-                MyDrawingManager.PrintDrawings(ModelEnum.MyDrawingHandler, StatusLabel);
+                MyDrawingManager.PrintDrawings(StatusLabel);
                 MyModelModifiers.MarkAsFabPackComplete(ModelEnum);
                 MyFolderManager.RemoveUnusedFolders();
                 MyModelModifiers.LockSelected(ModelEnum);
                 Cursor = Cursors.Default;
-                DialogResult finishBox = MessageBox.Show($"Thanks {ModelData.First}, your fab package is now complete", "Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                DialogResult finishBox = MessageBox.Show($"Thanks {ModelData.First}, your fab package is now complete, please attached your fab package, located in your model folder, to the following email and send to the relevent team", "Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 if (finishBox == DialogResult.OK)
                 {
+                    FormIssueEmail("Test@email.com", "Test Subject", "Some test text for the body");
                     this.Close();
                 }
             }
@@ -119,7 +128,12 @@ namespace Prism
             if (packageDAMStructures)
             {
                 MessageBox.Show("Sorry, this package location has not been added yet, please try another location.");
-            }           
+            }
+        }
+
+        public static void FormIssueEmail(string emailAddress, string subject, string body)
+        {
+            Process.Start("mailto:" + emailAddress + "?subject=" + subject + "&body=" + body);
         }
     }
 }

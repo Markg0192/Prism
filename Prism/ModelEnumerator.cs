@@ -27,8 +27,8 @@ namespace Prism
             SelectedModelBolts = new ArrayList();
             MyDrawingHandler = new DrawingHandler();
             Moe = new Tekla.Structures.Model.UI.ModelObjectSelector().GetSelectedObjects();
-            DrawingEnum = MyDrawingHandler.GetDrawings();
-            Ndrawings = DrawingEnum.GetSize();
+           // DrawingEnum = MyDrawingHandler.GetDrawings();
+          //  Ndrawings = DrawingEnum.GetSize();
             MyMarks = new List<string>();
 
             foreach (object myObject in Moe)
