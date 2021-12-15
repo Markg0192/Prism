@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Net.Mail;
 using System.Windows.Forms;
 using Tekla.Structures.Dialog;
 using Tekla.Structures.Model;
@@ -16,6 +17,7 @@ namespace Prism
         private SevModelEnumerator ModelEnum;
         private PreRunChecks MyPreRunChecks;
         private ModelModifiers MyModelModifiers;
+        private BswxExporter MyBswxExporter;
 
         public PrismForm()
         {
@@ -69,13 +71,15 @@ namespace Prism
             MyReportManager = new ReportManager(Model, phaseNumber.Text, issueNumber.Text);
             MyDrawingManager = new DrawingManager(Model, phaseNumber.Text, issueNumber.Text, ModelEnum);
             MyFolderManager = new SevFolders(Model, phaseNumber.Text, issueNumber.Text);
+            MyBswxExporter = new BswxExporter();
+            MyBswxExporter.ExportBSWX(ModelEnum, MyFolderManager, ModelData, phaseNumber.Text, issueNumber.Text);
 
             bool packageSNI = cmbPackageLocation.Text == "SNI";
             bool packageSUK = cmbPackageLocation.Text == "SUK";
             bool packageSDB = cmbPackageLocation.Text == "SDB";
             bool packageHarryPeers = cmbPackageLocation.Text == "Harry Peers";
             bool packageDAMStructures = cmbPackageLocation.Text == "DAM Structures";
-
+            
             if (packageSNI)
             {
                 StatusLabel.Text = "Checking numbering is up to date";
@@ -103,9 +107,22 @@ namespace Prism
                 MyModelModifiers.LockSelected(ModelEnum);
                 Cursor = Cursors.Default;
                 DialogResult finishBox = MessageBox.Show($"Thanks {ModelData.First}, your fab package is now complete, please attached your fab package, located in your model folder, to the following email and send to the relevent team", "Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+               
+                const string MailNewLine = "%0D%0A";
                 if (finishBox == DialogResult.OK)
                 {
-                    FormIssueEmail("Test@email.com", "Test Subject", "Some test text for the body");
+                    FormIssueEmail("Test@email.com", $"{MyReportManager.reportPrefix} Fab Issue", 
+                                                                                     $" Hello,{MailNewLine}" +
+                                                                                     $"{MailNewLine}" +
+                                                                                     $"This is the fab package Issue {issueNumber.Text} for phase {phaseNumber.Text} in {ModelData.ProjNumber}, {ModelData.ProjName}.{MailNewLine}" +
+                                                                                     $"Please issue this package to the works when possible.{MailNewLine}" +
+                                                                                     $"{MailNewLine}" +
+                                                                                     $"This fab package contains the following;{MailNewLine}" +
+                                                                                     $"{ModelEnum.assembliesList.Count} Assemblies.{MailNewLine}" +
+                                                                                     $"{ModelEnum.SelectedModelParts.Count} Parts.{MailNewLine}" +
+                                                                                     $"{MailNewLine}" +
+                                                                                     $"Regards,{MailNewLine}{MailNewLine}" +
+                                                                                     $"{ModelData.Full}");
                     this.Close();
                 }
             }

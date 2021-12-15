@@ -55,7 +55,6 @@ namespace Prism
                 if (!Directory.Exists(folder))
                 {
                     Directory.CreateDirectory(folder);
-                    //Console.WriteLine($"{folder} folder created");
                 }
             }
         }     

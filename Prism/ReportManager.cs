@@ -15,8 +15,7 @@ namespace Prism
     {
         public SevFolders folders;
         private SevModelData modelData;
-        // private SevModelEnumerator modelEnum;
-        private readonly string reportPrefix;
+        public readonly string reportPrefix;
         private string title1;
         private string title2;
         private string title3;
@@ -65,7 +64,6 @@ namespace Prism
             issueNumber = issueNum;
             folders = model.CreateSevFolders(phaseNumber, issueNumber);
             modelData = model.CreateSevModelData();
-            //modelEnum = model.CreateSevModelEnumerator();
             reportPrefix = ($"{modelData.ProjNumber}-{phaseNumber}-FAB-ISSUE{issueNumber}");
             title1 = phaseNumber.ToString();
             title2 = modelData.Initials;

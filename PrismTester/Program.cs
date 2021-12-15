@@ -5,6 +5,8 @@ using Tekla.Structures.Model;
 using System.Windows.Forms;
 using Tekla.Structures.Drawing;
 using System.Diagnostics;
+using System.Net.Mail;
+using System.Text;
 
 namespace PrismTester
 {
@@ -12,7 +14,7 @@ namespace PrismTester
     {
         public static void Main(string[] args)
         {
-            
+
             var watch = new System.Diagnostics.Stopwatch();
             watch.Start();
 
@@ -24,6 +26,8 @@ namespace PrismTester
             SevModelEnumerator modelEnum;
             PreRunChecks myPreRunChecks;
             ModelModifiers myModelModifiers;
+            BswxExporter myBswxExporter = new BswxExporter();
+            const string MailNewLine = "%0D%0A";
 
             model = new Model();
             myPreRunChecks = new PreRunChecks(model);
@@ -40,6 +44,8 @@ namespace PrismTester
             string testPackageLocation = "SNI";
 
             modelEnum = model.CreateSevModelEnumerator();
+            myFolderManager = new SevFolders(model, phaseNumber, issueNumber);
+            myBswxExporter.ExportBSWX(modelEnum, myFolderManager, modelData, phaseNumber, issueNumber);
 
             watch.Stop();
             Console.WriteLine($"Stage 1.1 complete, runtime: {watch.ElapsedMilliseconds} ms");
@@ -55,12 +61,6 @@ namespace PrismTester
 
             watch.Stop();
             Console.WriteLine($"Stage 1.3 complete, runtime: {watch.ElapsedMilliseconds} ms");
-            watch.Restart();
-
-            myFolderManager = new SevFolders(model, phaseNumber, issueNumber);
-
-            watch.Stop();
-            Console.WriteLine($"Stage 1.4 complete, runtime: {watch.ElapsedMilliseconds} ms");
             watch.Restart();
 
             bool packageSNI = true;
@@ -99,7 +99,7 @@ namespace PrismTester
                 Console.WriteLine($"Stage 5.0 complete, runtime: {watch.ElapsedMilliseconds} ms");
                 watch.Restart();
 
-                DummyPrintDrawings(modelEnum.MyDrawingHandler, myFolderManager, myDrawingManager, modelEnum);
+               // DummyPrintDrawings(modelEnum.MyDrawingHandler, myFolderManager, myDrawingManager, modelEnum);
 
                 watch.Stop();
                 Console.WriteLine($"Stage 6.0 complete, runtime: {watch.ElapsedMilliseconds} ms");
@@ -122,7 +122,14 @@ namespace PrismTester
             Console.WriteLine("This is the end of the program, press enter to close");
             Console.ReadLine();
 
-            FormIssueEmail("Test@email.com", "Test Subject", "Some test text for the body");
+            FormIssueEmail("Test@email.com", "Test Subject", $"Hello,{MailNewLine}{MailNewLine}" +
+                                                                                     $"This is the fab package Issue {issueNumber} for phase {phaseNumber} in {modelData.ProjNumber}, {modelData.ProjName}.{MailNewLine}" +
+                                                                                     $"Please issue this package to the works when possible.{MailNewLine}{MailNewLine}" +
+                                                                                     $"This fab package contains the following;{MailNewLine}" +
+                                                                                     $"{modelEnum.assembliesList.Count} Assemblies.{MailNewLine}" +
+                                                                                     $"{modelEnum.SelectedModelParts.Count} Parts.{MailNewLine}{MailNewLine}" +
+                                                                                     $"Regards,{MailNewLine}{MailNewLine}" +
+                                                                                     $"{modelData.Full}");
 
             DialogResult finishBox = MessageBox.Show($"Thanks {modelData.First}, your fab package is now complete", "Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
             if (finishBox == DialogResult.OK)
@@ -146,12 +153,11 @@ namespace PrismTester
                 myPDF.OutputFileName = $"{myFolderManager.fabPath}/{myDrawing.DrawingFolderName}/{myDrawing.PdfName}";
                 myPDF.OutputType = DotPrintOutputType.PDF;
                 myPDF.PaperSize = DotPrintPaperSize.Auto;
-                // UpdateStatusLabel(statusLabel, drawingProcessCounter, _modelEnum.MyMarks.Count);
                 modelEnum.MyDrawingHandler.PrintDrawing(myDrawing.TeklaDrawing, myPDF);
                 printNumber++;
             }
         }
-     
+
         public static void FormIssueEmail(string emailAddress, string subject, string body)
         {
             Process.Start("mailto:" + emailAddress + "?subject=" + subject + "&body=" + body + "&Attachment=" + @"C:\Users\mark.gibson\Desktop\Pdf\Book1.pdf");

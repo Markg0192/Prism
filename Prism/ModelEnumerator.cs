@@ -12,13 +12,12 @@ namespace Prism
     {
         public ArrayList SelectedModelParts;
         public ArrayList SelectedModelBolts;
-        private List<Assembly> assembliesList;
+        public List<Assembly> assembliesList;
         public Tekla.Structures.Model.Part MyPart;
         public List<string> MyMarks;
         private ModelObjectEnumerator Moe;
         public DrawingHandler MyDrawingHandler;
         public DrawingEnumerator DrawingEnum;
-        public int Ndrawings;
 
         public SevModelEnumerator()
         {
@@ -27,8 +26,6 @@ namespace Prism
             SelectedModelBolts = new ArrayList();
             MyDrawingHandler = new DrawingHandler();
             Moe = new Tekla.Structures.Model.UI.ModelObjectSelector().GetSelectedObjects();
-           // DrawingEnum = MyDrawingHandler.GetDrawings();
-          //  Ndrawings = DrawingEnum.GetSize();
             MyMarks = new List<string>();
 
             foreach (object myObject in Moe)

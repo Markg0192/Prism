@@ -56,6 +56,7 @@ namespace Prism
                 currentDrawing.Delete();
                 return;
             }
+
             string[] drawingTitle1 = currentDrawing.Title1.Split(new char[] { ' ' });
             DrawingFolderName = drawingTitle1[0];
             string[] mark = currentDrawing.Mark.Split(new char[] { '[', '.', ']' });
