@@ -70,6 +70,7 @@ namespace Prism
 
                         Directory.Delete(subdirectory);
                 }
+
                 foreach (string subFile in Directory.GetFiles(reportPath))
                 {
                     if (subFile.Substring(subFile.Length - 3) == "dpm")

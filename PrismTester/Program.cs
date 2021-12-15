@@ -71,7 +71,7 @@ namespace PrismTester
             watch.Restart();
 
             ToolStripStatusLabel DummyStrip = new ToolStripStatusLabel();
-            myDrawingManager.CreateDrawingList(DummyStrip);
+            myDrawingManager.CreateDrawingList();
 
             watch.Stop();
             Console.WriteLine($"Stage 3.0 complete, runtime: {watch.ElapsedMilliseconds} ms");
@@ -126,7 +126,7 @@ namespace PrismTester
                                                                                      $"This is the fab package Issue {issueNumber} for phase {phaseNumber} in {modelData.ProjNumber}, {modelData.ProjName}.{MailNewLine}" +
                                                                                      $"Please issue this package to the works when possible.{MailNewLine}{MailNewLine}" +
                                                                                      $"This fab package contains the following;{MailNewLine}" +
-                                                                                     $"{modelEnum.assembliesList.Count} Assemblies.{MailNewLine}" +
+                                                                                     $"{modelEnum.AssembliesList.Count} Assemblies.{MailNewLine}" +
                                                                                      $"{modelEnum.SelectedModelParts.Count} Parts.{MailNewLine}{MailNewLine}" +
                                                                                      $"Regards,{MailNewLine}{MailNewLine}" +
                                                                                      $"{modelData.Full}");

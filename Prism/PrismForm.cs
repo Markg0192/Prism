@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Net.Mail;
 using System.Windows.Forms;
 using Tekla.Structures.Dialog;
 using Tekla.Structures.Model;
@@ -18,6 +17,7 @@ namespace Prism
         private PreRunChecks MyPreRunChecks;
         private ModelModifiers MyModelModifiers;
         private BswxExporter MyBswxExporter;
+        private string UnavailableLocation = "Sorry, this package location has not been added yet, please try another location.";
 
         public PrismForm()
         {
@@ -90,7 +90,7 @@ namespace Prism
                 }
 
                 StatusLabel.Text = "Getting drawings from model selection";
-                MyDrawingManager.CreateDrawingList(StatusLabel);
+                MyDrawingManager.CreateDrawingList();
 
                 StatusLabel.Text = "Checking all drawings are up to date";
                 if (!MyPreRunChecks.CheckDrawingsAreUpToDate(MyDrawingManager.PrismDrawingList))
@@ -106,19 +106,19 @@ namespace Prism
                 MyFolderManager.RemoveUnusedFolders();
                 MyModelModifiers.LockSelected(ModelEnum);
                 Cursor = Cursors.Default;
-                DialogResult finishBox = MessageBox.Show($"Thanks {ModelData.First}, your fab package is now complete, please attached your fab package, located in your model folder, to the following email and send to the relevent team", "Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                DialogResult finishBox = MessageBox.Show($"Thanks {ModelData.First}, your fab package is now complete, please attach your fab package, located in your model folder, to the following email and send to the relevent team", "Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
                
                 const string MailNewLine = "%0D%0A";
                 if (finishBox == DialogResult.OK)
                 {
-                    FormIssueEmail("Test@email.com", $"{MyReportManager.reportPrefix} Fab Issue", 
+                    FormIssueEmail("Test@email.com", $"{MyReportManager.ReportPrefix} Fab Issue", 
                                                                                      $" Hello,{MailNewLine}" +
                                                                                      $"{MailNewLine}" +
                                                                                      $"This is the fab package Issue {issueNumber.Text} for phase {phaseNumber.Text} in {ModelData.ProjNumber}, {ModelData.ProjName}.{MailNewLine}" +
                                                                                      $"Please issue this package to the works when possible.{MailNewLine}" +
                                                                                      $"{MailNewLine}" +
                                                                                      $"This fab package contains the following;{MailNewLine}" +
-                                                                                     $"{ModelEnum.assembliesList.Count} Assemblies.{MailNewLine}" +
+                                                                                     $"{ModelEnum.AssembliesList.Count} Assemblies.{MailNewLine}" +
                                                                                      $"{ModelEnum.SelectedModelParts.Count} Parts.{MailNewLine}" +
                                                                                      $"{MailNewLine}" +
                                                                                      $"Regards,{MailNewLine}{MailNewLine}" +
@@ -129,26 +129,26 @@ namespace Prism
 
             if (packageSUK)
             {
-                MessageBox.Show("Sorry, this package location has not been added yet, please try another location.");
+                MessageBox.Show(UnavailableLocation);
             }
 
             if (packageSDB)
             {
-                MessageBox.Show("Sorry, this package location has not been added yet, please try another location.");
+                MessageBox.Show(UnavailableLocation);
             }
 
             if (packageHarryPeers)
             {
-                MessageBox.Show("Sorry, this package location has not been added yet, please try another location.");
+                MessageBox.Show(UnavailableLocation);
             }
 
             if (packageDAMStructures)
             {
-                MessageBox.Show("Sorry, this package location has not been added yet, please try another location.");
+                MessageBox.Show(UnavailableLocation);
             }
         }
 
-        public static void FormIssueEmail(string emailAddress, string subject, string body)
+        private static void FormIssueEmail(string emailAddress, string subject, string body)
         {
             Process.Start("mailto:" + emailAddress + "?subject=" + subject + "&body=" + body);
         }

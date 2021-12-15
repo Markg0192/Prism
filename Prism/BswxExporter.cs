@@ -10,15 +10,17 @@ namespace Prism
 {
     public class BswxExporter
     {
-        public void ExportBSWX(SevModelEnumerator ModelEnum, SevFolders myFolderManager, SevModelData modelData, string phaseNumber, string issueNumber)
+        private int MaxNumberOfPartsInAnArray = 99;
+
+        public void ExportBSWX(SevModelEnumerator modelEnum, SevFolders myFolderManager, SevModelData modelData, string phaseNumber, string issueNumber)
         {
             List<ArrayList> myLists = new List<ArrayList>();
             myLists.Add(new ArrayList());
 
-            foreach (var item in ModelEnum.assembliesList)
+            foreach (var item in modelEnum.AssembliesList)
             {
                 ArrayList currentList = myLists.Last();
-                if (currentList.Count >= 99) myLists.Add(new ArrayList());
+                if (currentList.Count >= MaxNumberOfPartsInAnArray) myLists.Add(new ArrayList());
                 currentList = myLists.Last();
                 currentList.Add(item);
             }

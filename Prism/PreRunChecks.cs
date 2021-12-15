@@ -15,12 +15,10 @@ namespace Prism
     public class PreRunChecks
     {
         private string[] mark;
-       // private SevModelEnumerator modelEnum;
         private DrawingUpToDateStatus updateStatus;  
 
         public PreRunChecks(Model model)
         {
-            //modelEnum = model.CreateSevModelEnumerator();
         }
 
         public bool CheckDrawingsAreUpToDate(List<PrismDrawing> drawingsList)

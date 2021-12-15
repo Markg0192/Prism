@@ -12,16 +12,15 @@ namespace Prism
     {
         public ArrayList SelectedModelParts;
         public ArrayList SelectedModelBolts;
-        public List<Assembly> assembliesList;
+        public List<Assembly> AssembliesList;
         public Tekla.Structures.Model.Part MyPart;
         public List<string> MyMarks;
         private ModelObjectEnumerator Moe;
         public DrawingHandler MyDrawingHandler;
-        public DrawingEnumerator DrawingEnum;
 
         public SevModelEnumerator()
         {
-            assembliesList = new List<Assembly>();
+            AssembliesList = new List<Assembly>();
             SelectedModelParts = new ArrayList();
             SelectedModelBolts = new ArrayList();
             MyDrawingHandler = new DrawingHandler();
@@ -40,15 +39,15 @@ namespace Prism
                     if (assembly != null)
                     {
                         Assembly matchingAssembly = null;
-                        matchingAssembly = assembliesList.Find(x => x.Identifier.ToString() == assembly.Identifier.ToString());
-                        if (matchingAssembly == null) assembliesList.Add(assembly);
+                        matchingAssembly = AssembliesList.Find(x => x.Identifier.ToString() == assembly.Identifier.ToString());
+                        if (matchingAssembly == null) AssembliesList.Add(assembly);
                     }
                 }
             }
 
-            if (assembliesList != null)
+            if (AssembliesList != null)
             {
-                foreach (Assembly assembly in assembliesList)
+                foreach (Assembly assembly in AssembliesList)
                 {
                     List<BoltGroup> MyBolts = GetBoltsFromAssembly(assembly);
 
@@ -63,7 +62,7 @@ namespace Prism
             }             
         }
 
-        public static List<BoltGroup> GetBoltsFromAssembly(Assembly assembly)
+        private static List<BoltGroup> GetBoltsFromAssembly(Assembly assembly)
         {
             List<BoltGroup> myBoltsList = new List<BoltGroup>();
             ArrayList secondaries = assembly.GetSecondaries();

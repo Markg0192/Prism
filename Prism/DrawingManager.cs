@@ -17,7 +17,6 @@ namespace Prism
     {
         private SevModelEnumerator _modelEnum;
         private SevFolders _folders;
-        private const string _notRequired = "Not Required";
         private Model _model;
 
         public DrawingManager(Model model, string phaseNum, string issueNum, SevModelEnumerator modelEnum)
@@ -29,19 +28,21 @@ namespace Prism
 
         public List<PrismDrawing> PrismDrawingList = new List<PrismDrawing>();
 
-        public void CreateDrawingList(ToolStripStatusLabel statusLabel)
+        public void CreateDrawingList()
         {
-            int drawingCheckNo = 1;
-            var drawingsBySelectedParts = new List<Drawing>();
+            List<Drawing> drawingsBySelectedParts = new List<Drawing>();
             IEnumerable<int> drawingNos = Operation.GetDrawingsBySelectedParts();
             int counter = 0;
             foreach (var item in drawingNos) counter++;
-            
+
             if (counter == 0)
-            {
+            { //the refresh drawings method / macro is used here as a work around, when the user first opens the model the document
+                //manager must be opened at least once to initialise it, if this not done the GetDrawingsBySelectedParts method does not work
+                //RefreshDrawings quickly opens the document manager if it has not been opened before to do this initialisation 
                 RefreshDrawings();
                 drawingNos = Operation.GetDrawingsBySelectedParts();
             }
+
             foreach (var no in drawingNos)
             {
                 var id = new Identifier(no);
@@ -52,19 +53,15 @@ namespace Prism
 
             foreach (Drawing drawing in drawingsBySelectedParts)
             {
-                if (drawing != null)
+                PrismDrawing prismDrawing = new PrismDrawing(drawing, _modelEnum, _model);
+                if (prismDrawing.IsDrawingRequired)
                 {
-                    PrismDrawing prismDrawing = new PrismDrawing(drawing, _modelEnum, _model);
-                    if (prismDrawing.IsDrawingRequired)
-                    {
-                        PrismDrawingList.Add(prismDrawing);
-                    }
+                    PrismDrawingList.Add(prismDrawing);
                 }
-                drawingCheckNo++;
             }
         }
 
-        public static bool RefreshDrawings()
+        private static bool RefreshDrawings()
         {
             var macrodir = "";
             TeklaStructuresSettings.GetAdvancedOption("XS_MACRO_DIRECTORY", ref macrodir);

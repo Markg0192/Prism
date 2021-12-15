@@ -28,7 +28,7 @@ namespace Prism
         public Drawing TeklaDrawing { get; set; }
 
 
-        private string GetDrawingRevison(Drawing currentDrawing)
+        private string GetDrawingRevision(Drawing currentDrawing)
         {
             AssemblyDrawing assDraw = currentDrawing as AssemblyDrawing;
             SinglePartDrawing singDraw = currentDrawing as SinglePartDrawing;
@@ -49,7 +49,7 @@ namespace Prism
             return revMark;
         }
 
-        public void GetPrismDrawing(Drawing currentDrawing)
+        private void GetPrismDrawing(Drawing currentDrawing)
         {
             if (currentDrawing.Title1 == _notRequired)
             {
@@ -69,7 +69,7 @@ namespace Prism
             {
                 if (_modelEnum.MyMarks.Contains(drawingName))
                 {
-                    RevMark = GetDrawingRevison(currentDrawing);
+                    RevMark = GetDrawingRevision(currentDrawing);
                     PdfName = ($"{drawingName}-{RevMark}.pdf");
                     TeklaDrawing = currentDrawing;
                 }
