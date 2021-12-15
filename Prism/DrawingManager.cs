@@ -33,8 +33,11 @@ namespace Prism
         {
             int drawingCheckNo = 1;
             var drawingsBySelectedParts = new List<Drawing>();
-            var drawingNos = Operation.GetDrawingsBySelectedParts();
-            if (drawingsBySelectedParts.Count == 0)
+            IEnumerable<int> drawingNos = Operation.GetDrawingsBySelectedParts();
+            int counter = 0;
+            foreach (var item in drawingNos) counter++;
+            
+            if (counter == 0)
             {
                 RefreshDrawings();
                 drawingNos = Operation.GetDrawingsBySelectedParts();
@@ -45,7 +48,6 @@ namespace Prism
                 var drawing = Operation.GetDrawing(id);
                 drawing.Select();
                 drawingsBySelectedParts.Add(drawing);
-
             }
 
             foreach (Drawing drawing in drawingsBySelectedParts)

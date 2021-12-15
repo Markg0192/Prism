@@ -99,7 +99,7 @@ namespace PrismTester
                 Console.WriteLine($"Stage 5.0 complete, runtime: {watch.ElapsedMilliseconds} ms");
                 watch.Restart();
 
-               // DummyPrintDrawings(modelEnum.MyDrawingHandler, myFolderManager, myDrawingManager, modelEnum);
+                DummyPrintDrawings(modelEnum.MyDrawingHandler, myFolderManager, myDrawingManager, modelEnum);
 
                 watch.Stop();
                 Console.WriteLine($"Stage 6.0 complete, runtime: {watch.ElapsedMilliseconds} ms");
@@ -153,7 +153,7 @@ namespace PrismTester
                 myPDF.OutputFileName = $"{myFolderManager.fabPath}/{myDrawing.DrawingFolderName}/{myDrawing.PdfName}";
                 myPDF.OutputType = DotPrintOutputType.PDF;
                 myPDF.PaperSize = DotPrintPaperSize.Auto;
-                modelEnum.MyDrawingHandler.PrintDrawing(myDrawing.TeklaDrawing, myPDF);
+             //   modelEnum.MyDrawingHandler.PrintDrawing(myDrawing.TeklaDrawing, myPDF);
                 printNumber++;
             }
         }
