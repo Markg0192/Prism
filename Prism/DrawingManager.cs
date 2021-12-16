@@ -2,6 +2,10 @@
 using Tekla.Structures.Drawing;
 using Tekla.Structures.Model;
 using System.Windows.Forms;
+using System.Collections.Generic;
+using System.IO;
+using Tekla.Structures.DrawingInternal;
+using Tekla.Structures;
 
 namespace Prism
 {
@@ -11,83 +15,97 @@ namespace Prism
     /// </summary>
     public class DrawingManager
     {
-        private SevModelEnumerator ModelEnum;
-        private SevFolders Folders;
-        private const string NotRequired = "Not Required";
-        private Model model;
+        private SevModelEnumerator _modelEnum;
+        private SevFolders _folders;
+        private Model _model;
 
-        public DrawingManager(Model model, string phaseNum, string issueNum)
+        public DrawingManager(Model model, string phaseNum, string issueNum, SevModelEnumerator modelEnum)
         {
-            ModelEnum = model.CreateSevModelEnumerator();
-            Folders = model.CreateSevFolders(phaseNum, issueNum);
-            this.model = model;
+            _modelEnum = modelEnum;
+            _folders = model.CreateSevFolders(phaseNum, issueNum);
+            this._model = model;
         }
 
-        private void UpdateStatusLabel(ToolStripStatusLabel statusLabel, int currentNumber, int totalNumber)
-        {
-            statusLabel.Text = $"Processing Drawing {currentNumber} of {totalNumber}";
-        }
+        public List<PrismDrawing> PrismDrawingList = new List<PrismDrawing>();
 
-        private string GetDrawingRevison(Drawing currentDrawing)
+        public void CreateDrawingList()
         {
-            AssemblyDrawing assDraw = currentDrawing as AssemblyDrawing;
-            SinglePartDrawing singDraw = currentDrawing as SinglePartDrawing;
-            Tekla.Structures.Identifier drawingID = null;
-            string revMark = string.Empty;
-            if (assDraw != null)
-            {
-                drawingID = assDraw.AssemblyIdentifier;
-                Assembly myAssembly = model.SelectModelObject(drawingID) as Assembly;
-                myAssembly.GetReportProperty("DRAWING.REVISION.MARK", ref revMark);
+            List<Drawing> drawingsBySelectedParts = new List<Drawing>();
+            IEnumerable<int> drawingNos = Operation.GetDrawingsBySelectedParts();
+            int counter = 0;
+            foreach (var item in drawingNos) counter++;
+
+            if (counter == 0)
+            { //the refresh drawings method / macro is used here as a work around, when the user first opens the model the document
+                //manager must be opened at least once to initialise it, if this not done the GetDrawingsBySelectedParts method does not work
+                //RefreshDrawings quickly opens the document manager if it has not been opened before to do this initialisation 
+                RefreshDrawings();
+                drawingNos = Operation.GetDrawingsBySelectedParts();
             }
-            if (singDraw != null)
-            {
-                drawingID = singDraw.PartIdentifier;
-                Tekla.Structures.Model.Part myPart = model.SelectModelObject(drawingID) as Tekla.Structures.Model.Part;
-                myPart.GetReportProperty("DRAWING.REVISION.MARK", ref revMark);
-            }
-            return revMark;
-        }
 
-        public void PrintDrawings(DrawingHandler myDrawingHandler, ToolStripStatusLabel statusLabel)
-        {            
-            int drawingProcessCounter = 0;
-            DrawingEnumerator drawingsList = myDrawingHandler.GetDrawings();
-            while (drawingsList.MoveNext())
+            foreach (var no in drawingNos)
             {
-                Drawing currentDrawing = drawingsList.Current as Drawing;
-                if (currentDrawing != null)
+                var id = new Identifier(no);
+                var drawing = Operation.GetDrawing(id);
+                drawing.Select();
+                drawingsBySelectedParts.Add(drawing);
+            }
+
+            foreach (Drawing drawing in drawingsBySelectedParts)
+            {
+                PrismDrawing prismDrawing = new PrismDrawing(drawing, _modelEnum, _model);
+                if (prismDrawing.IsDrawingRequired)
                 {
-                    if (currentDrawing.Title1 == NotRequired)
-                    {
-                        currentDrawing.Delete();
-                    }
-                    string[] Mark = currentDrawing.Mark.Split(new char[] { '[', '.', ']' });
-                    string drawingName = "";
-                    foreach (string s in Mark)
-                    {
-                        drawingName = drawingName + s;
-                    }
-                    if (ModelEnum.MyMarks != null)
-                    {
-                        if (ModelEnum.MyMarks.Contains(drawingName))
-                        {                            
-                            string revMark = GetDrawingRevison(currentDrawing);
-                            drawingProcessCounter++;
-                            ModelEnum.MyDrawingHandler.IssueDrawing(currentDrawing);
-                            string PDFname = ($"{drawingName}-{revMark}.pdf");
-                            DPMPrinterAttributes myPDF = new DPMPrinterAttributes();
-                            myPDF.ColorMode = DotPrintColor.BlackAndWhite;
-                            myPDF.OpenFileWhenFinished = false;
-                            myPDF.Orientation = DotPrintOrientationType.Landscape;
-                            myPDF.OutputFileName = $"{Folders.fabPath}/{currentDrawing.Title1}/{PDFname}";
-                            myPDF.OutputType = DotPrintOutputType.PDF;
-                            myPDF.PaperSize = DotPrintPaperSize.Auto;
-                            UpdateStatusLabel(statusLabel, drawingProcessCounter, ModelEnum.MyMarks.Count);
-                            ModelEnum.MyDrawingHandler.PrintDrawing(currentDrawing, myPDF);
-                        }
-                    }
+                    PrismDrawingList.Add(prismDrawing);
                 }
+            }
+        }
+
+        private static bool RefreshDrawings()
+        {
+            var macrodir = "";
+            TeklaStructuresSettings.GetAdvancedOption("XS_MACRO_DIRECTORY", ref macrodir);
+            var dir = macrodir.Split(';')[0];
+            if (!File.Exists(dir + @"\modeling\OpenAndCloseDocumentManager.cs"))
+            {
+                var writer = new StreamWriter(dir + @"\modeling\OpenAndCloseDocumentManager.cs");
+                var macro = "#pragma warning disable 1633 // Unrecognized #pragma directive" + Environment.NewLine +
+                "#pragma warning disable 1633 // Unrecognized #pragma directive" + Environment.NewLine +
+                "#pragma reference \"Tekla.Macros.Wpf.Runtime\"" + Environment.NewLine +
+                "#pragma reference \"Tekla.Macros.Runtime\"" + Environment.NewLine +
+                "#pragma warning restore 1633 // Unrecognized #pragma directive" + Environment.NewLine +
+                "namespace UserMacros {" + Environment.NewLine +
+                "public sealed class Macro {" + Environment.NewLine +
+                "[Tekla.Macros.Runtime.MacroEntryPointAttribute()]" + Environment.NewLine +
+                "public static void Run(Tekla.Macros.Runtime.IMacroRuntime runtime) {" +
+                Environment.NewLine +
+                "Tekla.Macros.Wpf.Runtime.IWpfMacroHost wpf = runtime.Get<Tekla.Macros.Wpf.Runtime.IWpfMacroHost>();" +
+                Environment.NewLine +
+                "wpf.InvokeCommand(\"CommandRepository\", \"Drawing.DrawingList\");" + Environment.NewLine +
+                "wpf.View(\"DocumentManager.MainWindow\").As.Window.Close();}}}";
+                writer.Write(macro);
+                writer.Close();
+            }
+            return Tekla.Structures.Model.Operations.Operation.RunMacro("OpenAndCloseDocumentManager.cs");
+        }
+
+        public void PrintDrawings(ToolStripStatusLabel statusLabel)
+        {
+            int drawingProcessCounter = 1;
+            foreach (PrismDrawing myDrawing in PrismDrawingList)
+            {
+                statusLabel.Text = "Starting to print";
+                _modelEnum.MyDrawingHandler.IssueDrawing(myDrawing.TeklaDrawing);
+                DPMPrinterAttributes myPDF = new DPMPrinterAttributes();
+                myPDF.ColorMode = DotPrintColor.BlackAndWhite;
+                myPDF.OpenFileWhenFinished = false;
+                myPDF.Orientation = DotPrintOrientationType.Landscape;
+                myPDF.OutputFileName = $"{_folders.fabPath}/{myDrawing.DrawingFolderName}/{myDrawing.PdfName}";
+                myPDF.OutputType = DotPrintOutputType.PDF;
+                myPDF.PaperSize = DotPrintPaperSize.Auto;
+                statusLabel.Text = $"Printing drawing number {drawingProcessCounter} of {PrismDrawingList.Count}";
+                _modelEnum.MyDrawingHandler.PrintDrawing(myDrawing.TeklaDrawing, myPDF);
+                drawingProcessCounter++;
             }
         }
     }

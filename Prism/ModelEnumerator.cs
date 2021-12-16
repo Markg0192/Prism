@@ -12,23 +12,19 @@ namespace Prism
     {
         public ArrayList SelectedModelParts;
         public ArrayList SelectedModelBolts;
-        private List<Assembly> assembliesList;
+        public List<Assembly> AssembliesList;
         public Tekla.Structures.Model.Part MyPart;
         public List<string> MyMarks;
         private ModelObjectEnumerator Moe;
         public DrawingHandler MyDrawingHandler;
-        public DrawingEnumerator DrawingEnum;
-        public int Ndrawings;
 
         public SevModelEnumerator()
         {
-            assembliesList = new List<Assembly>();
+            AssembliesList = new List<Assembly>();
             SelectedModelParts = new ArrayList();
             SelectedModelBolts = new ArrayList();
             MyDrawingHandler = new DrawingHandler();
             Moe = new Tekla.Structures.Model.UI.ModelObjectSelector().GetSelectedObjects();
-            DrawingEnum = MyDrawingHandler.GetDrawings();
-            Ndrawings = DrawingEnum.GetSize();
             MyMarks = new List<string>();
 
             foreach (object myObject in Moe)
@@ -43,15 +39,15 @@ namespace Prism
                     if (assembly != null)
                     {
                         Assembly matchingAssembly = null;
-                        matchingAssembly = assembliesList.Find(x => x.Identifier.ToString() == assembly.Identifier.ToString());
-                        if (matchingAssembly == null) assembliesList.Add(assembly);
+                        matchingAssembly = AssembliesList.Find(x => x.Identifier.ToString() == assembly.Identifier.ToString());
+                        if (matchingAssembly == null) AssembliesList.Add(assembly);
                     }
                 }
             }
 
-            if (assembliesList != null)
+            if (AssembliesList != null)
             {
-                foreach (Assembly assembly in assembliesList)
+                foreach (Assembly assembly in AssembliesList)
                 {
                     List<BoltGroup> MyBolts = GetBoltsFromAssembly(assembly);
 
@@ -66,7 +62,7 @@ namespace Prism
             }             
         }
 
-        public static List<BoltGroup> GetBoltsFromAssembly(Assembly assembly)
+        private static List<BoltGroup> GetBoltsFromAssembly(Assembly assembly)
         {
             List<BoltGroup> myBoltsList = new List<BoltGroup>();
             ArrayList secondaries = assembly.GetSecondaries();

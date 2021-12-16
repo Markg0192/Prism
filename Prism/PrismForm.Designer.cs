@@ -33,7 +33,6 @@ namespace Prism
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.label8 = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
             this.pictureBox6 = new System.Windows.Forms.PictureBox();
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -46,7 +45,6 @@ namespace Prism
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.statusStrip3 = new System.Windows.Forms.StatusStrip();
             this.label9 = new System.Windows.Forms.Label();
-            this.label10 = new System.Windows.Forms.Label();
             this.pictureBox5 = new System.Windows.Forms.PictureBox();
             this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
@@ -57,7 +55,6 @@ namespace Prism
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.label11 = new System.Windows.Forms.Label();
-            this.label12 = new System.Windows.Forms.Label();
             this.pictureBox4 = new System.Windows.Forms.PictureBox();
             this.statusStrip2 = new System.Windows.Forms.StatusStrip();
             this.StatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
@@ -106,7 +103,6 @@ namespace Prism
             this.tabPage1.BackColor = System.Drawing.Color.WhiteSmoke;
             this.structuresExtender.SetBindPropertyName(this.tabPage1, null);
             this.tabPage1.Controls.Add(this.label8);
-            this.tabPage1.Controls.Add(this.label7);
             this.tabPage1.Controls.Add(this.pictureBox6);
             this.tabPage1.Controls.Add(this.label3);
             this.tabPage1.Controls.Add(this.label2);
@@ -129,23 +125,11 @@ namespace Prism
             this.structuresExtender.SetAttributeTypeName(this.label8, null);
             this.label8.AutoSize = true;
             this.structuresExtender.SetBindPropertyName(this.label8, null);
-            this.label8.Location = new System.Drawing.Point(65, 246);
+            this.label8.Location = new System.Drawing.Point(245, 252);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(180, 13);
+            this.label8.Size = new System.Drawing.Size(60, 13);
             this.label8.TabIndex = 22;
-            this.label8.Text = "Version 1.0.0 Release date 19.08.21";
-            // 
-            // label7
-            // 
-            this.structuresExtender.SetAttributeName(this.label7, null);
-            this.structuresExtender.SetAttributeTypeName(this.label7, null);
-            this.label7.AutoSize = true;
-            this.structuresExtender.SetBindPropertyName(this.label7, null);
-            this.label7.Location = new System.Drawing.Point(69, 233);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(171, 13);
-            this.label7.TabIndex = 21;
-            this.label7.Text = "Prism. Developed by Severfield plc";
+            this.label8.Text = "Version 1.1";
             // 
             // pictureBox6
             // 
@@ -254,7 +238,7 @@ namespace Prism
             this.structuresExtender.SetBindPropertyName(this.pictureBox1, null);
             this.pictureBox1.Image = global::Prism.Properties.Resources.Severfield_blue_RGB_PNG;
             this.pictureBox1.InitialImage = null;
-            this.pictureBox1.Location = new System.Drawing.Point(72, 176);
+            this.pictureBox1.Location = new System.Drawing.Point(70, 195);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(161, 54);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -269,7 +253,6 @@ namespace Prism
             this.structuresExtender.SetBindPropertyName(this.tabPage2, null);
             this.tabPage2.Controls.Add(this.statusStrip3);
             this.tabPage2.Controls.Add(this.label9);
-            this.tabPage2.Controls.Add(this.label10);
             this.tabPage2.Controls.Add(this.pictureBox5);
             this.tabPage2.Controls.Add(this.label4);
             this.tabPage2.Controls.Add(this.label5);
@@ -302,23 +285,11 @@ namespace Prism
             this.structuresExtender.SetAttributeTypeName(this.label9, null);
             this.label9.AutoSize = true;
             this.structuresExtender.SetBindPropertyName(this.label9, null);
-            this.label9.Location = new System.Drawing.Point(65, 246);
+            this.label9.Location = new System.Drawing.Point(245, 252);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(180, 13);
+            this.label9.Size = new System.Drawing.Size(60, 13);
             this.label9.TabIndex = 25;
-            this.label9.Text = "Version 1.0.0 Release date 19.08.21";
-            // 
-            // label10
-            // 
-            this.structuresExtender.SetAttributeName(this.label10, null);
-            this.structuresExtender.SetAttributeTypeName(this.label10, null);
-            this.label10.AutoSize = true;
-            this.structuresExtender.SetBindPropertyName(this.label10, null);
-            this.label10.Location = new System.Drawing.Point(69, 233);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(171, 13);
-            this.label10.TabIndex = 24;
-            this.label10.Text = "Prism. Developed by Severfield plc";
+            this.label9.Text = "Version 1.1";
             // 
             // pictureBox5
             // 
@@ -416,7 +387,7 @@ namespace Prism
             this.structuresExtender.SetBindPropertyName(this.pictureBox2, null);
             this.pictureBox2.Image = global::Prism.Properties.Resources.Severfield_blue_RGB_PNG;
             this.pictureBox2.InitialImage = null;
-            this.pictureBox2.Location = new System.Drawing.Point(72, 176);
+            this.pictureBox2.Location = new System.Drawing.Point(70, 195);
             this.pictureBox2.Name = "pictureBox2";
             this.pictureBox2.Size = new System.Drawing.Size(161, 54);
             this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -430,7 +401,6 @@ namespace Prism
             this.tabPage3.BackColor = System.Drawing.Color.WhiteSmoke;
             this.structuresExtender.SetBindPropertyName(this.tabPage3, null);
             this.tabPage3.Controls.Add(this.label11);
-            this.tabPage3.Controls.Add(this.label12);
             this.tabPage3.Controls.Add(this.pictureBox4);
             this.tabPage3.Controls.Add(this.statusStrip2);
             this.tabPage3.Controls.Add(this.btnCreatePackage);
@@ -454,23 +424,11 @@ namespace Prism
             this.structuresExtender.SetAttributeTypeName(this.label11, null);
             this.label11.AutoSize = true;
             this.structuresExtender.SetBindPropertyName(this.label11, null);
-            this.label11.Location = new System.Drawing.Point(65, 246);
+            this.label11.Location = new System.Drawing.Point(245, 252);
             this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(180, 13);
+            this.label11.Size = new System.Drawing.Size(60, 13);
             this.label11.TabIndex = 24;
-            this.label11.Text = "Version 1.0.0 Release date 19.08.21";
-            // 
-            // label12
-            // 
-            this.structuresExtender.SetAttributeName(this.label12, null);
-            this.structuresExtender.SetAttributeTypeName(this.label12, null);
-            this.label12.AutoSize = true;
-            this.structuresExtender.SetBindPropertyName(this.label12, null);
-            this.label12.Location = new System.Drawing.Point(69, 233);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(171, 13);
-            this.label12.TabIndex = 23;
-            this.label12.Text = "Prism. Developed by Severfield plc";
+            this.label11.Text = "Version 1.1";
             // 
             // pictureBox4
             // 
@@ -600,7 +558,7 @@ namespace Prism
             this.structuresExtender.SetBindPropertyName(this.pictureBox3, null);
             this.pictureBox3.Image = global::Prism.Properties.Resources.Severfield_blue_RGB_PNG;
             this.pictureBox3.InitialImage = null;
-            this.pictureBox3.Location = new System.Drawing.Point(72, 176);
+            this.pictureBox3.Location = new System.Drawing.Point(70, 195);
             this.pictureBox3.Name = "pictureBox3";
             this.pictureBox3.Size = new System.Drawing.Size(161, 54);
             this.pictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -675,11 +633,8 @@ namespace Prism
         private System.Windows.Forms.PictureBox pictureBox5;
         private System.Windows.Forms.PictureBox pictureBox4;
         private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.Label label7;
         private System.Windows.Forms.StatusStrip statusStrip3;
         private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Label label11;
-        private System.Windows.Forms.Label label12;
     }
 }
