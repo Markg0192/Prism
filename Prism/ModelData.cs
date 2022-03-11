@@ -9,14 +9,6 @@ namespace Prism
     /// </summary>
     public class SevModelData
     {     
-        public readonly string ProjName;
-        public readonly string ProjNumber;
-        public readonly string Date;      
-        public readonly string First;
-        public readonly string Last;
-        public readonly string Full;
-        public readonly string Initials;
-
         public SevModelData(Model model)
         {
             ProjectInfo projectName = model.GetProjectInfo();
@@ -28,7 +20,15 @@ namespace Prism
             Last = Capitalise(NameArray[1]);
             Full = First + " " + Last;
             Initials = new string(new char[] { First.ToCharArray()[0], Last.ToCharArray()[0] }).ToUpper();
-        }
+        }   
+
+        public readonly string ProjName;
+        public readonly string ProjNumber;
+        public readonly string Date;      
+        public readonly string First;
+        public readonly string Last;
+        public readonly string Full;
+        public readonly string Initials;
 
         public string Capitalise(string original)
         {

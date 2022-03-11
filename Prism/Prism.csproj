@@ -80,6 +80,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BswxExporter.cs" />
+    <Compile Include="EmailWriter.cs" />
+    <Compile Include="PrelimMarker.cs" />
     <Compile Include="PrismDrawing.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="PrismPlugin.cs" />

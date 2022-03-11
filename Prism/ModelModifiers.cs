@@ -1,10 +1,11 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Tekla.Structures.Model;
+using Tekla.Structures.Model.Operations;
+using Tekla.Structures.Geometry3d;
+using Tekla.Structures.Drawing.Automation;
+using System.IO;
+using System.Collections.Generic;
+using Tekla.Structures;
 
 namespace Prism
 {
@@ -14,41 +15,33 @@ namespace Prism
     /// </summary>
     public class ModelModifiers
     {
-        public SevModelData ModelData;
-
         public ModelModifiers(Model model)
         {
             ModelData = model.CreateSevModelData();
-        }
-
-        public void MarkAsFabPackComplete(SevModelEnumerator modelEnum)
-        {
-            foreach (Part part in modelEnum.SelectedModelParts)
-            {
-                part.SetUserProperty("PRISM-FAB-1-NAME", ModelData.Full);
-                part.SetUserProperty("PRISM-FAB-1-DATE", ModelData.Date);
-                part.SetUserProperty("PRISM-FAB-1-NUMBER", part.GetPartMark());
-                part.Modify();
-            }
-        }
+        }    
         
-        public void MaterialCheckModifier(SevModelEnumerator modelEnum, int StageNumber)
+        public SevModelData ModelData;
+
+        public void ModifyAttributes(SevModelEnumerator modelEnum, int stageNumber)
         {
             foreach (Part part in modelEnum.SelectedModelParts)
             {
-                part.SetUserProperty($"PRISM-MAT-{StageNumber}-NAME", ModelData.Full);
-                part.SetUserProperty($"PRISM-MAT-{StageNumber}-DATE", ModelData.Date);
+                part.SetUserProperty($"PRISM-{stageNumber}-NAME", ModelData.Full);
+                part.SetUserProperty($"PRISM-{stageNumber}-DATE", ModelData.Date);
+                if(stageNumber == 7)
+                {
+                    part.SetUserProperty($"PRISM-{stageNumber}-DATE", part.GetPartMark());
+                }
                 part.Modify();
             }
         }
 
-        public void DetailingCheckModifier(SevModelEnumerator modelEnum, int StageNumber)
+        public void AddStartNumbers(SevModelEnumerator modelEnum, string startNumber)
         {
-            foreach (Part part in modelEnum.SelectedModelParts)
+            foreach (Part p in modelEnum.SelectedModelParts)
             {
-                part.SetUserProperty($"PRISM-DET-{StageNumber}-NAME", ModelData.Full);
-                part.SetUserProperty($"PRISM-DET-{StageNumber}-DATE", ModelData.Date);
-                part.Modify();
+                p.PartNumber.StartNumber = Convert.ToInt32(startNumber);
+                p.AssemblyNumber.StartNumber = Convert.ToInt32(startNumber);
             }
         }
 
@@ -58,6 +51,46 @@ namespace Prism
             {
                 part.SetUserProperty("OBJECT_LOCKED", 1);
             }
+        }
+
+        public void MoveAndRenameOmittedMembers(SevModelEnumerator modelEnum, Model model)
+        {
+            int distanceToMovePartsInZ = -100000;
+            foreach (Part p in modelEnum.SelectedModelParts)
+            {
+                p.Name = "OMIT";
+                p.AssemblyNumber.Prefix = "OMIT";
+                p.PartNumber.Prefix = "OMIT";
+                string test = p.Class;
+                p.Class = "6";
+                p.GetPhase(out Phase currentPhase);
+                Phase myPhase = new Phase((Convert.ToInt32(currentPhase.PhaseNumber) + 1000000), $"Phase {currentPhase.PhaseNumber} OMIT", "", 0);
+                myPhase.Insert();
+                p.SetPhase(myPhase);
+                p.Modify();
+                Vector myVector = new Vector(0, 0, distanceToMovePartsInZ);
+                Operation.MoveObject(p, myVector);
+            }
+            model.CommitChanges();
+        }
+
+        //NOTE!! dotStartAction "FullNumbering" numbers the full model, we do not want this but for now shows functionality.
+        public void NumberModel(SevModelEnumerator modelEnum)
+        {
+            Tekla.Structures.ModelInternal.Operation.dotStartAction("FullNumbering", (string)null);
+        }
+
+        public void CreateDrawings(SevModelEnumerator modelEnum)
+        {
+            FileInfo file = new FileInfo(@"C:\Sev_Firm_2019i\Roles\SNI\system\SNI Drawing Wizard.dproc");
+            AutoDrawingRule rule = new AutoDrawingRule(file.FullName);
+            AutoDrawingsStatusEnum status;
+            List<Identifier> idList = new List<Identifier>();
+            foreach (Part part in modelEnum.SelectedModelParts)
+            {
+                idList.Add(part.Identifier);
+            }
+            DrawingCreator.CreateDrawings(rule, idList, out status);
         }
     }
 }

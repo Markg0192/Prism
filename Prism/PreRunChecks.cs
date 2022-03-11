@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
 using System.Windows.Forms;
-using Tekla.Structures.Drawing;
 using Tekla.Structures.Model;
-using Tekla.Structures.Model.Operations;
+
 
 namespace Prism
 {
@@ -14,45 +11,200 @@ namespace Prism
     /// </summary>
     public class PreRunChecks
     {
-        private string[] mark;
-        private DrawingUpToDateStatus updateStatus;  
-
         public PreRunChecks(Model model)
         {
+
         }
 
-        public bool CheckDrawingsAreUpToDate(List<PrismDrawing> drawingsList)
-        {      
-            const string notUpToDateMessage = "Some drawings are not up to date, please update and try again";
-            const string notUpToDateTitle = "Drawings not up to date";
+        public bool CheckExecutionField(SevModelEnumerator modelEnum)
+        {  
+            foreach (Assembly ass in modelEnum.AssembliesList)
+            {
+                Part p = ass.GetMainPart() as Part;
+                int executionClassData = 10;
+                p.GetUserProperty("EN1090_EXC_PART", ref executionClassData);
 
-            foreach (PrismDrawing currentDrawing in drawingsList)
-            {    
-                updateStatus = currentDrawing.TeklaDrawing.UpToDateStatus;
-                    if (updateStatus!=DrawingUpToDateStatus.DrawingIsUpToDate)
-                    {
-                        MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        return false;
-                    }      
-            }
-            return true;
-        }
-
-        public bool CheckNumberingIsUpToDate(ArrayList selectedParts)
-        {
-            const string notUpToDateMessage = "Your member numbering is not up to date, please update and try again";
-            const string notUpToDateTitle = "Numbers not up to date";
-
-            foreach (Tekla.Structures.Model.Part part in selectedParts)
-            {                
-                if (!Operation.IsNumberingUpToDate(part)) 
-                { 
+                if (executionClassData == 10)
+                {
+                    const string notUpToDateMessage = "You have selected items that do not have an execution class specified, please correct this to continue";
+                    const string notUpToDateTitle = "Execution class missing";
                     MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return false;
                 }
             }
             return true;
         }
+
+        public bool CheckNameAndClassAlignment(SevModelEnumerator modelEnum)
+        {
+            foreach (Part p in modelEnum.SelectedModelParts)
+            {
+                string partName = p.Name;
+                string partClass = p.Class;
+
+                if (partName == "BEAM" && partClass != "3")
+                {
+                    ShowNameAndClassErrorMessage();
+                    return false;
+                }
+                if (partName == "COLUMN" && partClass != "2" || partName == "COLUMN" && partClass != "5")
+                {
+                    ShowNameAndClassErrorMessage();
+                    return false;
+                }
+                if (partName == "BRACE" && partClass != "4" || partName == "BRACE" && partClass != "13")
+                {
+                    ShowNameAndClassErrorMessage();
+                    return false;
+                }
+                if (partName == "FABESEC" && partClass != "7")
+                {
+                    ShowNameAndClassErrorMessage();
+                    return false;
+                }
+                if (partName == "RAFTER" && partClass !="8" || partName =="PORTAL RAFTER" && partClass != "8")
+                {
+                    ShowNameAndClassErrorMessage();
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public void ShowNameAndClassErrorMessage()
+        {
+            const string notUpToDateMessage = "You have selected something thats name and class do not align with GDOM convention, please correct this to continue.";
+            const string notUpToDateTitle = "Part name and class misalignment";
+            MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
+        public bool CheckPreviousStepsAreComplete(SevModelEnumerator modelEnum, int stageNumber)
+        {
+            foreach (Part p in modelEnum.SelectedModelParts)
+            {
+                string userProperty = "";
+                p.GetUserProperty($"PRISM-{stageNumber - 1}-NAME", ref userProperty);
+                if (userProperty == "")
+                {
+                    const string notUpToDateMessage = "You have not completed all the required steps before this action, please correct this to continue.";
+                    const string notUpToDateTitle = "Incomplete stages";
+                    MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public bool CheckAllInputsAreCorrect(int stageNumber, string input1, string input2)
+        {
+            if (stageNumber == 2 && input1 == "")
+            {
+                const string notUpToDateMessage = "You have not stated a start number, please complete this field to continue.";
+                const string notUpToDateTitle = "Missing start number";
+                MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (stageNumber == 3 && input1 == "")
+            {
+                const string notUpToDateMessage = "You have stated a phase number, please complete this field to continue.";
+                const string notUpToDateTitle = "Missing phase number";
+                MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (stageNumber == 3 && input2 == "")
+            {
+                const string notUpToDateMessage = "You have not stated an issue number, please complete this field to continue";
+                const string notUpToDateTitle = "Missing issue number";
+                MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+            return true;
+        }
+
+        public bool RunStage4Checks(SevModelEnumerator modelEnum)
+        {
+            bool process = true;
+            foreach (Assembly ass in modelEnum.AssembliesList)
+            {
+                Part myMainPart = ass.GetMainPart() as Part;
+                process = CheckMainPartHasBeenOrdered(myMainPart);
+                if (!process) { return false; }
+                process = CheckMainPartHasFinish(myMainPart);
+                if (!process) { return false; }
+                ArrayList mySecondaries = ass.GetSecondaries();
+                foreach (Part mySecondaryPart in mySecondaries)
+                {
+                    process = CheckStartNumbersMatch(myMainPart, mySecondaryPart);
+                    if (!process) { return false; }
+                    process = CheckPhasesMatch(myMainPart, mySecondaryPart);
+                    if (!process) { return false; }
+                }
+            }
+            return true;
+        }
+
+        public bool CheckStartNumbersMatch(Part mainPart, Part secondaryPart)
+        {
+            if (mainPart.AssemblyNumber.StartNumber != secondaryPart.PartNumber.StartNumber)
+            {
+                const string notUpToDateMessage = "You have primary members and secondary parts of the same assembly with mismatching start numbers, please correct this to continue.";
+                const string notUpToDateTitle = "Mismatching numbers";
+                MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+            return true;
+        }
+
+        public bool CheckPhasesMatch(Part mainPart, Part secondaryPart)
+        {
+            mainPart.GetPhase(out Phase mainPartPhase);
+            secondaryPart.GetPhase(out Phase secondaryPhase);
+            int mainPartPhaseNumber = mainPartPhase.PhaseNumber;
+            int secondaryPartPhaseNumber = secondaryPhase.PhaseNumber;
+
+            if (mainPartPhaseNumber != secondaryPartPhaseNumber)
+            {
+                const string notUpToDateMessage = "You have primary members and secondary parts of the same assembly with mismatching phasing, please correct this to continue.";
+                const string notUpToDateTitle = "Mismatching phasing";
+                MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+            return true;
+        }
+
+        public bool CheckMainPartHasFinish(Part mainPart)
+        {
+            if(mainPart.Finish == "")
+            {
+                const string notUpToDateMessage = "You have main parts without a finish, please correct this to continue.";
+                const string notUpToDateTitle = "Missing finishes";
+                MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+            return true;
+        }
+
+        public bool CheckMainPartHasBeenOrdered(Part mainPart)
+        {
+            string prelimMark = "";
+            mainPart.GetUserProperty("PRELIM_MARK", ref prelimMark);
+            if(prelimMark == "")
+            {
+                const string notUpToDateMessage = "You have main parts without a prelim number, this indicates it has not been ordered, please correct this to continue.";
+                const string notUpToDateTitle = "Missing prelim marks";
+                MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+                const string notUpToDateMessage2 = "Would you like to ignore this error and continue?";
+                const string notUpToDateTitle2 = "Missing prelims";
+                DialogResult result = MessageBox.Show(notUpToDateMessage2, notUpToDateTitle2, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if (result == DialogResult.No)
+                {
+                    return false;      
+                }
+            }
+            return true;
+        }
     }
 }
-

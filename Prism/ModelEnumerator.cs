@@ -1,7 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Windows.Forms;
 using Tekla.Structures.Drawing;
 using Tekla.Structures.Model;
+using Tekla.Structures.Model.Operations;
 
 namespace Prism
 {
@@ -16,14 +18,15 @@ namespace Prism
         public Tekla.Structures.Model.Part MyPart;
         public List<string> MyMarks;
         private ModelObjectEnumerator Moe;
-        public DrawingHandler MyDrawingHandler;
+       // public DrawingHandler MyDrawingHandler; This will be needed when drawing functionaility is introduced
+        public bool NumbersNotUpToDate = true;
 
-        public SevModelEnumerator()
+        public SevModelEnumerator(string stageType)
         {
             AssembliesList = new List<Assembly>();
             SelectedModelParts = new ArrayList();
             SelectedModelBolts = new ArrayList();
-            MyDrawingHandler = new DrawingHandler();
+           //MyDrawingHandler = new DrawingHandler();
             Moe = new Tekla.Structures.Model.UI.ModelObjectSelector().GetSelectedObjects();
             MyMarks = new List<string>();
 
@@ -32,6 +35,14 @@ namespace Prism
                 MyPart = myObject as Tekla.Structures.Model.Part;
                 if (MyPart != null)
                 {
+                    if (!Operation.IsNumberingUpToDate(MyPart) && stageType == "FAB")
+                    {
+                        const string notUpToDateMessage = "Your member numbering is not up to date, please update and try again";
+                        const string notUpToDateTitle = "Numbers not up to date";
+                        MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        NumbersNotUpToDate = false;
+                        return;
+                    }
                     SelectedModelParts.Add(MyPart);
                     MyMarks.Add(MyPart.GetPartMark());
 
@@ -54,12 +65,12 @@ namespace Prism
                     if (MyBolts != null)
                     {
                         foreach (BoltGroup bolts in MyBolts)
-                        { 
-                        SelectedModelBolts.Add(bolts);
-                    }
+                        {
+                            SelectedModelBolts.Add(bolts);
+                        }
                     }
                 }
-            }             
+            }
         }
 
         private static List<BoltGroup> GetBoltsFromAssembly(Assembly assembly)
@@ -67,7 +78,7 @@ namespace Prism
             List<BoltGroup> myBoltsList = new List<BoltGroup>();
             ArrayList secondaries = assembly.GetSecondaries();
             secondaries.Add(assembly.GetMainPart());
-            
+
             foreach (Tekla.Structures.Model.ModelObject item in secondaries)
             {
                 Tekla.Structures.Model.Part part = item as Tekla.Structures.Model.Part;
@@ -82,7 +93,7 @@ namespace Prism
 
                     BoltGroup bolt = setOfBolts as BoltGroup;
                     if (bolt.PartToBeBolted.Identifier.GUID == part.Identifier.GUID)
-                    { 
+                    {
                         BoltGroup matchingBolt = null;
                         matchingBolt = myBoltsList.Find(x => x.Identifier.GUID == bolt.Identifier.GUID);
                         if (matchingBolt == null)

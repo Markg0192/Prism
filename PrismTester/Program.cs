@@ -7,6 +7,7 @@ using Tekla.Structures.Drawing;
 using System.Diagnostics;
 using System.Net.Mail;
 using System.Text;
+using System.Collections.Generic;
 
 namespace PrismTester
 {
@@ -43,9 +44,25 @@ namespace PrismTester
             string issueNumber = "01";
             string testPackageLocation = "SNI";
 
-            modelEnum = model.CreateSevModelEnumerator();
+            PrelimMarker myPrelimMarker = new PrelimMarker();
+            modelEnum = model.CreateSevModelEnumerator("");
+
+           myPrelimMarker.AddPrelimMarks(modelEnum, model);
+            // myModelModifiers.MoveAndRenameOmittedMembers(modelEnum, model);
+
+
+            myPreRunChecks.RunStage4Checks(modelEnum);
+            myModelModifiers.CreateDrawings(modelEnum);
+            myModelModifiers.NumberModel(modelEnum);
+            myPreRunChecks.CheckExecutionField(modelEnum);
+            myPreRunChecks.CheckNameAndClassAlignment(modelEnum);
+            myModelModifiers.ModifyAttributes(modelEnum, 1);
+            if (!modelEnum.NumbersNotUpToDate)
+            {
+                return;
+            }
             myFolderManager = new SevFolders(model, phaseNumber, issueNumber);
-            myBswxExporter.ExportBSWX(modelEnum, myFolderManager, modelData, phaseNumber, issueNumber);
+            myBswxExporter.ExportBSWX(modelEnum, myFolderManager.DspPath, modelData, phaseNumber, issueNumber, "");
 
             watch.Stop();
             Console.WriteLine($"Stage 1.1 complete, runtime: {watch.ElapsedMilliseconds} ms");
@@ -71,7 +88,14 @@ namespace PrismTester
             watch.Restart();
 
             ToolStripStatusLabel DummyStrip = new ToolStripStatusLabel();
-            myDrawingManager.CreateDrawingList();
+            bool allDrawingsUpToDate = myDrawingManager.CreateDrawingList();
+            if(!allDrawingsUpToDate)
+            {
+                const string notUpToDateMessage = "Some drawings are not up to date, please update and try again";
+                const string notUpToDateTitle = "Drawings not up to date";
+                MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
 
             watch.Stop();
             Console.WriteLine($"Stage 3.0 complete, runtime: {watch.ElapsedMilliseconds} ms");
@@ -79,33 +103,33 @@ namespace PrismTester
 
             if (packageSNI)
             {
-                if (!myPreRunChecks.CheckDrawingsAreUpToDate(myDrawingManager.PrismDrawingList))
+                /*if (!myPreRunChecks.CheckDrawingsAreUpToDate(myDrawingManager.PrismDrawingList))
                 {
                     return;
                 }
                 if (!myPreRunChecks.CheckNumberingIsUpToDate(modelEnum.SelectedModelParts))
                 {
                     return;
-                }
+                }*/
 
                 watch.Stop();
                 Console.WriteLine($"Stage 4.0 complete, runtime: {watch.ElapsedMilliseconds} ms");
                 watch.Restart();
 
-                myFolderManager.CreateFolders();
-                myReportManager.CreateReports(modelEnum.SelectedModelParts, modelEnum.SelectedModelBolts, testPackageLocation);
+                myFolderManager.CreateFabFolders();
+                myReportManager.CreateFabReports(modelEnum.SelectedModelParts, modelEnum.SelectedModelBolts, testPackageLocation);
 
                 watch.Stop();
                 Console.WriteLine($"Stage 5.0 complete, runtime: {watch.ElapsedMilliseconds} ms");
                 watch.Restart();
 
-                DummyPrintDrawings(modelEnum.MyDrawingHandler, myFolderManager, myDrawingManager, modelEnum);
+                //DummyPrintDrawings(modelEnum.MyDrawingHandler, myFolderManager, myDrawingManager, modelEnum);
 
                 watch.Stop();
                 Console.WriteLine($"Stage 6.0 complete, runtime: {watch.ElapsedMilliseconds} ms");
                 watch.Restart();
 
-                myModelModifiers.MarkAsFabPackComplete(modelEnum);
+                myModelModifiers.ModifyAttributes(modelEnum, 7);
                 myFolderManager.RemoveUnusedFolders();
                 myModelModifiers.LockSelected(modelEnum);
 
@@ -142,20 +166,31 @@ namespace PrismTester
         {
             Console.WriteLine($"You have {myDrawingManager.PrismDrawingList.Count} drawings to print");
             int printNumber = 1;
+
+            DPMPrinterAttributes myPDF = new DPMPrinterAttributes();
+            myPDF.ColorMode = DotPrintColor.BlackAndWhite;
+            myPDF.OpenFileWhenFinished = false;
+            myPDF.Orientation = DotPrintOrientationType.Landscape;
+            myPDF.OutputType = DotPrintOutputType.PDF;
+            myPDF.PaperSize = DotPrintPaperSize.Auto;
+
+            List<Drawing> myDrawings = new List<Drawing>();
+
             foreach (PrismDrawing myDrawing in myDrawingManager.PrismDrawingList)
             {
+                if(!myDrawing.IsDrawingRequired)
+                {
+                    continue;
+                }
+                myDrawings.Add(myDrawing.TeklaDrawing);
                 Console.WriteLine($"Printing drawing {printNumber} of {myDrawingManager.PrismDrawingList.Count}");
                 modelEnum.MyDrawingHandler.IssueDrawing(myDrawing.TeklaDrawing);
-                DPMPrinterAttributes myPDF = new DPMPrinterAttributes();
-                myPDF.ColorMode = DotPrintColor.BlackAndWhite;
-                myPDF.OpenFileWhenFinished = false;
-                myPDF.Orientation = DotPrintOrientationType.Landscape;
-                myPDF.OutputFileName = $"{myFolderManager.fabPath}/{myDrawing.DrawingFolderName}/{myDrawing.PdfName}";
-                myPDF.OutputType = DotPrintOutputType.PDF;
-                myPDF.PaperSize = DotPrintPaperSize.Auto;
-             //   modelEnum.MyDrawingHandler.PrintDrawing(myDrawing.TeklaDrawing, myPDF);
+                myPDF.OutputFileName = $"{myFolderManager.FabPath}/{myDrawing.DrawingFolderName}/{myDrawing.PdfName}";
+                //modelEnum.MyDrawingHandler.PrintDrawing(myDrawing.TeklaDrawing, myPDF);
                 printNumber++;
             }
+            // modelEnum.MyDrawingHandler.PrintDrawings(myDrawings, myPDF);               
+
         }
 
         public static void FormIssueEmail(string emailAddress, string subject, string body)
