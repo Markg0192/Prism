@@ -37,7 +37,7 @@ namespace Prism
             {
                 typeOfOrderText = "This is an omit material order";
             }
-            FormIssueEmail("Test@email.com", $"{fabPrefix} Prelim Issue",
+            FormIssueEmail("purchasing@severifeld.com", $"{fabPrefix} Prelim Issue",
                                                                                     $"Hello,{_mailNewLine}" +
                                                                                     $"{_mailNewLine}" +
                                                                                     $"{typeOfOrderText}, issue {issueNumber} for phase {phaseNumber} in {projNumber}, {projName}.{_mailNewLine}" +
