@@ -28,9 +28,13 @@ namespace Prism
             {
                 part.SetUserProperty($"PRISM-{stageNumber}-NAME", ModelData.Full);
                 part.SetUserProperty($"PRISM-{stageNumber}-DATE", ModelData.Date);
+                if(stageNumber == 3)
+                {
+                    part.SetUserProperty("SEV-UDA-39", ModelData.Date);
+                }
                 if(stageNumber == 7)
                 {
-                    part.SetUserProperty($"PRISM-{stageNumber}-DATE", part.GetPartMark());
+                    part.SetUserProperty($"PRISM-{stageNumber}-NUMBER", part.GetPartMark());
                 }
                 part.Modify();
             }
@@ -74,10 +78,10 @@ namespace Prism
             model.CommitChanges();
         }
 
-        //NOTE!! dotStartAction "FullNumbering" numbers the full model, we do not want this but for now shows functionality.
         public void NumberModel(SevModelEnumerator modelEnum)
         {
-            Tekla.Structures.ModelInternal.Operation.dotStartAction("FullNumbering", (string)null);
+            TeklaStructures.Connect();
+            TeklaStructures.CommonTasks.PerformNumbering(true);
         }
 
         public void CreateDrawings(SevModelEnumerator modelEnum)

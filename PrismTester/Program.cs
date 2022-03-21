@@ -5,8 +5,6 @@ using Tekla.Structures.Model;
 using System.Windows.Forms;
 using Tekla.Structures.Drawing;
 using System.Diagnostics;
-using System.Net.Mail;
-using System.Text;
 using System.Collections.Generic;
 
 namespace PrismTester
@@ -46,14 +44,14 @@ namespace PrismTester
 
             PrelimMarker myPrelimMarker = new PrelimMarker();
             modelEnum = model.CreateSevModelEnumerator("");
-
+            myModelModifiers.NumberModel(modelEnum);
            myPrelimMarker.AddPrelimMarks(modelEnum, model);
             // myModelModifiers.MoveAndRenameOmittedMembers(modelEnum, model);
 
 
             myPreRunChecks.RunStage4Checks(modelEnum);
             myModelModifiers.CreateDrawings(modelEnum);
-            myModelModifiers.NumberModel(modelEnum);
+
             myPreRunChecks.CheckExecutionField(modelEnum);
             myPreRunChecks.CheckNameAndClassAlignment(modelEnum);
             myModelModifiers.ModifyAttributes(modelEnum, 1);
@@ -184,7 +182,7 @@ namespace PrismTester
                 }
                 myDrawings.Add(myDrawing.TeklaDrawing);
                 Console.WriteLine($"Printing drawing {printNumber} of {myDrawingManager.PrismDrawingList.Count}");
-                modelEnum.MyDrawingHandler.IssueDrawing(myDrawing.TeklaDrawing);
+             //   modelEnum.MyDrawingHandler.IssueDrawing(myDrawing.TeklaDrawing);
                 myPDF.OutputFileName = $"{myFolderManager.FabPath}/{myDrawing.DrawingFolderName}/{myDrawing.PdfName}";
                 //modelEnum.MyDrawingHandler.PrintDrawing(myDrawing.TeklaDrawing, myPDF);
                 printNumber++;

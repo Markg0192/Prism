@@ -31,7 +31,7 @@ namespace Prism
             SevModelData modelData = model.CreateSevModelData();
             ModelPath = model.GetInfo().ModelPath;
             _fabFolder = $"{modelData.ProjNumber}-{phaseNum}-FAB-ISSUE{issueNum}";
-            _matFolder = $"{modelData.ProjNumber}-{phaseNum}-Prelim-ISSUE{issueNum}";
+            _matFolder = $"{modelData.ProjNumber}-{phaseNum}-PRELIM-ISSUE{issueNum}";
             FabPath = Path.Combine(ModelPath, _fabFolder);
             MatPath = Path.Combine(ModelPath, _matFolder);
             _assPath = Path.Combine(FabPath, _assFolder);

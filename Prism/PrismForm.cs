@@ -85,7 +85,7 @@ namespace Prism
             }
 
             _myModelModifiers.ModifyAttributes(_modelEnum, stageNumber);
-            DialogResult finishBox = MessageBox.Show($"Thanks {_modelData.First}, your material order is now complete, please forward the following email to the releveent purchasing team", "Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            DialogResult finishBox = MessageBox.Show($"Thanks {_modelData.First}, your material order is now complete, please forward the following email to the relevant purchasing team", "Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
             if (finishBox == DialogResult.OK)
             {
