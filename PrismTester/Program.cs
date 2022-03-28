@@ -44,7 +44,7 @@ namespace PrismTester
 
             PrelimMarker myPrelimMarker = new PrelimMarker();
             modelEnum = model.CreateSevModelEnumerator("");
-            myModelModifiers.NumberModel(modelEnum);
+            myModelModifiers.PerformNumbering();
            myPrelimMarker.AddPrelimMarks(modelEnum, model);
             // myModelModifiers.MoveAndRenameOmittedMembers(modelEnum, model);
 

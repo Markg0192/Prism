@@ -18,8 +18,8 @@ namespace Prism
         public ModelModifiers(Model model)
         {
             ModelData = model.CreateSevModelData();
-        }    
-        
+        }
+
         public SevModelData ModelData;
 
         public void ModifyAttributes(SevModelEnumerator modelEnum, int stageNumber)
@@ -28,11 +28,11 @@ namespace Prism
             {
                 part.SetUserProperty($"PRISM-{stageNumber}-NAME", ModelData.Full);
                 part.SetUserProperty($"PRISM-{stageNumber}-DATE", ModelData.Date);
-                if(stageNumber == 3)
+                if (stageNumber == 3)
                 {
                     part.SetUserProperty("SEV-UDA-39", ModelData.Date);
                 }
-                if(stageNumber == 7)
+                if (stageNumber == 7)
                 {
                     part.SetUserProperty($"PRISM-{stageNumber}-NUMBER", part.GetPartMark());
                 }
@@ -80,8 +80,12 @@ namespace Prism
 
         public void NumberModel(SevModelEnumerator modelEnum)
         {
-            TeklaStructures.Connect();
-            TeklaStructures.CommonTasks.PerformNumbering(true);
+           //TeklaStructures.Connect();
+           // TeklaStructures.CommonTasks.PerformNumbering(true);
+        }
+        public void PerformNumbering()
+        {
+            new MacroBuilder().Callback("acmd_partnumbers_selected", string.Empty, "main_frame").Run();
         }
 
         public void CreateDrawings(SevModelEnumerator modelEnum)
