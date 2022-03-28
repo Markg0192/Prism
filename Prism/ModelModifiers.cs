@@ -78,11 +78,6 @@ namespace Prism
             model.CommitChanges();
         }
 
-        public void NumberModel(SevModelEnumerator modelEnum)
-        {
-           //TeklaStructures.Connect();
-           // TeklaStructures.CommonTasks.PerformNumbering(true);
-        }
         public void PerformNumbering()
         {
             new MacroBuilder().Callback("acmd_partnumbers_selected", string.Empty, "main_frame").Run();

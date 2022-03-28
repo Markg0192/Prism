@@ -132,7 +132,7 @@ namespace Prism
                            _myPreRunChecks.RunStage4Checks(_modelEnum);
             if (!isValid) { return; }
 
-            _myModelModifiers.NumberModel(_modelEnum);
+            _myModelModifiers.PerformNumbering();
 
             const string notUpToDateMessage = "Are you happy with your numbering?";
             const string notUpToDateTitle = "Numbering";

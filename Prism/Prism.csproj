@@ -77,22 +77,6 @@
   <ItemGroup>
     <Compile Include="BswxExporter.cs" />
     <Compile Include="EmailWriter.cs" />
-    <Compile Include="TeklaAppLibrary\Cache.cs" />
-    <Compile Include="TeklaAppLibrary\CommonTasks.cs" />
-    <Compile Include="TeklaAppLibrary\Configuration.cs" />
-    <Compile Include="TeklaAppLibrary\ConfigurationSet.cs" />
-    <Compile Include="TeklaAppLibrary\Connection.cs" />
-    <Compile Include="TeklaAppLibrary\Enumerable.cs" />
-    <Compile Include="TeklaAppLibrary\ICommonTasks.cs" />
-    <Compile Include="TeklaAppLibrary\IConnection.cs" />
-    <Compile Include="TeklaAppLibrary\IEnvironment.cs" />
-    <Compile Include="TeklaAppLibrary\IMainWindow.cs" />
-    <Compile Include="TeklaAppLibrary\IModel.cs" />
-    <Compile Include="TeklaAppLibrary\InpParser\CharType.cs" />
-    <Compile Include="TeklaAppLibrary\InpParser\CheckSwitchValues.cs" />
-    <Compile Include="TeklaAppLibrary\InpParser\EOFException.cs" />
-    <Compile Include="TeklaAppLibrary\InpParser\KeyWords.cs" />
-    <Compile Include="TeklaAppLibrary\InpParser\Lexer.cs" />
     <Compile Include="PrelimMarker.cs" />
     <Compile Include="PrismDrawing.cs" />
     <Compile Include="Extensions.cs" />
@@ -116,35 +100,14 @@
       <DependentUpon>PrismForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TeklaAppLibrary\InpParser\Parser.cs" />
-    <Compile Include="TeklaAppLibrary\InpParser\Picture.cs" />
-    <Compile Include="TeklaAppLibrary\InpParser\Token.cs" />
-    <Compile Include="TeklaAppLibrary\InpParser\TokenType.cs" />
-    <Compile Include="TeklaAppLibrary\InpParser\TSModelObject.cs" />
-    <Compile Include="TeklaAppLibrary\InpParser\TSModelObjectTypes.cs" />
-    <Compile Include="TeklaAppLibrary\InpParser\TSTabPageDeclaration.cs" />
-    <Compile Include="TeklaAppLibrary\InpParser\TSTabPageDefinition.cs" />
-    <Compile Include="TeklaAppLibrary\InpParser\TSTabPageObject.cs" />
-    <Compile Include="TeklaAppLibrary\InpParser\UDA.cs" />
-    <Compile Include="TeklaAppLibrary\InpParser\UDATypes.cs" />
-    <Compile Include="TeklaAppLibrary\InpParser\UDAValue.cs" />
-    <Compile Include="TeklaAppLibrary\InpParser\WrongFormatException.cs" />
-    <Compile Include="TeklaAppLibrary\IPicker.cs" />
-    <Compile Include="TeklaAppLibrary\IRegistry.cs" />
-    <Compile Include="TeklaAppLibrary\IRunMacro.cs" />
-    <Compile Include="TeklaAppLibrary\ISelection.cs" />
-    <Compile Include="TeklaAppLibrary\ISelectObject.cs" />
-    <Compile Include="TeklaAppLibrary\ITransaction.cs" />
     <Compile Include="TeklaAppLibrary\MacroBuilder.cs" />
     <Compile Include="TeklaAppLibrary\ModelConnection.cs" />
-    <Compile Include="TeklaAppLibrary\ModelFolder.cs" />
-    <Compile Include="TeklaAppLibrary\Registry.cs" />
-    <Compile Include="TeklaAppLibrary\SearchPath.cs" />
     <Compile Include="TeklaAppLibrary\SeparateThread.cs" />
-    <Compile Include="TeklaAppLibrary\TeklaStructures.cs" />
-    <Compile Include="TeklaAppLibrary\VirtualFolder.cs" />
     <Compile Include="TeklaAppLibrary\WaitingDialog.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TeklaAppLibrary\WaitingDialog.designer.cs">
+      <DependentUpon>WaitingDialog.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -155,6 +118,9 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TeklaAppLibrary\WaitingDialog.resx">
+      <DependentUpon>WaitingDialog.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

@@ -1,94 +1,83 @@
-using System;
-using System.ComponentModel;
-using System.Drawing;
-using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace Tekla.Structures
 {
-	public class WaitingDialog : Form
-	{
-		private readonly Predicate<WaitingDialog> completed;
+    using System;
+    using System.Windows.Forms;
 
-		private IContainer components = null;
+    /// <summary>
+    /// Waiting dialog.
+    /// </summary>
+    public partial class WaitingDialog : Form
+    {
+        #region Fields
 
-		private ProgressBar progressBar1;
+        /// <summary>
+        /// Predicate that determines whether the operation has been completed.
+        /// </summary>
+        private readonly Predicate<WaitingDialog> completed;
 
-		private Button cancelButton;
+        private readonly ModelConnection modelConnection = new ModelConnection();
 
-		private Timer completionTimer;
+        #endregion
 
-		public WaitingDialog(Predicate<WaitingDialog> completed)
-		{
-			this.completed = completed;
-			InitializeComponent();
-		}
+        #region Constructors and Destructors
 
-		protected override void OnLoad(EventArgs e)
-		{
-			base.OnLoad(e);
-			if (!base.DesignMode && TeklaStructures.Connection.IsActive)
-			{
-				TeklaStructures.Environment.Localization.Localize((Control)this);
-			}
-			else
-			{
-				cancelButton.Text = "Cancel";
-			}
-		}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WaitingDialog"/> class. 
+        /// Initializes a new instance of the class.
+        /// </summary>
+        /// <param name="completed">
+        /// Predicate that determines whether the operation has been completed.
+        /// </param>
+        public WaitingDialog(Predicate<WaitingDialog> completed)
+        {
+            this.completed = completed;
+            this.InitializeComponent();
+        }
 
-		private void OnTick(object sender, EventArgs e)
-		{
-			if (completed(this))
-			{
-				base.DialogResult = DialogResult.OK;
-				Close();
-			}
-		}
+        #endregion
 
-		protected override void Dispose(bool disposing)
-		{
-			if (disposing && components != null)
-			{
-				components.Dispose();
-			}
-			base.Dispose(disposing);
-		}
+        #region Methods
 
-		private void InitializeComponent()
-		{
-			components = new System.ComponentModel.Container();
-			progressBar1 = new System.Windows.Forms.ProgressBar();
-			cancelButton = new System.Windows.Forms.Button();
-			completionTimer = new System.Windows.Forms.Timer(components);
-			SuspendLayout();
-			progressBar1.Location = new System.Drawing.Point(12, 12);
-			progressBar1.Name = "progressBar1";
-			progressBar1.Size = new System.Drawing.Size(260, 23);
-			progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
-			progressBar1.TabIndex = 0;
-			cancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			cancelButton.Location = new System.Drawing.Point(105, 41);
-			cancelButton.Name = "cancelButton";
-			cancelButton.Size = new System.Drawing.Size(75, 23);
-			cancelButton.TabIndex = 1;
-			cancelButton.Text = "albl_Cancel";
-			cancelButton.UseVisualStyleBackColor = true;
-			completionTimer.Enabled = true;
-			completionTimer.Tick += new System.EventHandler(OnTick);
-			base.AutoScaleDimensions = new System.Drawing.SizeF(6f, 13f);
-			base.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			base.CancelButton = cancelButton;
-			base.ClientSize = new System.Drawing.Size(284, 73);
-			base.ControlBox = false;
-			base.Controls.Add(cancelButton);
-			base.Controls.Add(progressBar1);
-			base.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-			base.MaximizeBox = false;
-			base.MinimizeBox = false;
-			base.Name = "WaitingDialog";
-			base.ShowInTaskbar = false;
-			base.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-			ResumeLayout(false);
-		}
-	}
+        /// <summary>
+        /// Raises the Load event.
+        /// </summary>
+        /// <param name="e">
+        /// Event arguments.
+        /// </param>
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+
+            if (!this.DesignMode && modelConnection.IsActive)
+            {
+                modelConnection.Localization.Localize(this);
+            }
+            else
+            {
+                this.cancelButton.Text = "Cancel";
+            }
+        }
+
+        /// <summary>
+        /// Handles the Tick event.
+        /// </summary>
+        /// <param name="sender">
+        /// The Sender.
+        /// </param>
+        /// <param name="e">
+        /// Event arguments.
+        /// </param>
+        private void OnTick(object sender, EventArgs e)
+        {
+            if (this.completed(this))
+            {
+                this.DialogResult = DialogResult.OK;
+                this.Close();
+            }
+        }
+
+        #endregion
+    }
 }
