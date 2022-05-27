@@ -10,9 +10,9 @@ namespace Prism
 {
     public class BswxExporter
     {
-        private int MaxNumberOfPartsInAnArray = 99;
+        private int _maxNumberOfPartsInAnArray = 99;
 
-        public void ExportBSWX(SevModelEnumerator modelEnum, SevFolders myFolderManager, SevModelData modelData, string phaseNumber, string issueNumber)
+        public void ExportBSWX(SevModelEnumerator modelEnum, string myFolder, SevModelData modelData, string phaseNumber, string issueNumber, string orderType)
         {
             List<ArrayList> myLists = new List<ArrayList>();
             myLists.Add(new ArrayList());
@@ -20,7 +20,7 @@ namespace Prism
             foreach (var item in modelEnum.AssembliesList)
             {
                 ArrayList currentList = myLists.Last();
-                if (currentList.Count >= MaxNumberOfPartsInAnArray) myLists.Add(new ArrayList());
+                if (currentList.Count >= _maxNumberOfPartsInAnArray) myLists.Add(new ArrayList());
                 currentList = myLists.Last();
                 currentList.Add(item);
             }
@@ -36,7 +36,7 @@ namespace Prism
             }
 
             bimRevExp.SetComponentInput(myInputs);
-            bimRevExp.SetAttribute("output_file_path", $@"{myFolderManager.dspPath}\{modelData.ProjNumber}-{phaseNumber}-FAB-ISSUE{issueNumber}.bswx");
+            bimRevExp.SetAttribute("output_file_path", $@"{myFolder}\{modelData.ProjNumber}-{phaseNumber}-{orderType}-ISSUE{issueNumber}.bswx");
             bimRevExp.SetAttribute("export_cam_files", 0);
             bimRevExp.SetAttribute("cam_file_folder", "");
             bimRevExp.SetAttribute("export_gantt_charts", 0);
@@ -61,4 +61,3 @@ namespace Prism
         }
     }
 }
-

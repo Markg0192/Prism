@@ -75,7 +75,7 @@ namespace Prism
             _myReportManager.CreateMaterialReports(_modelEnum.SelectedModelParts, cmb_OrderMaterial.Text);
             if (cmb_OrderMaterial.Text != "Omit Material")
             {
-                //_myBswxExporter.ExportBSWX(_modelEnum, _myFolderManager.MatPath, _modelData, txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text, stageType);
+                _myBswxExporter.ExportBSWX(_modelEnum, _myFolderManager.MatPath, _modelData, txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text, stageType);
             }
             else
             {
@@ -174,7 +174,7 @@ namespace Prism
 
             if (packageSNI)
             {
-               // _myBswxExporter.ExportBSWX(_modelEnum, _myFolderManager.DspPath, _modelData, phaseNumber.Text, issueNumber.Text, stageType);
+                _myBswxExporter.ExportBSWX(_modelEnum, _myFolderManager.DspPath, _modelData, phaseNumber.Text, issueNumber.Text, stageType);
                 _myFolderManager.CreateFabFolders();
                 _myReportManager.CreateFabReports(_modelEnum.SelectedModelParts, _modelEnum.SelectedModelBolts, cmbPackageLocation.Text);
                 // MyDrawingManager.PrintDrawings(StatusLabel); Temporarily not in use
