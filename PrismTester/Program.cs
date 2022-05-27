@@ -42,10 +42,10 @@ namespace PrismTester
             string issueNumber = "01";
             string testPackageLocation = "SNI";
 
-            PrelimMarker myPrelimMarker = new PrelimMarker();
+
             modelEnum = model.CreateSevModelEnumerator("");
             myModelModifiers.PerformNumbering();
-           myPrelimMarker.AddPrelimMarks(modelEnum, model);
+            PrelimMarker.AddPrelimMarks(modelEnum, model);
             // myModelModifiers.MoveAndRenameOmittedMembers(modelEnum, model);
 
 
@@ -60,7 +60,7 @@ namespace PrismTester
                 return;
             }
             myFolderManager = new SevFolders(model, phaseNumber, issueNumber);
-            myBswxExporter.ExportBSWX(modelEnum, myFolderManager.DspPath, modelData, phaseNumber, issueNumber, "");
+            //myBswxExporter.ExportBSWX(modelEnum, myFolderManager.DspPath, modelData, phaseNumber, issueNumber, "");
 
             watch.Stop();
             Console.WriteLine($"Stage 1.1 complete, runtime: {watch.ElapsedMilliseconds} ms");
@@ -176,7 +176,7 @@ namespace PrismTester
 
             foreach (PrismDrawing myDrawing in myDrawingManager.PrismDrawingList)
             {
-                if(!myDrawing.IsDrawingRequired)
+                if(!myDrawing.DrawingRequired)
                 {
                     continue;
                 }

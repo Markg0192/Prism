@@ -78,7 +78,7 @@ namespace Prism
             MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
-        public bool CheckPreviousStepsAreComplete(SevModelEnumerator modelEnum, int stageNumber)
+        public bool ArePreviousStepsComplete(SevModelEnumerator modelEnum, int stageNumber)
         {
             foreach (Part p in modelEnum.SelectedModelParts)
             {
@@ -95,7 +95,7 @@ namespace Prism
             return true;
         }
 
-        public bool CheckAllInputsAreCorrect(int stageNumber, string input1, string input2)
+        public bool ArePreviousStepsComplete(int stageNumber, string input1, string input2)
         {
             if (stageNumber == 2 && input1 == "")
             {
@@ -176,7 +176,7 @@ namespace Prism
 
         public bool CheckMainPartHasFinish(Part mainPart)
         {
-            if(mainPart.Finish == "")
+            if(mainPart.Finish.Length == 0)
             {
                 const string notUpToDateMessage = "You have main parts without a finish, please correct this to continue.";
                 const string notUpToDateTitle = "Missing finishes";
@@ -190,7 +190,7 @@ namespace Prism
         {
             string prelimMark = "";
             mainPart.GetUserProperty("PRELIM_MARK", ref prelimMark);
-            if(prelimMark == "")
+            if(prelimMark.Length == 0)
             {
                 const string notUpToDateMessage = "You have main parts without a prelim number, this indicates it has not been ordered, please correct this to continue.";
                 const string notUpToDateTitle = "Missing prelim marks";

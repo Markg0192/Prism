@@ -6,9 +6,9 @@ using Tekla.Structures.Model;
 
 namespace Prism
 {
-    public class PrelimMarker
+    public static class PrelimMarker
     {
-        public void AddPrelimMarks(SevModelEnumerator modelEnum, Model myModel)
+        public static void AddPrelimMarks(SevModelEnumerator modelEnum, Model myModel)
         {
             var allParts = modelEnum.SelectedModelParts.Cast<Part>().ToList();
             var groupedParts = allParts.GroupBy(p => new { profile = p.Profile.ProfileString, length = GetPartLength(p), material = p.Material.MaterialString });
@@ -40,7 +40,7 @@ namespace Prism
             }
         }
 
-        public double GetPartLength(Part myPart)
+        private static double GetPartLength(Part myPart)
         {
             ArrayList points = myPart.GetCenterLine(true);
             Point start = points[0] as Point;

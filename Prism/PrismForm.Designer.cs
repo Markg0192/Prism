@@ -46,9 +46,11 @@ namespace Prism
             this.btnOrderMaterial = new System.Windows.Forms.Button();
             this.btnRunThroughMaterialChecks = new System.Windows.Forms.Button();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.MaterialStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.statusStrip3 = new System.Windows.Forms.StatusStrip();
+            this.DetailingStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.label9 = new System.Windows.Forms.Label();
             this.pictureBox5 = new System.Windows.Forms.PictureBox();
             this.label4 = new System.Windows.Forms.Label();
@@ -71,8 +73,6 @@ namespace Prism
             this.phaseNumber = new System.Windows.Forms.TextBox();
             this.issueNumber = new System.Windows.Forms.TextBox();
             this.pictureBox3 = new System.Windows.Forms.PictureBox();
-            this.MaterialStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
-            this.DetailingStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox6)).BeginInit();
@@ -216,7 +216,7 @@ namespace Prism
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(60, 13);
             this.label8.TabIndex = 22;
-            this.label8.Text = "Version 1.1";
+            this.label8.Text = "Version 2.0";
             // 
             // pictureBox6
             // 
@@ -308,6 +308,12 @@ namespace Prism
             this.statusStrip1.TabIndex = 10;
             this.statusStrip1.Text = "statusStrip1";
             // 
+            // MaterialStatusLabel
+            // 
+            this.MaterialStatusLabel.Name = "MaterialStatusLabel";
+            this.MaterialStatusLabel.Size = new System.Drawing.Size(39, 17);
+            this.MaterialStatusLabel.Text = "Status";
+            // 
             // pictureBox1
             // 
             this.structuresExtender.SetAttributeName(this.pictureBox1, null);
@@ -358,6 +364,12 @@ namespace Prism
             this.statusStrip3.TabIndex = 26;
             this.statusStrip3.Text = "statusStrip3";
             // 
+            // DetailingStatusLabel
+            // 
+            this.DetailingStatusLabel.Name = "DetailingStatusLabel";
+            this.DetailingStatusLabel.Size = new System.Drawing.Size(39, 17);
+            this.DetailingStatusLabel.Text = "Status";
+            // 
             // label9
             // 
             this.structuresExtender.SetAttributeName(this.label9, null);
@@ -368,7 +380,7 @@ namespace Prism
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(60, 13);
             this.label9.TabIndex = 25;
-            this.label9.Text = "Version 1.1";
+            this.label9.Text = "Version 2.0";
             // 
             // pictureBox5
             // 
@@ -507,7 +519,7 @@ namespace Prism
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(60, 13);
             this.label11.TabIndex = 24;
-            this.label11.Text = "Version 1.1";
+            this.label11.Text = "Version 2.0";
             // 
             // pictureBox4
             // 
@@ -644,18 +656,6 @@ namespace Prism
             this.pictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox3.TabIndex = 10;
             this.pictureBox3.TabStop = false;
-            // 
-            // MaterialStatusLabel
-            // 
-            this.MaterialStatusLabel.Name = "MaterialStatusLabel";
-            this.MaterialStatusLabel.Size = new System.Drawing.Size(39, 17);
-            this.MaterialStatusLabel.Text = "Status";
-            // 
-            // DetailingStatusLabel
-            // 
-            this.DetailingStatusLabel.Name = "DetailingStatusLabel";
-            this.DetailingStatusLabel.Size = new System.Drawing.Size(39, 17);
-            this.DetailingStatusLabel.Text = "Status";
             // 
             // PrismForm
             // 

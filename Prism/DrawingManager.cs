@@ -59,7 +59,7 @@ namespace Prism
             foreach (Drawing drawing in drawingsBySelectedParts)
             {
                 PrismDrawing prismDrawing = new PrismDrawing(drawing, _modelEnum, _model);
-                if (prismDrawing.IsDrawingRequired)
+                if (prismDrawing.DrawingRequired)
                 {
                     PrismDrawingList.Add(prismDrawing);
                 }

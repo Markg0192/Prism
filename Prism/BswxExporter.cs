@@ -36,7 +36,7 @@ namespace Prism
             }
 
             bimRevExp.SetComponentInput(myInputs);
-            bimRevExp.SetAttribute("output_file_path", $@"{myFolderManager.dspPath}\{modelData.ProjNumber}-{phaseNumber}-FAB-ISSUE{issueNumber}.bswx");
+            bimRevExp.SetAttribute("output_file_path", $@"{myFolderManager.DspPath}\{modelData.ProjNumber}-{phaseNumber}-FAB-ISSUE{issueNumber}.bswx");
             bimRevExp.SetAttribute("export_cam_files", 0);
             bimRevExp.SetAttribute("cam_file_folder", "");
             bimRevExp.SetAttribute("export_gantt_charts", 0);

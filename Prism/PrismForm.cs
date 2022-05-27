@@ -18,7 +18,6 @@ namespace Prism
         private ModelModifiers _myModelModifiers;
         private BswxExporter _myBswxExporter;
         private EmailWriter _myEmailWriter = new EmailWriter();
-        private PrelimMarker _myPrelimMarker = new PrelimMarker();
         private string _unavailableLocation = "Sorry, this package location has not been added yet, please try another location.";
 
         public PrismForm()
@@ -71,12 +70,12 @@ namespace Prism
             bool isValid = InitialSetup(stageNumber, stageType, true, true, txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text);
             if(!isValid) { return; }
 
-            _myPrelimMarker.AddPrelimMarks(_modelEnum, _model);
+            PrelimMarker.AddPrelimMarks(_modelEnum, _model);
             _myFolderManager.CreateMatFolder();
             _myReportManager.CreateMaterialReports(_modelEnum.SelectedModelParts, cmb_OrderMaterial.Text);
             if (cmb_OrderMaterial.Text != "Omit Material")
             {
-                _myBswxExporter.ExportBSWX(_modelEnum, _myFolderManager.MatPath, _modelData, txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text, stageType);
+                //_myBswxExporter.ExportBSWX(_modelEnum, _myFolderManager.MatPath, _modelData, txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text, stageType);
             }
             else
             {
@@ -175,7 +174,7 @@ namespace Prism
 
             if (packageSNI)
             {
-                _myBswxExporter.ExportBSWX(_modelEnum, _myFolderManager.DspPath, _modelData, phaseNumber.Text, issueNumber.Text, stageType);
+               // _myBswxExporter.ExportBSWX(_modelEnum, _myFolderManager.DspPath, _modelData, phaseNumber.Text, issueNumber.Text, stageType);
                 _myFolderManager.CreateFabFolders();
                 _myReportManager.CreateFabReports(_modelEnum.SelectedModelParts, _modelEnum.SelectedModelBolts, cmbPackageLocation.Text);
                 // MyDrawingManager.PrintDrawings(StatusLabel); Temporarily not in use
@@ -238,30 +237,22 @@ namespace Prism
             }
         }
 
-        private bool InitialSetup(int stageNumber, string stageType, bool checkForPreviousSteps, bool checkForInputs=false , string input1="", string input2="")
-        {
-            bool isValid=true ;
-            if (checkForInputs)
-            {
-                isValid = _myPreRunChecks.CheckAllInputsAreCorrect(stageNumber, input1, input2);
+        private bool InitialSetup(int stageNumber, string stageType, bool checkForPreviousSteps, bool checkForInputs = false, string input1 = "", string input2 = "")
+        {      
+            if (checkForInputs && !_myPreRunChecks.ArePreviousStepsComplete(stageNumber, input1, input2))
+            {          
+                DetailingStatusLabel.Text = "Cancelled";
+                return false;
             }
-
-            if (isValid)
+         
+             _modelEnum = _model.CreateSevModelEnumerator(stageType);
+            
+            if (checkForPreviousSteps && !_myPreRunChecks.ArePreviousStepsComplete(_modelEnum, stageNumber))
             {
-                _modelEnum = _model.CreateSevModelEnumerator(stageType);
+                DetailingStatusLabel.Text = "Cancelled";
+                return false;
             }
-
-            if (isValid && checkForPreviousSteps)
-            {
-                isValid = _myPreRunChecks.CheckPreviousStepsAreComplete(_modelEnum, stageNumber);               
-            }
-
-            if (!isValid)
-            {
-                 DetailingStatusLabel.Text = "Cancelled"; 
-            }
-
-            return isValid;
+            return true;         
         }
     }
 }

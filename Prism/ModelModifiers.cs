@@ -59,7 +59,7 @@ namespace Prism
 
         public void MoveAndRenameOmittedMembers(SevModelEnumerator modelEnum, Model model)
         {
-            int distanceToMovePartsInZ = -100000;
+            double distanceToMovePartsInZ = -100000;
             foreach (Part p in modelEnum.SelectedModelParts)
             {
                 p.Name = "OMIT";
@@ -85,7 +85,8 @@ namespace Prism
 
         public void CreateDrawings(SevModelEnumerator modelEnum)
         {
-            FileInfo file = new FileInfo(@"C:\Sev_Firm_2019i\Roles\SNI\system\SNI Drawing Wizard.dproc");
+            string sniWizardLocation = @"C:\Sev_Firm_2019i\Roles\SNI\system\SNI Drawing Wizard.dproc";
+            FileInfo file = new FileInfo(sniWizardLocation);
             AutoDrawingRule rule = new AutoDrawingRule(file.FullName);
             AutoDrawingsStatusEnum status;
             List<Identifier> idList = new List<Identifier>();

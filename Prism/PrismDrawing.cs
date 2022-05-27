@@ -19,11 +19,11 @@ namespace Prism
         {
             _model = model;
             _modelEnum = modelEnum;
-            IsDrawingRequired = true;
+            DrawingRequired = true;
             GetPrismDrawing(currentDrawing);
         }
 
-        public bool IsDrawingRequired { get; set; }
+        public bool DrawingRequired { get; set; }
         public string RevMark { get; set; }
         public string PdfName { get; set; }
         public string DrawingFolderName { get; set; }
@@ -59,7 +59,7 @@ namespace Prism
         {
             if (currentDrawing.Title1 == _notRequired)
             {
-                IsDrawingRequired = false;
+                DrawingRequired = false;
                 currentDrawing.Delete();
                 return;
             }
@@ -82,7 +82,7 @@ namespace Prism
                 }
                 else
                 {
-                    IsDrawingRequired = false;
+                    DrawingRequired = false;
                 }
             }
         }
