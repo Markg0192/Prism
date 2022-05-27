@@ -7,6 +7,7 @@ using System.IO;
 using Tekla.Structures.DrawingInternal;
 using Tekla.Structures;
 
+//This class is temporarily not in use
 namespace Prism
 {
     /// <summary>
@@ -28,7 +29,7 @@ namespace Prism
 
         public List<PrismDrawing> PrismDrawingList = new List<PrismDrawing>();
 
-        public void CreateDrawingList()
+        public bool CreateDrawingList()
         {
             List<Drawing> drawingsBySelectedParts = new List<Drawing>();
             IEnumerable<int> drawingNos = Operation.GetDrawingsBySelectedParts();
@@ -48,17 +49,22 @@ namespace Prism
                 var id = new Identifier(no);
                 var drawing = Operation.GetDrawing(id);
                 drawing.Select();
+                if(drawing.UpToDateStatus!= DrawingUpToDateStatus.DrawingIsUpToDate)
+                {
+                    return false;
+                }
                 drawingsBySelectedParts.Add(drawing);
             }
 
             foreach (Drawing drawing in drawingsBySelectedParts)
             {
                 PrismDrawing prismDrawing = new PrismDrawing(drawing, _modelEnum, _model);
-                if (prismDrawing.IsDrawingRequired)
+                if (prismDrawing.DrawingRequired)
                 {
                     PrismDrawingList.Add(prismDrawing);
                 }
             }
+            return true;
         }
 
         private static bool RefreshDrawings()
@@ -92,19 +98,20 @@ namespace Prism
         public void PrintDrawings(ToolStripStatusLabel statusLabel)
         {
             int drawingProcessCounter = 1;
+
             foreach (PrismDrawing myDrawing in PrismDrawingList)
             {
                 statusLabel.Text = "Starting to print";
-                _modelEnum.MyDrawingHandler.IssueDrawing(myDrawing.TeklaDrawing);
+                //_modelEnum.MyDrawingHandler.IssueDrawing(myDrawing.TeklaDrawing);
                 DPMPrinterAttributes myPDF = new DPMPrinterAttributes();
                 myPDF.ColorMode = DotPrintColor.BlackAndWhite;
                 myPDF.OpenFileWhenFinished = false;
                 myPDF.Orientation = DotPrintOrientationType.Landscape;
-                myPDF.OutputFileName = $"{_folders.fabPath}/{myDrawing.DrawingFolderName}/{myDrawing.PdfName}";
+                myPDF.OutputFileName = $"{_folders.FabPath}/{myDrawing.DrawingFolderName}/{myDrawing.PdfName}";
                 myPDF.OutputType = DotPrintOutputType.PDF;
                 myPDF.PaperSize = DotPrintPaperSize.Auto;
                 statusLabel.Text = $"Printing drawing number {drawingProcessCounter} of {PrismDrawingList.Count}";
-                _modelEnum.MyDrawingHandler.PrintDrawing(myDrawing.TeklaDrawing, myPDF);
+                //_modelEnum.MyDrawingHandler.PrintDrawing(myDrawing.TeklaDrawing, myPDF);
                 drawingProcessCounter++;
             }
         }

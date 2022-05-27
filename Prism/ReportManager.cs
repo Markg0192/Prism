@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.IO;
 using Tekla.Structures.Model;
 using Tekla.Structures.Model.Operations;
@@ -8,91 +7,100 @@ using Tekla.Structures.Catalogs;
 namespace Prism
 {
     /// <summary>
-    /// The Report Manager class is where all reports required for a fab package are created.
-    /// NC files and bswx information is also created from here.
+    /// The Report Manager class is where all reports are created.
+    /// NC files are also created from here.
     /// </summary>
     public class ReportManager
     {
         public SevFolders Folders;
-        private SevModelData modelData;
-        public readonly string ReportPrefix;
-        private string title1;
-        private string title2;
-        private string title3;
-        private string report2QS;
-        private string report3;
-        private string report3PG;
-        private string report4;
-        private string report7;
-        private string report7s;
-        private string report8;
-        private string report8L;
-        private string report8s;
-        private string report9;
-
-        private string PDFpocListOutput;
-
-        private string niFirmFolderReportPath;
-        private const string report2QSname = "-2QS-SNI-AssemblyBreakdownList.rpt";
-        private const string report3name = "-3-SNI-HotRolledMemList.rpt";
-        private const string report3PGname = "-3_PG-SNI-HotRolledPlateGirderList.rpt";
-        private const string report4name = "-4-SNI-HotRolledFitList.rpt";
-        private const string report7name = "-7-SNI-ShopBoltList.rpt";
-        private const string report7sname = "-7S-SNI-ShopSTUDList.rpt";
-        private const string report8name = "-8-SNI-SiteBoltList.rpt";
-        private const string report8Lname = "-8L-SNI-SiteBoltLocationList.rpt";
-        private const string report8sname = "-8s-SNI-SiteSTUDList.rpt";
-        private const string report9name = "-9-SNI-SiteDeliveryBatchList.rpt";
-        private const string output2QS = "-2QS-SNI-AssemblyBreakdownList.xsr";
-        private const string output3 = "-3-SNI-HotRolledMemList.xsr";
-        private const string output3PG = "-3_PG-SNI-HotRolledPlateGirderList.xsr";
-        private const string output4 = "-4-SNI-HotRolledFitList.xsr";
-        private const string output7 = "-7-SNI-ShopBoltList.xsr";
-        private const string output7s = "-7S-SNI-ShopSTUDList.xsr";
-        private const string output8 = "-8-SNI-SiteBoltList.xsr";
-        private const string output8L = "-8L-SNI-SiteBoltLocationList.xsr";
-        private const string output8s = "-8s-SNI-SiteSTUDList.xsr";
-        private const string output9 = "-9-SNI-SiteDeliveryBatchList.xsr";
-        private const string PDFpocList = "-00-Prism-PDF-POC.pdf.rpt";
-        private const string PDFpocListName = "-00-Prism-PDF-POC.pdf";
-        private readonly string phaseNumber;
-        private readonly string issueNumber;
+        private SevModelData _modelData;
+        public readonly string FabReportPrefix;
+        public readonly string MatReportPrefix;
+        private string _title1;
+        private string _title2;
+        private string _title3;
+        private string _report2QS;
+        private string _report3; 
+        private string _report3PG;
+        private string _report4;
+        private string _report8L;
+        private string _reportBolts;
+        private string _report9;
+        private string _niFirmFolderReportPath;
+        private const string _report2QSname = "-2QS-SNI-AssemblyBreakdownList.rpt";
+        private const string _report3name = "Prism-3-SNI-HotRolledMemList.pdf.rpt";
+        private const string _report3Pname = "Prism-3P-SNI-PrelimHotRolledMemList.pdf.rpt";
+        private const string _report3PAname = "Prism-3PA-SNI-PrelimHotRolledMemList-ADD.pdf.rpt";
+        private const string _report3POname = "Prism-3PO-SNI-PrelimHotRolledMemList-OMIT.pdf.rpt";
+        private const string _report3PGname = "-3_PG-SNI-HotRolledPlateGirderList.rpt";
+        private const string _report4name = "Prism-4-SNI-HotRolledFitList.pdf.rpt";
+        private const string _report8Lname = "-8L-SNI-SiteBoltLocationList.rpt";
+        private const string _reportBoltsName = "-SEV-BOLTS-STRUMIS-SUMMARY_v3.rpt";
+        private const string _report9name = "Prism-9-SNI-SiteDeliveryBatchList.pdf.rpt";
+        private const string _output2QS = "-2QS-SNI-AssemblyBreakdownList.xsr";
+        private const string _output3 = "-3-SNI-HotRolledMemList.pdf";
+        private const string _output3Pname = "-3P-SNI-PrelimHotRolledMemList.pdf";
+        private const string _output3PAname = "-3PA-SNI-PrelimHotRolledMemList-ADD.pdf";
+        private const string _output3POname = "-3PO-SNI-PrelimHotRolledMemList-OMIT.pdf";
+        private const string _output3PG = "-3_PG-SNI-HotRolledPlateGirderList.xsr";
+        private const string _output4 = "-4-SNI-HotRolledFitList.pdf";
+        private const string _output8L = "-8L-SNI-SiteBoltLocationList.xsr";
+        private const string _outputBolts = "-SEV-BOLTS-STRUMIS-SUMMARY_v3.xsr";
+        private const string _output9 = "-9-SNI-SiteDeliveryBatchList.pdf";
+        private readonly string _phaseNumber;
+        private readonly string _issueNumber;
 
         public ReportManager(Model model, string phaseNum, string issueNum)
         {
-            phaseNumber = phaseNum;
-            issueNumber = issueNum;
-            Folders = model.CreateSevFolders(phaseNumber, issueNumber);
-            modelData = model.CreateSevModelData();
-            ReportPrefix = ($"{modelData.ProjNumber}-{phaseNumber}-FAB-ISSUE{issueNumber}");
-            title1 = phaseNumber;
-            title2 = modelData.Initials;
-            title3 = issueNumber;
+            _phaseNumber = phaseNum;
+            _issueNumber = issueNum;
+            Folders = model.CreateSevFolders(_phaseNumber, _issueNumber);
+            _modelData = model.CreateSevModelData();
+            FabReportPrefix = ($"{_modelData.ProjNumber}-{_phaseNumber}-FAB-ISSUE{_issueNumber}");
+            MatReportPrefix = ($"{_modelData.ProjNumber}-{_phaseNumber}-PRELIM-ISSUE{_issueNumber}");
+            _title1 = _phaseNumber;
+            _title2 = _modelData.Initials;
+            _title3 = _issueNumber;
         }
 
-        public void CreateReports(ArrayList partsList, ArrayList boltList, string packageLocation)
+        public void CreateMaterialReports(ArrayList partsList, string orderType)
         {
-            niFirmFolderReportPath = $"C:/Sev_Firm_2019i/Roles/{packageLocation}/Reports";
-            report2QS = Path.Combine(niFirmFolderReportPath, report2QSname);
-            report3 = Path.Combine(niFirmFolderReportPath, report3name);
-            report3PG = Path.Combine(niFirmFolderReportPath, report3PGname);
-            report4 = Path.Combine(niFirmFolderReportPath, report4name);
-            report7 = Path.Combine(niFirmFolderReportPath, report7name);
-            report7s = Path.Combine(niFirmFolderReportPath, report7sname);
-            report8 = Path.Combine(niFirmFolderReportPath, report8name);
-            report8L = Path.Combine(niFirmFolderReportPath, report8Lname);
-            report8s = Path.Combine(niFirmFolderReportPath, report8sname);
-            report9 = Path.Combine(niFirmFolderReportPath, report9name);
+            string materialReport = "";
+            string outputName = "";
+            _niFirmFolderReportPath = $"C:/Sev_Firm_2019i/Roles/SNI/Reports";
+            if (orderType == "Order Material")
+            {
+                materialReport = Path.Combine(_niFirmFolderReportPath, _report3Pname);
+                outputName = _output3Pname;
+            }
+            if (orderType == "Add Material")
+            {
+                materialReport = Path.Combine(_niFirmFolderReportPath, _report3PAname);
+                outputName = _output3PAname;
+            }
+            if (orderType == "Omit Material")
+            {
+                materialReport = Path.Combine(_niFirmFolderReportPath, _report3POname);
+                outputName = _output3POname;
+            }
 
-            PDFpocListOutput = Path.Combine(Folders.modelPath, PDFpocList);
+            Operation.CreateReportFromSelected(materialReport, Path.Combine(Folders.MatPath, $"{MatReportPrefix}{outputName}"), _title1, _title2, _title3);
+        }
+
+        public void CreateFabReports(ArrayList partsList, ArrayList boltList, string packageLocation)
+        {
+            _niFirmFolderReportPath = $"C:/Sev_Firm_2019i/Roles/{packageLocation}/Reports";
+            _report2QS = Path.Combine(_niFirmFolderReportPath, _report2QSname);
+            _report3 = Path.Combine(_niFirmFolderReportPath, _report3name);
+            _report3PG = Path.Combine(_niFirmFolderReportPath, _report3PGname);
+            _report4 = Path.Combine(_niFirmFolderReportPath, _report4name);
+            _report8L = Path.Combine(_niFirmFolderReportPath, _report8Lname);
+            _reportBolts = Path.Combine(_niFirmFolderReportPath, _reportBoltsName);
+            _report9 = Path.Combine(_niFirmFolderReportPath, _report9name);
 
             bool create3Report = false;
             bool create3PGReport = false;
             bool create4Report = false;
-            bool create7Report = false;
-            bool create7sReport = false;
-            bool create8Report = false;
-            bool create8sReport = false;
             string sectionSize;
             LibraryProfileItem myProfileItem = new LibraryProfileItem();
 
@@ -106,54 +114,29 @@ namespace Prism
                 if (isPlateGirder) create3PGReport = true;
                 if (isFitting) create4Report = true;
             }
-
-            foreach (BoltGroup bolt in boltList)
-            {
-                bool isSiteBolt = bolt.BoltType != BoltGroup.BoltTypeEnum.BOLT_TYPE_WORKSHOP;
-                bool isShopBolt = bolt.BoltType == BoltGroup.BoltTypeEnum.BOLT_TYPE_WORKSHOP;
-                bool isShearStud = bolt.BoltStandard == "SHEAR-STUD";
-                if (isShopBolt && !isShearStud) create7Report = true;
-                if (isShopBolt && isShearStud) create7sReport = true;
-                if (isSiteBolt && !isShearStud) create8Report = true;
-                if (isSiteBolt && isShearStud) create8sReport = true;
-
-            }
-
-            Operation.CreateReportFromSelected(report2QS, Path.Combine(Folders.dspPath, $"{ReportPrefix}{output2QS}"), title1, title2, title3);
-            Operation.CreateReportFromSelected(report9, Path.Combine(Folders.reportPath, $"{ReportPrefix}{output9}"), title1, title2, title3);
+            Operation.CreateReportFromSelected(_report2QS, Path.Combine(Folders.DspPath, $"{FabReportPrefix}{_output2QS}"), _title1, _title2, _title3);
+            Operation.CreateReportFromSelected(_report9, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output9}"), _title1, _title2, _title3);
 
             if (create3Report)
             {
-                Operation.CreateReportFromSelected(report3, Path.Combine(Folders.reportPath, $"{ReportPrefix}{output3}"), title1, title2, title3);
-                Operation.CreateReportFromSelected(PDFpocListOutput, Path.Combine(Folders.reportPath, $"{ReportPrefix}{PDFpocListName}"), title1, title2, title3);
+                Operation.CreateReportFromSelected(_report3, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output3}"), _title1, _title2, _title3);
             }
             if (create3PGReport)
             {
-                Operation.CreateReportFromSelected(report3PG, Path.Combine(Folders.reportPath, $"{ReportPrefix}{output3PG}"), title1, title2, title3);
+                Operation.CreateReportFromSelected(_report3PG, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output3PG}"), _title1, _title2, _title3);
             }
             if (create4Report)
             {
-                Operation.CreateReportFromSelected(report4, Path.Combine(Folders.reportPath, $"{ReportPrefix}{output4}"), title1, title2, title3);
+                Operation.CreateReportFromSelected(_report4, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output4}"), _title1, _title2, _title3);
             }
-            if (create7Report)
+            if(boltList.Count > 0)
             {
-                Operation.CreateReportFromSelected(report7, Path.Combine(Folders.reportPath, $"{ReportPrefix}{output7}"), title1, title2, title3);
+                Operation.CreateReportFromSelected(_reportBolts, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_outputBolts}"), _title1, _title2, _title3);
+             //   Operation.CreateReportFromSelected(_report8L, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output8L}"), _title1, _title2, _title3);
             }
-            if (create7sReport)
-            {
-                Operation.CreateReportFromSelected(report7s, Path.Combine(Folders.reportPath, $"{ReportPrefix}{output7s}"), title1, title2, title3);
-            }
-            if (create8Report)
-            {
-                Operation.CreateReportFromSelected(report8, Path.Combine(Folders.reportPath, $"{ReportPrefix}{output8}"), title1, title2, title3);
-                Operation.CreateReportFromSelected(report8L, Path.Combine(Folders.reportPath, $"{ReportPrefix}{output8L}"), title1, title2, title3);
-            }
-            if (create8sReport)
-            {
-                Operation.CreateReportFromSelected(report8s, Path.Combine(Folders.reportPath, $"{ReportPrefix}{output8s}"), title1, title2, title3);
-            }           
-            Operation.CreateNCFilesFromSelected("-SNI-PROFILES", Path.Combine(Folders.ncPath, " "));
-            Operation.CreateNCFilesFromSelected("-SNI-PLATES", Path.Combine(Folders.ncPath, " "));
+
+            Operation.CreateNCFilesFromSelected("-SNI-PROFILES", Path.Combine(Folders.NcPath, " "));
+            Operation.CreateNCFilesFromSelected("-SNI-PLATES", Path.Combine(Folders.NcPath, " "));
         }
     }
 }

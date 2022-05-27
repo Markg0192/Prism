@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Tekla.Structures.Model;
+﻿using Tekla.Structures.Model;
 
 namespace Prism
 {
@@ -19,9 +14,9 @@ namespace Prism
             return new SevFolders(model, phaseNum, issueNum);
         }
 
-        public static SevModelEnumerator CreateSevModelEnumerator(this Model model)
+        public static SevModelEnumerator CreateSevModelEnumerator(this Model model, string stageType)
         {
-            return new SevModelEnumerator();
+            return new SevModelEnumerator(stageType);
         }
         public static ModelModifiers CreateModelMods(this Model model)
         {

@@ -32,25 +32,32 @@ namespace Prism
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PrismForm));
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.txt_StartNumber = new System.Windows.Forms.TextBox();
+            this.cmb_OrderMaterial = new System.Windows.Forms.ComboBox();
+            this.label10 = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
+            this.txt_MaterialIssueNumber = new System.Windows.Forms.TextBox();
+            this.txt_MaterialPhaseNumber = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
             this.pictureBox6 = new System.Windows.Forms.PictureBox();
-            this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
-            this.btnMaterialChecksComplete = new System.Windows.Forms.Button();
-            this.btnMaterialOrdered = new System.Windows.Forms.Button();
+            this.btn_AddStartNumbers = new System.Windows.Forms.Button();
+            this.btnOrderMaterial = new System.Windows.Forms.Button();
             this.btnRunThroughMaterialChecks = new System.Windows.Forms.Button();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.MaterialStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.statusStrip3 = new System.Windows.Forms.StatusStrip();
+            this.DetailingStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.label9 = new System.Windows.Forms.Label();
             this.pictureBox5 = new System.Windows.Forms.PictureBox();
             this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.btnDetailingChecksComplete = new System.Windows.Forms.Button();
-            this.btnDrawingsCreated = new System.Windows.Forms.Button();
+            this.btn_CreateDrawings = new System.Windows.Forms.Button();
             this.btnRunThroughDetailingChecks = new System.Windows.Forms.Button();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.tabPage3 = new System.Windows.Forms.TabPage();
@@ -69,8 +76,10 @@ namespace Prism
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox6)).BeginInit();
+            this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.tabPage2.SuspendLayout();
+            this.statusStrip3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox5)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.tabPage3.SuspendLayout();
@@ -100,15 +109,20 @@ namespace Prism
             // 
             this.structuresExtender.SetAttributeName(this.tabPage1, null);
             this.structuresExtender.SetAttributeTypeName(this.tabPage1, null);
-            this.tabPage1.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.tabPage1.BackColor = System.Drawing.Color.White;
             this.structuresExtender.SetBindPropertyName(this.tabPage1, null);
+            this.tabPage1.Controls.Add(this.txt_StartNumber);
+            this.tabPage1.Controls.Add(this.cmb_OrderMaterial);
+            this.tabPage1.Controls.Add(this.label10);
+            this.tabPage1.Controls.Add(this.label7);
+            this.tabPage1.Controls.Add(this.txt_MaterialIssueNumber);
+            this.tabPage1.Controls.Add(this.txt_MaterialPhaseNumber);
             this.tabPage1.Controls.Add(this.label8);
             this.tabPage1.Controls.Add(this.pictureBox6);
-            this.tabPage1.Controls.Add(this.label3);
             this.tabPage1.Controls.Add(this.label2);
             this.tabPage1.Controls.Add(this.label1);
-            this.tabPage1.Controls.Add(this.btnMaterialChecksComplete);
-            this.tabPage1.Controls.Add(this.btnMaterialOrdered);
+            this.tabPage1.Controls.Add(this.btn_AddStartNumbers);
+            this.tabPage1.Controls.Add(this.btnOrderMaterial);
             this.tabPage1.Controls.Add(this.btnRunThroughMaterialChecks);
             this.tabPage1.Controls.Add(this.statusStrip1);
             this.tabPage1.Controls.Add(this.pictureBox1);
@@ -118,6 +132,79 @@ namespace Prism
             this.tabPage1.Size = new System.Drawing.Size(311, 300);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Material Checks";
+            // 
+            // txt_StartNumber
+            // 
+            this.structuresExtender.SetAttributeName(this.txt_StartNumber, null);
+            this.structuresExtender.SetAttributeTypeName(this.txt_StartNumber, null);
+            this.structuresExtender.SetBindPropertyName(this.txt_StartNumber, null);
+            this.txt_StartNumber.Location = new System.Drawing.Point(82, 84);
+            this.txt_StartNumber.Name = "txt_StartNumber";
+            this.txt_StartNumber.Size = new System.Drawing.Size(100, 20);
+            this.txt_StartNumber.TabIndex = 28;
+            this.txt_StartNumber.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txt_StartNumber_KeyPress);
+            // 
+            // cmb_OrderMaterial
+            // 
+            this.structuresExtender.SetAttributeName(this.cmb_OrderMaterial, null);
+            this.structuresExtender.SetAttributeTypeName(this.cmb_OrderMaterial, null);
+            this.structuresExtender.SetBindPropertyName(this.cmb_OrderMaterial, null);
+            this.cmb_OrderMaterial.FormattingEnabled = true;
+            this.cmb_OrderMaterial.Items.AddRange(new object[] {
+            "Order Material",
+            "Add Material",
+            "Omit Material"});
+            this.cmb_OrderMaterial.Location = new System.Drawing.Point(82, 124);
+            this.cmb_OrderMaterial.Name = "cmb_OrderMaterial";
+            this.cmb_OrderMaterial.Size = new System.Drawing.Size(100, 21);
+            this.cmb_OrderMaterial.TabIndex = 27;
+            this.cmb_OrderMaterial.Text = "Order Material";
+            // 
+            // label10
+            // 
+            this.structuresExtender.SetAttributeName(this.label10, null);
+            this.structuresExtender.SetAttributeTypeName(this.label10, null);
+            this.label10.AutoSize = true;
+            this.structuresExtender.SetBindPropertyName(this.label10, null);
+            this.label10.Location = new System.Drawing.Point(128, 166);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(72, 13);
+            this.label10.TabIndex = 26;
+            this.label10.Text = "Issue Number";
+            // 
+            // label7
+            // 
+            this.structuresExtender.SetAttributeName(this.label7, null);
+            this.structuresExtender.SetAttributeTypeName(this.label7, null);
+            this.label7.AutoSize = true;
+            this.structuresExtender.SetBindPropertyName(this.label7, null);
+            this.label7.Location = new System.Drawing.Point(6, 166);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(77, 13);
+            this.label7.TabIndex = 26;
+            this.label7.Text = "Phase Number";
+            // 
+            // txt_MaterialIssueNumber
+            // 
+            this.structuresExtender.SetAttributeName(this.txt_MaterialIssueNumber, null);
+            this.structuresExtender.SetAttributeTypeName(this.txt_MaterialIssueNumber, null);
+            this.structuresExtender.SetBindPropertyName(this.txt_MaterialIssueNumber, null);
+            this.txt_MaterialIssueNumber.Location = new System.Drawing.Point(131, 185);
+            this.txt_MaterialIssueNumber.Name = "txt_MaterialIssueNumber";
+            this.txt_MaterialIssueNumber.Size = new System.Drawing.Size(100, 20);
+            this.txt_MaterialIssueNumber.TabIndex = 25;
+            this.txt_MaterialIssueNumber.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txt_MaterialIssueNumber_KeyPress);
+            // 
+            // txt_MaterialPhaseNumber
+            // 
+            this.structuresExtender.SetAttributeName(this.txt_MaterialPhaseNumber, null);
+            this.structuresExtender.SetAttributeTypeName(this.txt_MaterialPhaseNumber, null);
+            this.structuresExtender.SetBindPropertyName(this.txt_MaterialPhaseNumber, null);
+            this.txt_MaterialPhaseNumber.Location = new System.Drawing.Point(8, 185);
+            this.txt_MaterialPhaseNumber.Name = "txt_MaterialPhaseNumber";
+            this.txt_MaterialPhaseNumber.Size = new System.Drawing.Size(100, 20);
+            this.txt_MaterialPhaseNumber.TabIndex = 25;
+            this.txt_MaterialPhaseNumber.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txt_MaterialPhaseNumber_KeyPress);
             // 
             // label8
             // 
@@ -129,7 +216,7 @@ namespace Prism
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(60, 13);
             this.label8.TabIndex = 22;
-            this.label8.Text = "Version 1.1";
+            this.label8.Text = "Version 2.0";
             // 
             // pictureBox6
             // 
@@ -145,29 +232,17 @@ namespace Prism
             this.pictureBox6.TabIndex = 20;
             this.pictureBox6.TabStop = false;
             // 
-            // label3
-            // 
-            this.structuresExtender.SetAttributeName(this.label3, null);
-            this.structuresExtender.SetAttributeTypeName(this.label3, null);
-            this.label3.AutoSize = true;
-            this.structuresExtender.SetBindPropertyName(this.label3, null);
-            this.label3.Location = new System.Drawing.Point(82, 127);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(83, 13);
-            this.label3.TabIndex = 16;
-            this.label3.Text = "Material ordered";
-            // 
             // label2
             // 
             this.structuresExtender.SetAttributeName(this.label2, null);
             this.structuresExtender.SetAttributeTypeName(this.label2, null);
             this.label2.AutoSize = true;
             this.structuresExtender.SetBindPropertyName(this.label2, null);
-            this.label2.Location = new System.Drawing.Point(82, 75);
+            this.label2.Location = new System.Drawing.Point(79, 62);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(129, 13);
+            this.label2.Size = new System.Drawing.Size(94, 13);
             this.label2.TabIndex = 15;
-            this.label2.Text = "Member checks complete";
+            this.label2.Text = "Add start Numbers";
             // 
             // label1
             // 
@@ -177,41 +252,41 @@ namespace Prism
             this.structuresExtender.SetBindPropertyName(this.label1, null);
             this.label1.Location = new System.Drawing.Point(82, 23);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(144, 13);
+            this.label1.Size = new System.Drawing.Size(83, 13);
             this.label1.TabIndex = 14;
-            this.label1.Text = "Run through member checks";
+            this.label1.Text = "Check members";
             // 
-            // btnMaterialChecksComplete
+            // btn_AddStartNumbers
             // 
-            this.structuresExtender.SetAttributeName(this.btnMaterialChecksComplete, null);
-            this.structuresExtender.SetAttributeTypeName(this.btnMaterialChecksComplete, null);
-            this.btnMaterialChecksComplete.BackColor = System.Drawing.Color.Orange;
-            this.structuresExtender.SetBindPropertyName(this.btnMaterialChecksComplete, null);
-            this.btnMaterialChecksComplete.Location = new System.Drawing.Point(8, 58);
-            this.btnMaterialChecksComplete.Name = "btnMaterialChecksComplete";
-            this.btnMaterialChecksComplete.Size = new System.Drawing.Size(68, 46);
-            this.btnMaterialChecksComplete.TabIndex = 13;
-            this.btnMaterialChecksComplete.UseVisualStyleBackColor = false;
-            this.btnMaterialChecksComplete.Click += new System.EventHandler(this.btnMaterialChecksComplete_Click);
+            this.structuresExtender.SetAttributeName(this.btn_AddStartNumbers, null);
+            this.structuresExtender.SetAttributeTypeName(this.btn_AddStartNumbers, null);
+            this.btn_AddStartNumbers.BackColor = System.Drawing.Color.Gold;
+            this.structuresExtender.SetBindPropertyName(this.btn_AddStartNumbers, null);
+            this.btn_AddStartNumbers.Location = new System.Drawing.Point(8, 58);
+            this.btn_AddStartNumbers.Name = "btn_AddStartNumbers";
+            this.btn_AddStartNumbers.Size = new System.Drawing.Size(68, 46);
+            this.btn_AddStartNumbers.TabIndex = 13;
+            this.btn_AddStartNumbers.UseVisualStyleBackColor = false;
+            this.btn_AddStartNumbers.Click += new System.EventHandler(this.btn_AddStartNumbers_Click);
             // 
-            // btnMaterialOrdered
+            // btnOrderMaterial
             // 
-            this.structuresExtender.SetAttributeName(this.btnMaterialOrdered, null);
-            this.structuresExtender.SetAttributeTypeName(this.btnMaterialOrdered, null);
-            this.btnMaterialOrdered.BackColor = System.Drawing.Color.LimeGreen;
-            this.structuresExtender.SetBindPropertyName(this.btnMaterialOrdered, null);
-            this.btnMaterialOrdered.Location = new System.Drawing.Point(8, 110);
-            this.btnMaterialOrdered.Name = "btnMaterialOrdered";
-            this.btnMaterialOrdered.Size = new System.Drawing.Size(68, 46);
-            this.btnMaterialOrdered.TabIndex = 12;
-            this.btnMaterialOrdered.UseVisualStyleBackColor = false;
-            this.btnMaterialOrdered.Click += new System.EventHandler(this.btnMaterialOrdered_Click);
+            this.structuresExtender.SetAttributeName(this.btnOrderMaterial, null);
+            this.structuresExtender.SetAttributeTypeName(this.btnOrderMaterial, null);
+            this.btnOrderMaterial.BackColor = System.Drawing.Color.Chartreuse;
+            this.structuresExtender.SetBindPropertyName(this.btnOrderMaterial, null);
+            this.btnOrderMaterial.Location = new System.Drawing.Point(8, 110);
+            this.btnOrderMaterial.Name = "btnOrderMaterial";
+            this.btnOrderMaterial.Size = new System.Drawing.Size(68, 46);
+            this.btnOrderMaterial.TabIndex = 12;
+            this.btnOrderMaterial.UseVisualStyleBackColor = false;
+            this.btnOrderMaterial.Click += new System.EventHandler(this.btnOrderMaterial_Click);
             // 
             // btnRunThroughMaterialChecks
             // 
             this.structuresExtender.SetAttributeName(this.btnRunThroughMaterialChecks, null);
             this.structuresExtender.SetAttributeTypeName(this.btnRunThroughMaterialChecks, null);
-            this.btnRunThroughMaterialChecks.BackColor = System.Drawing.Color.Red;
+            this.btnRunThroughMaterialChecks.BackColor = System.Drawing.Color.OrangeRed;
             this.structuresExtender.SetBindPropertyName(this.btnRunThroughMaterialChecks, null);
             this.btnRunThroughMaterialChecks.Location = new System.Drawing.Point(8, 6);
             this.btnRunThroughMaterialChecks.Name = "btnRunThroughMaterialChecks";
@@ -225,11 +300,19 @@ namespace Prism
             this.structuresExtender.SetAttributeName(this.statusStrip1, null);
             this.structuresExtender.SetAttributeTypeName(this.statusStrip1, null);
             this.structuresExtender.SetBindPropertyName(this.statusStrip1, null);
+            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MaterialStatusLabel});
             this.statusStrip1.Location = new System.Drawing.Point(3, 275);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(305, 22);
             this.statusStrip1.TabIndex = 10;
             this.statusStrip1.Text = "statusStrip1";
+            // 
+            // MaterialStatusLabel
+            // 
+            this.MaterialStatusLabel.Name = "MaterialStatusLabel";
+            this.MaterialStatusLabel.Size = new System.Drawing.Size(39, 17);
+            this.MaterialStatusLabel.Text = "Status";
             // 
             // pictureBox1
             // 
@@ -238,7 +321,7 @@ namespace Prism
             this.structuresExtender.SetBindPropertyName(this.pictureBox1, null);
             this.pictureBox1.Image = global::Prism.Properties.Resources.Severfield_blue_RGB_PNG;
             this.pictureBox1.InitialImage = null;
-            this.pictureBox1.Location = new System.Drawing.Point(70, 195);
+            this.pictureBox1.Location = new System.Drawing.Point(0, 218);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(161, 54);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -249,7 +332,7 @@ namespace Prism
             // 
             this.structuresExtender.SetAttributeName(this.tabPage2, null);
             this.structuresExtender.SetAttributeTypeName(this.tabPage2, null);
-            this.tabPage2.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.tabPage2.BackColor = System.Drawing.Color.White;
             this.structuresExtender.SetBindPropertyName(this.tabPage2, null);
             this.tabPage2.Controls.Add(this.statusStrip3);
             this.tabPage2.Controls.Add(this.label9);
@@ -258,7 +341,7 @@ namespace Prism
             this.tabPage2.Controls.Add(this.label5);
             this.tabPage2.Controls.Add(this.label6);
             this.tabPage2.Controls.Add(this.btnDetailingChecksComplete);
-            this.tabPage2.Controls.Add(this.btnDrawingsCreated);
+            this.tabPage2.Controls.Add(this.btn_CreateDrawings);
             this.tabPage2.Controls.Add(this.btnRunThroughDetailingChecks);
             this.tabPage2.Controls.Add(this.pictureBox2);
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
@@ -273,11 +356,19 @@ namespace Prism
             this.structuresExtender.SetAttributeName(this.statusStrip3, null);
             this.structuresExtender.SetAttributeTypeName(this.statusStrip3, null);
             this.structuresExtender.SetBindPropertyName(this.statusStrip3, null);
+            this.statusStrip3.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.DetailingStatusLabel});
             this.statusStrip3.Location = new System.Drawing.Point(3, 275);
             this.statusStrip3.Name = "statusStrip3";
             this.statusStrip3.Size = new System.Drawing.Size(305, 22);
             this.statusStrip3.TabIndex = 26;
             this.statusStrip3.Text = "statusStrip3";
+            // 
+            // DetailingStatusLabel
+            // 
+            this.DetailingStatusLabel.Name = "DetailingStatusLabel";
+            this.DetailingStatusLabel.Size = new System.Drawing.Size(39, 17);
+            this.DetailingStatusLabel.Text = "Status";
             // 
             // label9
             // 
@@ -289,7 +380,7 @@ namespace Prism
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(60, 13);
             this.label9.TabIndex = 25;
-            this.label9.Text = "Version 1.1";
+            this.label9.Text = "Version 2.0";
             // 
             // pictureBox5
             // 
@@ -313,9 +404,9 @@ namespace Prism
             this.structuresExtender.SetBindPropertyName(this.label4, null);
             this.label4.Location = new System.Drawing.Point(82, 127);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(90, 13);
+            this.label4.Size = new System.Drawing.Size(83, 13);
             this.label4.TabIndex = 22;
-            this.label4.Text = "Drawings created";
+            this.label4.Text = "Create drawings";
             // 
             // label5
             // 
@@ -337,15 +428,15 @@ namespace Prism
             this.structuresExtender.SetBindPropertyName(this.label6, null);
             this.label6.Location = new System.Drawing.Point(82, 23);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(144, 13);
+            this.label6.Size = new System.Drawing.Size(83, 13);
             this.label6.TabIndex = 20;
-            this.label6.Text = "Run through member checks";
+            this.label6.Text = "Check members";
             // 
             // btnDetailingChecksComplete
             // 
             this.structuresExtender.SetAttributeName(this.btnDetailingChecksComplete, null);
             this.structuresExtender.SetAttributeTypeName(this.btnDetailingChecksComplete, null);
-            this.btnDetailingChecksComplete.BackColor = System.Drawing.Color.Orange;
+            this.btnDetailingChecksComplete.BackColor = System.Drawing.Color.Gold;
             this.structuresExtender.SetBindPropertyName(this.btnDetailingChecksComplete, null);
             this.btnDetailingChecksComplete.Location = new System.Drawing.Point(8, 58);
             this.btnDetailingChecksComplete.Name = "btnDetailingChecksComplete";
@@ -354,24 +445,24 @@ namespace Prism
             this.btnDetailingChecksComplete.UseVisualStyleBackColor = false;
             this.btnDetailingChecksComplete.Click += new System.EventHandler(this.btnDetailingChecksComplete_Click);
             // 
-            // btnDrawingsCreated
+            // btn_CreateDrawings
             // 
-            this.structuresExtender.SetAttributeName(this.btnDrawingsCreated, null);
-            this.structuresExtender.SetAttributeTypeName(this.btnDrawingsCreated, null);
-            this.btnDrawingsCreated.BackColor = System.Drawing.Color.LimeGreen;
-            this.structuresExtender.SetBindPropertyName(this.btnDrawingsCreated, null);
-            this.btnDrawingsCreated.Location = new System.Drawing.Point(8, 110);
-            this.btnDrawingsCreated.Name = "btnDrawingsCreated";
-            this.btnDrawingsCreated.Size = new System.Drawing.Size(68, 46);
-            this.btnDrawingsCreated.TabIndex = 18;
-            this.btnDrawingsCreated.UseVisualStyleBackColor = false;
-            this.btnDrawingsCreated.Click += new System.EventHandler(this.btnDrawingsCreated_Click);
+            this.structuresExtender.SetAttributeName(this.btn_CreateDrawings, null);
+            this.structuresExtender.SetAttributeTypeName(this.btn_CreateDrawings, null);
+            this.btn_CreateDrawings.BackColor = System.Drawing.Color.Chartreuse;
+            this.structuresExtender.SetBindPropertyName(this.btn_CreateDrawings, null);
+            this.btn_CreateDrawings.Location = new System.Drawing.Point(8, 110);
+            this.btn_CreateDrawings.Name = "btn_CreateDrawings";
+            this.btn_CreateDrawings.Size = new System.Drawing.Size(68, 46);
+            this.btn_CreateDrawings.TabIndex = 18;
+            this.btn_CreateDrawings.UseVisualStyleBackColor = false;
+            this.btn_CreateDrawings.Click += new System.EventHandler(this.btn_CreateDrawings_Click);
             // 
             // btnRunThroughDetailingChecks
             // 
             this.structuresExtender.SetAttributeName(this.btnRunThroughDetailingChecks, null);
             this.structuresExtender.SetAttributeTypeName(this.btnRunThroughDetailingChecks, null);
-            this.btnRunThroughDetailingChecks.BackColor = System.Drawing.Color.Red;
+            this.btnRunThroughDetailingChecks.BackColor = System.Drawing.Color.OrangeRed;
             this.structuresExtender.SetBindPropertyName(this.btnRunThroughDetailingChecks, null);
             this.btnRunThroughDetailingChecks.Location = new System.Drawing.Point(8, 6);
             this.btnRunThroughDetailingChecks.Name = "btnRunThroughDetailingChecks";
@@ -387,7 +478,7 @@ namespace Prism
             this.structuresExtender.SetBindPropertyName(this.pictureBox2, null);
             this.pictureBox2.Image = global::Prism.Properties.Resources.Severfield_blue_RGB_PNG;
             this.pictureBox2.InitialImage = null;
-            this.pictureBox2.Location = new System.Drawing.Point(70, 195);
+            this.pictureBox2.Location = new System.Drawing.Point(0, 218);
             this.pictureBox2.Name = "pictureBox2";
             this.pictureBox2.Size = new System.Drawing.Size(161, 54);
             this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -398,7 +489,7 @@ namespace Prism
             // 
             this.structuresExtender.SetAttributeName(this.tabPage3, null);
             this.structuresExtender.SetAttributeTypeName(this.tabPage3, null);
-            this.tabPage3.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.tabPage3.BackColor = System.Drawing.Color.White;
             this.structuresExtender.SetBindPropertyName(this.tabPage3, null);
             this.tabPage3.Controls.Add(this.label11);
             this.tabPage3.Controls.Add(this.pictureBox4);
@@ -428,7 +519,7 @@ namespace Prism
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(60, 13);
             this.label11.TabIndex = 24;
-            this.label11.Text = "Version 1.1";
+            this.label11.Text = "Version 2.0";
             // 
             // pictureBox4
             // 
@@ -467,13 +558,14 @@ namespace Prism
             // 
             this.structuresExtender.SetAttributeName(this.btnCreatePackage, null);
             this.structuresExtender.SetAttributeTypeName(this.btnCreatePackage, null);
+            this.btnCreatePackage.BackColor = System.Drawing.Color.Chartreuse;
             this.structuresExtender.SetBindPropertyName(this.btnCreatePackage, null);
             this.btnCreatePackage.Location = new System.Drawing.Point(180, 120);
             this.btnCreatePackage.Name = "btnCreatePackage";
             this.btnCreatePackage.Size = new System.Drawing.Size(108, 37);
             this.btnCreatePackage.TabIndex = 17;
             this.btnCreatePackage.Text = "Create Package";
-            this.btnCreatePackage.UseVisualStyleBackColor = true;
+            this.btnCreatePackage.UseVisualStyleBackColor = false;
             this.btnCreatePackage.Click += new System.EventHandler(this.btnCreatePackage_Click);
             // 
             // lblPackageLocation
@@ -558,7 +650,7 @@ namespace Prism
             this.structuresExtender.SetBindPropertyName(this.pictureBox3, null);
             this.pictureBox3.Image = global::Prism.Properties.Resources.Severfield_blue_RGB_PNG;
             this.pictureBox3.InitialImage = null;
-            this.pictureBox3.Location = new System.Drawing.Point(70, 195);
+            this.pictureBox3.Location = new System.Drawing.Point(0, 218);
             this.pictureBox3.Name = "pictureBox3";
             this.pictureBox3.Size = new System.Drawing.Size(161, 54);
             this.pictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -578,14 +670,18 @@ namespace Prism
             this.MaximumSize = new System.Drawing.Size(337, 367);
             this.MinimumSize = new System.Drawing.Size(337, 367);
             this.Name = "PrismForm";
-            this.Text = "PrismForm";
+            this.Text = "Prism";
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox6)).EndInit();
+            this.statusStrip1.ResumeLayout(false);
+            this.statusStrip1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
+            this.statusStrip3.ResumeLayout(false);
+            this.statusStrip3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox5)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             this.tabPage3.ResumeLayout(false);
@@ -617,16 +713,15 @@ namespace Prism
         public System.Windows.Forms.TextBox issueNumber;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Button btnMaterialChecksComplete;
-        private System.Windows.Forms.Button btnMaterialOrdered;
+        private System.Windows.Forms.Button btn_AddStartNumbers;
+        private System.Windows.Forms.Button btnOrderMaterial;
         private System.Windows.Forms.Button btnRunThroughMaterialChecks;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Button btnDetailingChecksComplete;
-        private System.Windows.Forms.Button btnDrawingsCreated;
+        private System.Windows.Forms.Button btn_CreateDrawings;
         private System.Windows.Forms.Button btnRunThroughDetailingChecks;
-        private System.Windows.Forms.Label label3;
         private System.Windows.Forms.StatusStrip statusStrip2;
         public System.Windows.Forms.ToolStripStatusLabel StatusLabel;
         private System.Windows.Forms.PictureBox pictureBox6;
@@ -636,5 +731,13 @@ namespace Prism
         private System.Windows.Forms.StatusStrip statusStrip3;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.TextBox txt_MaterialIssueNumber;
+        private System.Windows.Forms.TextBox txt_MaterialPhaseNumber;
+        private System.Windows.Forms.ComboBox cmb_OrderMaterial;
+        private System.Windows.Forms.TextBox txt_StartNumber;
+        private System.Windows.Forms.ToolStripStatusLabel MaterialStatusLabel;
+        private System.Windows.Forms.ToolStripStatusLabel DetailingStatusLabel;
     }
 }

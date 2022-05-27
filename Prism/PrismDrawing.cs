@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Tekla.Structures.Drawing;
 using Tekla.Structures.Model;
 
+//This class is temporarily not in use.
 namespace Prism
 {
     public class PrismDrawing
@@ -18,10 +19,11 @@ namespace Prism
         {
             _model = model;
             _modelEnum = modelEnum;
+            DrawingRequired = true;
             GetPrismDrawing(currentDrawing);
         }
 
-        public bool IsDrawingRequired = true;
+        public bool DrawingRequired { get; set; }
         public string RevMark { get; set; }
         public string PdfName { get; set; }
         public string DrawingFolderName { get; set; }
@@ -30,6 +32,10 @@ namespace Prism
 
         private string GetDrawingRevision(Drawing currentDrawing)
         {
+            if (currentDrawing.UpToDateStatus != DrawingUpToDateStatus.DrawingIsUpToDate)
+            {
+                return null;
+            }
             AssemblyDrawing assDraw = currentDrawing as AssemblyDrawing;
             SinglePartDrawing singDraw = currentDrawing as SinglePartDrawing;
             Tekla.Structures.Identifier drawingID = null;
@@ -53,6 +59,7 @@ namespace Prism
         {
             if (currentDrawing.Title1 == _notRequired)
             {
+                DrawingRequired = false;
                 currentDrawing.Delete();
                 return;
             }
@@ -75,7 +82,7 @@ namespace Prism
                 }
                 else
                 {
-                    IsDrawingRequired = false;
+                    DrawingRequired = false;
                 }
             }
         }
