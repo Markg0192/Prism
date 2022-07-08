@@ -1,7 +1,7 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using System.Windows.Forms;
 using Tekla.Structures.Model;
-
 
 namespace Prism
 {
@@ -9,14 +9,9 @@ namespace Prism
     /// The pre run checks class is used to check the model for any issues in the model that may cause the program to crash.
     /// These are ran before the main program and warns the user of the problem and closes the app before it crashes.
     /// </summary>
-    public class PreRunChecks
-    {
-        public PreRunChecks(Model model)
-        {
-
-        }
-
-        public bool CheckExecutionField(SevModelEnumerator modelEnum)
+    public static class ModelChecker
+    {      
+        public static bool CheckExecutionField(this SelectedObjects modelEnum)
         {  
             foreach (Assembly ass in modelEnum.AssembliesList)
             {
@@ -35,50 +30,28 @@ namespace Prism
             return true;
         }
 
-        public bool CheckNameAndClassAlignment(SevModelEnumerator modelEnum)
+        public static bool CheckNameAndClassAlignment(this SelectedObjects modelEnum)
         {
             foreach (Part p in modelEnum.SelectedModelParts)
             {
-                string partName = p.Name;
-                string partClass = p.Class;
-
-                if (partName == "BEAM" && partClass != "3")
-                {
-                    ShowNameAndClassErrorMessage();
-                    return false;
-                }
-                if (partName == "COLUMN" && partClass != "2" || partName == "COLUMN" && partClass != "5")
-                {
-                    ShowNameAndClassErrorMessage();
-                    return false;
-                }
-                if (partName == "BRACE" && partClass != "4" || partName == "BRACE" && partClass != "13")
-                {
-                    ShowNameAndClassErrorMessage();
-                    return false;
-                }
-                if (partName == "FABESEC" && partClass != "7")
-                {
-                    ShowNameAndClassErrorMessage();
-                    return false;
-                }
-                if (partName == "RAFTER" && partClass !="8" || partName =="PORTAL RAFTER" && partClass != "8")
-                {
-                    ShowNameAndClassErrorMessage();
-                    return false;
+                List<string> meantToBeClass = GdomValues.PartClass()[p.Name] as List<string>;
+                if (!meantToBeClass.Contains(p.Class)) 
+                { 
+                    ShowNameAndClassErrorMessage(); 
+                    return false; 
                 }
             }
             return true;
         }
 
-        public void ShowNameAndClassErrorMessage()
+        private static void ShowNameAndClassErrorMessage()
         {
             const string notUpToDateMessage = "You have selected something thats name and class do not align with GDOM convention, please correct this to continue.";
             const string notUpToDateTitle = "Part name and class misalignment";
             MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
-        public bool ArePreviousStepsComplete(SevModelEnumerator modelEnum, int stageNumber)
+        public static bool ArePreviousStepsComplete(SelectedObjects modelEnum, int stageNumber)
         {
             foreach (Part p in modelEnum.SelectedModelParts)
             {
@@ -95,7 +68,7 @@ namespace Prism
             return true;
         }
 
-        public bool ArePreviousStepsComplete(int stageNumber, string input1, string input2)
+        public static bool CheckForInputs(int stageNumber, string input1, string input2)
         {
             if (stageNumber == 2 && input1 == "")
             {
@@ -123,7 +96,7 @@ namespace Prism
             return true;
         }
 
-        public bool RunStage4Checks(SevModelEnumerator modelEnum)
+        public static bool RunStage4Checks(this SelectedObjects modelEnum)
         {
             bool process = true;
             foreach (Assembly ass in modelEnum.AssembliesList)
@@ -145,7 +118,7 @@ namespace Prism
             return true;
         }
 
-        public bool CheckStartNumbersMatch(Part mainPart, Part secondaryPart)
+        public static bool CheckStartNumbersMatch(Part mainPart, Part secondaryPart)
         {
             if (mainPart.AssemblyNumber.StartNumber != secondaryPart.PartNumber.StartNumber)
             {
@@ -157,7 +130,7 @@ namespace Prism
             return true;
         }
 
-        public bool CheckPhasesMatch(Part mainPart, Part secondaryPart)
+        public static bool CheckPhasesMatch(Part mainPart, Part secondaryPart)
         {
             mainPart.GetPhase(out Phase mainPartPhase);
             secondaryPart.GetPhase(out Phase secondaryPhase);
@@ -174,7 +147,7 @@ namespace Prism
             return true;
         }
 
-        public bool CheckMainPartHasFinish(Part mainPart)
+        public static bool CheckMainPartHasFinish(Part mainPart)
         {
             if(mainPart.Finish.Length == 0)
             {
@@ -186,7 +159,7 @@ namespace Prism
             return true;
         }
 
-        public bool CheckMainPartHasBeenOrdered(Part mainPart)
+        public static bool CheckMainPartHasBeenOrdered(Part mainPart)
         {
             string prelimMark = "";
             mainPart.GetUserProperty("PRELIM_MARK", ref prelimMark);

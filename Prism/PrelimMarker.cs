@@ -8,7 +8,7 @@ namespace Prism
 {
     public static class PrelimMarker
     {
-        public static void AddPrelimMarks(SevModelEnumerator modelEnum, Model myModel)
+        public static void AddPrelimMarks(SelectedObjects modelEnum, Model myModel)
         {
             var allParts = modelEnum.SelectedModelParts.Cast<Part>().ToList();
             var groupedParts = allParts.GroupBy(p => new { profile = p.Profile.ProfileString, length = GetPartLength(p), material = p.Material.MaterialString });

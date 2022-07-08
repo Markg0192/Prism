@@ -13,24 +13,24 @@ namespace Prism
     /// The Model modifiers class is where all changes to the model take place.
     /// This is usually adding stamps to member and drawing user fields.
     /// </summary>
-    public class ModelModifiers
+    public static class ModelModifiers
     {
-        public ModelModifiers(Model model)
+       /* public static ModelModifiers(Model model)
         {
             ModelData = model.CreateSevModelData();
         }
 
-        public SevModelData ModelData;
+        public static SevModelData ModelData;*/
 
-        public void ModifyAttributes(SevModelEnumerator modelEnum, int stageNumber)
+        public static void ModifyAttributes(this SelectedObjects modelEnum, int stageNumber, PrismProjectData projectData)
         {
             foreach (Part part in modelEnum.SelectedModelParts)
             {
-                part.SetUserProperty($"PRISM-{stageNumber}-NAME", ModelData.Full);
-                part.SetUserProperty($"PRISM-{stageNumber}-DATE", ModelData.Date);
+                part.SetUserProperty($"PRISM-{stageNumber}-NAME", projectData.Full);
+                part.SetUserProperty($"PRISM-{stageNumber}-DATE", projectData.Date);
                 if (stageNumber == 3)
                 {
-                    part.SetUserProperty("SEV-UDA-39", ModelData.Date);
+                    part.SetUserProperty("SEV-UDA-39", projectData.Date);
                 }
                 if (stageNumber == 7)
                 {
@@ -40,7 +40,7 @@ namespace Prism
             }
         }
 
-        public void AddStartNumbers(SevModelEnumerator modelEnum, string startNumber)
+        public static void AddStartNumbers(this SelectedObjects modelEnum, string startNumber)
         {
             foreach (Part p in modelEnum.SelectedModelParts)
             {
@@ -49,7 +49,7 @@ namespace Prism
             }
         }
 
-        public void LockSelected(SevModelEnumerator modelEnum)
+        public static void LockSelected(this SelectedObjects modelEnum)
         {
             foreach (Part part in modelEnum.SelectedModelParts)
             {
@@ -57,7 +57,7 @@ namespace Prism
             }
         }
 
-        public void MoveAndRenameOmittedMembers(SevModelEnumerator modelEnum, Model model)
+        public static void MoveAndRenameOmittedMembers(this SelectedObjects modelEnum, Model model)
         {
             double distanceToMovePartsInZ = -100000;
             foreach (Part p in modelEnum.SelectedModelParts)
@@ -78,12 +78,12 @@ namespace Prism
             model.CommitChanges();
         }
 
-        public void PerformNumbering()
+        public static void PerformNumbering(this SelectedObjects modelEnum)
         {
             new MacroBuilder().Callback("acmd_partnumbers_selected", string.Empty, "main_frame").Run();
         }
 
-        public void CreateDrawings(SevModelEnumerator modelEnum)
+        public static void CreateDrawings(this SelectedObjects modelEnum)
         {
             string sniWizardLocation = @"C:\Sev_Firm_2019i\Roles\SNI\system\SNI Drawing Wizard.dproc";
             FileInfo file = new FileInfo(sniWizardLocation);

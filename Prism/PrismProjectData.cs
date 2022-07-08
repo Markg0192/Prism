@@ -7,13 +7,13 @@ namespace Prism
     /// The model data class gathers all the information that is being read from the model.
     /// This is then used to inform folder and report names.
     /// </summary>
-    public class SevModelData
+    public class PrismProjectData
     {     
-        public SevModelData(Model model)
+        public PrismProjectData(Model model)
         {
-            ProjectInfo projectName = model.GetProjectInfo();
-            ProjName = projectName.Name;
-            ProjNumber = projectName.ProjectNumber;
+            ProjectInfo projectInfo = model.GetProjectInfo();
+            ProjName = projectInfo.Name;
+            ProjNumber = projectInfo.ProjectNumber;
             Date = DateTime.Now.ToString("dd/MM/yyyy");          
             string[] NameArray = Environment.UserName.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
             First = Capitalise(NameArray[0]);
@@ -30,7 +30,7 @@ namespace Prism
         public readonly string Full;
         public readonly string Initials;
 
-        public string Capitalise(string original)
+        private string Capitalise(string original)
         {
             char[] chars = original.ToLower().ToCharArray();
             string initial = new string(chars, 0, 1).ToUpper();

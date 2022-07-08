@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Tekla.Structures.Model;
 
 namespace Prism
@@ -12,7 +9,7 @@ namespace Prism
     {
         private int _maxNumberOfPartsInAnArray = 99;
 
-        public void ExportBSWX(SevModelEnumerator modelEnum, string myFolder, SevModelData modelData, string phaseNumber, string issueNumber, string orderType)
+        public void ExportBSWX(SelectedObjects modelEnum, string myFolder, PrismProjectData modelData, string phaseNumber, string issueNumber, string orderType)
         {
             List<ArrayList> myLists = new List<ArrayList>();
             myLists.Add(new ArrayList());

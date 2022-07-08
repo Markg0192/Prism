@@ -29,6 +29,7 @@ namespace Prism
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PrismForm));
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
@@ -73,6 +74,8 @@ namespace Prism
             this.phaseNumber = new System.Windows.Forms.TextBox();
             this.issueNumber = new System.Windows.Forms.TextBox();
             this.pictureBox3 = new System.Windows.Forms.PictureBox();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.btn_BoltOrder = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox6)).BeginInit();
@@ -494,6 +497,7 @@ namespace Prism
             this.tabPage3.Controls.Add(this.label11);
             this.tabPage3.Controls.Add(this.pictureBox4);
             this.tabPage3.Controls.Add(this.statusStrip2);
+            this.tabPage3.Controls.Add(this.btn_BoltOrder);
             this.tabPage3.Controls.Add(this.btnCreatePackage);
             this.tabPage3.Controls.Add(this.lblPackageLocation);
             this.tabPage3.Controls.Add(this.cmbPackageLocation);
@@ -631,6 +635,7 @@ namespace Prism
             this.phaseNumber.Name = "phaseNumber";
             this.phaseNumber.Size = new System.Drawing.Size(124, 20);
             this.phaseNumber.TabIndex = 11;
+            this.toolTip1.SetToolTip(this.phaseNumber, "Phase or VO number.\r\n\r\n");
             // 
             // issueNumber
             // 
@@ -657,6 +662,20 @@ namespace Prism
             this.pictureBox3.TabIndex = 10;
             this.pictureBox3.TabStop = false;
             // 
+            // btn_BoltOrder
+            // 
+            this.structuresExtender.SetAttributeName(this.btn_BoltOrder, null);
+            this.structuresExtender.SetAttributeTypeName(this.btn_BoltOrder, null);
+            this.btn_BoltOrder.BackColor = System.Drawing.Color.Chartreuse;
+            this.structuresExtender.SetBindPropertyName(this.btn_BoltOrder, null);
+            this.btn_BoltOrder.Location = new System.Drawing.Point(180, 163);
+            this.btn_BoltOrder.Name = "btn_BoltOrder";
+            this.btn_BoltOrder.Size = new System.Drawing.Size(108, 37);
+            this.btn_BoltOrder.TabIndex = 17;
+            this.btn_BoltOrder.Text = "Create Bolt Order";
+            this.btn_BoltOrder.UseVisualStyleBackColor = false;
+            this.btn_BoltOrder.Click += new System.EventHandler(this.btn_BoltOrder_Click);
+            // 
             // PrismForm
             // 
             this.structuresExtender.SetAttributeName(this, null);
@@ -671,6 +690,7 @@ namespace Prism
             this.MinimumSize = new System.Drawing.Size(337, 367);
             this.Name = "PrismForm";
             this.Text = "Prism";
+            this.toolTip1.SetToolTip(this, "Phase or VO no.");
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
@@ -739,5 +759,7 @@ namespace Prism
         private System.Windows.Forms.TextBox txt_StartNumber;
         private System.Windows.Forms.ToolStripStatusLabel MaterialStatusLabel;
         private System.Windows.Forms.ToolStripStatusLabel DetailingStatusLabel;
+        private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.Button btn_BoltOrder;
     }
 }

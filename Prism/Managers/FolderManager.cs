@@ -18,31 +18,25 @@ namespace Prism
         private const string _ncFolder = "NC";
         private const string _reportFolder = "Lists";
         private const string _ifcFolder = "IFC";
-        private readonly string _fabFolder;
-        private readonly string _matFolder;
-        private readonly string _ifcPath;
         private List<string> _folderNames;    
-        private readonly string _assPath;
-        private readonly string _fitPath;
-        private readonly string _prtPath;
 
         public SevFolders(Model model, string phaseNum, string issueNum)
-        {  
-            SevModelData modelData = model.CreateSevModelData();
+        {
+            PrismProjectData modelData = new PrismProjectData(model);
             ModelPath = model.GetInfo().ModelPath;
-            _fabFolder = $"{modelData.ProjNumber}-{phaseNum}-FAB-ISSUE{issueNum}";
-            _matFolder = $"{modelData.ProjNumber}-{phaseNum}-PRELIM-ISSUE{issueNum}";
-            FabPath = Path.Combine(ModelPath, _fabFolder);
-            MatPath = Path.Combine(ModelPath, _matFolder);
-            _assPath = Path.Combine(FabPath, _assFolder);
-            _fitPath = Path.Combine(FabPath, _fitFolder);
-            _prtPath = Path.Combine(FabPath, _prtFolder);
+            string fabFolder = $"{modelData.ProjNumber}-{phaseNum}-FAB-ISSUE{issueNum}";
+            string matFolder = $"{modelData.ProjNumber}-{phaseNum}-PRELIM-ISSUE{issueNum}";
+            FabPath = Path.Combine(ModelPath, fabFolder);
+            MatPath = Path.Combine(ModelPath, matFolder);
+            string assPath = Path.Combine(FabPath, _assFolder);
+            string fitPath = Path.Combine(FabPath, _fitFolder);
+            string prtPath = Path.Combine(FabPath, _prtFolder);
             NcPath = Path.Combine(FabPath, _ncFolder);
             ReportPath = Path.Combine(FabPath, _reportFolder);
             DspPath = Path.Combine(FabPath, _dspFolder);
-            _ifcPath = Path.Combine(FabPath, _ifcFolder);
+            string ifcPath = Path.Combine(FabPath, _ifcFolder);
             _folderNames = new List<string>
-                {_assPath, _fitPath, _prtPath, DspPath, NcPath, ReportPath, _ifcPath};
+                {assPath, fitPath, prtPath, DspPath, NcPath, ReportPath, ifcPath};
         }
 
         public readonly string ModelPath;

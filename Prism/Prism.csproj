@@ -30,6 +30,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -76,23 +79,29 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BswxExporter.cs" />
+    <Compile Include="ButtonOperations\CreatePackageButton.cs" />
+    <Compile Include="ButtonOperations\DetailButton1.cs" />
+    <Compile Include="ButtonOperations\DetailButton2.cs" />
+    <Compile Include="ButtonOperations\DetailButton3.cs" />
+    <Compile Include="ButtonOperations\MaterialButton1.cs" />
+    <Compile Include="ButtonOperations\MaterialButton2.cs" />
+    <Compile Include="ButtonOperations\MaterialButton3.cs" />
     <Compile Include="EmailWriter.cs" />
+    <Compile Include="GdomValues.cs" />
     <Compile Include="PrelimMarker.cs" />
     <Compile Include="PrismDrawing.cs" />
-    <Compile Include="Extensions.cs" />
     <Compile Include="PrismPlugin.cs" />
-    <Compile Include="DrawingManager.cs" />
-    <Compile Include="FolderManager.cs" />
+    <Compile Include="Managers\DrawingManager.cs" />
+    <Compile Include="Managers\FolderManager.cs" />
     <Compile Include="ModelModifiers.cs" />
-    <Compile Include="PreRunChecks.cs" />
+    <Compile Include="ModelChecker.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="ReportManager.cs" />
-    <Compile Include="ModelData.cs" />
-    <Compile Include="ModelEnumerator.cs" />
+    <Compile Include="Managers\ReportManager.cs" />
+    <Compile Include="PrismProjectData.cs" />
     <Compile Include="PrismForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -100,6 +109,7 @@
       <DependentUpon>PrismForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SelectedObjects.cs" />
     <Compile Include="TeklaAppLibrary\MacroBuilder.cs" />
     <Compile Include="TeklaAppLibrary\ModelConnection.cs" />
     <Compile Include="TeklaAppLibrary\SeparateThread.cs" />

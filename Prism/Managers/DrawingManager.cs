@@ -16,14 +16,14 @@ namespace Prism
     /// </summary>
     public class DrawingManager
     {
-        private SevModelEnumerator _modelEnum;
+        private SelectedObjects _modelEnum;
         private SevFolders _folders;
         private Model _model;
 
-        public DrawingManager(Model model, string phaseNum, string issueNum, SevModelEnumerator modelEnum)
+        public DrawingManager(Model model, string phaseNum, string issueNum, SelectedObjects modelEnum)
         {
             _modelEnum = modelEnum;
-            _folders = model.CreateSevFolders(phaseNum, issueNum);
+            _folders = new SevFolders(model, phaseNum, issueNum);
             this._model = model;
         }
 

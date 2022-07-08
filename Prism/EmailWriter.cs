@@ -6,7 +6,7 @@ namespace Prism
     {              
         private const string _mailNewLine = "%0D%0A";
 
-        public void WriteFabEmail(string fabPrefix, int assemblyCount, int partCount, string issueNumber, string phaseNumber, string projNumber, string projName, string userName)
+        public void WriteFabEmail(string fabPrefix, int assemblyCount, int partCount, string issueNumber, string phaseNumber, string projNumber, string projName, string userName, double totalWeight)
         {
             FormIssueEmail("Test@email.com", $"{fabPrefix} Fab Issue",
                                                                                     $"Hello,{_mailNewLine}" +
@@ -17,12 +17,27 @@ namespace Prism
                                                                                     $"This fab package contains the following;{_mailNewLine}" +
                                                                                     $"{assemblyCount} Assemblies.{_mailNewLine}" +
                                                                                     $"{partCount} Parts.{_mailNewLine}" +
+                                                                                    $"{totalWeight} T. { _mailNewLine}" +
                                                                                     $"{_mailNewLine}" +
                                                                                     $"Regards,{_mailNewLine}{_mailNewLine}" +
                                                                                     $"{userName}");
         }
 
-        public void WriteMatEmail(string fabPrefix, int partCount, string issueNumber, string phaseNumber, string projNumber, string projName, string userName, string orderType)
+        public void WriteBoltOrderEmail(string fabPrefix, string issueNumber, string phaseNumber, string projNumber, string projName, string userName, string onSiteDate)
+        {
+            FormIssueEmail("purchasing@severfield.com", $"{fabPrefix} Bolt Order",
+                                                                                    $"Hello,{_mailNewLine}" +
+                                                                                    $"{_mailNewLine}" +
+                                                                                    $"This is the bolt order Issue {issueNumber} for phase {phaseNumber} in {projNumber}, {projName}.{_mailNewLine}" +
+                                                                                    $"Please order these bolts when possible.{_mailNewLine}" +
+                                                                                    $"{_mailNewLine}" +
+                                                                                    $"These items are required on site {onSiteDate}{_mailNewLine}" +
+                                                                                    $"{_mailNewLine}" +
+                                                                                    $"Regards,{_mailNewLine}{_mailNewLine}" +
+                                                                                    $"{userName}");
+        }
+
+        public void WriteMatEmail(string fabPrefix, int partCount, string issueNumber, string phaseNumber, string projNumber, string projName, string userName, string orderType, double totalWeight)
         {   
             string typeOfOrderText = "";
             if(orderType == "Order Material")
@@ -45,6 +60,7 @@ namespace Prism
                                                                                     $"{_mailNewLine}" +
                                                                                     $"This material order contains the following;{_mailNewLine}" +           
                                                                                     $"{partCount} Parts.{_mailNewLine}" +
+                                                                                    $"{totalWeight} T. { _mailNewLine}" +
                                                                                     $"{_mailNewLine}" +
                                                                                     $"Regards,{_mailNewLine}{_mailNewLine}" +
                                                                                     $"{userName}");

@@ -21,18 +21,18 @@ namespace PrismTester
             ReportManager myReportManager;
             DrawingManager myDrawingManager;
             SevFolders myFolderManager;
-            SevModelData modelData;
-            SevModelEnumerator modelEnum;
-            PreRunChecks myPreRunChecks;
-            ModelModifiers myModelModifiers;
+            PrismProjectData modelData;
+            SelectedObjects modelEnum;
+
+
             BswxExporter myBswxExporter = new BswxExporter();
             const string MailNewLine = "%0D%0A";
 
             model = new Model();
-            myPreRunChecks = new PreRunChecks(model);
 
-            modelData = model.CreateSevModelData();
-            myModelModifiers = new ModelModifiers(model);
+
+            modelData = new PrismProjectData(model);
+
 
             watch.Stop();
             Console.WriteLine($"Stage 1.0 complete, runtime: {watch.ElapsedMilliseconds} ms");
@@ -43,18 +43,19 @@ namespace PrismTester
             string testPackageLocation = "SNI";
 
 
-            modelEnum = model.CreateSevModelEnumerator("");
-            myModelModifiers.PerformNumbering();
+
+            modelEnum = new SelectedObjects("");
+
             PrelimMarker.AddPrelimMarks(modelEnum, model);
             // myModelModifiers.MoveAndRenameOmittedMembers(modelEnum, model);
 
 
-            myPreRunChecks.RunStage4Checks(modelEnum);
-            myModelModifiers.CreateDrawings(modelEnum);
+           /* myPreRunChecks.RunStage4Checks(modelEnum);
 
-            myPreRunChecks.CheckExecutionField(modelEnum);
-            myPreRunChecks.CheckNameAndClassAlignment(modelEnum);
-            myModelModifiers.ModifyAttributes(modelEnum, 1);
+
+            modelEnum.CheckExecutionField(modelEnum);
+            myPreRunChecks.CheckNameAndClassAlignment(modelEnum);*/
+
             if (!modelEnum.NumbersNotUpToDate)
             {
                 return;
@@ -125,11 +126,7 @@ namespace PrismTester
 
                 watch.Stop();
                 Console.WriteLine($"Stage 6.0 complete, runtime: {watch.ElapsedMilliseconds} ms");
-                watch.Restart();
 
-                myModelModifiers.ModifyAttributes(modelEnum, 7);
-                myFolderManager.RemoveUnusedFolders();
-                myModelModifiers.LockSelected(modelEnum);
 
                 watch.Stop();
                 Console.WriteLine($"Stage 7.0 complete, runtime: {watch.ElapsedMilliseconds} ms");
@@ -160,7 +157,7 @@ namespace PrismTester
             }
         }
 
-        public static void DummyPrintDrawings(DrawingHandler myDrawingHandler, SevFolders myFolderManager, DrawingManager myDrawingManager, SevModelEnumerator modelEnum)
+        public static void DummyPrintDrawings(DrawingHandler myDrawingHandler, SevFolders myFolderManager, DrawingManager myDrawingManager, SelectedObjects modelEnum)
         {
             Console.WriteLine($"You have {myDrawingManager.PrismDrawingList.Count} drawings to print");
             int printNumber = 1;

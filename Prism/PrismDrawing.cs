@@ -13,9 +13,9 @@ namespace Prism
     {
         private string _notRequired = "Not Required";
         private Model _model;
-        private SevModelEnumerator _modelEnum;
+        private SelectedObjects _modelEnum;
 
-        public PrismDrawing(Drawing currentDrawing, SevModelEnumerator modelEnum, Model model)
+        public PrismDrawing(Drawing currentDrawing, SelectedObjects modelEnum, Model model)
         {
             _model = model;
             _modelEnum = modelEnum;
