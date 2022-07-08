@@ -16,14 +16,14 @@ namespace Prism
     /// </summary>
     public class DrawingManager
     {
-        private SelectedObjects _modelEnum;
-        private SevFolders _folders;
+        private SelectedObjects _selectedObjects;
+        private FolderManager _folders;
         private Model _model;
 
-        public DrawingManager(Model model, string phaseNum, string issueNum, SelectedObjects modelEnum)
+        public DrawingManager(Model model, string phaseNum, string issueNum, SelectedObjects selectedObjects)
         {
-            _modelEnum = modelEnum;
-            _folders = new SevFolders(model, phaseNum, issueNum);
+            _selectedObjects = selectedObjects;
+            _folders = new FolderManager(model, phaseNum, issueNum);
             this._model = model;
         }
 
@@ -58,7 +58,7 @@ namespace Prism
 
             foreach (Drawing drawing in drawingsBySelectedParts)
             {
-                PrismDrawing prismDrawing = new PrismDrawing(drawing, _modelEnum, _model);
+                PrismDrawing prismDrawing = new PrismDrawing(drawing, _selectedObjects, _model);
                 if (prismDrawing.DrawingRequired)
                 {
                     PrismDrawingList.Add(prismDrawing);
@@ -102,7 +102,7 @@ namespace Prism
             foreach (PrismDrawing myDrawing in PrismDrawingList)
             {
                 statusLabel.Text = "Starting to print";
-                //_modelEnum.MyDrawingHandler.IssueDrawing(myDrawing.TeklaDrawing);
+                //_selectedObjects.MyDrawingHandler.IssueDrawing(myDrawing.TeklaDrawing);
                 DPMPrinterAttributes myPDF = new DPMPrinterAttributes();
                 myPDF.ColorMode = DotPrintColor.BlackAndWhite;
                 myPDF.OpenFileWhenFinished = false;
@@ -111,7 +111,7 @@ namespace Prism
                 myPDF.OutputType = DotPrintOutputType.PDF;
                 myPDF.PaperSize = DotPrintPaperSize.Auto;
                 statusLabel.Text = $"Printing drawing number {drawingProcessCounter} of {PrismDrawingList.Count}";
-                //_modelEnum.MyDrawingHandler.PrintDrawing(myDrawing.TeklaDrawing, myPDF);
+                //_selectedObjects.MyDrawingHandler.PrintDrawing(myDrawing.TeklaDrawing, myPDF);
                 drawingProcessCounter++;
             }
         }

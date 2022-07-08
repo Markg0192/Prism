@@ -66,6 +66,7 @@ namespace Prism
             this.pictureBox4 = new System.Windows.Forms.PictureBox();
             this.statusStrip2 = new System.Windows.Forms.StatusStrip();
             this.StatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.btn_BoltOrder = new System.Windows.Forms.Button();
             this.btnCreatePackage = new System.Windows.Forms.Button();
             this.lblPackageLocation = new System.Windows.Forms.Label();
             this.cmbPackageLocation = new System.Windows.Forms.ComboBox();
@@ -75,7 +76,6 @@ namespace Prism
             this.issueNumber = new System.Windows.Forms.TextBox();
             this.pictureBox3 = new System.Windows.Forms.PictureBox();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.btn_BoltOrder = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox6)).BeginInit();
@@ -558,17 +558,33 @@ namespace Prism
             this.StatusLabel.Size = new System.Drawing.Size(39, 17);
             this.StatusLabel.Text = "Status";
             // 
+            // btn_BoltOrder
+            // 
+            this.structuresExtender.SetAttributeName(this.btn_BoltOrder, null);
+            this.structuresExtender.SetAttributeTypeName(this.btn_BoltOrder, null);
+            this.btn_BoltOrder.BackColor = System.Drawing.Color.Chartreuse;
+            this.structuresExtender.SetBindPropertyName(this.btn_BoltOrder, null);
+            this.btn_BoltOrder.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btn_BoltOrder.Location = new System.Drawing.Point(166, 170);
+            this.btn_BoltOrder.Name = "btn_BoltOrder";
+            this.btn_BoltOrder.Size = new System.Drawing.Size(120, 37);
+            this.btn_BoltOrder.TabIndex = 17;
+            this.btn_BoltOrder.Text = "Create Bolt Order";
+            this.btn_BoltOrder.UseVisualStyleBackColor = false;
+            this.btn_BoltOrder.Click += new System.EventHandler(this.btn_BoltOrder_Click);
+            // 
             // btnCreatePackage
             // 
             this.structuresExtender.SetAttributeName(this.btnCreatePackage, null);
             this.structuresExtender.SetAttributeTypeName(this.btnCreatePackage, null);
             this.btnCreatePackage.BackColor = System.Drawing.Color.Chartreuse;
             this.structuresExtender.SetBindPropertyName(this.btnCreatePackage, null);
-            this.btnCreatePackage.Location = new System.Drawing.Point(180, 120);
+            this.btnCreatePackage.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnCreatePackage.Location = new System.Drawing.Point(166, 127);
             this.btnCreatePackage.Name = "btnCreatePackage";
-            this.btnCreatePackage.Size = new System.Drawing.Size(108, 37);
+            this.btnCreatePackage.Size = new System.Drawing.Size(120, 37);
             this.btnCreatePackage.TabIndex = 17;
-            this.btnCreatePackage.Text = "Create Package";
+            this.btnCreatePackage.Text = "Create Fab Package";
             this.btnCreatePackage.UseVisualStyleBackColor = false;
             this.btnCreatePackage.Click += new System.EventHandler(this.btnCreatePackage_Click);
             // 
@@ -661,20 +677,6 @@ namespace Prism
             this.pictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox3.TabIndex = 10;
             this.pictureBox3.TabStop = false;
-            // 
-            // btn_BoltOrder
-            // 
-            this.structuresExtender.SetAttributeName(this.btn_BoltOrder, null);
-            this.structuresExtender.SetAttributeTypeName(this.btn_BoltOrder, null);
-            this.btn_BoltOrder.BackColor = System.Drawing.Color.Chartreuse;
-            this.structuresExtender.SetBindPropertyName(this.btn_BoltOrder, null);
-            this.btn_BoltOrder.Location = new System.Drawing.Point(180, 163);
-            this.btn_BoltOrder.Name = "btn_BoltOrder";
-            this.btn_BoltOrder.Size = new System.Drawing.Size(108, 37);
-            this.btn_BoltOrder.TabIndex = 17;
-            this.btn_BoltOrder.Text = "Create Bolt Order";
-            this.btn_BoltOrder.UseVisualStyleBackColor = false;
-            this.btn_BoltOrder.Click += new System.EventHandler(this.btn_BoltOrder_Click);
             // 
             // PrismForm
             // 

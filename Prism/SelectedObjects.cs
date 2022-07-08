@@ -4,18 +4,19 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using Tekla.Structures.Model;
 using Tekla.Structures.Model.Operations;
+using static Prism.PrismForm;
 
 namespace Prism
 {
     /// <summary>
-    /// The SelecedObjects class is the central area for all model enumeration, outputting model parts, bolts, drawings etc.
+    /// The SelecedObjects class gets and stores model objects for our use elsewhere.
     /// </summary>
     public class SelectedObjects
     {
         private ModelObjectEnumerator Moe;
         // public DrawingHandler MyDrawingHandler; This will be needed when drawing functionaility is introduced
 
-        public SelectedObjects(string stageType)
+        public SelectedObjects(stageTypes stageType)
         {
             NumbersNotUpToDate = true;
             AssembliesList = new List<Assembly>();
@@ -25,31 +26,25 @@ namespace Prism
             Moe = new Tekla.Structures.Model.UI.ModelObjectSelector().GetSelectedObjects();
             MyMarks = new List<string>();
 
-            foreach (object myObject in Moe)
-            {
-                Part myPart = myObject as Part;
-                if (myPart != null)
+            foreach (object myObject in Moe) // This selects all items, if it is a part add to list, if it is a component get the objects within and add, do this twice to deal with components inside components.
+            {      
+                if (myObject is BaseComponent myComponent)
                 {
-                    if (!Operation.IsNumberingUpToDate(myPart) && stageType == "FAB")
+                    ModelObjectEnumerator moe = myComponent.GetChildren();
+                    foreach (object myCompObject in moe)
                     {
-                        const string notUpToDateMessage = "Your member numbering is not up to date, please update and try again";
-                        const string notUpToDateTitle = "Numbers not up to date";
-                        MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        NumbersNotUpToDate = false;
-                        return;
-                    }
-                    SelectedModelParts.Add(myPart);
-
-                    MyMarks.Add(myPart.GetPartMark());
-
-                    Assembly assembly = myPart.GetAssembly();
-                    if (assembly != null)
-                    {
-                        Assembly matchingAssembly = null;
-                        matchingAssembly = AssembliesList.Find(x => x.Identifier.ToString() == assembly.Identifier.ToString());
-                        if (matchingAssembly == null) AssembliesList.Add(assembly);
+                        if (myCompObject is BaseComponent myComponent2)
+                        {
+                            ModelObjectEnumerator moe2 = myComponent2.GetChildren();
+                            foreach (object myCompObject2 in moe2)
+                            {
+                                ProcessMoe(myCompObject2, stageType);
+                            }
+                        }
+                        else ProcessMoe(myCompObject, stageType);
                     }
                 }
+                else ProcessMoe(myObject, stageType);                
             }
 
             if (AssembliesList != null)
@@ -78,6 +73,42 @@ namespace Prism
         public List<BoltGroup> SelectedModelBolts { get; set; }
         public List<Part> SelectedModelParts { get; set; }
         public List<string> MyMarks { get; set; }
+
+        private void ProcessMoe(object myObject, stageTypes stageType)
+        { 
+            if (myObject is Part myPart)
+            {
+                if (!Operation.IsNumberingUpToDate(myPart) && stageType == stageTypes.FAB)
+                {
+                    const string notUpToDateMessage = "Your member numbering is not up to date, please update and try again";
+                    const string notUpToDateTitle = "Numbers not up to date";
+                    MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    NumbersNotUpToDate = false;
+                    return;
+                }
+                SelectedModelParts.Add(myPart);
+
+                MyMarks.Add(myPart.GetPartMark());
+
+                if (myObject is Assembly assembly)
+                {
+                    Assembly matchingAssembly = null;
+                    matchingAssembly = AssembliesList.Find(x => x.Identifier.ToString() == assembly.Identifier.ToString());
+                    if (matchingAssembly == null) AssembliesList.Add(assembly);
+                }
+            }
+        }
+
+        public void GetCorrectModelSelection()
+        {
+            ArrayList selectList = new ArrayList();
+            foreach(Part part in SelectedModelParts)
+            {
+                selectList.Add(part);
+            }
+           Tekla.Structures.Model.UI.ModelObjectSelector ms = new Tekla.Structures.Model.UI.ModelObjectSelector();           
+            ms.Select(selectList);
+        }
 
         private static List<BoltGroup> GetBoltsFromAssembly(Assembly assembly)
         {

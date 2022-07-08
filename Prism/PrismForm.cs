@@ -12,9 +12,9 @@ namespace Prism
         private Model _model;
         //private DrawingManager _myDrawingManager; temporarily not in use
         private PrismProjectData _modelData;
-        private SelectedObjects _modelEnum;
+        private SelectedObjects _selectedObjects;
         private EmailWriter _myEmailWriter = new EmailWriter();
-
+        public enum stageTypes { PRELIM, Check, FAB, Unassigned};
 
         public PrismForm()
         {
@@ -26,9 +26,9 @@ namespace Prism
         private void btnRunThroughMaterialChecks_Click(object sender, EventArgs e)
         {  
             MaterialStatusLabel.Text = "Working";
-            if (!InitialSetup(1, "PRELIM", false)) { return; }
+            if (!InitialSetup(1, stageTypes.PRELIM, false)) { return; }
 
-            _modelEnum.MaterialButton1op(_modelData, 1);
+            _selectedObjects.MaterialButton1op(_modelData, 1);
 
             MaterialStatusLabel.Text = "Complete";
         }
@@ -36,9 +36,9 @@ namespace Prism
         private void btn_AddStartNumbers_Click(object sender, EventArgs e)
         {
             MaterialStatusLabel.Text = "Working";
-            if(!InitialSetup(2, "PRELIM", true, true, txt_StartNumber.Text, null)) { return; } ;
+            if(!InitialSetup(2, stageTypes.PRELIM, true, true, txt_StartNumber.Text, null)) { return; } ;
 
-            _modelEnum.MaterialButton2op(txt_StartNumber.Text, 2, _modelData);
+            _selectedObjects.MaterialButton2op(txt_StartNumber.Text, 2, _modelData);
 
             MaterialStatusLabel.Text = "Complete";
         }
@@ -46,9 +46,9 @@ namespace Prism
         private void btnOrderMaterial_Click(object sender, EventArgs e)
         {
             MaterialStatusLabel.Text = "Working";      
-            if(!InitialSetup(3, "PRELIM", true, true, txt_MaterialIssueNumber.Text, txt_MaterialPhaseNumber.Text)) { return; } ;
+            if(!InitialSetup(3, stageTypes.PRELIM, true, true, txt_MaterialIssueNumber.Text, txt_MaterialPhaseNumber.Text)) { return; } ;
 
-            _modelEnum.MaterialButton3op(_myEmailWriter, _model, _modelData, txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text, cmb_OrderMaterial.Text, 3, "PRELIM");
+            _selectedObjects.MaterialButton3op(_myEmailWriter, _model, _modelData, txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text, cmb_OrderMaterial.Text, 3, stageTypes.PRELIM);
 
             MaterialStatusLabel.Text = "Complete";
         }
@@ -56,9 +56,9 @@ namespace Prism
         private void btnRunThroughDetailingChecks_Click(object sender, EventArgs e)
         {
             DetailingStatusLabel.Text = "Working";
-            if(!InitialSetup(4, "Check", false)) { return; }
+            if(!InitialSetup(4, stageTypes.Check, false)) { return; }
 
-            _modelEnum.DetailButton1op(_modelData, 4);
+            _selectedObjects.DetailButton1op(_modelData, 4);
 
             DetailingStatusLabel.Text = "Complete";
         }
@@ -66,9 +66,9 @@ namespace Prism
         private void btnDetailingChecksComplete_Click(object sender, EventArgs e)
         {
             DetailingStatusLabel.Text = "Working";
-            if(!InitialSetup(5, "Check", true)) { return; }
+            if(!InitialSetup(5, stageTypes.Check, true)) { return; }
 
-            _modelEnum.DetailButton2op(_modelData, 5);
+            _selectedObjects.DetailButton2op(_modelData, 5);
 
             DetailingStatusLabel.Text = "Complete";
         }
@@ -76,9 +76,9 @@ namespace Prism
         private void btn_CreateDrawings_Click(object sender, EventArgs e)
         {
             DetailingStatusLabel.Text = "Working";
-            if(!InitialSetup(6, "Check", true)) { return; }
+            if(!InitialSetup(6, stageTypes.Check, true)) { return; }
 
-            string statusLabelMessage = _modelEnum.DetailButton3op(_modelData, 6);
+            string statusLabelMessage = _selectedObjects.DetailButton3op(_modelData, 6);
 
             DetailingStatusLabel.Text = statusLabelMessage;
         }
@@ -93,10 +93,10 @@ namespace Prism
             StatusLabel.Text = "Working";
             Cursor = Cursors.AppStarting;
 
-            if(!InitialSetup(7, "FAB", false)) { return; }
-            if (!_modelEnum.NumbersNotUpToDate) {return;}
+            if(!InitialSetup(7, stageTypes.FAB, false)) { return; }
+            if (!_selectedObjects.NumbersNotUpToDate) {return;}
 
-            string statusLabelMessage = _modelEnum.CreateFabPackage(_myEmailWriter, _modelData, _model, cmbPackageLocation.Text, phaseNumber.Text, issueNumber.Text, "FAB", 7);
+            string statusLabelMessage = _selectedObjects.CreateFabPackage(_myEmailWriter, _modelData, _model, cmbPackageLocation.Text, phaseNumber.Text, issueNumber.Text, stageTypes.FAB, 7);
 
             Cursor = Cursors.Default;
             StatusLabel.Text = statusLabelMessage;          
@@ -126,7 +126,7 @@ namespace Prism
             }
         }
 
-        private bool InitialSetup(int stageNumber, string stageType, bool checkForPreviousSteps, bool checkForInputs = false, string input1 = "", string input2 = "")
+        private bool InitialSetup(int stageNumber, stageTypes stageType, bool checkForPreviousSteps, bool checkForInputs = false, string input1 = "", string input2 = "")
         {      
             if (checkForInputs && !ModelChecker.CheckForInputs(stageNumber, input1, input2))
             {          
@@ -134,9 +134,9 @@ namespace Prism
                 return false;
             }         
 
-            _modelEnum = new SelectedObjects(stageType);
+            _selectedObjects = new SelectedObjects(stageType);
             
-            if (checkForPreviousSteps && !ModelChecker.ArePreviousStepsComplete(_modelEnum, stageNumber))
+            if (checkForPreviousSteps && !ModelChecker.ArePreviousStepsComplete(_selectedObjects, stageNumber))
             {
                 DetailingStatusLabel.Text = "Cancelled";
                 return false;

@@ -8,7 +8,7 @@ namespace Prism
 
         public void WriteFabEmail(string fabPrefix, int assemblyCount, int partCount, string issueNumber, string phaseNumber, string projNumber, string projName, string userName, double totalWeight)
         {
-            FormIssueEmail("Test@email.com", $"{fabPrefix} Fab Issue",
+            FormIssueEmail("ni.fabissue@severfield.com", $"{fabPrefix} Fab Issue",
                                                                                     $"Hello,{_mailNewLine}" +
                                                                                     $"{_mailNewLine}" +
                                                                                     $"This is the fab package Issue {issueNumber} for phase {phaseNumber} in {projNumber}, {projName}.{_mailNewLine}" +

@@ -13,7 +13,7 @@ namespace Prism
     /// </summary>
     public class ReportManager
     {
-        public SevFolders Folders;
+        public FolderManager Folders;
         private PrismProjectData _modelData;
         public readonly string FabReportPrefix;
         public readonly string MatReportPrefix;
@@ -45,7 +45,7 @@ namespace Prism
 
         public ReportManager(Model model, string phaseNum, string issueNum)
         {
-            Folders = new SevFolders(model, phaseNum, issueNum);
+            Folders = new FolderManager(model, phaseNum, issueNum);
             _modelData = new PrismProjectData(model);
             FabReportPrefix = ($"{_modelData.ProjNumber}-{phaseNum}-FAB-ISSUE{issueNum}");
             MatReportPrefix = ($"{_modelData.ProjNumber}-{phaseNum}-PRELIM-ISSUE{issueNum}");
@@ -82,8 +82,7 @@ namespace Prism
         {
             _niFirmFolderReportPath = $"C:/Sev_Firm_2019i/Roles/SNI/Reports";
             _reportBolts = Path.Combine(_niFirmFolderReportPath, _reportBoltsName);
-            Operation.CreateReportFromSelected(_reportBolts, Path.Combine(Folders.ModelPath, $"Reports"), _title1, _title2, _title3);
-
+            Operation.CreateReportFromSelected(_reportBolts, Path.Combine(Folders.BoltPath, $"{FabReportPrefix}{_reportBoltsName}"), _title1, _title2, _title3);
         }
 
         public void CreateFabReports(List<Part> partsList, List<BoltGroup> boltList, string packageLocation)

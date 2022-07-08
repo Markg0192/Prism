@@ -11,9 +11,9 @@ namespace Prism
     /// </summary>
     public static class ModelChecker
     {      
-        public static bool CheckExecutionField(this SelectedObjects modelEnum)
+        public static bool CheckExecutionField(this SelectedObjects selectedObjects)
         {  
-            foreach (Assembly ass in modelEnum.AssembliesList)
+            foreach (Assembly ass in selectedObjects.AssembliesList)
             {
                 Part p = ass.GetMainPart() as Part;
                 int executionClassData = 10;
@@ -30,9 +30,9 @@ namespace Prism
             return true;
         }
 
-        public static bool CheckNameAndClassAlignment(this SelectedObjects modelEnum)
+        public static bool CheckNameAndClassAlignment(this SelectedObjects selectedObjects)
         {
-            foreach (Part p in modelEnum.SelectedModelParts)
+            foreach (Part p in selectedObjects.SelectedModelParts)
             {
                 List<string> meantToBeClass = GdomValues.PartClass()[p.Name] as List<string>;
                 if (!meantToBeClass.Contains(p.Class)) 
@@ -51,9 +51,9 @@ namespace Prism
             MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
-        public static bool ArePreviousStepsComplete(SelectedObjects modelEnum, int stageNumber)
+        public static bool ArePreviousStepsComplete(SelectedObjects selectedObjects, int stageNumber)
         {
-            foreach (Part p in modelEnum.SelectedModelParts)
+            foreach (Part p in selectedObjects.SelectedModelParts)
             {
                 string userProperty = "";
                 p.GetUserProperty($"PRISM-{stageNumber - 1}-NAME", ref userProperty);
@@ -96,29 +96,29 @@ namespace Prism
             return true;
         }
 
-        public static bool RunStage4Checks(this SelectedObjects modelEnum)
+        public static bool RunStage4Checks(this SelectedObjects selectedObjects)
         {
             bool process = true;
-            foreach (Assembly ass in modelEnum.AssembliesList)
+            foreach (Assembly ass in selectedObjects.AssembliesList)
             {
                 Part myMainPart = ass.GetMainPart() as Part;
-                process = CheckMainPartHasBeenOrdered(myMainPart);
+                process = myMainPart.CheckMainPartHasBeenOrdered();
                 if (!process) { return false; }
-                process = CheckMainPartHasFinish(myMainPart);
+                process = myMainPart.CheckMainPartHasFinish();
                 if (!process) { return false; }
                 ArrayList mySecondaries = ass.GetSecondaries();
                 foreach (Part mySecondaryPart in mySecondaries)
                 {
-                    process = CheckStartNumbersMatch(myMainPart, mySecondaryPart);
+                    process = myMainPart.CheckStartNumbersMatch(mySecondaryPart);
                     if (!process) { return false; }
-                    process = CheckPhasesMatch(myMainPart, mySecondaryPart);
+                    process = myMainPart.CheckPhasesMatch(mySecondaryPart);
                     if (!process) { return false; }
                 }
             }
             return true;
         }
 
-        public static bool CheckStartNumbersMatch(Part mainPart, Part secondaryPart)
+        public static bool CheckStartNumbersMatch(this Part mainPart, Part secondaryPart)
         {
             if (mainPart.AssemblyNumber.StartNumber != secondaryPart.PartNumber.StartNumber)
             {
@@ -130,7 +130,7 @@ namespace Prism
             return true;
         }
 
-        public static bool CheckPhasesMatch(Part mainPart, Part secondaryPart)
+        public static bool CheckPhasesMatch(this Part mainPart, Part secondaryPart)
         {
             mainPart.GetPhase(out Phase mainPartPhase);
             secondaryPart.GetPhase(out Phase secondaryPhase);
@@ -147,7 +147,7 @@ namespace Prism
             return true;
         }
 
-        public static bool CheckMainPartHasFinish(Part mainPart)
+        public static bool CheckMainPartHasFinish(this Part mainPart)
         {
             if(mainPart.Finish.Length == 0)
             {
@@ -159,7 +159,7 @@ namespace Prism
             return true;
         }
 
-        public static bool CheckMainPartHasBeenOrdered(Part mainPart)
+        public static bool CheckMainPartHasBeenOrdered(this Part mainPart)
         {
             string prelimMark = "";
             mainPart.GetUserProperty("PRELIM_MARK", ref prelimMark);

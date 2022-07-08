@@ -2,19 +2,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using Tekla.Structures.Model;
+using static Prism.PrismForm;
 
 namespace Prism
 {
-    public class BswxExporter
+    public static class BswxExporter
     {
-        private int _maxNumberOfPartsInAnArray = 99;
+        private const int _maxNumberOfPartsInAnArray = 99;
 
-        public void ExportBSWX(SelectedObjects modelEnum, string myFolder, PrismProjectData modelData, string phaseNumber, string issueNumber, string orderType)
+        public static void ExportBSWX(this SelectedObjects selectedObjects, string myFolder, PrismProjectData modelData, string phaseNumber,
+            string issueNumber, stageTypes stageType)
         {
             List<ArrayList> myLists = new List<ArrayList>();
             myLists.Add(new ArrayList());
 
-            foreach (var item in modelEnum.AssembliesList)
+            foreach (var item in selectedObjects.AssembliesList)
             {
                 ArrayList currentList = myLists.Last();
                 if (currentList.Count >= _maxNumberOfPartsInAnArray) myLists.Add(new ArrayList());
@@ -33,7 +35,7 @@ namespace Prism
             }
 
             bimRevExp.SetComponentInput(myInputs);
-            bimRevExp.SetAttribute("output_file_path", $@"{myFolder}\{modelData.ProjNumber}-{phaseNumber}-{orderType}-ISSUE{issueNumber}.bswx");
+            bimRevExp.SetAttribute("output_file_path", $@"{myFolder}\{modelData.ProjNumber}-{phaseNumber}-{stageType.ToString()}-ISSUE{issueNumber}.bswx");
             bimRevExp.SetAttribute("export_cam_files", 0);
             bimRevExp.SetAttribute("cam_file_folder", "");
             bimRevExp.SetAttribute("export_gantt_charts", 0);

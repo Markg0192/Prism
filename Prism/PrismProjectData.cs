@@ -4,8 +4,7 @@ using Tekla.Structures.Model;
 namespace Prism
 {
     /// <summary>
-    /// The model data class gathers all the information that is being read from the model.
-    /// This is then used to inform folder and report names.
+    /// The Prism project data class gathers some project information for us to use in folder naming, report naming and email text.
     /// </summary>
     public class PrismProjectData
     {     

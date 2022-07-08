@@ -9,7 +9,7 @@ namespace Prism
     /// The Create folders method creates all folders that may be required (even if they aren't) because of this we also have he remove 
     /// unused folders method which runs at the end of the process to clear out any unused folders.
     /// </summary>
-    public class SevFolders
+    public class FolderManager
     {  
         private const string _assFolder = "ASS";
         private const string _fitFolder = "FIT";
@@ -20,14 +20,16 @@ namespace Prism
         private const string _ifcFolder = "IFC";
         private List<string> _folderNames;    
 
-        public SevFolders(Model model, string phaseNum, string issueNum)
+        public FolderManager(Model model, string phaseNum, string issueNum)
         {
             PrismProjectData modelData = new PrismProjectData(model);
             ModelPath = model.GetInfo().ModelPath;
             string fabFolder = $"{modelData.ProjNumber}-{phaseNum}-FAB-ISSUE{issueNum}";
             string matFolder = $"{modelData.ProjNumber}-{phaseNum}-PRELIM-ISSUE{issueNum}";
+            string boltFolder = $"{modelData.ProjNumber}-{phaseNum}-BOLT-ISSUE{issueNum}";
             FabPath = Path.Combine(ModelPath, fabFolder);
             MatPath = Path.Combine(ModelPath, matFolder);
+            BoltPath = Path.Combine(ModelPath, boltFolder);
             string assPath = Path.Combine(FabPath, _assFolder);
             string fitPath = Path.Combine(FabPath, _fitFolder);
             string prtPath = Path.Combine(FabPath, _prtFolder);
@@ -42,6 +44,7 @@ namespace Prism
         public readonly string ModelPath;
         public readonly string FabPath;
         public readonly string MatPath;
+        public readonly string BoltPath;
         public readonly string NcPath;
         public readonly string ReportPath;
         public readonly string DspPath;
@@ -60,6 +63,11 @@ namespace Prism
         public void CreateMatFolder()
         {
             Directory.CreateDirectory(MatPath);
+        }
+
+        public void CreateBoltFolder()
+        {
+            Directory.CreateDirectory(BoltPath);
         }
 
         //This method is not used yet, it will be required when drawing printing is enabled.

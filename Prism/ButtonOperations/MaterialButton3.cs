@@ -1,27 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 using Tekla.Structures.Model;
+using static Prism.PrismForm;
 
 namespace Prism.ButtonOperations
 {
     public static class MaterialButton3
     {
-        public static void MaterialButton3op(this SelectedObjects myObjects, EmailWriter myEmailWriter, Model myModel, PrismProjectData projectData, string phaseNumber, string issueNumber, string orderType, int stageNumber, string stageType)
+        public static void MaterialButton3op(this SelectedObjects myObjects, EmailWriter myEmailWriter, Model myModel, PrismProjectData projectData, 
+            string phaseNumber, string issueNumber, string orderType, int stageNumber, stageTypes stageType)
         {
-            SevFolders myFolderManager = new SevFolders(myModel, phaseNumber, issueNumber);
+            FolderManager myFolderManager = new FolderManager(myModel, phaseNumber, issueNumber);
             ReportManager myReportManager = new ReportManager(myModel, phaseNumber, issueNumber);
-            BswxExporter myBswxExporter = new BswxExporter();
 
-            PrelimMarker.AddPrelimMarks(myObjects, myModel);
+            myObjects.AddPrelimMarks(myModel.GetProjectInfo());
             myFolderManager.CreateMatFolder();
             myReportManager.CreateMaterialReports(myObjects.SelectedModelParts, orderType);
             if (orderType != "Omit Material")
             {
-                myBswxExporter.ExportBSWX(myObjects, myFolderManager.MatPath, projectData, phaseNumber, issueNumber, stageType);
+                myObjects.ExportBSWX(myFolderManager.MatPath, projectData, phaseNumber, issueNumber, stageType);
             }
             else
             {

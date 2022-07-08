@@ -1,5 +1,6 @@
 ﻿using System.Windows.Forms;
 using Tekla.Structures.Model;
+using static Prism.PrismForm;
 
 namespace Prism.ButtonOperations
 {
@@ -10,17 +11,18 @@ namespace Prism.ButtonOperations
         public static void CreateBoltList(EmailWriter myEmailWriter, Model myModel, string phaseNumber, string issueNumber, PrismProjectData projectData)
         {
             ReportManager myReportManager = new ReportManager(myModel, phaseNumber, issueNumber);
+            FolderManager myFolderManager = new FolderManager(myModel, phaseNumber, issueNumber);
+            myFolderManager.CreateBoltFolder();
             myReportManager.CreateBoltList();
-            myEmailWriter.WriteBoltOrderEmail(myReportManager.FabReportPrefix, issueNumber, phaseNumber, projectData.ProjNumber, projectData.ProjName, projectData.Full, "Right Away!!");
+            myEmailWriter.WriteBoltOrderEmail(myReportManager.FabReportPrefix, issueNumber, phaseNumber, projectData.ProjNumber, projectData.ProjName, projectData.Full, "Right away!!");
 }
 
-        public static string CreateFabPackage(this SelectedObjects myObjects, EmailWriter myEmailWriter, PrismProjectData projectData, Model myModel, string packageLocation, string phaseNumber, string issueNumber, string stageType, int stageNumber)
+        public static string CreateFabPackage(this SelectedObjects myObjects, EmailWriter myEmailWriter, PrismProjectData projectData, Model myModel, string packageLocation, string phaseNumber, string issueNumber, stageTypes stageType, int stageNumber)
         {
 
             ReportManager myReportManager = new ReportManager(myModel, phaseNumber, issueNumber);
-            //MyDrawingManager = new DrawingManager(Model, phaseNumber.Text, issueNumber.Text, ModelEnum); Temporarily not in use
-            SevFolders myFolderManager = new SevFolders(myModel, phaseNumber, issueNumber);
-            BswxExporter myBswxExporter = new BswxExporter();
+            //MyDrawingManager = new DrawingManager(Model, phaseNumber.Text, issueNumber.Text, selectedObjects); Temporarily not in use
+            FolderManager myFolderManager = new FolderManager(myModel, phaseNumber, issueNumber);
 
             bool packageSNI = packageLocation == "SNI";
             bool packageSUK = packageLocation == "SUK";
@@ -30,7 +32,7 @@ namespace Prism.ButtonOperations
 
             if (packageSNI)
             {
-                myBswxExporter.ExportBSWX(myObjects, myFolderManager.DspPath, projectData, phaseNumber, issueNumber, stageType);
+                myObjects.ExportBSWX(myFolderManager.DspPath, projectData, phaseNumber, issueNumber, stageType);
                 myFolderManager.CreateFabFolders();
                 myReportManager.CreateFabReports(myObjects.SelectedModelParts, myObjects.SelectedModelBolts, packageLocation);
                 // MyDrawingManager.PrintDrawings(StatusLabel); Temporarily not in use
