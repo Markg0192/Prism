@@ -1,6 +1,4 @@
-﻿using Tekla.Structures.Model;
-
-namespace Prism.ButtonOperations
+﻿namespace Prism.ButtonOperations
 {
     public static class DetailButton1
     {

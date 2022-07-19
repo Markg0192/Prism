@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Tekla.Structures.Model;
-using static Prism.PrismForm;
+using static Prism.Enums;
 
 namespace Prism
 {
@@ -34,8 +34,18 @@ namespace Prism
                 myInputs.AddInputObjects(a);
             }
 
+            string typeString;
+            if(stageType == stageTypes.Prelim1 || stageType == stageTypes.Prelim2 || stageType == stageTypes.Prelim3)
+            {
+                typeString = stageType.ToString().Substring(0, (stageType.ToString().Length - 1)).ToUpper();                
+            }
+            else
+            {
+                typeString = stageType.ToString();
+            }
+
             bimRevExp.SetComponentInput(myInputs);
-            bimRevExp.SetAttribute("output_file_path", $@"{myFolder}\{modelData.ProjNumber}-{phaseNumber}-{stageType.ToString()}-ISSUE{issueNumber}.bswx");
+            bimRevExp.SetAttribute("output_file_path", $@"{myFolder}\{modelData.ProjNumber}-{phaseNumber}-{typeString}-ISSUE{issueNumber}.bswx");
             bimRevExp.SetAttribute("export_cam_files", 0);
             bimRevExp.SetAttribute("cam_file_folder", "");
             bimRevExp.SetAttribute("export_gantt_charts", 0);

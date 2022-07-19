@@ -20,12 +20,12 @@ namespace Prism
         private FolderManager _folders;
         private Model _model;
 
-        public DrawingManager(Model model, string phaseNum, string issueNum, SelectedObjects selectedObjects)
+       /* public DrawingManager(Model model, string phaseNum, string issueNum, SelectedObjects selectedObjects)
         {
             _selectedObjects = selectedObjects;
-            _folders = new FolderManager(model, phaseNum, issueNum);
+            _folders = new FolderManager(model.GetProjectInfo(), phaseNum, issueNum);
             this._model = model;
-        }
+        }*/
 
         public List<PrismDrawing> PrismDrawingList = new List<PrismDrawing>();
 

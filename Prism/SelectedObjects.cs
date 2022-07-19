@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using Tekla.Structures.Model;
 using Tekla.Structures.Model.Operations;
-using static Prism.PrismForm;
+using static Prism.Enums;
 
 namespace Prism
 {
@@ -17,34 +17,35 @@ namespace Prism
         // public DrawingHandler MyDrawingHandler; This will be needed when drawing functionaility is introduced
 
         public SelectedObjects(stageTypes stageType)
-        {
+        {       
+            List<BoltGroup> SiteBolts = new List<BoltGroup>();
+            List<BoltGroup> ShopBolts = new List<BoltGroup>();
             NumbersNotUpToDate = true;
             AssembliesList = new List<Assembly>();
             SelectedModelParts = new List<Part>();
-            SelectedModelBolts = new List<BoltGroup>();
             //MyDrawingHandler = new DrawingHandler();
             Moe = new Tekla.Structures.Model.UI.ModelObjectSelector().GetSelectedObjects();
             MyMarks = new List<string>();
 
             foreach (object myObject in Moe) // This selects all items, if it is a part add to list, if it is a component get the objects within and add, do this twice to deal with components inside components.
-            {      
+            {
                 if (myObject is BaseComponent myComponent)
                 {
-                    ModelObjectEnumerator moe = myComponent.GetChildren();
-                    foreach (object myCompObject in moe)
+                    ModelObjectEnumerator children = myComponent.GetChildren();
+                    foreach (object child in children)
                     {
-                        if (myCompObject is BaseComponent myComponent2)
+                        if (child is BaseComponent componentChild)
                         {
-                            ModelObjectEnumerator moe2 = myComponent2.GetChildren();
-                            foreach (object myCompObject2 in moe2)
+                            ModelObjectEnumerator grandChildren = componentChild.GetChildren();
+                            foreach (object grandChild in grandChildren)
                             {
-                                ProcessMoe(myCompObject2, stageType);
+                                ProcessObject(grandChild, stageType);
                             }
                         }
-                        else ProcessMoe(myCompObject, stageType);
+                        else ProcessObject(child, stageType);
                     }
                 }
-                else ProcessMoe(myObject, stageType);                
+                else ProcessObject(myObject, stageType);
             }
 
             if (AssembliesList != null)
@@ -53,36 +54,41 @@ namespace Prism
                 {
                     List<BoltGroup> MyBolts = GetBoltsFromAssembly(assembly);
                     double weight = 0;
-                    assembly.GetReportProperty("WEIGHT", ref weight);
-                    totalWeight = totalWeight + weight;
+                    assembly.GetReportProperty(ModelUDA.Weight(), ref weight);
+                    TotalWeight = TotalWeight + weight;
                     if (MyBolts != null)
                     {
                         foreach (BoltGroup bolts in MyBolts)
                         {
-                            SelectedModelBolts.Add(bolts);
+                            SiteBolts.Add(bolts);
+                            if (bolts.BoltType == BoltGroup.BoltTypeEnum.BOLT_TYPE_WORKSHOP)
+                            {
+                                ShopBolts.Add(bolts);
+                            }
                         }
                     }
                 }
-                totalWeight = Math.Round(totalWeight / 1000, 3);
+                TotalWeight = Math.Round(TotalWeight / 1000, 3);
             }
+            GetCorrectModelSelection();
+            AllBolts.Add(SiteBolts);
+            AllBolts.Add(ShopBolts);
         }
 
-        public double totalWeight { get; set; }
+        public double TotalWeight { get; set; }
         public bool NumbersNotUpToDate { get; set; }
         public List<Assembly> AssembliesList { get; set; }
-        public List<BoltGroup> SelectedModelBolts { get; set; }
+        public List<List<BoltGroup>> AllBolts = new List<List<BoltGroup>>();
         public List<Part> SelectedModelParts { get; set; }
         public List<string> MyMarks { get; set; }
 
-        private void ProcessMoe(object myObject, stageTypes stageType)
-        { 
+        private void ProcessObject(object myObject, stageTypes stageType)
+        {
             if (myObject is Part myPart)
             {
                 if (!Operation.IsNumberingUpToDate(myPart) && stageType == stageTypes.FAB)
                 {
-                    const string notUpToDateMessage = "Your member numbering is not up to date, please update and try again";
-                    const string notUpToDateTitle = "Numbers not up to date";
-                    MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    PrismWarnings.NumberingIsNotUpToDate();
                     NumbersNotUpToDate = false;
                     return;
                 }
@@ -90,11 +96,14 @@ namespace Prism
 
                 MyMarks.Add(myPart.GetPartMark());
 
-                if (myObject is Assembly assembly)
+                if (myPart.GetAssembly() is Assembly assembly)
                 {
                     Assembly matchingAssembly = null;
                     matchingAssembly = AssembliesList.Find(x => x.Identifier.ToString() == assembly.Identifier.ToString());
-                    if (matchingAssembly == null) AssembliesList.Add(assembly);
+                    if (matchingAssembly == null)
+                    {
+                        AssembliesList.Add(assembly);
+                    }
                 }
             }
         }
@@ -102,11 +111,11 @@ namespace Prism
         public void GetCorrectModelSelection()
         {
             ArrayList selectList = new ArrayList();
-            foreach(Part part in SelectedModelParts)
+            foreach (Part part in SelectedModelParts)
             {
                 selectList.Add(part);
             }
-           Tekla.Structures.Model.UI.ModelObjectSelector ms = new Tekla.Structures.Model.UI.ModelObjectSelector();           
+            Tekla.Structures.Model.UI.ModelObjectSelector ms = new Tekla.Structures.Model.UI.ModelObjectSelector();
             ms.Select(selectList);
         }
 
@@ -118,24 +127,21 @@ namespace Prism
 
             foreach (ModelObject item in secondaries)
             {
-                Part part = item as Part;
-                if (part == null)
+                if (item is Part part)
                 {
-                    continue;
-                }
-                ModelObjectEnumerator bolts = part.GetBolts();
+                    ModelObjectEnumerator bolts = part.GetBolts();
 
-                foreach (var setOfBolts in bolts)
-                {
-
-                    BoltGroup bolt = setOfBolts as BoltGroup;
-                    if (bolt.PartToBeBolted.Identifier.GUID == part.Identifier.GUID)
+                    foreach (var setOfBolts in bolts)
                     {
-                        BoltGroup matchingBolt = null;
-                        matchingBolt = myBoltsList.Find(x => x.Identifier.GUID == bolt.Identifier.GUID);
-                        if (matchingBolt == null)
+                        BoltGroup bolt = setOfBolts as BoltGroup;
+                        if (bolt.PartToBeBolted.Identifier.GUID == part.Identifier.GUID)
                         {
-                            myBoltsList.Add(bolt);
+                            BoltGroup matchingBolt = null;
+                            matchingBolt = myBoltsList.Find(x => x.Identifier.GUID == bolt.Identifier.GUID);
+                            if (matchingBolt == null)
+                            {
+                                myBoltsList.Add(bolt);
+                            }
                         }
                     }
                 }

@@ -6,7 +6,7 @@ using System.Windows.Forms;
 using Tekla.Structures.Drawing;
 using System.Diagnostics;
 using System.Collections.Generic;
-using Prism.ButtonOperations;
+using static Prism.Enums;
 
 namespace PrismTester
 {
@@ -32,7 +32,7 @@ namespace PrismTester
             model = new Model();
 
 
-            modelData = new PrismProjectData(model);
+       //    modelData = new PrismProjectData(model.GetProjectInfo());
 
 
             watch.Stop();
@@ -45,13 +45,13 @@ namespace PrismTester
 
 
 
-            selectedObjects = new SelectedObjects(PrismForm.stageTypes.Unassigned);
-            EmailWriter myEmailWriter = new EmailWriter();
+            selectedObjects = new SelectedObjects(stageTypes.Unassigned);
 
-            selectedObjects.ModifyAttributes(3, modelData);
+
+       //     selectedObjects.ModifyAttributes(3, modelData);
 
             selectedObjects.GetCorrectModelSelection();
-            CreatePackageButton.CreateBoltList(myEmailWriter, model, phaseNumber, issueNumber, modelData);
+
 
             selectedObjects.AddPrelimMarks(model.GetProjectInfo());
             // myModelModifiers.MoveAndRenameOmittedMembers(selectedObjects, model);
@@ -67,20 +67,20 @@ namespace PrismTester
             {
                 return;
             }
-            myFolderManager = new FolderManager(model, phaseNumber, issueNumber);
+         //   myFolderManager = new FolderManager(model.GetProjectInfo(), model.GetInfo().ModelPath, phaseNumber, issueNumber);
             //myBswxExporter.ExportBSWX(selectedObjects, myFolderManager.DspPath, modelData, phaseNumber, issueNumber, "");
 
             watch.Stop();
             Console.WriteLine($"Stage 1.1 complete, runtime: {watch.ElapsedMilliseconds} ms");
             watch.Restart();
 
-            myReportManager = new ReportManager(model, phaseNumber, issueNumber);
+
 
             watch.Stop();
             Console.WriteLine($"Stage 1.2 complete, runtime: {watch.ElapsedMilliseconds} ms");
             watch.Restart();
 
-            myDrawingManager = new DrawingManager(model, phaseNumber, issueNumber, selectedObjects);
+          //  myDrawingManager = new DrawingManager(model, phaseNumber, issueNumber, selectedObjects);
 
             watch.Stop();
             Console.WriteLine($"Stage 1.3 complete, runtime: {watch.ElapsedMilliseconds} ms");
@@ -94,8 +94,8 @@ namespace PrismTester
             watch.Restart();
 
             ToolStripStatusLabel DummyStrip = new ToolStripStatusLabel();
-            bool allDrawingsUpToDate = myDrawingManager.CreateDrawingList();
-            if(!allDrawingsUpToDate)
+           // bool allDrawingsUpToDate = myDrawingManager.CreateDrawingList();
+          //  if(!allDrawingsUpToDate)
             {
                 const string notUpToDateMessage = "Some drawings are not up to date, please update and try again";
                 const string notUpToDateTitle = "Drawings not up to date";
@@ -123,7 +123,7 @@ namespace PrismTester
                 watch.Restart();
 
                 myFolderManager.CreateFabFolders();
-                myReportManager.CreateFabReports(selectedObjects.SelectedModelParts, selectedObjects.SelectedModelBolts, testPackageLocation);
+                myReportManager.CreateFabReports(selectedObjects.SelectedModelParts, selectedObjects.AllBolts, testPackageLocation);
 
                 watch.Stop();
                 Console.WriteLine($"Stage 5.0 complete, runtime: {watch.ElapsedMilliseconds} ms");

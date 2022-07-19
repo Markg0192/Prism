@@ -21,15 +21,11 @@ namespace Prism
         {
             foreach (Part part in selectedObjects.SelectedModelParts)
             {
-                part.SetUserProperty($"PRISM-{stageNumber}-NAME", projectData.Full);
-                part.SetUserProperty($"PRISM-{stageNumber}-DATE", projectData.Date);
-                if (stageNumber == 3)
-                {
-                    part.SetUserProperty("SEV-UDA-39", projectData.Date);
-                }
+                part.SetUserProperty(ModelUDA.CurrentStageName(stageNumber), projectData.Full);
+                part.SetUserProperty(ModelUDA.CurrentStageDate(stageNumber), projectData.Date);
                 if (stageNumber == 7)
                 {
-                    part.SetUserProperty($"PRISM-{stageNumber}-NUMBER", part.GetPartMark());
+                    part.SetUserProperty(ModelUDA.CurrentStageNumber(stageNumber), part.GetPartMark());
                 }
                 part.Modify();
             }
@@ -68,7 +64,7 @@ namespace Prism
                     {
                         Console.WriteLine("Last number read" + currentLastNumber);
                     }
-                    p.SetUserProperty("PRELIM_MARK", (currentLastNumber + p.AssemblyNumber.StartNumber - 1).ToString());
+                    p.SetUserProperty(ModelUDA.PrelimMark(), (currentLastNumber + p.AssemblyNumber.StartNumber - 1).ToString());
                 }
                 currentLastNumber++;
                 pInfo.SetUserProperty(prismLastNumberAttributeName, currentLastNumber);
@@ -88,11 +84,11 @@ namespace Prism
         {
             foreach (Part part in selectedObjects.SelectedModelParts)
             {
-                part.SetUserProperty("OBJECT_LOCKED", 1);
+                part.SetUserProperty(ModelUDA.ObjectLock(), 1);
             }
         }
 
-        public static void MoveAndRenameOmittedMembers(this SelectedObjects selectedObjects, Model model)
+        public static void MoveAndRenameOmittedMembers(this SelectedObjects selectedObjects)
         {
             double distanceToMovePartsInZ = -100000;
             foreach (Part p in selectedObjects.SelectedModelParts)
@@ -109,8 +105,7 @@ namespace Prism
                 p.Modify();
                 Vector myVector = new Vector(0, 0, distanceToMovePartsInZ);
                 Operation.MoveObject(p, myVector);
-            }
-            model.CommitChanges();
+            }            
         }
 
         public static void PerformNumbering(this SelectedObjects selectedObjects)
@@ -120,8 +115,8 @@ namespace Prism
 
         public static void CreateDrawings(this SelectedObjects selectedObjects)
         {
-            string sniWizardLocation = @"C:\Sev_Firm_2019i\Roles\SNI\system\SNI Drawing Wizard.dproc";
-            FileInfo file = new FileInfo(sniWizardLocation);
+            string SNIWizardLocation = @"C:\Sev_Firm_2019i\Roles\SNI\system\SNI Drawing Wizard.dproc";
+            FileInfo file = new FileInfo(SNIWizardLocation);
             AutoDrawingRule rule = new AutoDrawingRule(file.FullName);
             AutoDrawingsStatusEnum status;
             List<Identifier> idList = new List<Identifier>();

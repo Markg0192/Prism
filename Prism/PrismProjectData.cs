@@ -8,9 +8,8 @@ namespace Prism
     /// </summary>
     public class PrismProjectData
     {     
-        public PrismProjectData(Model model)
+        public PrismProjectData(ProjectInfo projectInfo, string modelPath)
         {
-            ProjectInfo projectInfo = model.GetProjectInfo();
             ProjName = projectInfo.Name;
             ProjNumber = projectInfo.ProjectNumber;
             Date = DateTime.Now.ToString("dd/MM/yyyy");          
@@ -19,8 +18,10 @@ namespace Prism
             Last = Capitalise(NameArray[1]);
             Full = First + " " + Last;
             Initials = new string(new char[] { First.ToCharArray()[0], Last.ToCharArray()[0] }).ToUpper();
-        }   
+            ProjPath = modelPath;
+        }
 
+        public readonly string ProjPath;
         public readonly string ProjName;
         public readonly string ProjNumber;
         public readonly string Date;      

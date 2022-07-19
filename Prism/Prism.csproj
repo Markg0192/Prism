@@ -87,13 +87,16 @@
     <Compile Include="ButtonOperations\MaterialButton2.cs" />
     <Compile Include="ButtonOperations\MaterialButton3.cs" />
     <Compile Include="EmailWriter.cs" />
+    <Compile Include="Enums.cs" />
     <Compile Include="GdomValues.cs" />
+    <Compile Include="ModelUDA.cs" />
     <Compile Include="PrismDrawing.cs" />
     <Compile Include="PrismPlugin.cs" />
     <Compile Include="Managers\DrawingManager.cs" />
     <Compile Include="Managers\FolderManager.cs" />
     <Compile Include="ModelModifiers.cs" />
     <Compile Include="ModelChecker.cs" />
+    <Compile Include="PrismWarnings.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

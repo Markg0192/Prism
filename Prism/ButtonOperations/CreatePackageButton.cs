@@ -1,77 +1,53 @@
 ﻿using System.Windows.Forms;
-using Tekla.Structures.Model;
-using static Prism.PrismForm;
+using static Prism.Enums;
 
 namespace Prism.ButtonOperations
 {
     public static class CreatePackageButton
     {
-        private static string _unavailableLocation = "Sorry, this package location has not been added yet, please try another location.";
-
-        public static void CreateBoltList(EmailWriter myEmailWriter, Model myModel, string phaseNumber, string issueNumber, PrismProjectData projectData)
+        public static void CreateBoltList(string phaseNumber, string issueNumber, PrismProjectData projectData, string siteDate)
         {
-            ReportManager myReportManager = new ReportManager(myModel, phaseNumber, issueNumber);
-            FolderManager myFolderManager = new FolderManager(myModel, phaseNumber, issueNumber);
-            myFolderManager.CreateBoltFolder();
+            ReportManager myReportManager = new ReportManager(projectData, phaseNumber, issueNumber);
+            myReportManager.Folders.CreateBoltFolder();
             myReportManager.CreateBoltList();
-            myEmailWriter.WriteBoltOrderEmail(myReportManager.FabReportPrefix, issueNumber, phaseNumber, projectData.ProjNumber, projectData.ProjName, projectData.Full, "Right away!!");
-}
+            EmailWriter.WriteBoltOrderEmail(projectData, myReportManager.FabReportPrefix, issueNumber, phaseNumber, siteDate);
+        }
 
-        public static string CreateFabPackage(this SelectedObjects myObjects, EmailWriter myEmailWriter, PrismProjectData projectData, Model myModel, string packageLocation, string phaseNumber, string issueNumber, stageTypes stageType, int stageNumber)
+        public static string CreateFabPackage(this SelectedObjects myObjects, PrismProjectData projectData, string packageLocation, string phaseNumber, string issueNumber, stageTypes stageType, string siteDate)
         {
-
-            ReportManager myReportManager = new ReportManager(myModel, phaseNumber, issueNumber);
+            ReportManager myReportManager = new ReportManager(projectData, phaseNumber, issueNumber);
             //MyDrawingManager = new DrawingManager(Model, phaseNumber.Text, issueNumber.Text, selectedObjects); Temporarily not in use
-            FolderManager myFolderManager = new FolderManager(myModel, phaseNumber, issueNumber);
 
-            bool packageSNI = packageLocation == "SNI";
-            bool packageSUK = packageLocation == "SUK";
-            bool packageSDB = packageLocation == "SDB";
-            bool packageHarryPeers = packageLocation == "Harry Peers";
-            bool packageDAMStructures = packageLocation == "DAM Structures";
-
-            if (packageSNI)
+            switch (packageLocation)
             {
-                myObjects.ExportBSWX(myFolderManager.DspPath, projectData, phaseNumber, issueNumber, stageType);
-                myFolderManager.CreateFabFolders();
-                myReportManager.CreateFabReports(myObjects.SelectedModelParts, myObjects.SelectedModelBolts, packageLocation);
-                // MyDrawingManager.PrintDrawings(StatusLabel); Temporarily not in use
-                myObjects.ModifyAttributes(stageNumber, projectData);
-                //MyFolderManager.RemoveUnusedFolders(); Temporarily not in use
-                myObjects.LockSelected();
-                DialogResult finishBox = MessageBox.Show($"Thanks {projectData.First}, your fab package is now complete, please attach your fab package, located in your model folder, " +
-                    $"to the following email and send to the relevant team. PLEASE NOTE: This version of Prism does NOT print drawings, you will have to do this bit yourself.", "Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                case "SNI":
+                    myObjects.ExportBSWX(myReportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType);
+                    myReportManager.Folders.CreateFabFolders();
+                    myReportManager.CreateFabReports(myObjects.SelectedModelParts, myObjects.AllBolts, packageLocation);
+                    // MyDrawingManager.PrintDrawings(StatusLabel); Temporarily not in use
+                    myObjects.ModifyAttributes((int)stageType, projectData);
+                    //MyFolderManager.RemoveUnusedFolders(); Temporarily not in use
+                    myObjects.LockSelected();
+                    DialogResult finishBox = PrismWarnings.FabPackComplete(projectData);
 
-                if (finishBox == DialogResult.OK)
-                {
-                    myEmailWriter.WriteFabEmail(myReportManager.FabReportPrefix, myObjects.AssembliesList.Count, myObjects.SelectedModelParts.Count,
-                        issueNumber, phaseNumber, projectData.ProjNumber, projectData.ProjName, projectData.Full, myObjects.totalWeight);
-                }
-                return "Complete";
-            }
+                    if (finishBox == DialogResult.OK)
+                    {
+                        EmailWriter.WriteFabEmail(projectData, myObjects, myReportManager.FabReportPrefix, issueNumber, phaseNumber, siteDate);
+                    }
+                    return "Complete";
 
-            if (packageSUK)
-            {
-                MessageBox.Show(_unavailableLocation);
-                return "Cancelled";
-            }
+                //None of the below cases are reachable now due to button restrictions
+                case "SUK":
+                    return "Cancelled";
 
-            if (packageSDB)
-            {
-                MessageBox.Show(_unavailableLocation);
-                return "Cancelled";
-            }
+                case "SDB":
+                    return "Cancelled";
 
-            if (packageHarryPeers)
-            {
-                MessageBox.Show(_unavailableLocation);
-                return "Cancelled";
-            }
+                case "Harry Peers":
+                    return "Cancelled";
 
-            if (packageDAMStructures)
-            {
-                MessageBox.Show(_unavailableLocation);
-                return "Cancelled";
+                case "DAM Structures":
+                    return "Cancelled";
             }
             return "Cancelled";
         }

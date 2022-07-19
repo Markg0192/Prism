@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using Tekla.Structures.Model;
 
 namespace Prism
 {
@@ -20,16 +19,14 @@ namespace Prism
         private const string _ifcFolder = "IFC";
         private List<string> _folderNames;    
 
-        public FolderManager(Model model, string phaseNum, string issueNum)
+        public FolderManager(PrismProjectData projectData, string phaseNum, string issueNum)
         {
-            PrismProjectData modelData = new PrismProjectData(model);
-            ModelPath = model.GetInfo().ModelPath;
-            string fabFolder = $"{modelData.ProjNumber}-{phaseNum}-FAB-ISSUE{issueNum}";
-            string matFolder = $"{modelData.ProjNumber}-{phaseNum}-PRELIM-ISSUE{issueNum}";
-            string boltFolder = $"{modelData.ProjNumber}-{phaseNum}-BOLT-ISSUE{issueNum}";
-            FabPath = Path.Combine(ModelPath, fabFolder);
-            MatPath = Path.Combine(ModelPath, matFolder);
-            BoltPath = Path.Combine(ModelPath, boltFolder);
+            string fabFolder = $"{projectData.ProjNumber}-{phaseNum}-FAB-ISSUE{issueNum}";
+            string matFolder = $"{projectData.ProjNumber}-{phaseNum}-PRELIM-ISSUE{issueNum}";
+            string boltFolder = $"{projectData.ProjNumber}-{phaseNum}-BOLT-ISSUE{issueNum}";
+            FabPath = Path.Combine(projectData.ProjPath, fabFolder);
+            MatPath = Path.Combine(projectData.ProjPath, matFolder);
+            BoltPath = Path.Combine(projectData.ProjPath, boltFolder);
             string assPath = Path.Combine(FabPath, _assFolder);
             string fitPath = Path.Combine(FabPath, _fitFolder);
             string prtPath = Path.Combine(FabPath, _prtFolder);
@@ -41,7 +38,6 @@ namespace Prism
                 {assPath, fitPath, prtPath, DspPath, NcPath, ReportPath, ifcPath};
         }
 
-        public readonly string ModelPath;
         public readonly string FabPath;
         public readonly string MatPath;
         public readonly string BoltPath;

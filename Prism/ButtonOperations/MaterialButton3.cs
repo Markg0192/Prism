@@ -1,36 +1,35 @@
 ﻿using System.Windows.Forms;
 using Tekla.Structures.Model;
-using static Prism.PrismForm;
+using static Prism.Enums;
 
 namespace Prism.ButtonOperations
 {
     public static class MaterialButton3
     {
-        public static void MaterialButton3op(this SelectedObjects myObjects, EmailWriter myEmailWriter, Model myModel, PrismProjectData projectData, 
+        public static void MaterialButton3op(this SelectedObjects myObjects, PrismProjectData projectData, ProjectInfo projectInfo, 
             string phaseNumber, string issueNumber, string orderType, int stageNumber, stageTypes stageType)
         {
-            FolderManager myFolderManager = new FolderManager(myModel, phaseNumber, issueNumber);
-            ReportManager myReportManager = new ReportManager(myModel, phaseNumber, issueNumber);
+            ReportManager myReportManager = new ReportManager(projectData, phaseNumber, issueNumber);
 
-            myObjects.AddPrelimMarks(myModel.GetProjectInfo());
-            myFolderManager.CreateMatFolder();
+            myObjects.AddPrelimMarks(projectInfo);
+            myReportManager.Folders.CreateMatFolder();
             myReportManager.CreateMaterialReports(myObjects.SelectedModelParts, orderType);
             if (orderType != "Omit Material")
             {
-                myObjects.ExportBSWX(myFolderManager.MatPath, projectData, phaseNumber, issueNumber, stageType);
+                myObjects.ExportBSWX(myReportManager.Folders.MatPath, projectData, phaseNumber, issueNumber, stageType);
             }
             else
             {
-                myObjects.MoveAndRenameOmittedMembers(myModel) ;
+                myObjects.MoveAndRenameOmittedMembers();
                 stageNumber = 8;
             }
 
             myObjects.ModifyAttributes(stageNumber, projectData);
-            DialogResult finishBox = MessageBox.Show($"Thanks {projectData.First}, your material order is now complete, please forward the following email to the relevant purchasing team", "Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            DialogResult finishBox = PrismWarnings.MaterialOrderComplete(projectData);
 
             if (finishBox == DialogResult.OK)
             {
-                myEmailWriter.WriteMatEmail(myReportManager.MatReportPrefix, myObjects.SelectedModelParts.Count, issueNumber, phaseNumber, projectData.ProjNumber, projectData.ProjName, projectData.Full, orderType, myObjects.totalWeight);
+                EmailWriter.WriteMatEmail(projectData, myObjects, myReportManager.MatReportPrefix, issueNumber, phaseNumber,  orderType);
             }
         }
     }
