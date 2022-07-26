@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using Tekla.Structures.Model;
 
 namespace Prism
 {
@@ -9,7 +8,7 @@ namespace Prism
     /// The Create folders method creates all folders that may be required (even if they aren't) because of this we also have he remove 
     /// unused folders method which runs at the end of the process to clear out any unused folders.
     /// </summary>
-    public class SevFolders
+    public class FolderManager
     {  
         private const string _assFolder = "ASS";
         private const string _fitFolder = "FIT";
@@ -18,36 +17,30 @@ namespace Prism
         private const string _ncFolder = "NC";
         private const string _reportFolder = "Lists";
         private const string _ifcFolder = "IFC";
-        private readonly string _fabFolder;
-        private readonly string _matFolder;
-        private readonly string _ifcPath;
         private List<string> _folderNames;    
-        private readonly string _assPath;
-        private readonly string _fitPath;
-        private readonly string _prtPath;
 
-        public SevFolders(Model model, string phaseNum, string issueNum)
-        {  
-            SevModelData modelData = model.CreateSevModelData();
-            ModelPath = model.GetInfo().ModelPath;
-            _fabFolder = $"{modelData.ProjNumber}-{phaseNum}-FAB-ISSUE{issueNum}";
-            _matFolder = $"{modelData.ProjNumber}-{phaseNum}-PRELIM-ISSUE{issueNum}";
-            FabPath = Path.Combine(ModelPath, _fabFolder);
-            MatPath = Path.Combine(ModelPath, _matFolder);
-            _assPath = Path.Combine(FabPath, _assFolder);
-            _fitPath = Path.Combine(FabPath, _fitFolder);
-            _prtPath = Path.Combine(FabPath, _prtFolder);
+        public FolderManager(PrismProjectData projectData, string phaseNum, string issueNum)
+        {
+            string fabFolder = $"{projectData.ProjNumber}-{phaseNum}-FAB-ISSUE{issueNum}";
+            string matFolder = $"{projectData.ProjNumber}-{phaseNum}-PRELIM-ISSUE{issueNum}";
+            string boltFolder = $"{projectData.ProjNumber}-{phaseNum}-BOLT-ISSUE{issueNum}";
+            FabPath = Path.Combine(projectData.ProjPath, fabFolder);
+            MatPath = Path.Combine(projectData.ProjPath, matFolder);
+            BoltPath = Path.Combine(projectData.ProjPath, boltFolder);
+            string assPath = Path.Combine(FabPath, _assFolder);
+            string fitPath = Path.Combine(FabPath, _fitFolder);
+            string prtPath = Path.Combine(FabPath, _prtFolder);
             NcPath = Path.Combine(FabPath, _ncFolder);
             ReportPath = Path.Combine(FabPath, _reportFolder);
             DspPath = Path.Combine(FabPath, _dspFolder);
-            _ifcPath = Path.Combine(FabPath, _ifcFolder);
+            string ifcPath = Path.Combine(FabPath, _ifcFolder);
             _folderNames = new List<string>
-                {_assPath, _fitPath, _prtPath, DspPath, NcPath, ReportPath, _ifcPath};
+                {assPath, fitPath, prtPath, DspPath, NcPath, ReportPath, ifcPath};
         }
 
-        public readonly string ModelPath;
         public readonly string FabPath;
         public readonly string MatPath;
+        public readonly string BoltPath;
         public readonly string NcPath;
         public readonly string ReportPath;
         public readonly string DspPath;
@@ -66,6 +59,11 @@ namespace Prism
         public void CreateMatFolder()
         {
             Directory.CreateDirectory(MatPath);
+        }
+
+        public void CreateBoltFolder()
+        {
+            Directory.CreateDirectory(BoltPath);
         }
 
         //This method is not used yet, it will be required when drawing printing is enabled.

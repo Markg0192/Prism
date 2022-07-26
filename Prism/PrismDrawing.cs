@@ -13,12 +13,12 @@ namespace Prism
     {
         private string _notRequired = "Not Required";
         private Model _model;
-        private SevModelEnumerator _modelEnum;
+        private SelectedObjects _selectedObjects;
 
-        public PrismDrawing(Drawing currentDrawing, SevModelEnumerator modelEnum, Model model)
+        public PrismDrawing(Drawing currentDrawing, SelectedObjects selectedObjects, Model model)
         {
             _model = model;
-            _modelEnum = modelEnum;
+            _selectedObjects = selectedObjects;
             DrawingRequired = true;
             GetPrismDrawing(currentDrawing);
         }
@@ -72,9 +72,9 @@ namespace Prism
             {
                 drawingName = drawingName + s;
             }
-            if (_modelEnum.MyMarks != null)
+            if (_selectedObjects.MyMarks != null)
             {
-                if (_modelEnum.MyMarks.Contains(drawingName))
+                if (_selectedObjects.MyMarks.Contains(drawingName))
                 {
                     RevMark = GetDrawingRevision(currentDrawing);
                     PdfName = ($"{drawingName}-{RevMark}.pdf");

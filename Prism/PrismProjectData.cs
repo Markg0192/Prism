@@ -4,24 +4,24 @@ using Tekla.Structures.Model;
 namespace Prism
 {
     /// <summary>
-    /// The model data class gathers all the information that is being read from the model.
-    /// This is then used to inform folder and report names.
+    /// The Prism project data class gathers some project information for us to use in folder naming, report naming and email text.
     /// </summary>
-    public class SevModelData
+    public class PrismProjectData
     {     
-        public SevModelData(Model model)
+        public PrismProjectData(ProjectInfo projectInfo, string modelPath)
         {
-            ProjectInfo projectName = model.GetProjectInfo();
-            ProjName = projectName.Name;
-            ProjNumber = projectName.ProjectNumber;
+            ProjName = projectInfo.Name;
+            ProjNumber = projectInfo.ProjectNumber;
             Date = DateTime.Now.ToString("dd/MM/yyyy");          
             string[] NameArray = Environment.UserName.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
             First = Capitalise(NameArray[0]);
             Last = Capitalise(NameArray[1]);
             Full = First + " " + Last;
             Initials = new string(new char[] { First.ToCharArray()[0], Last.ToCharArray()[0] }).ToUpper();
-        }   
+            ProjPath = modelPath;
+        }
 
+        public readonly string ProjPath;
         public readonly string ProjName;
         public readonly string ProjNumber;
         public readonly string Date;      
@@ -30,7 +30,7 @@ namespace Prism
         public readonly string Full;
         public readonly string Initials;
 
-        public string Capitalise(string original)
+        private string Capitalise(string original)
         {
             char[] chars = original.ToLower().ToCharArray();
             string initial = new string(chars, 0, 1).ToUpper();

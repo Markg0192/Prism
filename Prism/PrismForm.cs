@@ -1,258 +1,261 @@
-﻿using System;
-using System.Diagnostics;
+﻿using Prism.ButtonOperations;
+using System;
+using System.Drawing;
 using System.Windows.Forms;
 using Tekla.Structures.Dialog;
 using Tekla.Structures.Model;
+using static Prism.Enums;
 
 namespace Prism
 {
     public partial class PrismForm : PluginFormBase
     {
         private Model _model;
-        private ReportManager _myReportManager;
         //private DrawingManager _myDrawingManager; temporarily not in use
-        private SevFolders _myFolderManager;
-        private SevModelData _modelData;
-        private SevModelEnumerator _modelEnum;
-        private PreRunChecks _myPreRunChecks;
-        private ModelModifiers _myModelModifiers;
-        private BswxExporter _myBswxExporter;
-        private EmailWriter _myEmailWriter = new EmailWriter();
-        private string _unavailableLocation = "Sorry, this package location has not been added yet, please try another location.";
+        private PrismProjectData _projectData;
+        private SelectedObjects _selectedObjects;
 
         public PrismForm()
         {
             InitializeComponent();
             _model = new Model();
-            _myPreRunChecks = new PreRunChecks(_model);
-            _modelData = _model.CreateSevModelData();
-            _myModelModifiers = new ModelModifiers(_model);
+            _projectData = new PrismProjectData(_model.GetProjectInfo(), _model.GetInfo().ModelPath);
         }
 
         private void btnRunThroughMaterialChecks_Click(object sender, EventArgs e)
         {
             MaterialStatusLabel.Text = "Working";
-            int stageNumber = 1;
-            string stageType = "PRELIM ";
+            if (!InitialSetup(stageTypes.Prelim1, false)) { return; }
 
-            bool isValid = InitialSetup(stageNumber, stageType, false)&&
-                           _myPreRunChecks.CheckExecutionField(_modelEnum)&& 
-                           _myPreRunChecks.CheckNameAndClassAlignment(_modelEnum);
-            if (!isValid) { return; }
+            _selectedObjects.MaterialButton1op(_projectData, (int)stageTypes.Prelim1);
 
-            _myModelModifiers.ModifyAttributes(_modelEnum, stageNumber);
             MaterialStatusLabel.Text = "Complete";
         }
 
         private void btn_AddStartNumbers_Click(object sender, EventArgs e)
         {
             MaterialStatusLabel.Text = "Working";
-            int stageNumber = 2;
-            string stageType = "PRELIM";
+            if (!InitialSetup(stageTypes.Prelim2, true)) { return; };
 
-            bool isValid = InitialSetup(stageNumber, stageType, true, true, txt_StartNumber.Text, null);
-            if (!isValid) { return; }
+            _selectedObjects.MaterialButton2op(txt_StartNumber.Text, (int)stageTypes.Prelim2, _projectData);
 
-            _myModelModifiers.AddStartNumbers(_modelEnum, txt_StartNumber.Text);
-            _myModelModifiers.ModifyAttributes(_modelEnum, stageNumber);
             MaterialStatusLabel.Text = "Complete";
         }
 
         private void btnOrderMaterial_Click(object sender, EventArgs e)
         {
             MaterialStatusLabel.Text = "Working";
-            int stageNumber = 3;
-            string stageType = "PRELIM";
-            _myFolderManager = new SevFolders(_model, txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text);
-            _myReportManager = new ReportManager(_model, txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text);
-            _myBswxExporter = new BswxExporter();
+            if (!InitialSetup(stageTypes.Prelim3, true)) { return; };
 
-            bool isValid = InitialSetup(stageNumber, stageType, true, true, txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text);
-            if(!isValid) { return; }
-
-            PrelimMarker.AddPrelimMarks(_modelEnum, _model);
-            _myFolderManager.CreateMatFolder();
-            _myReportManager.CreateMaterialReports(_modelEnum.SelectedModelParts, cmb_OrderMaterial.Text);
-            if (cmb_OrderMaterial.Text != "Omit Material")
-            {
-                _myBswxExporter.ExportBSWX(_modelEnum, _myFolderManager.MatPath, _modelData, txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text, stageType);
-            }
-            else
-            {
-                _myModelModifiers.MoveAndRenameOmittedMembers(_modelEnum, _model);
-                stageNumber = 8;
-            }
-
-            _myModelModifiers.ModifyAttributes(_modelEnum, stageNumber);
-            DialogResult finishBox = MessageBox.Show($"Thanks {_modelData.First}, your material order is now complete, please forward the following email to the relevant purchasing team", "Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-            if (finishBox == DialogResult.OK)
-            {
-                _myEmailWriter.WriteMatEmail(_myReportManager.MatReportPrefix, _modelEnum.SelectedModelParts.Count, txt_MaterialIssueNumber.Text, txt_MaterialPhaseNumber.Text, _modelData.ProjNumber, _modelData.ProjName, _modelData.Full, cmb_OrderMaterial.Text);
-            }
+            _selectedObjects.MaterialButton3op(_projectData, _model.GetProjectInfo(), txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text, cmb_OrderMaterial.Text, (int)stageTypes.Prelim3, stageTypes.Prelim3);
+            _model.CommitChanges();
             MaterialStatusLabel.Text = "Complete";
         }
 
         private void btnRunThroughDetailingChecks_Click(object sender, EventArgs e)
         {
             DetailingStatusLabel.Text = "Working";
-            int stageNumber = 4;
-            string stageType = "Check";
+            if (!InitialSetup(stageTypes.Check1, false)) { return; }
 
-            bool isValid = InitialSetup(stageNumber, stageType, false) &&
-                           _myPreRunChecks.RunStage4Checks(_modelEnum);
-            if (!isValid) { return; }
+            _selectedObjects.DetailButton1op(_projectData, (int)stageTypes.Check1);
 
-            _myModelModifiers.ModifyAttributes(_modelEnum, stageNumber);
             DetailingStatusLabel.Text = "Complete";
         }
 
         private void btnDetailingChecksComplete_Click(object sender, EventArgs e)
         {
             DetailingStatusLabel.Text = "Working";
-            int stageNumber = 5;
-            string stageType = "Check";
+            if (!InitialSetup(stageTypes.Check2, true)) { return; }
 
-            bool isValid = InitialSetup(stageNumber, stageType, true) &&
-                           _myPreRunChecks.RunStage4Checks(_modelEnum);
-            if(!isValid) { return; }
+            _selectedObjects.DetailButton2op(_projectData, (int)stageTypes.Check2);
 
-            _myModelModifiers.ModifyAttributes(_modelEnum, stageNumber);
             DetailingStatusLabel.Text = "Complete";
         }
 
         private void btn_CreateDrawings_Click(object sender, EventArgs e)
         {
             DetailingStatusLabel.Text = "Working";
-            int stageNumber = 6;
-            string stageType = "Check";
+            if (!InitialSetup(stageTypes.Check3, true)) { return; }      
 
-            bool isValid = InitialSetup(stageNumber, stageType, true) &&
-                           _myPreRunChecks.RunStage4Checks(_modelEnum);
-            if (!isValid) { return; }
+            DetailingStatusLabel.Text = _selectedObjects.DetailButton3op(_projectData, (int)stageTypes.Check3);
+        }
 
-            _myModelModifiers.PerformNumbering();
-
-            const string notUpToDateMessage = "Are you happy with your numbering?";
-            const string notUpToDateTitle = "Numbering";
-            DialogResult result = MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-            if (result == DialogResult.Yes)
-            {
-                _myModelModifiers.CreateDrawings(_modelEnum);
-            }
-            else
-            {
-                DetailingStatusLabel.Text = "Cancelled";
-                return;
-            }
-
-            _myModelModifiers.ModifyAttributes(_modelEnum, stageNumber);
-            DetailingStatusLabel.Text = "Complete";
+        private void btn_BoltOrder_Click(object sender, EventArgs e)
+        {
+            if (!InitialSetup(stageTypes.Bolt, false)) { return; }
+            CreatePackageButton.CreateBoltList(phaseNumber.Text, issueNumber.Text, _projectData, txt_SiteDate.Text);
         }
 
         private void btnCreatePackage_Click(object sender, EventArgs e)
         {
             StatusLabel.Text = "Working";
-            int stageNumber = 7;
-            string stageType = "FAB";
             Cursor = Cursors.AppStarting;
-            _modelEnum = _model.CreateSevModelEnumerator(stageType);
-            if (!_modelEnum.NumbersNotUpToDate)
+
+            if (!InitialSetup(stageTypes.FAB, false)) { return; }
+            if (!_selectedObjects.NumbersNotUpToDate) { return; } 
+            
+            StatusLabel.Text = _selectedObjects.CreateFabPackage(_projectData, cmbPackageLocation.Text, phaseNumber.Text, issueNumber.Text, stageTypes.FAB, txt_SiteDate.Text);
+            Cursor = Cursors.Default;
+        }
+
+        private bool InitialSetup(stageTypes stageType, bool checkForPreviousSteps)
+        {
+            _selectedObjects = new SelectedObjects(stageType);
+
+            if (checkForPreviousSteps && !ModelChecker.ArePreviousStepsComplete(_selectedObjects, (int)stageType))
             {
-                return;
+                DetailingStatusLabel.Text = "Cancelled";
+                return false;
             }
-            _myReportManager = new ReportManager(_model, phaseNumber.Text, issueNumber.Text);
-            //MyDrawingManager = new DrawingManager(Model, phaseNumber.Text, issueNumber.Text, ModelEnum); Temporarily not in use
-            _myFolderManager = new SevFolders(_model, phaseNumber.Text, issueNumber.Text);
-            _myBswxExporter = new BswxExporter();
-
-            bool packageSNI = cmbPackageLocation.Text == "SNI";
-            bool packageSUK = cmbPackageLocation.Text == "SUK";
-            bool packageSDB = cmbPackageLocation.Text == "SDB";
-            bool packageHarryPeers = cmbPackageLocation.Text == "Harry Peers";
-            bool packageDAMStructures = cmbPackageLocation.Text == "DAM Structures";
-
-            if (packageSNI)
-            {
-                _myBswxExporter.ExportBSWX(_modelEnum, _myFolderManager.DspPath, _modelData, phaseNumber.Text, issueNumber.Text, stageType);
-                _myFolderManager.CreateFabFolders();
-                _myReportManager.CreateFabReports(_modelEnum.SelectedModelParts, _modelEnum.SelectedModelBolts, cmbPackageLocation.Text);
-                // MyDrawingManager.PrintDrawings(StatusLabel); Temporarily not in use
-                _myModelModifiers.ModifyAttributes(_modelEnum, stageNumber);
-                //MyFolderManager.RemoveUnusedFolders(); Temporarily not in use
-                _myModelModifiers.LockSelected(_modelEnum);
-                Cursor = Cursors.Default;
-                DialogResult finishBox = MessageBox.Show($"Thanks {_modelData.First}, your fab package is now complete, please attach your fab package, located in your model folder, " +
-                    $"to the following email and send to the relevant team. PLEASE NOTE: This version of Prism does NOT print drawings, you will have to do this bit yourself.", "Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                if (finishBox == DialogResult.OK)
-                {
-                    _myEmailWriter.WriteFabEmail(_myReportManager.FabReportPrefix, _modelEnum.AssembliesList.Count, _modelEnum.SelectedModelParts.Count, issueNumber.Text, phaseNumber.Text, _modelData.ProjNumber, _modelData.ProjName, _modelData.Full);
-                }
-                StatusLabel.Text = "Complete";
-            }
-
-            if (packageSUK)
-            {
-                MessageBox.Show(_unavailableLocation);
-            }
-
-            if (packageSDB)
-            {
-                MessageBox.Show(_unavailableLocation);
-            }
-
-            if (packageHarryPeers)
-            {
-                MessageBox.Show(_unavailableLocation);
-            }
-
-            if (packageDAMStructures)
-            {
-                MessageBox.Show(_unavailableLocation);
-            }
+            return true;
         }
 
         private void txt_StartNumber_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if (!char.IsDigit(e.KeyChar))
-            {
-                e.Handled = true;
-            }
-        }
-
-        private void txt_MaterialPhaseNumber_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (!char.IsDigit(e.KeyChar))
-            {
-                e.Handled = true;
-            }
+            AllowNumbersAndDeleteOnly(e);
         }
 
         private void txt_MaterialIssueNumber_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if (!char.IsDigit(e.KeyChar))
+            AllowNumbersAndDeleteOnly(e);
+        }
+
+        private void issueNumber_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            AllowNumbersAndDeleteOnly(e);
+        }
+
+        private void AllowNumbersAndDeleteOnly(KeyPressEventArgs e)
+        {
+            char delete = new char();
+            delete = '\b'; //This is the code created when backspace is pressed.
+            if (!Char.IsNumber(e.KeyChar) && (e.KeyChar != delete)) //If the key press is neither a number or delete key then ignore.
             {
                 e.Handled = true;
+                return;
             }
         }
 
-        private bool InitialSetup(int stageNumber, string stageType, bool checkForPreviousSteps, bool checkForInputs = false, string input1 = "", string input2 = "")
-        {      
-            if (checkForInputs && !_myPreRunChecks.ArePreviousStepsComplete(stageNumber, input1, input2))
-            {          
-                DetailingStatusLabel.Text = "Cancelled";
-                return false;
-            }
-         
-             _modelEnum = _model.CreateSevModelEnumerator(stageType);
-            
-            if (checkForPreviousSteps && !_myPreRunChecks.ArePreviousStepsComplete(_modelEnum, stageNumber))
+        private void phaseNumber_TextChanged(object sender, EventArgs e)
+        {
+            if (phaseNumber.Text.Length > 0)
             {
-                DetailingStatusLabel.Text = "Cancelled";
-                return false;
+                phaseNumber.BackColor = Color.White;
             }
-            return true;         
+            else
+            {
+                phaseNumber.BackColor = Color.LightCoral;
+            }
+            CheckForFabButton();
+        }
+
+        private void issueNumber_TextChanged(object sender, EventArgs e)
+        {
+            if (issueNumber.Text.Length > 0)
+            {
+                issueNumber.BackColor = Color.White;
+            }
+            else
+            {
+                issueNumber.BackColor = Color.LightCoral;
+            }
+            CheckForFabButton();
+        }
+
+        private void cmbPackageLocation_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (cmbPackageLocation.Text == "SNI")
+            {
+                cmbPackageLocation.BackColor = Color.White;
+            }
+            else
+            {
+                cmbPackageLocation.BackColor = Color.LightCoral;
+            }
+            CheckForFabButton();
+        }
+
+        private void CheckForFabButton()
+        {
+            if (phaseNumber.Text.Length > 0 & issueNumber.Text.Length > 1 && cmbPackageLocation.Text == "SNI")
+            {
+                btnCreatePackage.Enabled = true;
+                btnCreatePackage.BackColor = Color.Chartreuse;
+            }
+            else
+            {
+                btnCreatePackage.Enabled = false;
+                btnCreatePackage.BackColor = Color.Gainsboro;
+            }
+
+        }
+
+        private void txt_StartNumber_TextChanged(object sender, EventArgs e)
+        {
+            if (txt_StartNumber.Text.Length > 0)
+            {
+                txt_StartNumber.BackColor = Color.White;
+                btn_AddStartNumbers.BackColor = Color.Gold;
+                btn_AddStartNumbers.Enabled = true;
+            }
+            else
+            {
+                txt_StartNumber.BackColor = Color.LightCoral;
+                btn_AddStartNumbers.BackColor = Color.Gainsboro;
+                btn_AddStartNumbers.Enabled = false;
+            }
+        }
+
+        private void txt_MaterialPhaseNumber_TextChanged(object sender, EventArgs e)
+        {
+            if (txt_MaterialPhaseNumber.Text.Length > 0)
+            {
+                txt_MaterialPhaseNumber.BackColor = Color.White;
+            }
+            else
+            {
+                txt_MaterialPhaseNumber.BackColor = Color.LightCoral;
+            }
+            CheckForMaterialButton();
+        }
+
+        private void txt_MaterialIssueNumber_TextChanged(object sender, EventArgs e)
+        {
+            if (txt_MaterialIssueNumber.Text.Length > 1)
+            {
+                txt_MaterialIssueNumber.BackColor = Color.White;
+            }
+            else
+            {
+                txt_MaterialIssueNumber.BackColor = Color.LightCoral;
+            }
+            CheckForMaterialButton();
+        }
+
+        private void CheckForMaterialButton()
+        {
+            if (txt_MaterialIssueNumber.Text.Length > 1 && txt_MaterialPhaseNumber.Text.Length > 0)
+            {
+                btnOrderMaterial.Enabled = true;
+                btnOrderMaterial.BackColor = Color.Chartreuse;
+            }
+            else
+            {
+                btnOrderMaterial.Enabled = false;
+                btnOrderMaterial.BackColor = Color.Gainsboro;
+            }
+        }
+
+        private void txt_SiteDate_TextChanged(object sender, EventArgs e)
+        {
+            if (txt_SiteDate.Text.Length > 7)
+            {
+                txt_SiteDate.BackColor = Color.White;
+            }
+            else
+            {
+                txt_SiteDate.BackColor = Color.Moccasin;
+            }
         }
     }
 }
