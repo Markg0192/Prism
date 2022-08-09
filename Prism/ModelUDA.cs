@@ -42,5 +42,14 @@
             return $"PRISM-{stageNumber}-NUMBER";
         }
 
+        public static string BoltOrderedBy()
+        {
+            return "BOLT_USERFIELD_7";
+        }
+
+        public static string BoltOrderedDate()
+        {
+            return "BOLT_USERFIELD_8";
+        }
     }
 }

@@ -97,11 +97,6 @@
     <Compile Include="ModelModifiers.cs" />
     <Compile Include="ModelChecker.cs" />
     <Compile Include="PrismWarnings.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="Managers\ReportManager.cs" />
     <Compile Include="PrismProjectData.cs" />
     <Compile Include="PrismForm.cs">
@@ -111,6 +106,11 @@
       <DependentUpon>PrismForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="SelectedObjects.cs" />
     <Compile Include="TeklaAppLibrary\MacroBuilder.cs" />
     <Compile Include="TeklaAppLibrary\ModelConnection.cs" />
@@ -137,6 +137,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\PrismTrans.png" />
+    <None Include="Resources\tick.webp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Severfield blue RGB PNG.png" />
@@ -154,6 +155,51 @@
       <Isolated>False</Isolated>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\PrismLightNoWords.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Home.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\look.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\add.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\order.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\tick.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\weld.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\bolt.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\penn.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\welder.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\MyPen.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\MyNewPen.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\MyNewWelder.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\MyNewWelder.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\watereddownlogo.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

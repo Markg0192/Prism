@@ -20,12 +20,13 @@ namespace PrismTester
 
             Model model;
             ReportManager myReportManager;
-            DrawingManager myDrawingManager;
+            DrawingManager myDrawingManager = new DrawingManager();
             FolderManager myFolderManager;
             PrismProjectData modelData;
             SelectedObjects selectedObjects;
 
-
+           // myDrawingManager.CreateDrawingList();
+           // myDrawingManager.PrintDrawings();
        
             const string MailNewLine = "%0D%0A";
 
@@ -45,8 +46,9 @@ namespace PrismTester
 
 
 
-            selectedObjects = new SelectedObjects(stageTypes.Unassigned);
-
+            selectedObjects = new SelectedObjects(stageTypes.Bolt);
+            Console.WriteLine("Shop" + selectedObjects.AllBolts[0].ToString());
+            Console.WriteLine("site" + selectedObjects.AllBolts[1].ToString());
 
        //     selectedObjects.ModifyAttributes(3, modelData);
 
