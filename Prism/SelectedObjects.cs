@@ -60,10 +60,14 @@ namespace Prism
                     {
                         foreach (BoltGroup bolts in MyBolts)
                         {
-                            SiteBolts.Add(bolts);
-                            if (bolts.BoltType == BoltGroup.BoltTypeEnum.BOLT_TYPE_WORKSHOP)
+                            if (bolts.Bolt)
                             {
-                                ShopBolts.Add(bolts);
+                                if (bolts.BoltType == BoltGroup.BoltTypeEnum.BOLT_TYPE_WORKSHOP)
+                                {
+                                    ShopBolts.Add(bolts);
+                                    return;
+                                }
+                                SiteBolts.Add(bolts);
                             }
                         }
                     }

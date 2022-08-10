@@ -77,7 +77,7 @@ namespace Prism
                 outputName = _output3POname;
             }
 
-            Operation.CreateReportFromSelected(materialReport, Path.Combine(Folders.MatPath, $"{MatReportPrefix}{outputName}"), _title1, _title3, _title2);
+            Operation.CreateReportFromSelected(materialReport, Path.Combine(Folders.MatPath, $"{MatReportPrefix}{outputName}"), _title1, _title2, _title3);
         }
 
         public void CreateBoltList()

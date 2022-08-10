@@ -95,13 +95,13 @@ namespace Prism
             return Tekla.Structures.Model.Operations.Operation.RunMacro("OpenAndCloseDocumentManager.cs");
         }
 
-        public void PrintDrawings(ToolStripStatusLabel statusLabel)
+        public void PrintDrawings(/*ToolStripStatusLabel statusLabel*/)
         {
             int drawingProcessCounter = 1;
 
             foreach (PrismDrawing myDrawing in PrismDrawingList)
             {
-                statusLabel.Text = "Starting to print";
+                //statusLabel.Text = "Starting to print";
                 //_selectedObjects.MyDrawingHandler.IssueDrawing(myDrawing.TeklaDrawing);
                 DPMPrinterAttributes myPDF = new DPMPrinterAttributes();
                 myPDF.ColorMode = DotPrintColor.BlackAndWhite;
@@ -110,7 +110,7 @@ namespace Prism
                 myPDF.OutputFileName = $"{_folders.FabPath}/{myDrawing.DrawingFolderName}/{myDrawing.PdfName}";
                 myPDF.OutputType = DotPrintOutputType.PDF;
                 myPDF.PaperSize = DotPrintPaperSize.Auto;
-                statusLabel.Text = $"Printing drawing number {drawingProcessCounter} of {PrismDrawingList.Count}";
+                //statusLabel.Text = $"Printing drawing number {drawingProcessCounter} of {PrismDrawingList.Count}";
                 //_selectedObjects.MyDrawingHandler.PrintDrawing(myDrawing.TeklaDrawing, myPDF);
                 drawingProcessCounter++;
             }

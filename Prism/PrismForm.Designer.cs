@@ -31,105 +31,143 @@ namespace Prism
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PrismForm));
-            this.tabControl1 = new System.Windows.Forms.TabControl();
-            this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.phaseNumber = new System.Windows.Forms.TextBox();
+            this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
+            this.pnl_Material = new System.Windows.Forms.Panel();
+            this.label1 = new System.Windows.Forms.Label();
+            this.statusStrip4 = new System.Windows.Forms.StatusStrip();
+            this.MaterialStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.txt_StartNumber = new System.Windows.Forms.TextBox();
             this.cmb_OrderMaterial = new System.Windows.Forms.ComboBox();
-            this.label10 = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
             this.txt_MaterialIssueNumber = new System.Windows.Forms.TextBox();
             this.txt_MaterialPhaseNumber = new System.Windows.Forms.TextBox();
-            this.label8 = new System.Windows.Forms.Label();
-            this.pictureBox6 = new System.Windows.Forms.PictureBox();
-            this.btn_AddStartNumbers = new System.Windows.Forms.Button();
-            this.btnOrderMaterial = new System.Windows.Forms.Button();
-            this.btnRunThroughMaterialChecks = new System.Windows.Forms.Button();
-            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.MaterialStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.statusStrip3 = new System.Windows.Forms.StatusStrip();
+            this.pnl_Detail = new System.Windows.Forms.Panel();
+            this.statusStrip5 = new System.Windows.Forms.StatusStrip();
             this.DetailingStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
-            this.label9 = new System.Windows.Forms.Label();
-            this.pictureBox5 = new System.Windows.Forms.PictureBox();
-            this.btnDetailingChecksComplete = new System.Windows.Forms.Button();
-            this.btn_CreateDrawings = new System.Windows.Forms.Button();
-            this.btnRunThroughDetailingChecks = new System.Windows.Forms.Button();
-            this.pictureBox2 = new System.Windows.Forms.PictureBox();
-            this.tabPage3 = new System.Windows.Forms.TabPage();
-            this.label11 = new System.Windows.Forms.Label();
-            this.pictureBox4 = new System.Windows.Forms.PictureBox();
-            this.statusStrip2 = new System.Windows.Forms.StatusStrip();
+            this.pnl_Package = new System.Windows.Forms.Panel();
+            this.statusStrip6 = new System.Windows.Forms.StatusStrip();
             this.StatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
-            this.btn_BoltOrder = new System.Windows.Forms.Button();
-            this.btnCreatePackage = new System.Windows.Forms.Button();
-            this.lblPackageLocation = new System.Windows.Forms.Label();
-            this.cmbPackageLocation = new System.Windows.Forms.ComboBox();
-            this.lblIssueNumber = new System.Windows.Forms.Label();
-            this.lblPhaseNumber = new System.Windows.Forms.Label();
-            this.phaseNumber = new System.Windows.Forms.TextBox();
-            this.issueNumber = new System.Windows.Forms.TextBox();
-            this.pictureBox3 = new System.Windows.Forms.PictureBox();
-            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.txt_SiteDate = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.tabControl1.SuspendLayout();
-            this.tabPage1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox6)).BeginInit();
-            this.statusStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
-            this.tabPage2.SuspendLayout();
-            this.statusStrip3.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox5)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
-            this.tabPage3.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).BeginInit();
-            this.statusStrip2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
+            this.label16 = new System.Windows.Forms.Label();
+            this.label17 = new System.Windows.Forms.Label();
+            this.cmbPackageLocation = new System.Windows.Forms.ComboBox();
+            this.label18 = new System.Windows.Forms.Label();
+            this.label19 = new System.Windows.Forms.Label();
+            this.issueNumber = new System.Windows.Forms.TextBox();
+            this.pnl_Home = new System.Windows.Forms.Panel();
+            this.button7 = new System.Windows.Forms.Button();
+            this.btn_MainPackageCreation = new System.Windows.Forms.Button();
+            this.btn_MainDetailCheck = new System.Windows.Forms.Button();
+            this.btn_MainMaterialCheck = new System.Windows.Forms.Button();
+            this.btn_HomeMaterial = new System.Windows.Forms.Button();
+            this.btn_Material2 = new System.Windows.Forms.Button();
+            this.btn_Material3 = new System.Windows.Forms.Button();
+            this.btn_Material1 = new System.Windows.Forms.Button();
+            this.btn_HomeDetail = new System.Windows.Forms.Button();
+            this.btn_Detail2 = new System.Windows.Forms.Button();
+            this.btn_Detail3 = new System.Windows.Forms.Button();
+            this.btn_Detail1 = new System.Windows.Forms.Button();
+            this.btn_HomePackage = new System.Windows.Forms.Button();
+            this.btn_BoltOrder1 = new System.Windows.Forms.Button();
+            this.btnCreatePackage1 = new System.Windows.Forms.Button();
+            this.label4 = new System.Windows.Forms.Label();
+            this.flowLayoutPanel1.SuspendLayout();
+            this.pnl_Material.SuspendLayout();
+            this.statusStrip4.SuspendLayout();
+            this.pnl_Detail.SuspendLayout();
+            this.statusStrip5.SuspendLayout();
+            this.pnl_Package.SuspendLayout();
+            this.statusStrip6.SuspendLayout();
+            this.pnl_Home.SuspendLayout();
             this.SuspendLayout();
             // 
-            // tabControl1
+            // phaseNumber
             // 
-            this.tabControl1.AccessibleDescription = "";
-            this.tabControl1.AccessibleName = "";
-            this.structuresExtender.SetAttributeName(this.tabControl1, null);
-            this.structuresExtender.SetAttributeTypeName(this.tabControl1, null);
-            this.structuresExtender.SetBindPropertyName(this.tabControl1, null);
-            this.tabControl1.Controls.Add(this.tabPage1);
-            this.tabControl1.Controls.Add(this.tabPage2);
-            this.tabControl1.Controls.Add(this.tabPage3);
-            this.tabControl1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.tabControl1.Location = new System.Drawing.Point(0, 0);
-            this.tabControl1.Name = "tabControl1";
-            this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(319, 326);
-            this.tabControl1.TabIndex = 0;
+            this.structuresExtender.SetAttributeName(this.phaseNumber, null);
+            this.structuresExtender.SetAttributeTypeName(this.phaseNumber, null);
+            this.phaseNumber.BackColor = System.Drawing.Color.LightCoral;
+            this.structuresExtender.SetBindPropertyName(this.phaseNumber, null);
+            this.phaseNumber.Cursor = System.Windows.Forms.Cursors.IBeam;
+            this.phaseNumber.Location = new System.Drawing.Point(15, 22);
+            this.phaseNumber.Name = "phaseNumber";
+            this.phaseNumber.Size = new System.Drawing.Size(124, 20);
+            this.phaseNumber.TabIndex = 26;
+            this.toolTip1.SetToolTip(this.phaseNumber, "Phase or VO number.\r\n\r\n");
+            this.phaseNumber.TextChanged += new System.EventHandler(this.phaseNumber_TextChanged_1);
             // 
-            // tabPage1
+            // flowLayoutPanel1
             // 
-            this.structuresExtender.SetAttributeName(this.tabPage1, null);
-            this.structuresExtender.SetAttributeTypeName(this.tabPage1, null);
-            this.tabPage1.BackColor = System.Drawing.Color.White;
-            this.structuresExtender.SetBindPropertyName(this.tabPage1, null);
-            this.tabPage1.Controls.Add(this.txt_StartNumber);
-            this.tabPage1.Controls.Add(this.cmb_OrderMaterial);
-            this.tabPage1.Controls.Add(this.label10);
-            this.tabPage1.Controls.Add(this.label7);
-            this.tabPage1.Controls.Add(this.txt_MaterialIssueNumber);
-            this.tabPage1.Controls.Add(this.txt_MaterialPhaseNumber);
-            this.tabPage1.Controls.Add(this.label8);
-            this.tabPage1.Controls.Add(this.pictureBox6);
-            this.tabPage1.Controls.Add(this.btn_AddStartNumbers);
-            this.tabPage1.Controls.Add(this.btnOrderMaterial);
-            this.tabPage1.Controls.Add(this.btnRunThroughMaterialChecks);
-            this.tabPage1.Controls.Add(this.statusStrip1);
-            this.tabPage1.Controls.Add(this.pictureBox1);
-            this.tabPage1.Location = new System.Drawing.Point(4, 22);
-            this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(311, 300);
-            this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "Material Checks";
+            this.structuresExtender.SetAttributeName(this.flowLayoutPanel1, null);
+            this.structuresExtender.SetAttributeTypeName(this.flowLayoutPanel1, null);
+            this.flowLayoutPanel1.AutoSize = true;
+            this.flowLayoutPanel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.structuresExtender.SetBindPropertyName(this.flowLayoutPanel1, null);
+            this.flowLayoutPanel1.Controls.Add(this.pnl_Home);
+            this.flowLayoutPanel1.Controls.Add(this.pnl_Material);
+            this.flowLayoutPanel1.Controls.Add(this.pnl_Detail);
+            this.flowLayoutPanel1.Controls.Add(this.pnl_Package);
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(1, 1);
+            this.flowLayoutPanel1.Name = "flowLayoutPanel1";
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(977, 282);
+            this.flowLayoutPanel1.TabIndex = 1;
+            // 
+            // pnl_Material
+            // 
+            this.structuresExtender.SetAttributeName(this.pnl_Material, null);
+            this.structuresExtender.SetAttributeTypeName(this.pnl_Material, null);
+            this.pnl_Material.BackColor = System.Drawing.Color.White;
+            this.structuresExtender.SetBindPropertyName(this.pnl_Material, null);
+            this.pnl_Material.Controls.Add(this.label4);
+            this.pnl_Material.Controls.Add(this.label1);
+            this.pnl_Material.Controls.Add(this.btn_HomeMaterial);
+            this.pnl_Material.Controls.Add(this.statusStrip4);
+            this.pnl_Material.Controls.Add(this.txt_StartNumber);
+            this.pnl_Material.Controls.Add(this.cmb_OrderMaterial);
+            this.pnl_Material.Controls.Add(this.label3);
+            this.pnl_Material.Controls.Add(this.txt_MaterialIssueNumber);
+            this.pnl_Material.Controls.Add(this.txt_MaterialPhaseNumber);
+            this.pnl_Material.Controls.Add(this.btn_Material2);
+            this.pnl_Material.Controls.Add(this.btn_Material3);
+            this.pnl_Material.Controls.Add(this.btn_Material1);
+            this.pnl_Material.Location = new System.Drawing.Point(258, 3);
+            this.pnl_Material.Name = "pnl_Material";
+            this.pnl_Material.Size = new System.Drawing.Size(255, 276);
+            this.pnl_Material.TabIndex = 4;
+            this.pnl_Material.Visible = false;
+            // 
+            // label1
+            // 
+            this.structuresExtender.SetAttributeName(this.label1, null);
+            this.structuresExtender.SetAttributeTypeName(this.label1, null);
+            this.label1.AutoSize = true;
+            this.structuresExtender.SetBindPropertyName(this.label1, null);
+            this.label1.Location = new System.Drawing.Point(103, 69);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(69, 13);
+            this.label1.TabIndex = 40;
+            this.label1.Text = "Start Number";
+            // 
+            // statusStrip4
+            // 
+            this.structuresExtender.SetAttributeName(this.statusStrip4, null);
+            this.structuresExtender.SetAttributeTypeName(this.statusStrip4, null);
+            this.structuresExtender.SetBindPropertyName(this.statusStrip4, null);
+            this.statusStrip4.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.statusStrip4.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MaterialStatusLabel});
+            this.statusStrip4.Location = new System.Drawing.Point(0, 254);
+            this.statusStrip4.Name = "statusStrip4";
+            this.statusStrip4.Size = new System.Drawing.Size(255, 22);
+            this.statusStrip4.TabIndex = 38;
+            this.statusStrip4.Text = "statusStrip4";
+            // 
+            // MaterialStatusLabel
+            // 
+            this.MaterialStatusLabel.Name = "MaterialStatusLabel";
+            this.MaterialStatusLabel.Size = new System.Drawing.Size(39, 17);
+            this.MaterialStatusLabel.Text = "Status";
             // 
             // txt_StartNumber
             // 
@@ -137,12 +175,12 @@ namespace Prism
             this.structuresExtender.SetAttributeTypeName(this.txt_StartNumber, null);
             this.txt_StartNumber.BackColor = System.Drawing.Color.LightCoral;
             this.structuresExtender.SetBindPropertyName(this.txt_StartNumber, null);
-            this.txt_StartNumber.Location = new System.Drawing.Point(100, 72);
+            this.txt_StartNumber.Location = new System.Drawing.Point(106, 88);
             this.txt_StartNumber.Name = "txt_StartNumber";
             this.txt_StartNumber.Size = new System.Drawing.Size(100, 20);
-            this.txt_StartNumber.TabIndex = 28;
-            this.txt_StartNumber.TextChanged += new System.EventHandler(this.txt_StartNumber_TextChanged);
-            this.txt_StartNumber.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txt_StartNumber_KeyPress);
+            this.txt_StartNumber.TabIndex = 37;
+            this.txt_StartNumber.TextChanged += new System.EventHandler(this.txt_StartNumber_TextChanged_1);
+            this.txt_StartNumber.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txt_StartNumber_KeyPress_1);
             // 
             // cmb_OrderMaterial
             // 
@@ -154,35 +192,23 @@ namespace Prism
             "Order Material",
             "Add Material",
             "Omit Material"});
-            this.cmb_OrderMaterial.Location = new System.Drawing.Point(100, 124);
+            this.cmb_OrderMaterial.Location = new System.Drawing.Point(106, 150);
             this.cmb_OrderMaterial.Name = "cmb_OrderMaterial";
             this.cmb_OrderMaterial.Size = new System.Drawing.Size(100, 21);
-            this.cmb_OrderMaterial.TabIndex = 27;
+            this.cmb_OrderMaterial.TabIndex = 36;
             this.cmb_OrderMaterial.Text = "Order Material";
             // 
-            // label10
+            // label3
             // 
-            this.structuresExtender.SetAttributeName(this.label10, null);
-            this.structuresExtender.SetAttributeTypeName(this.label10, null);
-            this.label10.AutoSize = true;
-            this.structuresExtender.SetBindPropertyName(this.label10, null);
-            this.label10.Location = new System.Drawing.Point(128, 166);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(72, 13);
-            this.label10.TabIndex = 26;
-            this.label10.Text = "Issue Number";
-            // 
-            // label7
-            // 
-            this.structuresExtender.SetAttributeName(this.label7, null);
-            this.structuresExtender.SetAttributeTypeName(this.label7, null);
-            this.label7.AutoSize = true;
-            this.structuresExtender.SetBindPropertyName(this.label7, null);
-            this.label7.Location = new System.Drawing.Point(6, 166);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(77, 13);
-            this.label7.TabIndex = 26;
-            this.label7.Text = "Phase Number";
+            this.structuresExtender.SetAttributeName(this.label3, null);
+            this.structuresExtender.SetAttributeTypeName(this.label3, null);
+            this.label3.AutoSize = true;
+            this.structuresExtender.SetBindPropertyName(this.label3, null);
+            this.label3.Location = new System.Drawing.Point(12, 193);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(77, 13);
+            this.label3.TabIndex = 35;
+            this.label3.Text = "Phase Number";
             // 
             // txt_MaterialIssueNumber
             // 
@@ -190,12 +216,12 @@ namespace Prism
             this.structuresExtender.SetAttributeTypeName(this.txt_MaterialIssueNumber, null);
             this.txt_MaterialIssueNumber.BackColor = System.Drawing.Color.LightCoral;
             this.structuresExtender.SetBindPropertyName(this.txt_MaterialIssueNumber, null);
-            this.txt_MaterialIssueNumber.Location = new System.Drawing.Point(131, 185);
+            this.txt_MaterialIssueNumber.Location = new System.Drawing.Point(137, 216);
             this.txt_MaterialIssueNumber.Name = "txt_MaterialIssueNumber";
             this.txt_MaterialIssueNumber.Size = new System.Drawing.Size(100, 20);
-            this.txt_MaterialIssueNumber.TabIndex = 25;
-            this.txt_MaterialIssueNumber.TextChanged += new System.EventHandler(this.txt_MaterialIssueNumber_TextChanged);
-            this.txt_MaterialIssueNumber.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txt_MaterialIssueNumber_KeyPress);
+            this.txt_MaterialIssueNumber.TabIndex = 32;
+            this.txt_MaterialIssueNumber.TextChanged += new System.EventHandler(this.txt_MaterialIssueNumber_TextChanged_1);
+            this.txt_MaterialIssueNumber.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txt_MaterialIssueNumber_KeyPress_1);
             // 
             // txt_MaterialPhaseNumber
             // 
@@ -203,147 +229,42 @@ namespace Prism
             this.structuresExtender.SetAttributeTypeName(this.txt_MaterialPhaseNumber, null);
             this.txt_MaterialPhaseNumber.BackColor = System.Drawing.Color.LightCoral;
             this.structuresExtender.SetBindPropertyName(this.txt_MaterialPhaseNumber, null);
-            this.txt_MaterialPhaseNumber.Location = new System.Drawing.Point(8, 185);
+            this.txt_MaterialPhaseNumber.Location = new System.Drawing.Point(15, 216);
             this.txt_MaterialPhaseNumber.Name = "txt_MaterialPhaseNumber";
             this.txt_MaterialPhaseNumber.Size = new System.Drawing.Size(100, 20);
-            this.txt_MaterialPhaseNumber.TabIndex = 25;
-            this.txt_MaterialPhaseNumber.TextChanged += new System.EventHandler(this.txt_MaterialPhaseNumber_TextChanged);
+            this.txt_MaterialPhaseNumber.TabIndex = 33;
+            this.txt_MaterialPhaseNumber.TextChanged += new System.EventHandler(this.txt_MaterialPhaseNumber_TextChanged_1);
             // 
-            // label8
+            // pnl_Detail
             // 
-            this.structuresExtender.SetAttributeName(this.label8, null);
-            this.structuresExtender.SetAttributeTypeName(this.label8, null);
-            this.label8.AutoSize = true;
-            this.structuresExtender.SetBindPropertyName(this.label8, null);
-            this.label8.Location = new System.Drawing.Point(245, 252);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(60, 13);
-            this.label8.TabIndex = 22;
-            this.label8.Text = "Version 2.1";
+            this.structuresExtender.SetAttributeName(this.pnl_Detail, null);
+            this.structuresExtender.SetAttributeTypeName(this.pnl_Detail, null);
+            this.pnl_Detail.BackColor = System.Drawing.Color.White;
+            this.structuresExtender.SetBindPropertyName(this.pnl_Detail, null);
+            this.pnl_Detail.Controls.Add(this.btn_HomeDetail);
+            this.pnl_Detail.Controls.Add(this.statusStrip5);
+            this.pnl_Detail.Controls.Add(this.btn_Detail2);
+            this.pnl_Detail.Controls.Add(this.btn_Detail3);
+            this.pnl_Detail.Controls.Add(this.btn_Detail1);
+            this.pnl_Detail.Location = new System.Drawing.Point(519, 3);
+            this.pnl_Detail.Name = "pnl_Detail";
+            this.pnl_Detail.Size = new System.Drawing.Size(191, 236);
+            this.pnl_Detail.TabIndex = 2;
+            this.pnl_Detail.Visible = false;
             // 
-            // pictureBox6
+            // statusStrip5
             // 
-            this.structuresExtender.SetAttributeName(this.pictureBox6, null);
-            this.structuresExtender.SetAttributeTypeName(this.pictureBox6, null);
-            this.structuresExtender.SetBindPropertyName(this.pictureBox6, null);
-            this.pictureBox6.Image = global::Prism.Properties.Resources.PrismTrans;
-            this.pictureBox6.InitialImage = null;
-            this.pictureBox6.Location = new System.Drawing.Point(237, 6);
-            this.pictureBox6.Name = "pictureBox6";
-            this.pictureBox6.Size = new System.Drawing.Size(68, 82);
-            this.pictureBox6.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox6.TabIndex = 20;
-            this.pictureBox6.TabStop = false;
-            // 
-            // btn_AddStartNumbers
-            // 
-            this.structuresExtender.SetAttributeName(this.btn_AddStartNumbers, null);
-            this.structuresExtender.SetAttributeTypeName(this.btn_AddStartNumbers, null);
-            this.btn_AddStartNumbers.BackColor = System.Drawing.Color.Gainsboro;
-            this.structuresExtender.SetBindPropertyName(this.btn_AddStartNumbers, null);
-            this.btn_AddStartNumbers.Enabled = false;
-            this.btn_AddStartNumbers.Location = new System.Drawing.Point(9, 58);
-            this.btn_AddStartNumbers.Name = "btn_AddStartNumbers";
-            this.btn_AddStartNumbers.Size = new System.Drawing.Size(83, 46);
-            this.btn_AddStartNumbers.TabIndex = 13;
-            this.btn_AddStartNumbers.Text = "Add Start Numbers";
-            this.btn_AddStartNumbers.UseVisualStyleBackColor = false;
-            this.btn_AddStartNumbers.Click += new System.EventHandler(this.btn_AddStartNumbers_Click);
-            // 
-            // btnOrderMaterial
-            // 
-            this.structuresExtender.SetAttributeName(this.btnOrderMaterial, null);
-            this.structuresExtender.SetAttributeTypeName(this.btnOrderMaterial, null);
-            this.btnOrderMaterial.BackColor = System.Drawing.Color.Gainsboro;
-            this.structuresExtender.SetBindPropertyName(this.btnOrderMaterial, null);
-            this.btnOrderMaterial.Enabled = false;
-            this.btnOrderMaterial.Location = new System.Drawing.Point(8, 110);
-            this.btnOrderMaterial.Name = "btnOrderMaterial";
-            this.btnOrderMaterial.Size = new System.Drawing.Size(84, 46);
-            this.btnOrderMaterial.TabIndex = 12;
-            this.btnOrderMaterial.Text = "Order";
-            this.btnOrderMaterial.UseVisualStyleBackColor = false;
-            this.btnOrderMaterial.Click += new System.EventHandler(this.btnOrderMaterial_Click);
-            // 
-            // btnRunThroughMaterialChecks
-            // 
-            this.structuresExtender.SetAttributeName(this.btnRunThroughMaterialChecks, null);
-            this.structuresExtender.SetAttributeTypeName(this.btnRunThroughMaterialChecks, null);
-            this.btnRunThroughMaterialChecks.BackColor = System.Drawing.Color.Tomato;
-            this.structuresExtender.SetBindPropertyName(this.btnRunThroughMaterialChecks, null);
-            this.btnRunThroughMaterialChecks.Location = new System.Drawing.Point(8, 6);
-            this.btnRunThroughMaterialChecks.Name = "btnRunThroughMaterialChecks";
-            this.btnRunThroughMaterialChecks.Size = new System.Drawing.Size(84, 46);
-            this.btnRunThroughMaterialChecks.TabIndex = 11;
-            this.btnRunThroughMaterialChecks.Text = "Check Members";
-            this.btnRunThroughMaterialChecks.UseVisualStyleBackColor = false;
-            this.btnRunThroughMaterialChecks.Click += new System.EventHandler(this.btnRunThroughMaterialChecks_Click);
-            // 
-            // statusStrip1
-            // 
-            this.structuresExtender.SetAttributeName(this.statusStrip1, null);
-            this.structuresExtender.SetAttributeTypeName(this.statusStrip1, null);
-            this.structuresExtender.SetBindPropertyName(this.statusStrip1, null);
-            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.MaterialStatusLabel});
-            this.statusStrip1.Location = new System.Drawing.Point(3, 275);
-            this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(305, 22);
-            this.statusStrip1.TabIndex = 10;
-            this.statusStrip1.Text = "statusStrip1";
-            // 
-            // MaterialStatusLabel
-            // 
-            this.MaterialStatusLabel.Name = "MaterialStatusLabel";
-            this.MaterialStatusLabel.Size = new System.Drawing.Size(39, 17);
-            this.MaterialStatusLabel.Text = "Status";
-            // 
-            // pictureBox1
-            // 
-            this.structuresExtender.SetAttributeName(this.pictureBox1, null);
-            this.structuresExtender.SetAttributeTypeName(this.pictureBox1, null);
-            this.structuresExtender.SetBindPropertyName(this.pictureBox1, null);
-            this.pictureBox1.Image = global::Prism.Properties.Resources.Severfield_blue_RGB_PNG;
-            this.pictureBox1.InitialImage = null;
-            this.pictureBox1.Location = new System.Drawing.Point(0, 218);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(161, 54);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox1.TabIndex = 9;
-            this.pictureBox1.TabStop = false;
-            // 
-            // tabPage2
-            // 
-            this.structuresExtender.SetAttributeName(this.tabPage2, null);
-            this.structuresExtender.SetAttributeTypeName(this.tabPage2, null);
-            this.tabPage2.BackColor = System.Drawing.Color.White;
-            this.structuresExtender.SetBindPropertyName(this.tabPage2, null);
-            this.tabPage2.Controls.Add(this.statusStrip3);
-            this.tabPage2.Controls.Add(this.label9);
-            this.tabPage2.Controls.Add(this.pictureBox5);
-            this.tabPage2.Controls.Add(this.btnDetailingChecksComplete);
-            this.tabPage2.Controls.Add(this.btn_CreateDrawings);
-            this.tabPage2.Controls.Add(this.btnRunThroughDetailingChecks);
-            this.tabPage2.Controls.Add(this.pictureBox2);
-            this.tabPage2.Location = new System.Drawing.Point(4, 22);
-            this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(311, 300);
-            this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "Detailing Checks";
-            // 
-            // statusStrip3
-            // 
-            this.structuresExtender.SetAttributeName(this.statusStrip3, null);
-            this.structuresExtender.SetAttributeTypeName(this.statusStrip3, null);
-            this.structuresExtender.SetBindPropertyName(this.statusStrip3, null);
-            this.statusStrip3.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.structuresExtender.SetAttributeName(this.statusStrip5, null);
+            this.structuresExtender.SetAttributeTypeName(this.statusStrip5, null);
+            this.structuresExtender.SetBindPropertyName(this.statusStrip5, null);
+            this.statusStrip5.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.statusStrip5.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.DetailingStatusLabel});
-            this.statusStrip3.Location = new System.Drawing.Point(3, 275);
-            this.statusStrip3.Name = "statusStrip3";
-            this.statusStrip3.Size = new System.Drawing.Size(305, 22);
-            this.statusStrip3.TabIndex = 26;
-            this.statusStrip3.Text = "statusStrip3";
+            this.statusStrip5.Location = new System.Drawing.Point(0, 214);
+            this.statusStrip5.Name = "statusStrip5";
+            this.statusStrip5.Size = new System.Drawing.Size(191, 22);
+            this.statusStrip5.TabIndex = 23;
+            this.statusStrip5.Text = "statusStrip5";
             // 
             // DetailingStatusLabel
             // 
@@ -351,153 +272,43 @@ namespace Prism
             this.DetailingStatusLabel.Size = new System.Drawing.Size(39, 17);
             this.DetailingStatusLabel.Text = "Status";
             // 
-            // label9
+            // pnl_Package
             // 
-            this.structuresExtender.SetAttributeName(this.label9, null);
-            this.structuresExtender.SetAttributeTypeName(this.label9, null);
-            this.label9.AutoSize = true;
-            this.structuresExtender.SetBindPropertyName(this.label9, null);
-            this.label9.Location = new System.Drawing.Point(245, 252);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(60, 13);
-            this.label9.TabIndex = 25;
-            this.label9.Text = "Version 2.1";
+            this.structuresExtender.SetAttributeName(this.pnl_Package, null);
+            this.structuresExtender.SetAttributeTypeName(this.pnl_Package, null);
+            this.pnl_Package.BackColor = System.Drawing.Color.White;
+            this.structuresExtender.SetBindPropertyName(this.pnl_Package, null);
+            this.pnl_Package.Controls.Add(this.btn_HomePackage);
+            this.pnl_Package.Controls.Add(this.statusStrip6);
+            this.pnl_Package.Controls.Add(this.txt_SiteDate);
+            this.pnl_Package.Controls.Add(this.btn_BoltOrder1);
+            this.pnl_Package.Controls.Add(this.btnCreatePackage1);
+            this.pnl_Package.Controls.Add(this.label16);
+            this.pnl_Package.Controls.Add(this.label17);
+            this.pnl_Package.Controls.Add(this.cmbPackageLocation);
+            this.pnl_Package.Controls.Add(this.label18);
+            this.pnl_Package.Controls.Add(this.label19);
+            this.pnl_Package.Controls.Add(this.phaseNumber);
+            this.pnl_Package.Controls.Add(this.issueNumber);
+            this.pnl_Package.Location = new System.Drawing.Point(716, 3);
+            this.pnl_Package.Name = "pnl_Package";
+            this.pnl_Package.Size = new System.Drawing.Size(258, 227);
+            this.pnl_Package.TabIndex = 3;
+            this.pnl_Package.Visible = false;
             // 
-            // pictureBox5
+            // statusStrip6
             // 
-            this.structuresExtender.SetAttributeName(this.pictureBox5, null);
-            this.structuresExtender.SetAttributeTypeName(this.pictureBox5, null);
-            this.structuresExtender.SetBindPropertyName(this.pictureBox5, null);
-            this.pictureBox5.Image = global::Prism.Properties.Resources.PrismTrans;
-            this.pictureBox5.InitialImage = null;
-            this.pictureBox5.Location = new System.Drawing.Point(237, 6);
-            this.pictureBox5.Name = "pictureBox5";
-            this.pictureBox5.Size = new System.Drawing.Size(68, 82);
-            this.pictureBox5.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox5.TabIndex = 23;
-            this.pictureBox5.TabStop = false;
-            // 
-            // btnDetailingChecksComplete
-            // 
-            this.structuresExtender.SetAttributeName(this.btnDetailingChecksComplete, null);
-            this.structuresExtender.SetAttributeTypeName(this.btnDetailingChecksComplete, null);
-            this.btnDetailingChecksComplete.BackColor = System.Drawing.Color.Gold;
-            this.structuresExtender.SetBindPropertyName(this.btnDetailingChecksComplete, null);
-            this.btnDetailingChecksComplete.Location = new System.Drawing.Point(8, 58);
-            this.btnDetailingChecksComplete.Name = "btnDetailingChecksComplete";
-            this.btnDetailingChecksComplete.Size = new System.Drawing.Size(84, 46);
-            this.btnDetailingChecksComplete.TabIndex = 19;
-            this.btnDetailingChecksComplete.Text = "Checks Complete";
-            this.btnDetailingChecksComplete.UseVisualStyleBackColor = false;
-            this.btnDetailingChecksComplete.Click += new System.EventHandler(this.btnDetailingChecksComplete_Click);
-            // 
-            // btn_CreateDrawings
-            // 
-            this.structuresExtender.SetAttributeName(this.btn_CreateDrawings, null);
-            this.structuresExtender.SetAttributeTypeName(this.btn_CreateDrawings, null);
-            this.btn_CreateDrawings.BackColor = System.Drawing.Color.Chartreuse;
-            this.structuresExtender.SetBindPropertyName(this.btn_CreateDrawings, null);
-            this.btn_CreateDrawings.Location = new System.Drawing.Point(8, 110);
-            this.btn_CreateDrawings.Name = "btn_CreateDrawings";
-            this.btn_CreateDrawings.Size = new System.Drawing.Size(84, 46);
-            this.btn_CreateDrawings.TabIndex = 18;
-            this.btn_CreateDrawings.Text = "Create Drawings";
-            this.btn_CreateDrawings.UseVisualStyleBackColor = false;
-            this.btn_CreateDrawings.Click += new System.EventHandler(this.btn_CreateDrawings_Click);
-            // 
-            // btnRunThroughDetailingChecks
-            // 
-            this.structuresExtender.SetAttributeName(this.btnRunThroughDetailingChecks, null);
-            this.structuresExtender.SetAttributeTypeName(this.btnRunThroughDetailingChecks, null);
-            this.btnRunThroughDetailingChecks.BackColor = System.Drawing.Color.Tomato;
-            this.structuresExtender.SetBindPropertyName(this.btnRunThroughDetailingChecks, null);
-            this.btnRunThroughDetailingChecks.Location = new System.Drawing.Point(8, 6);
-            this.btnRunThroughDetailingChecks.Name = "btnRunThroughDetailingChecks";
-            this.btnRunThroughDetailingChecks.Size = new System.Drawing.Size(84, 46);
-            this.btnRunThroughDetailingChecks.TabIndex = 17;
-            this.btnRunThroughDetailingChecks.Text = "Check Members";
-            this.btnRunThroughDetailingChecks.UseVisualStyleBackColor = false;
-            this.btnRunThroughDetailingChecks.Click += new System.EventHandler(this.btnRunThroughDetailingChecks_Click);
-            // 
-            // pictureBox2
-            // 
-            this.structuresExtender.SetAttributeName(this.pictureBox2, null);
-            this.structuresExtender.SetAttributeTypeName(this.pictureBox2, null);
-            this.structuresExtender.SetBindPropertyName(this.pictureBox2, null);
-            this.pictureBox2.Image = global::Prism.Properties.Resources.Severfield_blue_RGB_PNG;
-            this.pictureBox2.InitialImage = null;
-            this.pictureBox2.Location = new System.Drawing.Point(0, 218);
-            this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(161, 54);
-            this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox2.TabIndex = 10;
-            this.pictureBox2.TabStop = false;
-            // 
-            // tabPage3
-            // 
-            this.structuresExtender.SetAttributeName(this.tabPage3, null);
-            this.structuresExtender.SetAttributeTypeName(this.tabPage3, null);
-            this.tabPage3.BackColor = System.Drawing.Color.White;
-            this.structuresExtender.SetBindPropertyName(this.tabPage3, null);
-            this.tabPage3.Controls.Add(this.txt_SiteDate);
-            this.tabPage3.Controls.Add(this.label11);
-            this.tabPage3.Controls.Add(this.pictureBox4);
-            this.tabPage3.Controls.Add(this.statusStrip2);
-            this.tabPage3.Controls.Add(this.btn_BoltOrder);
-            this.tabPage3.Controls.Add(this.btnCreatePackage);
-            this.tabPage3.Controls.Add(this.label1);
-            this.tabPage3.Controls.Add(this.lblPackageLocation);
-            this.tabPage3.Controls.Add(this.cmbPackageLocation);
-            this.tabPage3.Controls.Add(this.lblIssueNumber);
-            this.tabPage3.Controls.Add(this.lblPhaseNumber);
-            this.tabPage3.Controls.Add(this.phaseNumber);
-            this.tabPage3.Controls.Add(this.issueNumber);
-            this.tabPage3.Controls.Add(this.pictureBox3);
-            this.tabPage3.Location = new System.Drawing.Point(4, 22);
-            this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(311, 300);
-            this.tabPage3.TabIndex = 2;
-            this.tabPage3.Text = "Fab Package Creation";
-            // 
-            // label11
-            // 
-            this.structuresExtender.SetAttributeName(this.label11, null);
-            this.structuresExtender.SetAttributeTypeName(this.label11, null);
-            this.label11.AutoSize = true;
-            this.structuresExtender.SetBindPropertyName(this.label11, null);
-            this.label11.Location = new System.Drawing.Point(245, 252);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(60, 13);
-            this.label11.TabIndex = 24;
-            this.label11.Text = "Version 2.1";
-            // 
-            // pictureBox4
-            // 
-            this.structuresExtender.SetAttributeName(this.pictureBox4, null);
-            this.structuresExtender.SetAttributeTypeName(this.pictureBox4, null);
-            this.structuresExtender.SetBindPropertyName(this.pictureBox4, null);
-            this.pictureBox4.Image = global::Prism.Properties.Resources.PrismTrans;
-            this.pictureBox4.InitialImage = null;
-            this.pictureBox4.Location = new System.Drawing.Point(237, 6);
-            this.pictureBox4.Name = "pictureBox4";
-            this.pictureBox4.Size = new System.Drawing.Size(68, 82);
-            this.pictureBox4.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox4.TabIndex = 21;
-            this.pictureBox4.TabStop = false;
-            // 
-            // statusStrip2
-            // 
-            this.structuresExtender.SetAttributeName(this.statusStrip2, null);
-            this.structuresExtender.SetAttributeTypeName(this.statusStrip2, null);
-            this.structuresExtender.SetBindPropertyName(this.statusStrip2, null);
-            this.statusStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.structuresExtender.SetAttributeName(this.statusStrip6, null);
+            this.structuresExtender.SetAttributeTypeName(this.statusStrip6, null);
+            this.structuresExtender.SetBindPropertyName(this.statusStrip6, null);
+            this.statusStrip6.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.statusStrip6.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.StatusLabel});
-            this.statusStrip2.Location = new System.Drawing.Point(3, 275);
-            this.statusStrip2.Name = "statusStrip2";
-            this.statusStrip2.Size = new System.Drawing.Size(305, 22);
-            this.statusStrip2.TabIndex = 18;
-            this.statusStrip2.Text = "statusStrip2";
+            this.statusStrip6.Location = new System.Drawing.Point(0, 205);
+            this.statusStrip6.Name = "statusStrip6";
+            this.statusStrip6.Size = new System.Drawing.Size(258, 22);
+            this.statusStrip6.TabIndex = 36;
+            this.statusStrip6.Text = "statusStrip6";
             // 
             // StatusLabel
             // 
@@ -505,48 +316,41 @@ namespace Prism
             this.StatusLabel.Size = new System.Drawing.Size(39, 17);
             this.StatusLabel.Text = "Status";
             // 
-            // btn_BoltOrder
+            // txt_SiteDate
             // 
-            this.structuresExtender.SetAttributeName(this.btn_BoltOrder, null);
-            this.structuresExtender.SetAttributeTypeName(this.btn_BoltOrder, null);
-            this.btn_BoltOrder.BackColor = System.Drawing.Color.Chartreuse;
-            this.structuresExtender.SetBindPropertyName(this.btn_BoltOrder, null);
-            this.btn_BoltOrder.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btn_BoltOrder.Location = new System.Drawing.Point(166, 170);
-            this.btn_BoltOrder.Name = "btn_BoltOrder";
-            this.btn_BoltOrder.Size = new System.Drawing.Size(120, 37);
-            this.btn_BoltOrder.TabIndex = 17;
-            this.btn_BoltOrder.Text = "Create Bolt Order";
-            this.btn_BoltOrder.UseVisualStyleBackColor = false;
-            this.btn_BoltOrder.Click += new System.EventHandler(this.btn_BoltOrder_Click);
+            this.structuresExtender.SetAttributeName(this.txt_SiteDate, null);
+            this.structuresExtender.SetAttributeTypeName(this.txt_SiteDate, null);
+            this.txt_SiteDate.BackColor = System.Drawing.Color.Moccasin;
+            this.structuresExtender.SetBindPropertyName(this.txt_SiteDate, null);
+            this.txt_SiteDate.Location = new System.Drawing.Point(15, 176);
+            this.txt_SiteDate.Name = "txt_SiteDate";
+            this.txt_SiteDate.Size = new System.Drawing.Size(124, 20);
+            this.txt_SiteDate.TabIndex = 35;
+            this.txt_SiteDate.TextChanged += new System.EventHandler(this.txt_SiteDate_TextChanged_1);
             // 
-            // btnCreatePackage
+            // label16
             // 
-            this.structuresExtender.SetAttributeName(this.btnCreatePackage, null);
-            this.structuresExtender.SetAttributeTypeName(this.btnCreatePackage, null);
-            this.btnCreatePackage.BackColor = System.Drawing.Color.Gainsboro;
-            this.structuresExtender.SetBindPropertyName(this.btnCreatePackage, null);
-            this.btnCreatePackage.Enabled = false;
-            this.btnCreatePackage.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnCreatePackage.Location = new System.Drawing.Point(166, 127);
-            this.btnCreatePackage.Name = "btnCreatePackage";
-            this.btnCreatePackage.Size = new System.Drawing.Size(120, 37);
-            this.btnCreatePackage.TabIndex = 17;
-            this.btnCreatePackage.Text = "Create Fab Package";
-            this.btnCreatePackage.UseVisualStyleBackColor = false;
-            this.btnCreatePackage.Click += new System.EventHandler(this.btnCreatePackage_Click);
+            this.structuresExtender.SetAttributeName(this.label16, null);
+            this.structuresExtender.SetAttributeTypeName(this.label16, null);
+            this.label16.AutoSize = true;
+            this.structuresExtender.SetBindPropertyName(this.label16, null);
+            this.label16.Location = new System.Drawing.Point(12, 159);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(99, 13);
+            this.label16.TabIndex = 31;
+            this.label16.Text = "Site Date (Optional)";
             // 
-            // lblPackageLocation
+            // label17
             // 
-            this.structuresExtender.SetAttributeName(this.lblPackageLocation, null);
-            this.structuresExtender.SetAttributeTypeName(this.lblPackageLocation, null);
-            this.lblPackageLocation.AutoSize = true;
-            this.structuresExtender.SetBindPropertyName(this.lblPackageLocation, null);
-            this.lblPackageLocation.Location = new System.Drawing.Point(15, 119);
-            this.lblPackageLocation.Name = "lblPackageLocation";
-            this.lblPackageLocation.Size = new System.Drawing.Size(94, 13);
-            this.lblPackageLocation.TabIndex = 16;
-            this.lblPackageLocation.Text = "Package Location";
+            this.structuresExtender.SetAttributeName(this.label17, null);
+            this.structuresExtender.SetAttributeTypeName(this.label17, null);
+            this.label17.AutoSize = true;
+            this.structuresExtender.SetBindPropertyName(this.label17, null);
+            this.label17.Location = new System.Drawing.Point(12, 108);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(94, 13);
+            this.label17.TabIndex = 32;
+            this.label17.Text = "Package Location";
             // 
             // cmbPackageLocation
             // 
@@ -561,49 +365,35 @@ namespace Prism
             "SDB",
             "Harry Peers",
             "DAM Structures"});
-            this.cmbPackageLocation.Location = new System.Drawing.Point(18, 136);
+            this.cmbPackageLocation.Location = new System.Drawing.Point(15, 125);
             this.cmbPackageLocation.Name = "cmbPackageLocation";
             this.cmbPackageLocation.Size = new System.Drawing.Size(121, 21);
-            this.cmbPackageLocation.TabIndex = 15;
-            this.cmbPackageLocation.SelectedIndexChanged += new System.EventHandler(this.cmbPackageLocation_SelectedIndexChanged);
+            this.cmbPackageLocation.TabIndex = 30;
+            this.cmbPackageLocation.SelectedIndexChanged += new System.EventHandler(this.cmbPackageLocation_SelectedIndexChanged_1);
             // 
-            // lblIssueNumber
+            // label18
             // 
-            this.structuresExtender.SetAttributeName(this.lblIssueNumber, null);
-            this.structuresExtender.SetAttributeTypeName(this.lblIssueNumber, null);
-            this.lblIssueNumber.AutoSize = true;
-            this.structuresExtender.SetBindPropertyName(this.lblIssueNumber, null);
-            this.lblIssueNumber.Location = new System.Drawing.Point(15, 67);
-            this.lblIssueNumber.Name = "lblIssueNumber";
-            this.lblIssueNumber.Size = new System.Drawing.Size(118, 13);
-            this.lblIssueNumber.TabIndex = 14;
-            this.lblIssueNumber.Text = "Package Issue Number";
+            this.structuresExtender.SetAttributeName(this.label18, null);
+            this.structuresExtender.SetAttributeTypeName(this.label18, null);
+            this.label18.AutoSize = true;
+            this.structuresExtender.SetBindPropertyName(this.label18, null);
+            this.label18.Location = new System.Drawing.Point(12, 56);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(118, 13);
+            this.label18.TabIndex = 29;
+            this.label18.Text = "Package Issue Number";
             // 
-            // lblPhaseNumber
+            // label19
             // 
-            this.structuresExtender.SetAttributeName(this.lblPhaseNumber, null);
-            this.structuresExtender.SetAttributeTypeName(this.lblPhaseNumber, null);
-            this.lblPhaseNumber.AutoSize = true;
-            this.structuresExtender.SetBindPropertyName(this.lblPhaseNumber, null);
-            this.lblPhaseNumber.Location = new System.Drawing.Point(15, 16);
-            this.lblPhaseNumber.Name = "lblPhaseNumber";
-            this.lblPhaseNumber.Size = new System.Drawing.Size(103, 13);
-            this.lblPhaseNumber.TabIndex = 13;
-            this.lblPhaseNumber.Text = "Package Reference";
-            // 
-            // phaseNumber
-            // 
-            this.structuresExtender.SetAttributeName(this.phaseNumber, null);
-            this.structuresExtender.SetAttributeTypeName(this.phaseNumber, null);
-            this.phaseNumber.BackColor = System.Drawing.Color.LightCoral;
-            this.structuresExtender.SetBindPropertyName(this.phaseNumber, null);
-            this.phaseNumber.Cursor = System.Windows.Forms.Cursors.IBeam;
-            this.phaseNumber.Location = new System.Drawing.Point(18, 33);
-            this.phaseNumber.Name = "phaseNumber";
-            this.phaseNumber.Size = new System.Drawing.Size(124, 20);
-            this.phaseNumber.TabIndex = 11;
-            this.toolTip1.SetToolTip(this.phaseNumber, "Phase or VO number.\r\n\r\n");
-            this.phaseNumber.TextChanged += new System.EventHandler(this.phaseNumber_TextChanged);
+            this.structuresExtender.SetAttributeName(this.label19, null);
+            this.structuresExtender.SetAttributeTypeName(this.label19, null);
+            this.label19.AutoSize = true;
+            this.structuresExtender.SetBindPropertyName(this.label19, null);
+            this.label19.Location = new System.Drawing.Point(12, 5);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(103, 13);
+            this.label19.TabIndex = 28;
+            this.label19.Text = "Package Reference";
             // 
             // issueNumber
             // 
@@ -612,50 +402,290 @@ namespace Prism
             this.issueNumber.BackColor = System.Drawing.Color.LightCoral;
             this.structuresExtender.SetBindPropertyName(this.issueNumber, null);
             this.issueNumber.Cursor = System.Windows.Forms.Cursors.IBeam;
-            this.issueNumber.Location = new System.Drawing.Point(18, 84);
+            this.issueNumber.Location = new System.Drawing.Point(15, 73);
             this.issueNumber.Name = "issueNumber";
             this.issueNumber.Size = new System.Drawing.Size(124, 20);
-            this.issueNumber.TabIndex = 12;
-            this.issueNumber.TextChanged += new System.EventHandler(this.issueNumber_TextChanged);
-            this.issueNumber.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.issueNumber_KeyPress);
+            this.issueNumber.TabIndex = 27;
+            this.issueNumber.TextChanged += new System.EventHandler(this.issueNumber_TextChanged_1);
+            this.issueNumber.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.issueNumber_KeyPress_1);
             // 
-            // pictureBox3
+            // pnl_Home
             // 
-            this.structuresExtender.SetAttributeName(this.pictureBox3, null);
-            this.structuresExtender.SetAttributeTypeName(this.pictureBox3, null);
-            this.structuresExtender.SetBindPropertyName(this.pictureBox3, null);
-            this.pictureBox3.Image = global::Prism.Properties.Resources.Severfield_blue_RGB_PNG;
-            this.pictureBox3.InitialImage = null;
-            this.pictureBox3.Location = new System.Drawing.Point(0, 218);
-            this.pictureBox3.Name = "pictureBox3";
-            this.pictureBox3.Size = new System.Drawing.Size(161, 54);
-            this.pictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox3.TabIndex = 10;
-            this.pictureBox3.TabStop = false;
+            this.structuresExtender.SetAttributeName(this.pnl_Home, null);
+            this.structuresExtender.SetAttributeTypeName(this.pnl_Home, null);
+            this.pnl_Home.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.pnl_Home.BackgroundImage = global::Prism.Properties.Resources.watereddownlogo;
+            this.pnl_Home.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.structuresExtender.SetBindPropertyName(this.pnl_Home, null);
+            this.pnl_Home.Controls.Add(this.button7);
+            this.pnl_Home.Controls.Add(this.btn_MainPackageCreation);
+            this.pnl_Home.Controls.Add(this.btn_MainDetailCheck);
+            this.pnl_Home.Controls.Add(this.btn_MainMaterialCheck);
+            this.pnl_Home.Location = new System.Drawing.Point(3, 3);
+            this.pnl_Home.Name = "pnl_Home";
+            this.pnl_Home.Size = new System.Drawing.Size(249, 249);
+            this.pnl_Home.TabIndex = 5;
             // 
-            // txt_SiteDate
+            // button7
             // 
-            this.structuresExtender.SetAttributeName(this.txt_SiteDate, null);
-            this.structuresExtender.SetAttributeTypeName(this.txt_SiteDate, null);
-            this.txt_SiteDate.BackColor = System.Drawing.Color.Moccasin;
-            this.structuresExtender.SetBindPropertyName(this.txt_SiteDate, null);
-            this.txt_SiteDate.Location = new System.Drawing.Point(18, 187);
-            this.txt_SiteDate.Name = "txt_SiteDate";
-            this.txt_SiteDate.Size = new System.Drawing.Size(124, 20);
-            this.txt_SiteDate.TabIndex = 25;
-            this.txt_SiteDate.TextChanged += new System.EventHandler(this.txt_SiteDate_TextChanged);
+            this.structuresExtender.SetAttributeName(this.button7, null);
+            this.structuresExtender.SetAttributeTypeName(this.button7, null);
+            this.button7.BackColor = System.Drawing.Color.Transparent;
+            this.structuresExtender.SetBindPropertyName(this.button7, null);
+            this.button7.Enabled = false;
+            this.button7.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.button7.Location = new System.Drawing.Point(126, 126);
+            this.button7.Name = "button7";
+            this.button7.Size = new System.Drawing.Size(120, 120);
+            this.button7.TabIndex = 0;
+            this.button7.UseVisualStyleBackColor = false;
             // 
-            // label1
+            // btn_MainPackageCreation
             // 
-            this.structuresExtender.SetAttributeName(this.label1, null);
-            this.structuresExtender.SetAttributeTypeName(this.label1, null);
-            this.label1.AutoSize = true;
-            this.structuresExtender.SetBindPropertyName(this.label1, null);
-            this.label1.Location = new System.Drawing.Point(15, 170);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(99, 13);
-            this.label1.TabIndex = 16;
-            this.label1.Text = "Site Date (Optional)";
+            this.structuresExtender.SetAttributeName(this.btn_MainPackageCreation, null);
+            this.structuresExtender.SetAttributeTypeName(this.btn_MainPackageCreation, null);
+            this.btn_MainPackageCreation.BackColor = System.Drawing.Color.Transparent;
+            this.btn_MainPackageCreation.BackgroundImage = global::Prism.Properties.Resources.MyNewWelder1;
+            this.btn_MainPackageCreation.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.structuresExtender.SetBindPropertyName(this.btn_MainPackageCreation, null);
+            this.btn_MainPackageCreation.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btn_MainPackageCreation.Location = new System.Drawing.Point(3, 126);
+            this.btn_MainPackageCreation.Name = "btn_MainPackageCreation";
+            this.btn_MainPackageCreation.Size = new System.Drawing.Size(120, 120);
+            this.btn_MainPackageCreation.TabIndex = 0;
+            this.toolTip1.SetToolTip(this.btn_MainPackageCreation, "Go to fab window");
+            this.btn_MainPackageCreation.UseVisualStyleBackColor = false;
+            this.btn_MainPackageCreation.Click += new System.EventHandler(this.btn_MainPackageCreation_Click);
+            // 
+            // btn_MainDetailCheck
+            // 
+            this.structuresExtender.SetAttributeName(this.btn_MainDetailCheck, null);
+            this.structuresExtender.SetAttributeTypeName(this.btn_MainDetailCheck, null);
+            this.btn_MainDetailCheck.BackColor = System.Drawing.Color.Transparent;
+            this.btn_MainDetailCheck.BackgroundImage = global::Prism.Properties.Resources.MyNewPen;
+            this.btn_MainDetailCheck.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.structuresExtender.SetBindPropertyName(this.btn_MainDetailCheck, null);
+            this.btn_MainDetailCheck.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btn_MainDetailCheck.Location = new System.Drawing.Point(126, 3);
+            this.btn_MainDetailCheck.Name = "btn_MainDetailCheck";
+            this.btn_MainDetailCheck.Size = new System.Drawing.Size(120, 120);
+            this.btn_MainDetailCheck.TabIndex = 0;
+            this.toolTip1.SetToolTip(this.btn_MainDetailCheck, "Go to detail window");
+            this.btn_MainDetailCheck.UseVisualStyleBackColor = false;
+            this.btn_MainDetailCheck.Click += new System.EventHandler(this.btn_MainDetailCheck_Click);
+            // 
+            // btn_MainMaterialCheck
+            // 
+            this.structuresExtender.SetAttributeName(this.btn_MainMaterialCheck, null);
+            this.structuresExtender.SetAttributeTypeName(this.btn_MainMaterialCheck, null);
+            this.btn_MainMaterialCheck.BackColor = System.Drawing.Color.Transparent;
+            this.btn_MainMaterialCheck.BackgroundImage = global::Prism.Properties.Resources.order;
+            this.btn_MainMaterialCheck.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.structuresExtender.SetBindPropertyName(this.btn_MainMaterialCheck, null);
+            this.btn_MainMaterialCheck.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btn_MainMaterialCheck.Location = new System.Drawing.Point(3, 3);
+            this.btn_MainMaterialCheck.Name = "btn_MainMaterialCheck";
+            this.btn_MainMaterialCheck.Size = new System.Drawing.Size(120, 120);
+            this.btn_MainMaterialCheck.TabIndex = 0;
+            this.toolTip1.SetToolTip(this.btn_MainMaterialCheck, "Go to material window");
+            this.btn_MainMaterialCheck.UseVisualStyleBackColor = false;
+            this.btn_MainMaterialCheck.Click += new System.EventHandler(this.btn_MainMaterialCheck_Click);
+            // 
+            // btn_HomeMaterial
+            // 
+            this.structuresExtender.SetAttributeName(this.btn_HomeMaterial, null);
+            this.structuresExtender.SetAttributeTypeName(this.btn_HomeMaterial, null);
+            this.btn_HomeMaterial.BackColor = System.Drawing.Color.White;
+            this.btn_HomeMaterial.BackgroundImage = global::Prism.Properties.Resources.Home;
+            this.btn_HomeMaterial.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.structuresExtender.SetBindPropertyName(this.btn_HomeMaterial, null);
+            this.btn_HomeMaterial.Location = new System.Drawing.Point(197, 7);
+            this.btn_HomeMaterial.Name = "btn_HomeMaterial";
+            this.btn_HomeMaterial.Size = new System.Drawing.Size(40, 40);
+            this.btn_HomeMaterial.TabIndex = 39;
+            this.toolTip1.SetToolTip(this.btn_HomeMaterial, "Home");
+            this.btn_HomeMaterial.UseVisualStyleBackColor = false;
+            this.btn_HomeMaterial.Click += new System.EventHandler(this.btn_HomeMaterial_Click);
+            // 
+            // btn_Material2
+            // 
+            this.structuresExtender.SetAttributeName(this.btn_Material2, null);
+            this.structuresExtender.SetAttributeTypeName(this.btn_Material2, null);
+            this.btn_Material2.BackColor = System.Drawing.Color.Gainsboro;
+            this.btn_Material2.BackgroundImage = global::Prism.Properties.Resources.add;
+            this.btn_Material2.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.structuresExtender.SetBindPropertyName(this.btn_Material2, null);
+            this.btn_Material2.Enabled = false;
+            this.btn_Material2.Location = new System.Drawing.Point(15, 69);
+            this.btn_Material2.Name = "btn_Material2";
+            this.btn_Material2.Size = new System.Drawing.Size(61, 56);
+            this.btn_Material2.TabIndex = 31;
+            this.toolTip1.SetToolTip(this.btn_Material2, "Add start numbers");
+            this.btn_Material2.UseVisualStyleBackColor = false;
+            this.btn_Material2.Click += new System.EventHandler(this.btn_Material2_Click);
+            // 
+            // btn_Material3
+            // 
+            this.structuresExtender.SetAttributeName(this.btn_Material3, null);
+            this.structuresExtender.SetAttributeTypeName(this.btn_Material3, null);
+            this.btn_Material3.BackColor = System.Drawing.Color.Gainsboro;
+            this.btn_Material3.BackgroundImage = global::Prism.Properties.Resources.order;
+            this.btn_Material3.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.structuresExtender.SetBindPropertyName(this.btn_Material3, null);
+            this.btn_Material3.Enabled = false;
+            this.btn_Material3.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btn_Material3.Location = new System.Drawing.Point(15, 131);
+            this.btn_Material3.Name = "btn_Material3";
+            this.btn_Material3.Size = new System.Drawing.Size(85, 56);
+            this.btn_Material3.TabIndex = 30;
+            this.toolTip1.SetToolTip(this.btn_Material3, "Run material order");
+            this.btn_Material3.UseVisualStyleBackColor = false;
+            this.btn_Material3.Click += new System.EventHandler(this.btn_Material3_Click);
+            // 
+            // btn_Material1
+            // 
+            this.structuresExtender.SetAttributeName(this.btn_Material1, null);
+            this.structuresExtender.SetAttributeTypeName(this.btn_Material1, null);
+            this.btn_Material1.BackColor = System.Drawing.Color.Tomato;
+            this.btn_Material1.BackgroundImage = global::Prism.Properties.Resources.look;
+            this.btn_Material1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.structuresExtender.SetBindPropertyName(this.btn_Material1, null);
+            this.btn_Material1.Location = new System.Drawing.Point(15, 7);
+            this.btn_Material1.Name = "btn_Material1";
+            this.btn_Material1.Size = new System.Drawing.Size(61, 56);
+            this.btn_Material1.TabIndex = 29;
+            this.toolTip1.SetToolTip(this.btn_Material1, "Check Members");
+            this.btn_Material1.UseVisualStyleBackColor = false;
+            this.btn_Material1.Click += new System.EventHandler(this.btn_Material1_Click);
+            // 
+            // btn_HomeDetail
+            // 
+            this.structuresExtender.SetAttributeName(this.btn_HomeDetail, null);
+            this.structuresExtender.SetAttributeTypeName(this.btn_HomeDetail, null);
+            this.btn_HomeDetail.BackColor = System.Drawing.Color.White;
+            this.btn_HomeDetail.BackgroundImage = global::Prism.Properties.Resources.Home;
+            this.btn_HomeDetail.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.structuresExtender.SetBindPropertyName(this.btn_HomeDetail, null);
+            this.btn_HomeDetail.Location = new System.Drawing.Point(148, 11);
+            this.btn_HomeDetail.Name = "btn_HomeDetail";
+            this.btn_HomeDetail.Size = new System.Drawing.Size(40, 40);
+            this.btn_HomeDetail.TabIndex = 24;
+            this.toolTip1.SetToolTip(this.btn_HomeDetail, "Home");
+            this.btn_HomeDetail.UseVisualStyleBackColor = false;
+            this.btn_HomeDetail.Click += new System.EventHandler(this.btn_HomeDetail_Click);
+            // 
+            // btn_Detail2
+            // 
+            this.structuresExtender.SetAttributeName(this.btn_Detail2, null);
+            this.structuresExtender.SetAttributeTypeName(this.btn_Detail2, null);
+            this.btn_Detail2.BackColor = System.Drawing.Color.Gold;
+            this.btn_Detail2.BackgroundImage = global::Prism.Properties.Resources.tick1;
+            this.btn_Detail2.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.structuresExtender.SetBindPropertyName(this.btn_Detail2, null);
+            this.btn_Detail2.Location = new System.Drawing.Point(15, 67);
+            this.btn_Detail2.Name = "btn_Detail2";
+            this.btn_Detail2.Size = new System.Drawing.Size(67, 56);
+            this.btn_Detail2.TabIndex = 22;
+            this.toolTip1.SetToolTip(this.btn_Detail2, "Checks complete");
+            this.btn_Detail2.UseVisualStyleBackColor = false;
+            this.btn_Detail2.Click += new System.EventHandler(this.btn_Detail2_Click);
+            // 
+            // btn_Detail3
+            // 
+            this.structuresExtender.SetAttributeName(this.btn_Detail3, null);
+            this.structuresExtender.SetAttributeTypeName(this.btn_Detail3, null);
+            this.btn_Detail3.BackColor = System.Drawing.Color.Chartreuse;
+            this.btn_Detail3.BackgroundImage = global::Prism.Properties.Resources.MyNewPen;
+            this.btn_Detail3.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.structuresExtender.SetBindPropertyName(this.btn_Detail3, null);
+            this.btn_Detail3.Location = new System.Drawing.Point(15, 129);
+            this.btn_Detail3.Name = "btn_Detail3";
+            this.btn_Detail3.Size = new System.Drawing.Size(67, 56);
+            this.btn_Detail3.TabIndex = 21;
+            this.toolTip1.SetToolTip(this.btn_Detail3, "Create drawings");
+            this.btn_Detail3.UseVisualStyleBackColor = false;
+            this.btn_Detail3.Click += new System.EventHandler(this.btn_Detail3_Click);
+            // 
+            // btn_Detail1
+            // 
+            this.structuresExtender.SetAttributeName(this.btn_Detail1, null);
+            this.structuresExtender.SetAttributeTypeName(this.btn_Detail1, null);
+            this.btn_Detail1.BackColor = System.Drawing.Color.Tomato;
+            this.btn_Detail1.BackgroundImage = global::Prism.Properties.Resources.look;
+            this.btn_Detail1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.structuresExtender.SetBindPropertyName(this.btn_Detail1, null);
+            this.btn_Detail1.Location = new System.Drawing.Point(15, 7);
+            this.btn_Detail1.Name = "btn_Detail1";
+            this.btn_Detail1.Size = new System.Drawing.Size(67, 56);
+            this.btn_Detail1.TabIndex = 20;
+            this.toolTip1.SetToolTip(this.btn_Detail1, "Check members");
+            this.btn_Detail1.UseVisualStyleBackColor = false;
+            this.btn_Detail1.Click += new System.EventHandler(this.btn_Detail1_Click);
+            // 
+            // btn_HomePackage
+            // 
+            this.structuresExtender.SetAttributeName(this.btn_HomePackage, null);
+            this.structuresExtender.SetAttributeTypeName(this.btn_HomePackage, null);
+            this.btn_HomePackage.BackColor = System.Drawing.Color.White;
+            this.btn_HomePackage.BackgroundImage = global::Prism.Properties.Resources.Home;
+            this.btn_HomePackage.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.structuresExtender.SetBindPropertyName(this.btn_HomePackage, null);
+            this.btn_HomePackage.Location = new System.Drawing.Point(203, 5);
+            this.btn_HomePackage.Name = "btn_HomePackage";
+            this.btn_HomePackage.Size = new System.Drawing.Size(40, 40);
+            this.btn_HomePackage.TabIndex = 37;
+            this.btn_HomePackage.Text = "\r\n";
+            this.toolTip1.SetToolTip(this.btn_HomePackage, "Home");
+            this.btn_HomePackage.UseVisualStyleBackColor = false;
+            this.btn_HomePackage.Click += new System.EventHandler(this.btn_HomePackage_Click);
+            // 
+            // btn_BoltOrder1
+            // 
+            this.structuresExtender.SetAttributeName(this.btn_BoltOrder1, null);
+            this.structuresExtender.SetAttributeTypeName(this.btn_BoltOrder1, null);
+            this.btn_BoltOrder1.BackColor = System.Drawing.Color.Chartreuse;
+            this.btn_BoltOrder1.BackgroundImage = global::Prism.Properties.Resources.bolt;
+            this.btn_BoltOrder1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.structuresExtender.SetBindPropertyName(this.btn_BoltOrder1, null);
+            this.btn_BoltOrder1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btn_BoltOrder1.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btn_BoltOrder1.Location = new System.Drawing.Point(191, 69);
+            this.btn_BoltOrder1.Name = "btn_BoltOrder1";
+            this.btn_BoltOrder1.Size = new System.Drawing.Size(52, 45);
+            this.btn_BoltOrder1.TabIndex = 33;
+            this.toolTip1.SetToolTip(this.btn_BoltOrder1, "Create bolt order");
+            this.btn_BoltOrder1.UseVisualStyleBackColor = false;
+            this.btn_BoltOrder1.Click += new System.EventHandler(this.btn_BoltOrder1_Click);
+            // 
+            // btnCreatePackage1
+            // 
+            this.structuresExtender.SetAttributeName(this.btnCreatePackage1, null);
+            this.structuresExtender.SetAttributeTypeName(this.btnCreatePackage1, null);
+            this.btnCreatePackage1.BackColor = System.Drawing.Color.Gainsboro;
+            this.btnCreatePackage1.BackgroundImage = global::Prism.Properties.Resources.MyNewWelder1;
+            this.btnCreatePackage1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.structuresExtender.SetBindPropertyName(this.btnCreatePackage1, null);
+            this.btnCreatePackage1.Enabled = false;
+            this.btnCreatePackage1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnCreatePackage1.Location = new System.Drawing.Point(160, 127);
+            this.btnCreatePackage1.Name = "btnCreatePackage1";
+            this.btnCreatePackage1.Size = new System.Drawing.Size(83, 69);
+            this.btnCreatePackage1.TabIndex = 34;
+            this.toolTip1.SetToolTip(this.btnCreatePackage1, "Create fab package");
+            this.btnCreatePackage1.UseVisualStyleBackColor = false;
+            this.btnCreatePackage1.Click += new System.EventHandler(this.btnCreatePackage1_Click);
+            // 
+            // label4
+            // 
+            this.structuresExtender.SetAttributeName(this.label4, null);
+            this.structuresExtender.SetAttributeTypeName(this.label4, null);
+            this.label4.AutoSize = true;
+            this.structuresExtender.SetBindPropertyName(this.label4, null);
+            this.label4.Location = new System.Drawing.Point(134, 193);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(72, 13);
+            this.label4.TabIndex = 41;
+            this.label4.Text = "Issue Number";
             // 
             // PrismForm
             // 
@@ -663,81 +693,78 @@ namespace Prism
             this.structuresExtender.SetAttributeTypeName(this, null);
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoSize = true;
+            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.structuresExtender.SetBindPropertyName(this, null);
-            this.ClientSize = new System.Drawing.Size(321, 328);
-            this.Controls.Add(this.tabControl1);
+            this.ClientSize = new System.Drawing.Size(992, 331);
+            this.Controls.Add(this.flowLayoutPanel1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MaximumSize = new System.Drawing.Size(337, 367);
-            this.MinimumSize = new System.Drawing.Size(337, 367);
+            this.MaximumSize = new System.Drawing.Size(2000, 2000);
+            this.MinimumSize = new System.Drawing.Size(100, 100);
             this.Name = "PrismForm";
             this.Text = "Prism";
             this.toolTip1.SetToolTip(this, "Phase or VO no.");
-            this.tabControl1.ResumeLayout(false);
-            this.tabPage1.ResumeLayout(false);
-            this.tabPage1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox6)).EndInit();
-            this.statusStrip1.ResumeLayout(false);
-            this.statusStrip1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
-            this.tabPage2.ResumeLayout(false);
-            this.tabPage2.PerformLayout();
-            this.statusStrip3.ResumeLayout(false);
-            this.statusStrip3.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox5)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
-            this.tabPage3.ResumeLayout(false);
-            this.tabPage3.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).EndInit();
-            this.statusStrip2.ResumeLayout(false);
-            this.statusStrip2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
+            this.flowLayoutPanel1.ResumeLayout(false);
+            this.pnl_Material.ResumeLayout(false);
+            this.pnl_Material.PerformLayout();
+            this.statusStrip4.ResumeLayout(false);
+            this.statusStrip4.PerformLayout();
+            this.pnl_Detail.ResumeLayout(false);
+            this.pnl_Detail.PerformLayout();
+            this.statusStrip5.ResumeLayout(false);
+            this.statusStrip5.PerformLayout();
+            this.pnl_Package.ResumeLayout(false);
+            this.pnl_Package.PerformLayout();
+            this.statusStrip6.ResumeLayout(false);
+            this.statusStrip6.PerformLayout();
+            this.pnl_Home.ResumeLayout(false);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
         #endregion
-
-        private System.Windows.Forms.TabControl tabControl1;
-        private System.Windows.Forms.TabPage tabPage1;
-        private System.Windows.Forms.TabPage tabPage3;
-        private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.StatusStrip statusStrip1;
-        private System.Windows.Forms.TabPage tabPage2;
-        private System.Windows.Forms.PictureBox pictureBox2;
-        private System.Windows.Forms.PictureBox pictureBox3;
-        private System.Windows.Forms.Button btnCreatePackage;
-        private System.Windows.Forms.Label lblPackageLocation;
-        private System.Windows.Forms.ComboBox cmbPackageLocation;
-        private System.Windows.Forms.Label lblIssueNumber;
-        private System.Windows.Forms.Label lblPhaseNumber;
-        public System.Windows.Forms.TextBox phaseNumber;
-        public System.Windows.Forms.TextBox issueNumber;
-        private System.Windows.Forms.Button btn_AddStartNumbers;
-        private System.Windows.Forms.Button btnOrderMaterial;
-        private System.Windows.Forms.Button btnRunThroughMaterialChecks;
-        private System.Windows.Forms.Button btnDetailingChecksComplete;
-        private System.Windows.Forms.Button btn_CreateDrawings;
-        private System.Windows.Forms.Button btnRunThroughDetailingChecks;
-        private System.Windows.Forms.StatusStrip statusStrip2;
-        public System.Windows.Forms.ToolStripStatusLabel StatusLabel;
-        private System.Windows.Forms.PictureBox pictureBox6;
-        private System.Windows.Forms.PictureBox pictureBox5;
-        private System.Windows.Forms.PictureBox pictureBox4;
-        private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.StatusStrip statusStrip3;
-        private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.Label label11;
-        private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.ComboBox cmb_OrderMaterial;
-        private System.Windows.Forms.ToolStripStatusLabel MaterialStatusLabel;
-        private System.Windows.Forms.ToolStripStatusLabel DetailingStatusLabel;
         private System.Windows.Forms.ToolTip toolTip1;
-        private System.Windows.Forms.Button btn_BoltOrder;
+        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
+        private System.Windows.Forms.Panel pnl_Home;
+        private System.Windows.Forms.Button button7;
+        private System.Windows.Forms.Button btn_MainPackageCreation;
+        private System.Windows.Forms.Button btn_MainDetailCheck;
+        private System.Windows.Forms.Button btn_MainMaterialCheck;
+        private System.Windows.Forms.Panel pnl_Material;
+        public System.Windows.Forms.TextBox txt_StartNumber;
+        private System.Windows.Forms.ComboBox cmb_OrderMaterial;
+        private System.Windows.Forms.Label label3;
         public System.Windows.Forms.TextBox txt_MaterialIssueNumber;
         public System.Windows.Forms.TextBox txt_MaterialPhaseNumber;
-        public System.Windows.Forms.TextBox txt_StartNumber;
+        private System.Windows.Forms.Button btn_Material2;
+        private System.Windows.Forms.Button btn_Material3;
+        private System.Windows.Forms.Button btn_Material1;
+        private System.Windows.Forms.Panel pnl_Detail;
+        private System.Windows.Forms.Button btn_Detail2;
+        private System.Windows.Forms.Button btn_Detail3;
+        private System.Windows.Forms.Button btn_Detail1;
+        private System.Windows.Forms.Panel pnl_Package;
         private System.Windows.Forms.TextBox txt_SiteDate;
+        private System.Windows.Forms.Button btn_BoltOrder1;
+        private System.Windows.Forms.Button btnCreatePackage1;
+        private System.Windows.Forms.Label label16;
+        private System.Windows.Forms.Label label17;
+        private System.Windows.Forms.ComboBox cmbPackageLocation;
+        private System.Windows.Forms.Label label18;
+        private System.Windows.Forms.Label label19;
+        public System.Windows.Forms.TextBox phaseNumber;
+        public System.Windows.Forms.TextBox issueNumber;
+        private System.Windows.Forms.StatusStrip statusStrip4;
+        private System.Windows.Forms.ToolStripStatusLabel MaterialStatusLabel;
+        private System.Windows.Forms.StatusStrip statusStrip5;
+        private System.Windows.Forms.ToolStripStatusLabel DetailingStatusLabel;
+        private System.Windows.Forms.StatusStrip statusStrip6;
+        private System.Windows.Forms.ToolStripStatusLabel StatusLabel;
+        private System.Windows.Forms.Button btn_HomeMaterial;
+        private System.Windows.Forms.Button btn_HomeDetail;
+        private System.Windows.Forms.Button btn_HomePackage;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label4;
     }
 }
