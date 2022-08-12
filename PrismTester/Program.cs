@@ -7,10 +7,12 @@ using Tekla.Structures.Drawing;
 using System.Diagnostics;
 using System.Collections.Generic;
 using static Prism.Enums;
+using System.Linq;
+using Part = Tekla.Structures.Model.Part;
 
 namespace PrismTester
 {
-    class Program
+    static class Program
     {
         public static void Main(string[] args)
         {
@@ -25,15 +27,20 @@ namespace PrismTester
             PrismProjectData modelData;
             SelectedObjects selectedObjects;
 
-           // myDrawingManager.CreateDrawingList();
-           // myDrawingManager.PrintDrawings();
-       
-            const string MailNewLine = "%0D%0A";
+
+
+        
+
+    
+    // myDrawingManager.CreateDrawingList();
+    // myDrawingManager.PrintDrawings();
+
+    const string MailNewLine = "%0D%0A";
 
             model = new Model();
+            modelData = new PrismProjectData(model.GetProjectInfo(), model.GetInfo().ModelPath);
 
-
-       //    modelData = new PrismProjectData(model.GetProjectInfo());
+            //    modelData = new PrismProjectData(model.GetProjectInfo());
 
 
             watch.Stop();
@@ -50,7 +57,9 @@ namespace PrismTester
             Console.WriteLine("Shop" + selectedObjects.AllBolts[0].ToString());
             Console.WriteLine("site" + selectedObjects.AllBolts[1].ToString());
 
-       //     selectedObjects.ModifyAttributes(3, modelData);
+            ResetPGNumbers(FabsecProcessing.GetMyFabsecs(selectedObjects), model.GetProjectInfo());
+
+            //     selectedObjects.ModifyAttributes(3, modelData);
 
             selectedObjects.GetCorrectModelSelection();
 
@@ -69,7 +78,7 @@ namespace PrismTester
             {
                 return;
             }
-         //   myFolderManager = new FolderManager(model.GetProjectInfo(), model.GetInfo().ModelPath, phaseNumber, issueNumber);
+            //   myFolderManager = new FolderManager(model.GetProjectInfo(), model.GetInfo().ModelPath, phaseNumber, issueNumber);
             //myBswxExporter.ExportBSWX(selectedObjects, myFolderManager.DspPath, modelData, phaseNumber, issueNumber, "");
 
             watch.Stop();
@@ -82,7 +91,7 @@ namespace PrismTester
             Console.WriteLine($"Stage 1.2 complete, runtime: {watch.ElapsedMilliseconds} ms");
             watch.Restart();
 
-          //  myDrawingManager = new DrawingManager(model, phaseNumber, issueNumber, selectedObjects);
+            //  myDrawingManager = new DrawingManager(model, phaseNumber, issueNumber, selectedObjects);
 
             watch.Stop();
             Console.WriteLine($"Stage 1.3 complete, runtime: {watch.ElapsedMilliseconds} ms");
@@ -96,8 +105,8 @@ namespace PrismTester
             watch.Restart();
 
             ToolStripStatusLabel DummyStrip = new ToolStripStatusLabel();
-           // bool allDrawingsUpToDate = myDrawingManager.CreateDrawingList();
-          //  if(!allDrawingsUpToDate)
+            // bool allDrawingsUpToDate = myDrawingManager.CreateDrawingList();
+            //  if(!allDrawingsUpToDate)
             {
                 const string notUpToDateMessage = "Some drawings are not up to date, please update and try again";
                 const string notUpToDateTitle = "Drawings not up to date";
@@ -166,6 +175,32 @@ namespace PrismTester
             }
         }
 
+        private static void ResetPGNumbers(this List<Part> fabsecList, ProjectInfo pInfo)
+        {
+            var groupedParts = fabsecList.GroupBy(p => new { profile = p.Profile.ProfileString });
+
+            foreach (var gp in groupedParts)
+            {
+                int fabsecGroup = 0;
+                string fabsecProfileString = "";
+
+                fabsecProfileString = "PRISM PG" + gp.First().Profile.ProfileString;
+                pInfo.GetUserProperty(fabsecProfileString, ref fabsecGroup);
+
+                    pInfo.SetUserProperty(fabsecProfileString, 0);
+                    pInfo.SetUserProperty("PG" + fabsecGroup, 0);
+                    pInfo.SetUserProperty("PRISM_PG_NEXT_NUMBER", 0);
+                
+
+                int currentLastNumber = 0;
+
+                foreach (Part p in gp)
+                {
+                    pInfo.SetUserProperty("PG" + fabsecGroup, currentLastNumber);
+                }
+            }
+        }
+
         public static void DummyPrintDrawings(DrawingHandler myDrawingHandler, FolderManager myFolderManager, DrawingManager myDrawingManager, SelectedObjects selectedObjects)
         {
             Console.WriteLine($"You have {myDrawingManager.PrismDrawingList.Count} drawings to print");
@@ -182,7 +217,7 @@ namespace PrismTester
 
             foreach (PrismDrawing myDrawing in myDrawingManager.PrismDrawingList)
             {
-                if(!myDrawing.DrawingRequired)
+                if (!myDrawing.DrawingRequired)
                 {
                     continue;
                 }

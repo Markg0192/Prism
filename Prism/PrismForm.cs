@@ -89,7 +89,7 @@ namespace Prism
             MaterialStatusLabel.Text = "Working";
             if (!InitialSetup(stageTypes.Prelim2, true)) { return; };
 
-            _selectedObjects.MaterialButton2op(txt_StartNumber.Text, (int)stageTypes.Prelim2, _projectData);
+            _selectedObjects.MaterialButton2op(txt_StartNumber.Text, (int)stageTypes.Prelim2, _projectData, _model);
 
             MaterialStatusLabel.Text = "Complete";
         }
@@ -99,7 +99,8 @@ namespace Prism
             MaterialStatusLabel.Text = "Working";
             if (!InitialSetup(stageTypes.Prelim3, true)) { return; };
 
-            _selectedObjects.MaterialButton3op(_projectData, _model.GetProjectInfo(), txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text, cmb_OrderMaterial.Text, (int)stageTypes.Prelim3, stageTypes.Prelim3);
+            _selectedObjects.MaterialButton3op(_projectData, _model.GetProjectInfo(), txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text, 
+                cmb_OrderMaterial.Text, (int)stageTypes.Prelim3, stageTypes.Prelim3, _model);
             _model.CommitChanges();
             MaterialStatusLabel.Text = "Complete";
         }

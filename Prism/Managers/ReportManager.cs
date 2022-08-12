@@ -4,6 +4,7 @@ using Tekla.Structures.Model.Operations;
 using System.Collections.Generic;
 using System.Threading;
 using System.Linq;
+using static Prism.Enums;
 
 namespace Prism
 {
@@ -17,7 +18,6 @@ namespace Prism
         private string _title2;
         private string _title3;
         private string _reportBolts;
-        private string _niFirmFolderReportPath = "C:/Sev_Firm_2019i/Roles/SNI/Reports";
         private const string _report2QSname = "-2QS-SNI-AssemblyBreakdownList.rpt";
         private const string _report3name = "Prism-3-SNI-HotRolledMemList.pdf.rpt";
         private const string _report3Pname = "Prism-3P-SNI-PrelimHotRolledMemList.pdf.rpt";
@@ -42,47 +42,80 @@ namespace Prism
         private const string _output9 = "-9-SNI-SiteDeliveryBatchList.pdf";
         private string _NCPlateSetting;
         private string _NCProfileSetting;
+        private bool create3PGReport = false;
+        private PrismProjectData _projectData;
+        private string _phaseNum;
+        private string _issueNum;
 
         public ReportManager(PrismProjectData projectData, string phaseNum, string issueNum)
-        {       
+        {
+            _projectData = projectData;
+            _phaseNum = phaseNum;
+            _issueNum = issueNum;
             Folders = new FolderManager(projectData, phaseNum, issueNum);
             FabReportPrefix = ($"{projectData.ProjNumber}-{phaseNum}-FAB-ISSUE{issueNum}");
             MatReportPrefix = ($"{projectData.ProjNumber}-{phaseNum}-PRELIM-ISSUE{issueNum}");
             _title1 = phaseNum;
             _title2 = projectData.Initials;
             _title3 = issueNum;
-        }        
-        
-        public FolderManager Folders;       
+        }
+
+        public FolderManager Folders;
         public readonly string FabReportPrefix;
         public readonly string MatReportPrefix;
 
-        public void CreateMaterialReports(List<Part> partsList, string orderType)
+        public void CreateMaterialReports(SelectedObjects selectedObjects, string orderType, Model model)
         {
             string materialReport = "";
             string outputName = "";
             if (orderType == "Order Material")
             {
-                materialReport = Path.Combine(_niFirmFolderReportPath, _report3Pname);
+                materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report3Pname);
                 outputName = _output3Pname;
+                PGListIfRequired(model, selectedObjects);
             }
+
             if (orderType == "Add Material")
             {
-                materialReport = Path.Combine(_niFirmFolderReportPath, _report3PAname);
+                materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report3PAname);
                 outputName = _output3PAname;
+                PGListIfRequired(model, selectedObjects);
             }
             if (orderType == "Omit Material")
             {
-                materialReport = Path.Combine(_niFirmFolderReportPath, _report3POname);
+                materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report3POname);
                 outputName = _output3POname;
             }
 
             Operation.CreateReportFromSelected(materialReport, Path.Combine(Folders.MatPath, $"{MatReportPrefix}{outputName}"), _title1, _title2, _title3);
         }
 
+        private bool PGsArePresent(List<Part> partsList)
+        {
+            foreach (Part part in partsList)
+            {
+                string sectionSize = part.Profile.ProfileString.Substring(0, 2);
+                if (sectionSize == "PG") return true;
+            }
+            return false;
+        }
+
+        private void PGListIfRequired(Model model, SelectedObjects selectedObjects)
+        {
+            if (PGsArePresent(selectedObjects.SelectedModelParts))
+            {
+                List<Part> carcasses = FabsecProcessing.GetCarcassesFromSelected(model, selectedObjects);
+                carcasses.SelectParts(model);
+                string report3PG = Path.Combine(FirmFolderLoc.ReportTemplates(), _report3PGname);
+                Operation.CreateReportFromSelected(report3PG, Path.Combine(Folders.MatPath, $"{MatReportPrefix}{_output3PG}"), _title1, _title2, _title3);
+               // carcasses.ExportBSWX(Folders.MatPath, _projectData, _phaseNum, _issueNum, stageTypes.PrelimPG);
+                selectedObjects.SelectedModelParts.SelectParts(model);
+            }
+        }
+
         public void CreateBoltList()
         {
-            _reportBolts = Path.Combine(_niFirmFolderReportPath, _reportBoltsName);
+            _reportBolts = Path.Combine(FirmFolderLoc.ReportTemplates(), _reportBoltsName);
             Operation.CreateReportFromSelected(_reportBolts, Path.Combine(Folders.BoltPath, $"{FabReportPrefix}{_outputBolts}"), _title1, _title2, _title3);
         }
 
@@ -90,21 +123,20 @@ namespace Prism
         {
             _NCPlateSetting = "-SNI-PLATES";
             _NCProfileSetting = "-SNI-PROFILES";
-            string report2QS = Path.Combine(_niFirmFolderReportPath, _report2QSname);
-            string report3 = Path.Combine(_niFirmFolderReportPath, _report3name);
-            string report3PG = Path.Combine(_niFirmFolderReportPath, _report3PGname);
-            string report4 = Path.Combine(_niFirmFolderReportPath, _report4name);
-            string report7 = Path.Combine(_niFirmFolderReportPath, _report7name);
-            string report8L = Path.Combine(_niFirmFolderReportPath, _report8Lname);
-            _reportBolts = Path.Combine(_niFirmFolderReportPath, _reportBoltsName);
-            string report9 = Path.Combine(_niFirmFolderReportPath, _report9name);
+            string report2QS = Path.Combine(FirmFolderLoc.ReportTemplates(), _report2QSname);
+            string report3 = Path.Combine(FirmFolderLoc.ReportTemplates(), _report3name);
+            string report3PG = Path.Combine(FirmFolderLoc.ReportTemplates(), _report3PGname);
+            string report4 = Path.Combine(FirmFolderLoc.ReportTemplates(), _report4name);
+            string report7 = Path.Combine(FirmFolderLoc.ReportTemplates(), _report7name);
+            string report8L = Path.Combine(FirmFolderLoc.ReportTemplates(), _report8Lname);
+            _reportBolts = Path.Combine(FirmFolderLoc.ReportTemplates(), _reportBoltsName);
+            string report9 = Path.Combine(FirmFolderLoc.ReportTemplates(), _report9name);
             bool create3Report = false;
-            bool create3PGReport = false;
             bool create4Report = false;
             string sectionSize;
 
             foreach (Part part in partsList)
-            {            
+            {
                 sectionSize = part.Profile.ProfileString.Substring(0, 2);
                 bool isFitting = sectionSize == "PL" || sectionSize == "RS" || sectionSize == "FL";
                 bool isPlateGirder = sectionSize == "PG";
@@ -131,7 +163,7 @@ namespace Prism
             {
                 Operation.CreateReportFromSelected(_reportBolts, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_outputBolts}"), _title1, _title3, _title2);
                 // Operation.CreateReportFromSelected(_report8L, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output8L}"), _title1, _title2, _title3);
-            }  
+            }
             if (boltList[1].Count > 0) //Then there are shop bolts in the selection therefore make a shop bolt list.
             {
                 Operation.CreateReportFromSelected(report7, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output7}"), _title1, _title3, _title2);
@@ -166,10 +198,10 @@ namespace Prism
                     RemoveDPM(folderPath);
                 }
 
-               /* do { Thread.Sleep(1000); }
-                while (fileTypes.Where(x => x.Contains("pdf")).Count() != fileTypes.Where(x => x.Contains("dpm")).Count());
+                /* do { Thread.Sleep(1000); }
+                 while (fileTypes.Where(x => x.Contains("pdf")).Count() != fileTypes.Where(x => x.Contains("dpm")).Count());
 
-                DeleteDPM(folderPath);*/
+                 DeleteDPM(folderPath);*/
             }
         }
 

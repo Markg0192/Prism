@@ -23,7 +23,28 @@ namespace Prism
                 currentList = myLists.Last();
                 currentList.Add(item);
             }
+            RunExport(myLists, myFolder, modelData, phaseNumber, issueNumber, stageType);
+        }
 
+        public static void ExportBSWX(this List<Part> myParts, string myFolder, PrismProjectData modelData, string phaseNumber,
+            string issueNumber, stageTypes stageType)
+        {
+            List<ArrayList> myLists = new List<ArrayList>();
+            myLists.Add(new ArrayList());
+
+            foreach (var item in myParts)
+            {
+                ArrayList currentList = myLists.Last();
+                if (currentList.Count >= _maxNumberOfPartsInAnArray) myLists.Add(new ArrayList());
+                currentList = myLists.Last();
+                currentList.Add(item);
+            }
+            RunExport(myLists, myFolder, modelData, phaseNumber, issueNumber, stageType);
+        }
+
+        private static void RunExport(List<ArrayList> myLists, string myFolder, PrismProjectData modelData, string phaseNumber,
+            string issueNumber, stageTypes stageType)
+        {
             Component bimRevExp = new Component();
             bimRevExp.Name = "BIMREVIEW Export";
             bimRevExp.Number = -100000;
@@ -35,14 +56,19 @@ namespace Prism
             }
 
             string typeString;
-            if(stageType == stageTypes.Prelim1 || stageType == stageTypes.Prelim2 || stageType == stageTypes.Prelim3)
+            if (stageType == stageTypes.Prelim1 || stageType == stageTypes.Prelim2 || stageType == stageTypes.Prelim3)
             {
-                typeString = stageType.ToString().Substring(0, (stageType.ToString().Length - 1)).ToUpper();                
+                typeString = stageType.ToString().Substring(0, (stageType.ToString().Length - 1)).ToUpper();
             }
             else
             {
                 typeString = stageType.ToString();
             }
+            if (stageType == stageTypes.PrelimPG)
+            {
+                typeString = "PG-Prelim";
+            }
+
 
             bimRevExp.SetComponentInput(myInputs);
             bimRevExp.SetAttribute("output_file_path", $@"{myFolder}\{modelData.ProjNumber}-{phaseNumber}-{typeString}-ISSUE{issueNumber}.bswx");

@@ -7,7 +7,7 @@ namespace Prism.ButtonOperations
         public static string DetailButton3op(this SelectedObjects myObjects, PrismProjectData projectData, int stageNumber)
         {
             if (!myObjects.RunStage4Checks()) { return "Cancelled"; }
-            myObjects.PerformNumbering();
+            ModelModifiers.PerformNumbering();
 
             const string notUpToDateMessage = "Are you happy with your numbering?";
             const string notUpToDateTitle = "Numbering";

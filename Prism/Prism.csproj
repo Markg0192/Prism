@@ -88,6 +88,8 @@
     <Compile Include="ButtonOperations\MaterialButton3.cs" />
     <Compile Include="EmailWriter.cs" />
     <Compile Include="Enums.cs" />
+    <Compile Include="FabsecProcessing.cs" />
+    <Compile Include="FirmFolderLoc.cs" />
     <Compile Include="GdomValues.cs" />
     <Compile Include="ModelUDA.cs" />
     <Compile Include="PrismDrawing.cs" />
