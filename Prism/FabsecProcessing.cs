@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -23,12 +22,12 @@ namespace Prism
             List<Part> myFabsecCarcasses = GetMyFabsecs(selectedObjects); //Run through the selection and single out Fabsecs
             if (myFabsecCarcasses.Count() != 0) //Keep going if there are fabsecs present
             {
-                myFabsecCarcasses.MovePGs(selectedObjects, model); // Move the model fabsecs to the "Material grave, deep below the model space" and remove them from selected objects
+                myFabsecCarcasses.MovePGs(selectedObjects); // Move the model fabsecs to the "Material grave, deep below the model space" and remove them from selected objects
                 myFabsecCarcasses.AddUniqueNumbering(model.GetProjectInfo());//Number each part uniquely with a profile specific prefix.
                 myFabsecCarcasses.AddGreenToCarcasses(); //Add "green" to carcasses, currently 100mm each side.
-                myFabsecCarcasses.SelectParts(model); //select carcasses only for numbering
+                myFabsecCarcasses.SelectParts(); //select carcasses only for numbering
                 ModelModifiers.PerformNumbering(); //Perform a numbering
-                myFabsecCarcasses.SavePrelimNumbers(); //save prelim marks on carcasses (should look like PG1-1, PG1-2, PG2-1, PG2-2 etc...
+                myFabsecCarcasses.SavePrelimNumbers(); //save prelim marks on carcasses (should look like PG1-1, PG1-2, PG2-1, PG2-2 etc...)
 
                 List<Part> myFabsecs = myFabsecCarcasses.CopyPGs(selectedObjects); //Copy carcasses back into model space and add these to selected objects
                 myFabsecs.RemoveGreenFromFabsecs(); // remove green from model space fabsecs
@@ -69,8 +68,31 @@ namespace Prism
                 List<Part> mathcingMembers = allFabsecs.FindAll(x => x.GetPrelimMark() == fabsec.GetPrelimMark());
                 Part myCarcass = mathcingMembers.FirstOrDefault(x => x.Identifier.GUID != fabsec.Identifier.GUID);
                 myCarcasses.Add(myCarcass);
+                selectedObjects.SelectedModelParts.Add(myCarcass);
+                selectedObjects.SelectedModelParts.Remove(fabsec);
             }
             return myCarcasses;
+        }
+
+        private static bool PGsArePresent(List<Part> partsList)
+        {
+            foreach (Part part in partsList)
+            {
+                string sectionSize = part.Profile.ProfileString.Substring(0, 2);
+                if (sectionSize == "PG") return true;
+            }
+            return false;
+        }
+
+        public static bool AddCarcassToSelection(Model model, SelectedObjects selectedObjects)
+        {
+            if (PGsArePresent(selectedObjects.SelectedModelParts))
+            {
+                GetCarcassesFromSelected(model, selectedObjects);
+                selectedObjects.SelectedModelParts.SelectParts();
+                return true;
+            }
+            return false;
         }
 
         private static List<Part> GetAllFabsecs(Model model)
@@ -120,8 +142,7 @@ namespace Prism
                     if (fabsecGroup == 0) // If this is zero then we are ecnountering the first PG in this model
                     {
                         fabsecGroup = 1;//so we set this to 1, PG"1"
-                    }
-                    Console.WriteLine("Failed to read last number");
+                    }              
                     pInfo.SetUserProperty(fabsecProfileString, fabsecGroup); //Set the UDA named after the profile with the fabsec group for future use
                     pInfo.SetUserProperty("PG" + fabsecGroup, 1); //Create a new UDA, named after the PG type and set its value to 1, this is the current last number used
                     pInfo.SetUserProperty(ModelUDA.NextFabsecPrefixNumber(), fabsecGroup + 1); //Set this to current group plus 1 so the next group of PGs to come along will get PG"2"
@@ -148,7 +169,7 @@ namespace Prism
             }
         }
 
-        private static void MovePGs(this List<Part> fabsecList, SelectedObjects selectedObjects, Model model)
+        private static void MovePGs(this List<Part> fabsecList, SelectedObjects selectedObjects)
         {
             foreach (Part fabsec in fabsecList)
             {
@@ -198,8 +219,8 @@ namespace Prism
         {
             foreach (Beam carcass in fabsecCarcassList)
             {
-                carcass.StartPointOffset.Dx = -carcassGreen;
-                carcass.EndPointOffset.Dx = carcassGreen;
+                carcass.StartPointOffset.Dx -= carcassGreen;
+                carcass.EndPointOffset.Dx += carcassGreen;
                 carcass.Modify();
             }
         }
@@ -208,8 +229,8 @@ namespace Prism
         {
             foreach (Beam carcass in fabsecList)
             {
-                carcass.StartPointOffset.Dx = 0;
-                carcass.EndPointOffset.Dx = 0;
+                carcass.StartPointOffset.Dx += carcassGreen;
+                carcass.EndPointOffset.Dx -= carcassGreen;
                 carcass.Modify();
             }
         }
@@ -225,10 +246,10 @@ namespace Prism
                 idList.Add(part.Identifier);
             }
 
-            fabsecCarcassList.SelectParts(model);
+            fabsecCarcassList.SelectParts();
             ModelModifiers.PerformNumbering();
             DrawingCreator.CreateDrawings(rule, idList, out status);
-            selectedObjects.SelectedModelParts.SelectParts(model);
+            selectedObjects.SelectedModelParts.SelectParts();
         }
         
     }

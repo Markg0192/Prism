@@ -1,15 +1,15 @@
 ﻿namespace Prism
 {
-    public static class FirmFolderLoc //These all point to 2019i NI locations, which is bad, but works for beta testing, this needs improving in the future
+    public static class FirmFolderLoc //both are set to use 2021 firm folder (so the latest reports/wizards, unsure if this works in 2019i
     {
-        public static string DrawingWizard()
+        public static string DrawingWizard() //This needs to be made into a group wide one.
         {
-            return @"C:\Sev_Firm_2019i\Roles\SNI\system\SNI Drawing Wizard.dproc";
+            return @"C:\Sev_Firm_2021\Roles\SNI\system\SNI Drawing Wizard.dproc";
         }
 
         public static string ReportTemplates()
         {
-            return "C:/Sev_Firm_2019i/Roles/SNI/Reports";
+            return "C:/Sev_Firm_2021/Reports";
         }
     }
 }

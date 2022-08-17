@@ -300,10 +300,11 @@ namespace Prism
             // 
             this.structuresExtender.SetAttributeName(this.btn_BoltOrder1, null);
             this.structuresExtender.SetAttributeTypeName(this.btn_BoltOrder1, null);
-            this.btn_BoltOrder1.BackColor = System.Drawing.Color.Chartreuse;
+            this.btn_BoltOrder1.BackColor = System.Drawing.Color.Gainsboro;
             this.btn_BoltOrder1.BackgroundImage = global::Prism.Properties.Resources.bolt;
             this.btn_BoltOrder1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.structuresExtender.SetBindPropertyName(this.btn_BoltOrder1, null);
+            this.btn_BoltOrder1.Enabled = false;
             this.btn_BoltOrder1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_BoltOrder1.ForeColor = System.Drawing.SystemColors.ControlText;
             this.btn_BoltOrder1.Location = new System.Drawing.Point(191, 69);

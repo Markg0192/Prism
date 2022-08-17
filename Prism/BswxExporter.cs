@@ -22,8 +22,8 @@ namespace Prism
                 if (currentList.Count >= _maxNumberOfPartsInAnArray) myLists.Add(new ArrayList());
                 currentList = myLists.Last();
                 currentList.Add(item);
-            }
-            RunExport(myLists, myFolder, modelData, phaseNumber, issueNumber, stageType);
+            } 
+            RunBswxExport(myLists, myFolder, modelData, phaseNumber, issueNumber, stageType);
         }
 
         public static void ExportBSWX(this List<Part> myParts, string myFolder, PrismProjectData modelData, string phaseNumber,
@@ -39,12 +39,13 @@ namespace Prism
                 currentList = myLists.Last();
                 currentList.Add(item);
             }
-            RunExport(myLists, myFolder, modelData, phaseNumber, issueNumber, stageType);
+            RunBswxExport(myLists, myFolder, modelData, phaseNumber, issueNumber, stageType);
         }
 
-        private static void RunExport(List<ArrayList> myLists, string myFolder, PrismProjectData modelData, string phaseNumber,
+        private static void RunBswxExport(List<ArrayList> myLists, string myFolder, PrismProjectData modelData, string phaseNumber,
             string issueNumber, stageTypes stageType)
-        {
+        {   
+            ModelModifiers.HideOrRestoreTekla(7);
             Component bimRevExp = new Component();
             bimRevExp.Name = "BIMREVIEW Export";
             bimRevExp.Number = -100000;
@@ -69,7 +70,6 @@ namespace Prism
                 typeString = "PG-Prelim";
             }
 
-
             bimRevExp.SetComponentInput(myInputs);
             bimRevExp.SetAttribute("output_file_path", $@"{myFolder}\{modelData.ProjNumber}-{phaseNumber}-{typeString}-ISSUE{issueNumber}.bswx");
             bimRevExp.SetAttribute("export_cam_files", 0);
@@ -92,7 +92,8 @@ namespace Prism
             bimRevExp.SetAttribute("include_gas", 0);
             bimRevExp.SetAttribute("include_multi", 0);
             bimRevExp.SetAttribute("drawing_extension", 0);
-            bimRevExp.Insert();
+            bimRevExp.Insert(); 
+            ModelModifiers.HideOrRestoreTekla(9);
         }
     }
 }

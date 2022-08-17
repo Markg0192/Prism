@@ -9,7 +9,6 @@ namespace Prism.ButtonOperations
             myObjects.ProcessFabsecs(model); 
             myObjects.AddStartNumbers(startNumber);
             myObjects.ModifyAttributes(stageNumber, projectData);
-
         }
     }
 }

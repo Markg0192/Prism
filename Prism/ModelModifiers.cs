@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using Tekla.Structures;
 using System.Linq;
 using System.Collections;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace Prism
 {
@@ -130,7 +132,7 @@ namespace Prism
             DrawingCreator.CreateDrawings(rule, idList, out status);
         }
 
-        public static void SelectParts(this List<Part> partsToBeSelected, Model model)
+        public static void SelectParts(this List<Part> partsToBeSelected)
         {
             ArrayList selectList = new ArrayList();
             foreach (Part part in partsToBeSelected)
@@ -144,11 +146,29 @@ namespace Prism
                 part.Modify();
             }
         }
+
         public static string GetPrelimMark(this Part p)
         {
             string prelim = "";
             p.GetUserProperty(ModelUDA.PrelimMark(), ref prelim);
             return prelim;
         }
+
+        public static void HideOrRestoreTekla(int hideOrRestore)
+        {
+            //if hideOrRestore = 7 then minimise tekla
+            //if hideOrRestore = 9 then restore tekla
+            Process[] processes = Process.GetProcesses();
+            foreach (Process process in processes)
+            {
+                if (process.MainWindowTitle.ToUpper().Contains("TEKLA"))
+                {
+                    ShowWindow(process.MainWindowHandle, hideOrRestore);
+                }
+            }
+        }
+
+        [DllImport("user32.dll")]
+        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
     }
 }

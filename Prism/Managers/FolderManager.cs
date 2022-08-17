@@ -9,7 +9,8 @@ namespace Prism
     /// unused folders method which runs at the end of the process to clear out any unused folders.
     /// </summary>
     public class FolderManager
-    {  
+    {
+        private const string _fabsecCarcasses = "Carcass Drawings";
         private const string _assFolder = "ASS";
         private const string _fitFolder = "FIT";
         private const string _prtFolder = "PRT";
@@ -30,6 +31,7 @@ namespace Prism
             string assPath = Path.Combine(FabPath, _assFolder);
             string fitPath = Path.Combine(FabPath, _fitFolder);
             string prtPath = Path.Combine(FabPath, _prtFolder);
+            FabsecCarcassPath = Path.Combine(MatPath, _fabsecCarcasses);
             NcPath = Path.Combine(FabPath, _ncFolder);
             ReportPath = Path.Combine(FabPath, _reportFolder);
             DspPath = Path.Combine(FabPath, _dspFolder);
@@ -44,6 +46,7 @@ namespace Prism
         public readonly string NcPath;
         public readonly string ReportPath;
         public readonly string DspPath;
+        private readonly string FabsecCarcassPath;
 
         public void CreateFabFolders()
         {        
@@ -56,9 +59,13 @@ namespace Prism
             }
         }    
         
-        public void CreateMatFolder()
+        public void CreateMatFolder(bool fabsecsPresent)
         {
             Directory.CreateDirectory(MatPath);
+            if(fabsecsPresent)
+            {
+                Directory.CreateDirectory(FabsecCarcassPath);
+            }
         }
 
         public void CreateBoltFolder()

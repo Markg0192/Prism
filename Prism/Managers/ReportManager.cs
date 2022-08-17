@@ -18,28 +18,35 @@ namespace Prism
         private string _title2;
         private string _title3;
         private string _reportBolts;
+
+        #region group accepted reports
+        private const string _output3Pname = "-3P-SEV-PrelimHotRolledMemList.pdf";  
+        private string _report3Pname = $"Prism{_output3Pname}.rpt";
+        private const string _output3PAname = "-3PA-SEV-PrelimHotRolledMemList-ADD.pdf";
+        private string _report3PAname = $"Prism{_output3PAname}.rpt";
+        private const string _output3POname = "-3PO-SEV-PrelimHotRolledMemList-OMIT.pdf";
+        private string _report3POname = $"Prism{_output3POname}.rpt";
+        private const string _outputBolts = "-SEV-BOLTS-STRUMIS-SUMMARY_v3.xsr";
+        private const string _reportBoltsName = "-SEV-BOLTS-STRUMIS-SUMMARY_v3.rpt";      
+        #endregion
+
+        #region SNI Reports to be converted to group wide alternative
         private const string _report2QSname = "-2QS-SNI-AssemblyBreakdownList.rpt";
         private const string _report3name = "Prism-3-SNI-HotRolledMemList.pdf.rpt";
-        private const string _report3Pname = "Prism-3P-SNI-PrelimHotRolledMemList.pdf.rpt";
-        private const string _report3PAname = "Prism-3PA-SNI-PrelimHotRolledMemList-ADD.pdf.rpt";
-        private const string _report3POname = "Prism-3PO-SNI-PrelimHotRolledMemList-OMIT.pdf.rpt";
         private const string _report3PGname = "-3_PG-SNI-HotRolledPlateGirderList.rpt";
         private const string _report4name = "Prism-4-SNI-HotRolledFitList.pdf.rpt";
         private const string _report7name = "-7-SNI-ShopBoltList.rpt";
         private const string _report8Lname = "-8L-SNI-SiteBoltLocationList.rpt";
-        private const string _reportBoltsName = "-SEV-BOLTS-STRUMIS-SUMMARY_v3.rpt";
         private const string _report9name = "Prism-9-SNI-SiteDeliveryBatchList.pdf.rpt";
         private const string _output2QS = "-2QS-SNI-AssemblyBreakdownList.xsr";
         private const string _output3 = "-3-SNI-HotRolledMemList.pdf";
-        private const string _output3Pname = "-3P-SNI-PrelimHotRolledMemList.pdf";
-        private const string _output3PAname = "-3PA-SNI-PrelimHotRolledMemList-ADD.pdf";
-        private const string _output3POname = "-3PO-SNI-PrelimHotRolledMemList-OMIT.pdf";
         private const string _output3PG = "-3_PG-SNI-HotRolledPlateGirderList.xsr";
         private const string _output4 = "-4-SNI-HotRolledFitList.pdf";
         private const string _output7 = "-7-SNI-ShopBoltList.xsr";
         private const string _output8L = "-8L-SNI-SiteBoltLocationList.xsr";
-        private const string _outputBolts = "-SEV-BOLTS-STRUMIS-SUMMARY_v3.xsr";
         private const string _output9 = "-9-SNI-SiteDeliveryBatchList.pdf";
+        #endregion
+
         private string _NCPlateSetting;
         private string _NCProfileSetting;
         private bool create3PGReport = false;
@@ -64,22 +71,22 @@ namespace Prism
         public readonly string FabReportPrefix;
         public readonly string MatReportPrefix;
 
-        public void CreateMaterialReports(SelectedObjects selectedObjects, string orderType, Model model)
+        public void CreateMaterialReports(SelectedObjects selectedObjects, string orderType, Model model, stageTypes stageType)
         {
             string materialReport = "";
             string outputName = "";
             if (orderType == "Order Material")
             {
+                selectedObjects.ExportBSWX(Folders.MatPath, _projectData, _phaseNum, _issueNum, stageType);
                 materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report3Pname);
                 outputName = _output3Pname;
-                PGListIfRequired(model, selectedObjects);
             }
 
             if (orderType == "Add Material")
             {
+                selectedObjects.ExportBSWX(Folders.MatPath, _projectData, _phaseNum, _issueNum, stageType);
                 materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report3PAname);
                 outputName = _output3PAname;
-                PGListIfRequired(model, selectedObjects);
             }
             if (orderType == "Omit Material")
             {
@@ -88,29 +95,6 @@ namespace Prism
             }
 
             Operation.CreateReportFromSelected(materialReport, Path.Combine(Folders.MatPath, $"{MatReportPrefix}{outputName}"), _title1, _title2, _title3);
-        }
-
-        private bool PGsArePresent(List<Part> partsList)
-        {
-            foreach (Part part in partsList)
-            {
-                string sectionSize = part.Profile.ProfileString.Substring(0, 2);
-                if (sectionSize == "PG") return true;
-            }
-            return false;
-        }
-
-        private void PGListIfRequired(Model model, SelectedObjects selectedObjects)
-        {
-            if (PGsArePresent(selectedObjects.SelectedModelParts))
-            {
-                List<Part> carcasses = FabsecProcessing.GetCarcassesFromSelected(model, selectedObjects);
-                carcasses.SelectParts(model);
-                string report3PG = Path.Combine(FirmFolderLoc.ReportTemplates(), _report3PGname);
-                Operation.CreateReportFromSelected(report3PG, Path.Combine(Folders.MatPath, $"{MatReportPrefix}{_output3PG}"), _title1, _title2, _title3);
-               // carcasses.ExportBSWX(Folders.MatPath, _projectData, _phaseNum, _issueNum, stageTypes.PrelimPG);
-                selectedObjects.SelectedModelParts.SelectParts(model);
-            }
         }
 
         public void CreateBoltList()

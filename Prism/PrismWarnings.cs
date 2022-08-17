@@ -4,6 +4,13 @@ namespace Prism
 {
     public static class PrismWarnings
     {
+        public static DialogResult FabsecsPresent()
+        {
+            const string notUpToDateMessage = "There are FABSEC members present in your selection, I will process these, have you tidied the carcass drawings?";
+            const string notUpToDateTitle = "FABSECS!";
+            return MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+        }
+
         public static void NumberingIsNotUpToDate()
         {
             const string notUpToDateMessage = "Your member numbering is not up to date, please update and try again";
