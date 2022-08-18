@@ -51,5 +51,15 @@
         {
             return "BOLT_USERFIELD_8";
         }
+
+        public static string UserPhase()
+        {
+            return "USER_PHASE";
+        }
+
+        public static string NextFabsecPrefixNumber()
+        {
+            return "PRISM_PG_NEXT_NUMBER";
+        }
     }
 }

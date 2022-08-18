@@ -57,9 +57,22 @@ namespace Prism
                 btnCreatePackage1.Enabled = false;
                 btnCreatePackage1.BackColor = Color.Gainsboro;
             }
-
         }
- 
+
+        private void CheckForBoltOrderButton()
+        {
+            if (phaseNumber.Text.Length > 0 & issueNumber.Text.Length > 1)
+            {
+                btn_BoltOrder1.Enabled = true;
+                btn_BoltOrder1.BackColor = Color.Chartreuse;
+            }
+            else
+            {
+                btn_BoltOrder1.Enabled = false;
+                btn_BoltOrder1.BackColor = Color.Gainsboro;
+            }
+        }
+
         private void CheckForMaterialButton()
         {
             if (txt_MaterialIssueNumber.Text.Length > 1 && txt_MaterialPhaseNumber.Text.Length > 0)
@@ -89,7 +102,7 @@ namespace Prism
             MaterialStatusLabel.Text = "Working";
             if (!InitialSetup(stageTypes.Prelim2, true)) { return; };
 
-            _selectedObjects.MaterialButton2op(txt_StartNumber.Text, (int)stageTypes.Prelim2, _projectData);
+            _selectedObjects.MaterialButton2op(txt_StartNumber.Text, (int)stageTypes.Prelim2, _projectData, _model);
 
             MaterialStatusLabel.Text = "Complete";
         }
@@ -99,7 +112,8 @@ namespace Prism
             MaterialStatusLabel.Text = "Working";
             if (!InitialSetup(stageTypes.Prelim3, true)) { return; };
 
-            _selectedObjects.MaterialButton3op(_projectData, _model.GetProjectInfo(), txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text, cmb_OrderMaterial.Text, (int)stageTypes.Prelim3, stageTypes.Prelim3);
+            _selectedObjects.MaterialButton3op(_projectData, _model.GetProjectInfo(), txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text, 
+                cmb_OrderMaterial.Text, (int)stageTypes.Prelim3, stageTypes.Prelim3, _model);
             _model.CommitChanges();
             MaterialStatusLabel.Text = "Complete";
         }
@@ -233,6 +247,7 @@ namespace Prism
                 phaseNumber.BackColor = Color.LightCoral;
             }
             CheckForFabButton();
+            CheckForBoltOrderButton();
         }
 
         private void issueNumber_TextChanged_1(object sender, EventArgs e)
@@ -246,11 +261,13 @@ namespace Prism
                 issueNumber.BackColor = Color.LightCoral;
             }
             CheckForFabButton();
+            CheckForBoltOrderButton();
         }
 
         private void cmbPackageLocation_SelectedIndexChanged_1(object sender, EventArgs e)
         {
-            if (cmbPackageLocation.Text == "SNI")
+            //The logic below will be needed when fab packages are ana vailable option so just commented out for now
+            /*if (cmbPackageLocation.Text == "SNI")
             {
                 cmbPackageLocation.BackColor = Color.White;
             }
@@ -258,7 +275,8 @@ namespace Prism
             {
                 cmbPackageLocation.BackColor = Color.LightCoral;
             }
-            CheckForFabButton();
+            CheckForFabButton();*/
+
         }
 
         private void txt_MaterialPhaseNumber_TextChanged_1(object sender, EventArgs e)

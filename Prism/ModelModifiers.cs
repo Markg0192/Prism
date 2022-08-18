@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using Tekla.Structures;
 using System.Linq;
 using System.Collections;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace Prism
 {
@@ -52,19 +54,22 @@ namespace Prism
 
                 foreach (Part p in gp)
                 {
-                    prismLastNumberAttributeName = "PRISM" + p.AssemblyNumber.StartNumber;
-                    pInfo.GetUserProperty(prismLastNumberAttributeName, ref currentLastNumber);
-                    if (currentLastNumber == 0)
+                    if (p.GetPrelimMark().Length < 1)
                     {
-                        Console.WriteLine("Failed to read last number");
-                        currentLastNumber = 1;
-                        pInfo.SetUserProperty(prismLastNumberAttributeName, currentLastNumber);
+                        prismLastNumberAttributeName = "PRISM" + p.AssemblyNumber.StartNumber;
+                        pInfo.GetUserProperty(prismLastNumberAttributeName, ref currentLastNumber);
+                        if (currentLastNumber == 0)
+                        {
+                            Console.WriteLine("Failed to read last number");
+                            currentLastNumber = 1;
+                            pInfo.SetUserProperty(prismLastNumberAttributeName, currentLastNumber);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Last number read" + currentLastNumber);
+                        }
+                        p.SetUserProperty(ModelUDA.PrelimMark(), (currentLastNumber + p.AssemblyNumber.StartNumber - 1).ToString());
                     }
-                    else
-                    {
-                        Console.WriteLine("Last number read" + currentLastNumber);
-                    }
-                    p.SetUserProperty(ModelUDA.PrelimMark(), (currentLastNumber + p.AssemblyNumber.StartNumber - 1).ToString());
                 }
                 currentLastNumber++;
                 pInfo.SetUserProperty(prismLastNumberAttributeName, currentLastNumber);
@@ -105,18 +110,18 @@ namespace Prism
                 p.Modify();
                 Vector myVector = new Vector(0, 0, distanceToMovePartsInZ);
                 Operation.MoveObject(p, myVector);
-            }            
+                p.Select();
+            }
         }
 
-        public static void PerformNumbering(this SelectedObjects selectedObjects)
+        public static void PerformNumbering()
         {
             new MacroBuilder().Callback("acmd_partnumbers_selected", string.Empty, "main_frame").Run();
         }
 
         public static void CreateDrawings(this SelectedObjects selectedObjects)
         {
-            string SNIWizardLocation = @"C:\Sev_Firm_2019i\Roles\SNI\system\SNI Drawing Wizard.dproc";
-            FileInfo file = new FileInfo(SNIWizardLocation);
+            FileInfo file = new FileInfo(FirmFolderLoc.DrawingWizard());
             AutoDrawingRule rule = new AutoDrawingRule(file.FullName);
             AutoDrawingsStatusEnum status;
             List<Identifier> idList = new List<Identifier>();
@@ -126,5 +131,44 @@ namespace Prism
             }
             DrawingCreator.CreateDrawings(rule, idList, out status);
         }
+
+        public static void SelectParts(this List<Part> partsToBeSelected)
+        {
+            ArrayList selectList = new ArrayList();
+            foreach (Part part in partsToBeSelected)
+            {
+                selectList.Add(part);
+            }
+            Tekla.Structures.Model.UI.ModelObjectSelector ms = new Tekla.Structures.Model.UI.ModelObjectSelector();
+            ms.Select(selectList);
+            foreach (Part part in partsToBeSelected)
+            {
+                part.Modify();
+            }
+        }
+
+        public static string GetPrelimMark(this Part p)
+        {
+            string prelim = "";
+            p.GetUserProperty(ModelUDA.PrelimMark(), ref prelim);
+            return prelim;
+        }
+
+        public static void HideOrRestoreTekla(int hideOrRestore)
+        {
+            //if hideOrRestore = 7 then minimise tekla
+            //if hideOrRestore = 9 then restore tekla
+            Process[] processes = Process.GetProcesses();
+            foreach (Process process in processes)
+            {
+                if (process.MainWindowTitle.ToUpper().Contains("TEKLA"))
+                {
+                    ShowWindow(process.MainWindowHandle, hideOrRestore);
+                }
+            }
+        }
+
+        [DllImport("user32.dll")]
+        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
     }
 }
