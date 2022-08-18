@@ -32,7 +32,7 @@ namespace Prism
         public bool CreateDrawingList()
         {
             List<Drawing> drawingsBySelectedParts = new List<Drawing>();
-            IEnumerable<int> drawingNos = Operation.GetDrawingsBySelectedParts();
+            IEnumerable<int> drawingNos = Operation.GetDrawingsBySelectedParts(true, true);
             int counter = 0;
             foreach (var item in drawingNos) counter++;
 
@@ -41,7 +41,7 @@ namespace Prism
                 //manager must be opened at least once to initialise it, if this not done the GetDrawingsBySelectedParts method does not work
                 //RefreshDrawings quickly opens the document manager if it has not been opened before to do this initialisation 
                 RefreshDrawings();
-                drawingNos = Operation.GetDrawingsBySelectedParts();
+                drawingNos = Operation.GetDrawingsBySelectedParts(true, true);
             }
 
             foreach (var no in drawingNos)
