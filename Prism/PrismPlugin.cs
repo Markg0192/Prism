@@ -1,4 +1,25 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Windows.Forms;
+
+namespace Prism
+{
+    static class Program
+    {
+        /// <summary>
+        /// The main entry point for the application.
+        /// </summary>
+        [STAThread]
+        static void Main()
+        {
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            Application.Run(new PrismUI());
+        }
+    }
+}
+
+/*using System.Collections.Generic;
 using Tekla.Structures.Model;
 using Tekla.Structures.Plugins;
 
@@ -55,3 +76,4 @@ namespace Prism
         }
     }
 }
+*/
