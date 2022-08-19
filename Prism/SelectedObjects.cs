@@ -17,9 +17,10 @@ namespace Prism
         // public DrawingHandler MyDrawingHandler; This will be needed when drawing functionaility is introduced
 
         public SelectedObjects(stageTypes stageType)
-        {       
+        {
             List<BoltGroup> SiteBolts = new List<BoltGroup>();
             List<BoltGroup> ShopBolts = new List<BoltGroup>();
+
             NumbersNotUpToDate = true;
             AssembliesList = new List<Assembly>();
             SelectedModelParts = new List<Part>();
@@ -79,6 +80,12 @@ namespace Prism
             AllBolts.Add(ShopBolts);
         }
 
+        public double SmallestX = 100000000;
+        public double SmallestY = 100000000;
+        public double SmallestZ = 100000000;
+        public double BiggestX = -100000000;
+        public double BiggestY = -100000000;
+        public double BiggestZ = -100000000;
         public double TotalWeight { get; set; }
         public bool NumbersNotUpToDate { get; set; }
         public List<Assembly> AssembliesList { get; set; }
@@ -86,10 +93,25 @@ namespace Prism
         public List<Part> SelectedModelParts { get; set; }
         public List<string> MyMarks { get; set; }
 
+        private void CheckXYZSize(Part myPart)
+        {
+            if (myPart is Beam beam)
+            {
+                SmallestX = Math.Min(beam.EndPoint.X, Math.Min(beam.StartPoint.X, SmallestX));
+                SmallestY = Math.Min(beam.EndPoint.Y, Math.Min(beam.StartPoint.Y, SmallestY));
+                SmallestZ = Math.Min(beam.EndPoint.Z, Math.Min(beam.StartPoint.Z, SmallestZ));
+
+                BiggestX = Math.Min(beam.EndPoint.X, Math.Min(beam.StartPoint.X, BiggestX));
+                BiggestY = Math.Min(beam.EndPoint.Y, Math.Min(beam.StartPoint.Y, BiggestY));
+                BiggestZ = Math.Min(beam.EndPoint.Z, Math.Min(beam.StartPoint.Z, BiggestZ));
+            }
+        }
+
         private void ProcessObject(object myObject, stageTypes stageType)
         {
             if (myObject is Part myPart)
             {
+                CheckXYZSize(myPart);
                 if (!Operation.IsNumberingUpToDate(myPart) && stageType == stageTypes.FAB)
                 {
                     PrismWarnings.NumberingIsNotUpToDate();

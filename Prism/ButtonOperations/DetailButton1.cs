@@ -6,7 +6,7 @@
         {            
            if(!myObjects.RunStage4Checks()) { return; }
 
-            myObjects.ModifyAttributes(stageNumber, projectData);
+            myObjects.SelectedModelParts.ModifyAttributes(stageNumber, projectData);
         }
     }
 }

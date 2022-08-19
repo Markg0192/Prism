@@ -39,11 +39,11 @@ namespace Prism
 
         public static void WriteMatEmail(PrismProjectData projData, SelectedObjects objects, string fabPrefix, string issueNumber, string phaseNumber, string orderType)
         {   
-            FormIssueEmail("purchasing@severfield.com", $"{fabPrefix} Prelim Issue",
+            FormIssueEmail("purchasing@severfield.com", $"{fabPrefix} {IssueType(orderType)}",
                                                                                     $"Hello,{_mailNewLine}" +
                                                                                     $"{_mailNewLine}" +
                                                                                     $"{OrderTypeText(orderType)}, issue {issueNumber}, for phase {phaseNumber} in {projData.ProjNumber}, {projData.ProjName}.{_mailNewLine}" +
-                                                                                    $"Please order this material as soon as possible.{_mailNewLine}" +
+                                                                                    $"{RemoveOrAddText(orderType)} as soon as possible.{_mailNewLine}" +
                                                                                     $"{_mailNewLine}" +
                                                                                     $"This material order contains the following;{_mailNewLine}" +           
                                                                                     $"{objects.SelectedModelParts.Count} Parts.{_mailNewLine}" +
@@ -83,6 +83,40 @@ namespace Prism
             if (orderType == "Omit Material")
             {
                 return "This is an omit material order";
+            }
+            return "";
+        }
+
+        private static string RemoveOrAddText(string orderType)
+        {
+            if (orderType == "Order Material")
+            {
+                return "Please order this material";
+            }
+            if (orderType == "Add Material")
+            {
+                return "Please add this to the material order for this phase";
+            }
+            if (orderType == "Omit Material")
+            {
+                return "Please remove this from the material order of this phase";
+            }
+            return "";
+        }
+
+        private static string IssueType(string orderType)
+        {
+            if (orderType == "Order Material")
+            {
+                return "Prelim Issue";
+            }
+            if (orderType == "Add Material")
+            {
+                return "Additonal Prelim Issue";
+            }
+            if (orderType == "Omit Material")
+            {
+                return "OMIT Issue";
             }
             return "";
         }

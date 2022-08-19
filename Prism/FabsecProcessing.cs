@@ -17,7 +17,7 @@ namespace Prism
         private static double moveDistance = 100000;
         private static double carcassGreen = 100;
 
-        public static void ProcessFabsecs(this SelectedObjects selectedObjects, Model model)
+        public static void ProcessFabsecs(this SelectedObjects selectedObjects, Model model, PrismProjectData projectData)
         {
             List<Part> myFabsecCarcasses = GetMyFabsecs(selectedObjects); //Run through the selection and single out Fabsecs
             if (myFabsecCarcasses.Count() != 0) //Keep going if there are fabsecs present
@@ -33,6 +33,7 @@ namespace Prism
                 myFabsecs.RemoveGreenFromFabsecs(); // remove green from model space fabsecs
                 myFabsecs.ReMarkModelFabsecs(); // remove unique prefixing from model members and return to local phase numbering
                 myFabsecCarcasses.CreateCarcassDrawings(selectedObjects, model); //Create carcass drawings from the members in the material grave
+                myFabsecCarcasses.ModifyAttributes(2, projectData);
             }
         }
 
@@ -57,13 +58,13 @@ namespace Prism
             return fabsecList;
         }
 
-        public static List<Part> GetCarcassesFromSelected(Model model, SelectedObjects selectedObjects)
+        public static List<Part> GetCarcassesFromSelected(Model model, SelectedObjects selectedObjects, out List<Part> originalFabsecs)
         {
-            List<Part> selectedFabsecs = GetMyFabsecs(selectedObjects);
+            originalFabsecs = GetMyFabsecs(selectedObjects);
             List<Part> allFabsecs = GetAllFabsecs(model);
             List<Part> myCarcasses = new List<Part>();
 
-            foreach (Part fabsec in selectedFabsecs)
+            foreach (Part fabsec in originalFabsecs)
             {
                 List<Part> mathcingMembers = allFabsecs.FindAll(x => x.GetPrelimMark() == fabsec.GetPrelimMark());
                 Part myCarcass = mathcingMembers.FirstOrDefault(x => x.Identifier.GUID != fabsec.Identifier.GUID);
@@ -84,14 +85,15 @@ namespace Prism
             return false;
         }
 
-        public static bool AddCarcassToSelection(Model model, SelectedObjects selectedObjects)
+        public static bool AddCarcassToSelection(Model model, SelectedObjects selectedObjects, out List<Part> originalFabsecs)
         {
             if (PGsArePresent(selectedObjects.SelectedModelParts))
             {
-                GetCarcassesFromSelected(model, selectedObjects);
+                GetCarcassesFromSelected(model, selectedObjects, out originalFabsecs);
                 selectedObjects.SelectedModelParts.SelectParts();
                 return true;
             }
+            originalFabsecs = null;
             return false;
         }
 
@@ -162,7 +164,7 @@ namespace Prism
                     p.PartNumber.StartNumber = 1;
                     p.AssemblyNumber.StartNumber = 1;
 
-                    p.SetUserProperty(ModelUDA.UserPhase(), $"PG{fabsecGroup}-{currentLastNumber}"); //The user phase UDA is used to trick tekla into thinking each piece in unique.
+                    p.SetUserProperty(ModelUDA.FabsecUniqueNumber(), $"PG{fabsecGroup}-{currentLastNumber}"); //The user phase UDA is used to trick tekla into thinking each piece in unique.
                     currentLastNumber++;
                     pInfo.SetUserProperty($"PG{fabsecGroup}", currentLastNumber);
                 }

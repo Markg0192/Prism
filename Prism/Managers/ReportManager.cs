@@ -198,6 +198,6 @@ namespace Prism
                     File.Delete(subFile);
                 }
             }
-        }
+        }          
     }
 }

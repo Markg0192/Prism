@@ -25,7 +25,7 @@ namespace Prism.ButtonOperations
                     myReportManager.Folders.CreateFabFolders();
                     myReportManager.CreateFabReports(myObjects.SelectedModelParts, myObjects.AllBolts, packageLocation);
                     // MyDrawingManager.PrintDrawings(StatusLabel); Temporarily not in use
-                    myObjects.ModifyAttributes((int)stageType, projectData);
+                    myObjects.SelectedModelParts.ModifyAttributes((int)stageType, projectData);
                     //MyFolderManager.RemoveUnusedFolders(); Temporarily not in use
                     myObjects.LockSelected();
                     DialogResult finishBox = PrismWarnings.FabPackComplete(projectData);

@@ -6,7 +6,7 @@
         {
             if (myObjects.HasExecutionClass() && myObjects.NameAndClassAligned())
             {
-                myObjects.ModifyAttributes(stageNumber, projectData);
+                myObjects.SelectedModelParts.ModifyAttributes(stageNumber, projectData);
             }
         }
     }

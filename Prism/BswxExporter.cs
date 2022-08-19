@@ -24,6 +24,7 @@ namespace Prism
                 currentList.Add(item);
             } 
             RunBswxExport(myLists, myFolder, modelData, phaseNumber, issueNumber, stageType);
+            ModelModifiers.RemoveLog(myFolder);
         }
 
         public static void ExportBSWX(this List<Part> myParts, string myFolder, PrismProjectData modelData, string phaseNumber,

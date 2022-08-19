@@ -6,9 +6,9 @@ namespace Prism.ButtonOperations
     {
         public static void MaterialButton2op(this SelectedObjects myObjects, string startNumber, int stageNumber, PrismProjectData projectData, Model model)
         {
-            myObjects.ProcessFabsecs(model); 
+            myObjects.ProcessFabsecs(model, projectData); 
             myObjects.AddStartNumbers(startNumber);
-            myObjects.ModifyAttributes(stageNumber, projectData);
+            myObjects.SelectedModelParts.ModifyAttributes(stageNumber, projectData);
         }
     }
 }

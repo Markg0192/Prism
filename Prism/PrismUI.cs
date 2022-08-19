@@ -315,5 +315,16 @@ namespace Prism
                 txt_SiteDate.BackColor = Color.Moccasin;
             }
         }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            _selectedObjects = new SelectedObjects(stageTypes.Bolt);
+            foreach (Part part in _selectedObjects.SelectedModelParts)
+            {
+                part.SetUserProperty(ModelUDA.FabStampUDA(), ModelUDA.FabStamp(phaseNumber.Text, issueNumber.Text));
+                part.Modify();
+            }
+            ViewManager.CreateFabView(phaseNumber.Text, issueNumber.Text, _projectData, _selectedObjects);
+        }
     }
 }
