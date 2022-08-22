@@ -239,7 +239,7 @@ namespace Prism
 
         private static void CreateCarcassDrawings(this List<Part> fabsecCarcassList, SelectedObjects selectedObjects, Model model)
         {
-            FileInfo file = new FileInfo(FirmFolderLoc.DrawingWizard());
+            FileInfo file = new FileInfo(FirmFolderLoc.FabsecCarcassDrawingWizard());
             AutoDrawingRule rule = new AutoDrawingRule(file.FullName);
             AutoDrawingsStatusEnum status;
             List<Identifier> idList = new List<Identifier>();

@@ -10,6 +10,11 @@
         public static string ReportTemplates()
         {
             return "C:/Sev_Firm_2021/Reports";
+        }     
+        
+        public static string FabsecCarcassDrawingWizard() 
+        {
+            return @"C:\Sev_Firm_2021\system\SEV Fabsec Carcass Drawing Wizard.dproc";
         }
     }
 }
