@@ -86,6 +86,7 @@ namespace Prism
         public double BiggestX = -100000000;
         public double BiggestY = -100000000;
         public double BiggestZ = -100000000;
+
         public double TotalWeight { get; set; }
         public bool NumbersNotUpToDate { get; set; }
         public List<Assembly> AssembliesList { get; set; }

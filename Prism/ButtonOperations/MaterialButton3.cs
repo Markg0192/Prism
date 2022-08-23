@@ -11,17 +11,17 @@ namespace Prism.ButtonOperations
             string phaseNumber, string issueNumber, string orderType, int stageNumber, stageTypes stageType, Model model)
         {
             foreach (Part myPart in myObjects.SelectedModelParts)
-            {                
+            {
                 if (orderType == "Omit Material" && !myPart.HasBeenOrdered(false))
                 {
                     PrismWarnings.HasNotBeenOrderedOMIT();
                     return;
-                } 
+                }
 
                 if (orderType != "Omit Material" && !myPart.HasBeenOrdered(true))
                 {
                     continue;
-                } 
+                }
 
                 if (orderType != "Omit Material" && myPart.HasBeenOrdered(false))
                 {
@@ -44,16 +44,17 @@ namespace Prism.ButtonOperations
 
             ReportManager myReportManager = new ReportManager(projectData, phaseNumber, issueNumber);
 
+            myObjects.AddPrelimMarks(projectInfo);
             myReportManager.Folders.CreateMatFolder(fabsecsPresent);
 
             myReportManager.CreateMaterialReports(myObjects, orderType, model, stageType);
             if (orderType == "Omit Material")
-            {              
+            {
                 stageNumber = 8;
                 myObjects.MoveAndRenameOmittedMembers();
             }
 
-            myObjects.AddPrelimMarks(projectInfo);            
+
             myObjects.SelectedModelParts.ModifyAttributes(stageNumber, projectData);
             DialogResult finishBox = PrismWarnings.MaterialOrderComplete(projectData);
             if (finishBox == DialogResult.OK)
