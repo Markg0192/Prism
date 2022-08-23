@@ -1,4 +1,5 @@
-﻿using System.Windows.Forms;
+﻿using System.Collections.Generic;
+using System.Windows.Forms;
 using Tekla.Structures.Model;
 using static Prism.Enums;
 
@@ -9,12 +10,33 @@ namespace Prism.ButtonOperations
         public static void MaterialButton3op(this SelectedObjects myObjects, PrismProjectData projectData, ProjectInfo projectInfo,
             string phaseNumber, string issueNumber, string orderType, int stageNumber, stageTypes stageType, Model model)
         {
-            bool fabsecsPresent = FabsecProcessing.AddCarcassToSelection(model, myObjects);
+            foreach (Part myPart in myObjects.SelectedModelParts)
+            {                
+                if (orderType == "Omit Material" && !myPart.HasBeenOrdered(false))
+                {
+                    PrismWarnings.HasNotBeenOrderedOMIT();
+                    return;
+                } 
+
+                if (orderType != "Omit Material" && !myPart.HasBeenOrdered(true))
+                {
+                    continue;
+                } 
+
+                if (orderType != "Omit Material" && myPart.HasBeenOrdered(false))
+                {
+                    PrismWarnings.HasAlreadyBeenOrdered();
+                    return;
+                }
+            }
+
+            bool fabsecsPresent = FabsecProcessing.AddCarcassToSelection(model, myObjects, out List<Part> originalFabsecs);
             if (fabsecsPresent)
             {
                 DialogResult fabsecWarning = PrismWarnings.FabsecsPresent();
                 if (fabsecWarning == DialogResult.Yes)
                 {
+                    originalFabsecs.ModifyAttributes(stageNumber, projectData);
                     MessageBox.Show("Sorry! I cannot get your carcass drawings, please create these manually.");
                 }
                 else { return; }
@@ -23,14 +45,16 @@ namespace Prism.ButtonOperations
             ReportManager myReportManager = new ReportManager(projectData, phaseNumber, issueNumber);
 
             myReportManager.Folders.CreateMatFolder(fabsecsPresent);
-            myObjects.AddPrelimMarks(projectInfo);
+
             myReportManager.CreateMaterialReports(myObjects, orderType, model, stageType);
             if (orderType == "Omit Material")
-            {
-                myObjects.MoveAndRenameOmittedMembers();
+            {              
                 stageNumber = 8;
+                myObjects.MoveAndRenameOmittedMembers();
             }
-            myObjects.ModifyAttributes(stageNumber, projectData);
+
+            myObjects.AddPrelimMarks(projectInfo);            
+            myObjects.SelectedModelParts.ModifyAttributes(stageNumber, projectData);
             DialogResult finishBox = PrismWarnings.MaterialOrderComplete(projectData);
             if (finishBox == DialogResult.OK)
             {

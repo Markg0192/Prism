@@ -20,12 +20,12 @@ namespace Prism
         private string _reportBolts;
 
         #region group accepted reports
-        private const string _output3Pname = "-3P-SEV-PrelimHotRolledMemList.pdf";  
-        private string _report3Pname = $"Prism{_output3Pname}.rpt";
-        private const string _output3PAname = "-3PA-SEV-PrelimHotRolledMemList-ADD.pdf";
-        private string _report3PAname = $"Prism{_output3PAname}.rpt";
-        private const string _output3POname = "-3PO-SEV-PrelimHotRolledMemList-OMIT.pdf";
-        private string _report3POname = $"Prism{_output3POname}.rpt";
+        private const string _output1Pname = "-1-SEV-PrelimHRList.pdf";  
+        private string _report1Pname = $"Prism{_output1Pname}.rpt";
+        private const string _output1PAname = "-1A-SEV-PrelimHRList-ADD.pdf";
+        private string _report1PAname = $"Prism{_output1PAname}.rpt";
+        private const string _output1POname = "-1O-SEV-PrelimHRList-OMIT.pdf";
+        private string _report1POname = $"Prism{_output1POname}.rpt";
         private const string _outputBolts = "-SEV-BOLTS-STRUMIS-SUMMARY_v3.xsr";
         private const string _reportBoltsName = "-SEV-BOLTS-STRUMIS-SUMMARY_v3.rpt";      
         #endregion
@@ -78,20 +78,20 @@ namespace Prism
             if (orderType == "Order Material")
             {
                 selectedObjects.ExportBSWX(Folders.MatPath, _projectData, _phaseNum, _issueNum, stageType);
-                materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report3Pname);
-                outputName = _output3Pname;
+                materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report1Pname);
+                outputName = _output1Pname;
             }
 
             if (orderType == "Add Material")
             {
                 selectedObjects.ExportBSWX(Folders.MatPath, _projectData, _phaseNum, _issueNum, stageType);
-                materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report3PAname);
-                outputName = _output3PAname;
+                materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report1PAname);
+                outputName = _output1PAname;
             }
             if (orderType == "Omit Material")
             {
-                materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report3POname);
-                outputName = _output3POname;
+                materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report1POname);
+                outputName = _output1POname;
             }
 
             Operation.CreateReportFromSelected(materialReport, Path.Combine(Folders.MatPath, $"{MatReportPrefix}{outputName}"), _title1, _title2, _title3);
@@ -198,6 +198,6 @@ namespace Prism
                     File.Delete(subFile);
                 }
             }
-        }
+        }          
     }
 }

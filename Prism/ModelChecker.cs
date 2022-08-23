@@ -47,6 +47,7 @@ namespace Prism
             {
                 string userProperty = "";
                 p.GetUserProperty(ModelUDA.PreviousStageName(stageNumber), ref userProperty);
+               
                 if (userProperty == "")
                 {
                     PrismWarnings.PreviousStepIncomplete();
@@ -54,14 +55,14 @@ namespace Prism
                 }
             }
             return true;
-        }        
+        }
 
         public static bool RunStage4Checks(this SelectedObjects selectedObjects)
         {
             foreach (Assembly ass in selectedObjects.AssembliesList)
             {
                 Part myMainPart = ass.GetMainPart() as Part;
-                if (!myMainPart.HasBeenOrdered()) { return false; }
+                if (!myMainPart.HasBeenOrdered(false)) { return false; }
                 if (!myMainPart.HasAFinish()) { return false; }
                 ArrayList mySecondaries = ass.GetSecondaries();
                 foreach (Part mySecondaryPart in mySecondaries)
@@ -106,12 +107,13 @@ namespace Prism
             return true;
         }
 
-        public static bool HasBeenOrdered(this Part mainPart)
+        public static bool HasBeenOrdered(this Part mainPart, bool skipMessages)
         {
             string prelimMark = "";
-            mainPart.GetUserProperty(ModelUDA.PrelimMark(), ref prelimMark);
+            mainPart.GetUserProperty(ModelUDA.CurrentStageName(3), ref prelimMark); //Check prism uda material order complete for data
             if (prelimMark.Length == 0)
             {
+                if (skipMessages) { return false; }
                 PrismWarnings.HasNotBeenOrdered();
                 return PrismWarnings.IgnoreHasNotBeenOrdered();
             }

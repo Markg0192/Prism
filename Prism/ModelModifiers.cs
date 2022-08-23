@@ -10,6 +10,7 @@ using System.Linq;
 using System.Collections;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+//using System.Threading;
 
 namespace Prism
 {
@@ -19,15 +20,15 @@ namespace Prism
     /// </summary>
     public static class ModelModifiers
     {
-        public static void ModifyAttributes(this SelectedObjects selectedObjects, int stageNumber, PrismProjectData projectData)
+        public static void ModifyAttributes(this List<Part> selectedObjects, int stageNumber, PrismProjectData projectData)
         {
-            foreach (Part part in selectedObjects.SelectedModelParts)
+            foreach (Part part in selectedObjects)
             {
                 part.SetUserProperty(ModelUDA.CurrentStageName(stageNumber), projectData.Full);
                 part.SetUserProperty(ModelUDA.CurrentStageDate(stageNumber), projectData.Date);
                 if (stageNumber == 7)
                 {
-                    part.SetUserProperty(ModelUDA.CurrentStageNumber(stageNumber), part.GetPartMark());
+                    part.SetUserProperty(ModelUDA.PartMarkAtFab(), part.GetPartMark());
                 }
                 part.Modify();
             }
@@ -42,8 +43,10 @@ namespace Prism
             }
         }
 
-        public static void AddPrelimMarks(this SelectedObjects selectedObjects, ProjectInfo pInfo)
+        public static void AddPrelimMarksOldMethod(this SelectedObjects selectedObjects, ProjectInfo pInfo)
         {
+            //This method adds prelim marks 'the old fashioned way' it rationalises members by profile, grade and length and adds numbers based on phase.
+            //We have moved to numbering each piece individually but keeping this method incase we change our mind again.
             var allParts = selectedObjects.SelectedModelParts.Cast<Part>().ToList();
             var groupedParts = allParts.GroupBy(p => new { profile = p.Profile.ProfileString, length = GetPartLength(p), material = p.Material.MaterialString });
 
@@ -74,6 +77,34 @@ namespace Prism
                 currentLastNumber++;
                 pInfo.SetUserProperty(prismLastNumberAttributeName, currentLastNumber);
             }
+        }
+
+        public static void AddPrelimMarks(this SelectedObjects selectedObjects, ProjectInfo pInfo)
+        {
+            //This method adds prelim marks 'the old fashioned way' it rationalises members by profile, grade and length and adds numbers based on phase.
+            //We have moved to numbering each piece individually but keeping this method incase we change our mind again.
+            int currentLastNumber = 0;
+
+            foreach (Part p in selectedObjects.SelectedModelParts)
+            {
+                if (p.GetPrelimMark().Length < 1)
+                {
+                    pInfo.GetUserProperty(ModelUDA.LastUsedPrelim(), ref currentLastNumber);
+                    if (currentLastNumber == 0)
+                    {
+                        Console.WriteLine("Failed to read last number");
+                        currentLastNumber = 1;
+                        pInfo.SetUserProperty(ModelUDA.LastUsedPrelim(), currentLastNumber);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Last number read" + currentLastNumber);
+                    }
+                    p.SetUserProperty(ModelUDA.PrelimMark(), currentLastNumber.ToString());
+                } 
+                currentLastNumber++;
+                pInfo.SetUserProperty(ModelUDA.LastUsedPrelim(), currentLastNumber);
+            }                
         }
 
         private static double GetPartLength(Part myPart)
@@ -170,5 +201,37 @@ namespace Prism
 
         [DllImport("user32.dll")]
         private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        public static void RemoveLog(string folderPath)
+        {
+            List<string> fileTypes = new List<string>();
+            if (Directory.Exists(folderPath))
+            {
+                foreach (string subFile in Directory.GetFiles(folderPath))
+                {
+                    fileTypes.Add(subFile.Substring(subFile.Length - 3));
+                }
+                if (fileTypes.Where(x => x.Contains("bswx")).Count() == fileTypes.Where(x => x.Contains("Log")).Count())
+                {
+                    DeleteLog(folderPath);
+                }
+                else
+                {
+                   // Thread.Sleep(1000);
+                    RemoveLog(folderPath);
+                }
+            }
+        }
+
+        private static void DeleteLog(string folderPath)
+        {
+            foreach (string subFile in Directory.GetFiles(folderPath))
+            {
+                if (subFile.Substring(subFile.Length - 3) == "txt")
+                {
+                    File.Delete(subFile);
+                }
+            }
+        }
     }
 }

@@ -91,6 +91,7 @@
     <Compile Include="FabsecProcessing.cs" />
     <Compile Include="FirmFolderLoc.cs" />
     <Compile Include="GdomValues.cs" />
+    <Compile Include="Managers\ViewManager.cs" />
     <Compile Include="ModelUDA.cs" />
     <Compile Include="PrismDrawing.cs" />
     <Compile Include="PrismPlugin.cs" />

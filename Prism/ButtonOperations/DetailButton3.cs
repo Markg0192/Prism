@@ -21,7 +21,7 @@ namespace Prism.ButtonOperations
                 return "Cancelled";
             }
 
-            myObjects.ModifyAttributes(stageNumber, projectData);
+            myObjects.SelectedModelParts.ModifyAttributes(stageNumber, projectData);
             return "Complete";
         }
     }

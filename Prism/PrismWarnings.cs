@@ -32,6 +32,20 @@ namespace Prism
             MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
+        public static void HasNotBeenOrderedOMIT()
+        {
+            const string notUpToDateMessage = "You are trying to OMIT material that does not appear to have ever been ordered, please choose a different course of action.";
+            const string notUpToDateTitle = "Can't Omit.";
+            MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
+        public static void HasAlreadyBeenOrdered()
+        {
+            const string notUpToDateMessage = "You are trying to order material that appears to have already been ordered.";
+            const string notUpToDateTitle = "Can't Order again.";
+            MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
         public static void ExecutionClassMissing()
         {
             const string notUpToDateMessage = "You have selected items that do not have an execution class specified, please correct this to continue";
@@ -62,7 +76,7 @@ namespace Prism
 
         public static void HasNotBeenOrdered()
         {
-            const string notUpToDateMessage = "You have main parts without a prelim number, this indicates it has not been ordered, please correct this to continue.";
+            const string notUpToDateMessage = "Prism UDA 'Material Order Complete' is empty on a selected part, this indicates it has not been ordered, please correct this to continue.";
             const string notUpToDateTitle = "Missing prelim marks";
             MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
