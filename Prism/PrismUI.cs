@@ -282,7 +282,7 @@ namespace Prism
 
         private void issueNumber_TextChanged(object sender, EventArgs e)
         {
-            if (issueNumber.Text.Length > 0)
+            if (issueNumber.Text.Length > 1)
             {
                 issueNumber.BackColor = Color.White;
             }
