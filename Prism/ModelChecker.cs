@@ -47,7 +47,7 @@ namespace Prism
             {
                 string userProperty = "";
                 p.GetUserProperty(ModelUDA.PreviousStageName(stageNumber), ref userProperty);
-               
+
                 if (userProperty == "")
                 {
                     PrismWarnings.PreviousStepIncomplete();
@@ -64,6 +64,7 @@ namespace Prism
                 Part myMainPart = ass.GetMainPart() as Part;
                 if (!myMainPart.HasBeenOrdered(false)) { return false; }
                 if (!myMainPart.HasAFinish()) { return false; }
+                if (!myMainPart.CheckForIntumescentLoading()) { return false; }
                 ArrayList mySecondaries = ass.GetSecondaries();
                 foreach (Part mySecondaryPart in mySecondaries)
                 {
@@ -116,6 +117,23 @@ namespace Prism
                 if (skipMessages) { return false; }
                 PrismWarnings.HasNotBeenOrdered();
                 return PrismWarnings.IgnoreHasNotBeenOrdered();
+            }
+            return true;
+        }
+
+        private static bool CheckForIntumescentLoading(this Part mainPart)
+        {
+            if (mainPart.Finish.StartsWith("IP"))
+            {
+                double dft = 0;
+                double wft = 0;
+                mainPart.GetUserProperty("FIRE_DFT", ref dft);
+                mainPart.GetUserProperty("FIRE_WFT", ref wft);
+                if (dft == 0 || wft == 0)
+                {
+                    PrismWarnings.IntumescentLoadingMissing();
+                    return PrismWarnings.IgnoreIntumescentLoading();
+                }
             }
             return true;
         }
