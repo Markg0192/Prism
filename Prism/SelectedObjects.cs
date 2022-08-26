@@ -86,6 +86,7 @@ namespace Prism
         public double BiggestX = -100000000;
         public double BiggestY = -100000000;
         public double BiggestZ = -100000000;
+
         public double TotalWeight { get; set; }
         public bool NumbersNotUpToDate { get; set; }
         public List<Assembly> AssembliesList { get; set; }
@@ -101,9 +102,9 @@ namespace Prism
                 SmallestY = Math.Min(beam.EndPoint.Y, Math.Min(beam.StartPoint.Y, SmallestY));
                 SmallestZ = Math.Min(beam.EndPoint.Z, Math.Min(beam.StartPoint.Z, SmallestZ));
 
-                BiggestX = Math.Min(beam.EndPoint.X, Math.Min(beam.StartPoint.X, BiggestX));
-                BiggestY = Math.Min(beam.EndPoint.Y, Math.Min(beam.StartPoint.Y, BiggestY));
-                BiggestZ = Math.Min(beam.EndPoint.Z, Math.Min(beam.StartPoint.Z, BiggestZ));
+                BiggestX = Math.Max(beam.EndPoint.X, Math.Max(beam.StartPoint.X, BiggestX));
+                BiggestY = Math.Max(beam.EndPoint.Y, Math.Max(beam.StartPoint.Y, BiggestY));
+                BiggestZ = Math.Max(beam.EndPoint.Z, Math.Max(beam.StartPoint.Z, BiggestZ));
             }
         }
 

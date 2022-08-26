@@ -30,9 +30,9 @@ namespace Prism
                                                                                     $"Hello,{_mailNewLine}" +
                                                                                     $"{_mailNewLine}" +
                                                                                     $"This is the bolt order Issue {issueNumber} for phase {phaseNumber} in {projData.ProjNumber}, {projData.ProjName}.{_mailNewLine}" +
-                                                                                    $"Please order these bolts when possible.{_mailNewLine}" +
+                                                                                    $"Please order these bolts when possible.{_mailNewLine}{_mailNewLine}" +
                                                                                     $"Site date is {SiteDateNote(siteDate)}" +
-                                                                                    $"{_mailNewLine}" +
+                                                                                    $"{_mailNewLine}{_mailNewLine}" +
                                                                                     $"Regards,{_mailNewLine}{_mailNewLine}" +
                                                                                     $"{projData.Full}");
         }

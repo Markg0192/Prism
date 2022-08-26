@@ -91,6 +91,13 @@
     <Compile Include="FabsecProcessing.cs" />
     <Compile Include="FirmFolderLoc.cs" />
     <Compile Include="GdomValues.cs" />
+    <Compile Include="Help.cs" />
+    <Compile Include="HelpForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="HelpForm.designer.cs">
+      <DependentUpon>HelpForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Managers\ViewManager.cs" />
     <Compile Include="ModelUDA.cs" />
     <Compile Include="PrismDrawing.cs" />
@@ -132,6 +139,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="HelpForm.resx">
+      <DependentUpon>HelpForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="PrismForm.resx">
       <DependentUpon>PrismForm.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -187,19 +197,7 @@
     <None Include="Resources\tick.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\weld.jpg" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\bolt.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\penn.jpg" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\welder.jpg" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\MyPen.jpg" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\MyNewPen.png" />
@@ -212,6 +210,18 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\watereddownlogo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Index.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Viewing.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Page.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\info.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

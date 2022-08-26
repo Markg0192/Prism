@@ -4,6 +4,25 @@ namespace Prism
 {
     public static class PrismWarnings
     {
+        public static void IntumescentLoadingMissing()
+        {
+            const string notUpToDateMessage = "You have selected intumescent members that have no loading.";
+            const string notUpToDateTitle = "Intumescent loadings";
+            MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
+        public static bool IgnoreIntumescentLoading()
+        {
+            const string notUpToDateMessage2 = "Would you like to ignore this error and continue?";
+            const string notUpToDateTitle2 = "Missing Intumescent Loadings";
+            DialogResult result = MessageBox.Show(notUpToDateMessage2, notUpToDateTitle2, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (result == DialogResult.No)
+            {
+                return false;
+            }
+            return true;
+        }
+
         public static DialogResult FabsecsPresent()
         {
             const string notUpToDateMessage = "There are FABSEC members present in your selection, I will process these, have you tidied the carcass drawings?";

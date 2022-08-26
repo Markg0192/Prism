@@ -1,6 +1,8 @@
 ﻿using Prism.ButtonOperations;
 using System;
 using System.Drawing;
+using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 using Tekla.Structures.Dialog;
 using Tekla.Structures.Model;
@@ -191,6 +193,13 @@ namespace Prism
                 bolts.SetUserProperty(ModelUDA.BoltOrderedBy(), _projectData.Full);
                 bolts.SetUserProperty(ModelUDA.BoltOrderedDate(), _projectData.Date);
             }
+
+            foreach (Part part in _selectedObjects.SelectedModelParts)
+            {
+                part.SetUserProperty(ModelUDA.FabStampUDA(), ModelUDA.FabStamp(phaseNumber.Text, issueNumber.Text));
+                part.Modify();
+            }
+            ViewManager.CreateFabView(phaseNumber.Text, issueNumber.Text, _projectData, _selectedObjects);
         }
 
         private void btnCreatePackage1_Click_1(object sender, EventArgs e)
@@ -273,7 +282,7 @@ namespace Prism
 
         private void issueNumber_TextChanged(object sender, EventArgs e)
         {
-            if (issueNumber.Text.Length > 0)
+            if (issueNumber.Text.Length > 1)
             {
                 issueNumber.BackColor = Color.White;
             }
@@ -325,6 +334,42 @@ namespace Prism
                 part.Modify();
             }
             ViewManager.CreateFabView(phaseNumber.Text, issueNumber.Text, _projectData, _selectedObjects);
+        }
+
+        private void userGuideToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Help.Open();
+        }
+
+        private void PrismUI_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+        {
+
+            Cursor = Cursors.Help;
+        }
+
+        private void info_Mat_Click(object sender, EventArgs e)
+        {
+            Help.OpenAt("Material Checks", "Index");
+        }
+
+        private void info_Detail_Click(object sender, EventArgs e)
+        {
+            Help.OpenAt("Detailing Checks", "Index");
+        }
+
+        private void info_Fab_Click(object sender, EventArgs e)
+        {
+            Help.OpenAt("Fabrication Packaging", "Index");
+        }
+
+        private void info_Home_Click(object sender, EventArgs e)
+        {
+            Help.OpenAt("Home", "Index");
+        }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.Close();
         }
     }
 }
