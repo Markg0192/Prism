@@ -6,8 +6,10 @@
         {
             if (!myObjects.RunStage4Checks()) { return; }
 
-            myObjects.SelectedModelParts.ModifyAttributes(stageNumber, projectData);           
-
+            myObjects.SelectedModelParts.ModifyAttributes(stageNumber, projectData);
+            ModelModifiers.RedrawViews();
+            int autoFixCount = ModelChecker.PhasesDoNotMatch.Count + ModelChecker.StartNumbersDoNotMatch.Count;
+            Logging.LogProgress(projectData.ProjName, "Detail 2", autoFixCount, myObjects.AssembliesList.Count);
         }
     }
 }

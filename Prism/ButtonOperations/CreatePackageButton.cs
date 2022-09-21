@@ -5,15 +5,7 @@ namespace Prism.ButtonOperations
 {
     public static class CreatePackageButton
     {
-        public static void CreateBoltList(string phaseNumber, string issueNumber, PrismProjectData projectData, string siteDate)
-        {
-            ReportManager myReportManager = new ReportManager(projectData, phaseNumber, issueNumber);
-            myReportManager.Folders.CreateBoltFolder();
-            myReportManager.CreateBoltList();
-            EmailWriter.WriteBoltOrderEmail(projectData, myReportManager.FabReportPrefix, issueNumber, phaseNumber, siteDate);
-        }
-
-        public static string CreateFabPackage(this SelectedObjects myObjects, PrismProjectData projectData, string packageLocation, string phaseNumber, string issueNumber, stageTypes stageType, string siteDate)
+        public static string CreateFabPackage(this SelectedObjects myObjects, PrismProjectData projectData, string packageLocation, string phaseNumber, string issueNumber, StageTypes stageType, string siteDate)
         {
             ReportManager myReportManager = new ReportManager(projectData, phaseNumber, issueNumber);
             //MyDrawingManager = new DrawingManager(Model, phaseNumber.Text, issueNumber.Text, selectedObjects); Temporarily not in use

@@ -71,7 +71,7 @@ namespace Prism
         public readonly string FabReportPrefix;
         public readonly string MatReportPrefix;
 
-        public void CreateMaterialReports(SelectedObjects selectedObjects, string orderType, Model model, stageTypes stageType)
+        public void CreateMaterialReports(SelectedObjects selectedObjects, string orderType, Model model, StageTypes stageType)
         {
             string materialReport = "";
             string outputName = "";

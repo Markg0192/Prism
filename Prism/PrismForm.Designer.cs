@@ -703,8 +703,9 @@ namespace Prism
             this.MaximumSize = new System.Drawing.Size(2000, 2000);
             this.MinimumSize = new System.Drawing.Size(100, 100);
             this.Name = "PrismForm";
-            this.Text = "Prism";
+            this.Text = "PrismForm";
             this.toolTip1.SetToolTip(this, "Phase or VO no.");
+            this.Load += new System.EventHandler(this.PrismForm_Load);
             this.flowLayoutPanel1.ResumeLayout(false);
             this.pnl_Home.ResumeLayout(false);
             this.pnl_Material.ResumeLayout(false);

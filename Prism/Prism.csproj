@@ -12,6 +12,22 @@
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>\\aws-app3\bespoke%24\Tekla\v2021\Prism\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Unc</InstallFrom>
+    <UpdateEnabled>true</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>2</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <PublishWizardCompleted>true</PublishWizardCompleted>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -32,6 +48,21 @@
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestCertificateThumbprint>4E5002887D7B35558A56AFB69AAD4FF7AF3B46A4</ManifestCertificateThumbprint>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestKeyFile>Prism_TemporaryKey.pfx</ManifestKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateManifests>true</GenerateManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignManifests>true</SignManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>ico.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -78,6 +109,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AutoFix.cs" />
     <Compile Include="BswxExporter.cs" />
     <Compile Include="ButtonOperations\CreatePackageButton.cs" />
     <Compile Include="ButtonOperations\DetailButton1.cs" />
@@ -86,19 +118,35 @@
     <Compile Include="ButtonOperations\MaterialButton1.cs" />
     <Compile Include="ButtonOperations\MaterialButton2.cs" />
     <Compile Include="ButtonOperations\MaterialButton3.cs" />
+    <Compile Include="CheckFittings.cs" />
     <Compile Include="EmailWriter.cs" />
     <Compile Include="Enums.cs" />
+    <Compile Include="CustomDialogs\ExecutionClass.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CustomDialogs\ExecutionClass.Designer.cs">
+      <DependentUpon>ExecutionClass.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ButtonOperations\FabMisc.cs" />
     <Compile Include="FabsecProcessing.cs" />
     <Compile Include="FirmFolderLoc.cs" />
     <Compile Include="GdomValues.cs" />
     <Compile Include="Help.cs" />
-    <Compile Include="HelpForm.cs">
+    <Compile Include="CustomDialogs\HelpForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="HelpForm.designer.cs">
+    <Compile Include="CustomDialogs\HelpForm.designer.cs">
       <DependentUpon>HelpForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="CustomDialogs\IgnoreWarning.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CustomDialogs\IgnoreWarning.Designer.cs">
+      <DependentUpon>IgnoreWarning.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Logging.cs" />
     <Compile Include="Managers\ViewManager.cs" />
+    <Compile Include="ModelPart.cs" />
     <Compile Include="ModelUDA.cs" />
     <Compile Include="PrismDrawing.cs" />
     <Compile Include="PrismPlugin.cs" />
@@ -137,10 +185,22 @@
     <Compile Include="TeklaAppLibrary\WaitingDialog.designer.cs">
       <DependentUpon>WaitingDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="CustomDialogs\FactoryLocation.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CustomDialogs\FactoryLocation.Designer.cs">
+      <DependentUpon>FactoryLocation.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="HelpForm.resx">
+    <EmbeddedResource Include="CustomDialogs\ExecutionClass.resx">
+      <DependentUpon>ExecutionClass.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CustomDialogs\HelpForm.resx">
       <DependentUpon>HelpForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CustomDialogs\IgnoreWarning.resx">
+      <DependentUpon>IgnoreWarning.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PrismForm.resx">
       <DependentUpon>PrismForm.cs</DependentUpon>
@@ -156,8 +216,12 @@
     <EmbeddedResource Include="TeklaAppLibrary\WaitingDialog.resx">
       <DependentUpon>WaitingDialog.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="CustomDialogs\FactoryLocation.resx">
+      <DependentUpon>FactoryLocation.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Prism_TemporaryKey.pfx" />
     <None Include="Resources\PrismTrans.png" />
     <None Include="Resources\tick.webp" />
   </ItemGroup>
@@ -222,6 +286,22 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\info.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.7.2 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="ico.ico" />
+    <None Include="Resources\Question.PNG" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

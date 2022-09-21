@@ -10,6 +10,7 @@ using System.Linq;
 using System.Collections;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using Tekla.Structures.Model.UI;
 //using System.Threading;
 
 namespace Prism
@@ -30,6 +31,24 @@ namespace Prism
                 {
                     part.SetUserProperty(ModelUDA.PartMarkAtFab(), part.GetPartMark());
                 }
+                part.Modify();
+            }
+        }
+
+        public static void StampBoltUDA(List<BoltGroup> allBolts, string name, string date)
+        {
+            foreach (BoltArray bolts in allBolts)
+            {
+                bolts.SetUserProperty(ModelUDA.BoltOrderedBy(), name);
+                bolts.SetUserProperty(ModelUDA.BoltOrderedDate(), date);
+            }
+        }
+
+        public static void StampPartFabUDA(List<Part> selectedModelParts, string phaseNumber, string issueNumber)
+        {
+            foreach (Part part in selectedModelParts)
+            {
+                part.SetUserProperty(ModelUDA.FabStampUDA(), ModelUDA.FabStamp(phaseNumber, issueNumber));
                 part.Modify();
             }
         }
@@ -107,7 +126,7 @@ namespace Prism
             }                
         }
 
-        private static double GetPartLength(Part myPart)
+        public static double GetPartLength(Part myPart)
         {
             ArrayList points = myPart.GetCenterLine(true);
             Point start = points[0] as Point;
@@ -232,6 +251,23 @@ namespace Prism
                     File.Delete(subFile);
                 }
             }
+        }
+
+        public static void RedrawViews()
+        {
+            var selectedView = ViewHandler.GetAllViews();
+
+            while (selectedView.MoveNext())
+            {
+                ViewHandler.RedrawView(selectedView.Current);
+            }
+        }
+
+        public static void SetPartsRed(List<ModelObject> myParts)
+        {
+            ModelObjectVisualization.SetTransparencyForAll(TemporaryTransparency.SEMITRANSPARENT);
+            ModelObjectVisualization.SetTemporaryStateForAll(new Color(0.5, 0.5, 0.5));
+            ModelObjectVisualization.SetTemporaryState(myParts, new Color(1, 0, 0));
         }
     }
 }

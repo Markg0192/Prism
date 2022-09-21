@@ -9,6 +9,7 @@ namespace Prism.ButtonOperations
             myObjects.ProcessFabsecs(model, projectData); 
             myObjects.AddStartNumbers(startNumber);
             myObjects.SelectedModelParts.ModifyAttributes(stageNumber, projectData);
+            Logging.LogProgress(projectData.ProjName, "Material 2", 0, myObjects.AssembliesList.Count);
         }
     }
 }

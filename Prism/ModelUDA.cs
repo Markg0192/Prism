@@ -2,6 +2,15 @@
 {
     public static class ModelUDA
     {
+        public static string FireDFT()
+        {
+            return "FIRE_DFT";
+        }
+        public static string FireWFT()
+        {
+            return "FIRE_WFT";
+        }
+
         public static string FabStamp(string phaseNum, string issueNum)
         {
             return $"FAB-PHASE{phaseNum}-ISSUE{issueNum}";

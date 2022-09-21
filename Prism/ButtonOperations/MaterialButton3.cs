@@ -8,22 +8,25 @@ namespace Prism.ButtonOperations
     public static class MaterialButton3
     {
         public static void MaterialButton3op(this SelectedObjects myObjects, PrismProjectData projectData, ProjectInfo projectInfo,
-            string phaseNumber, string issueNumber, string orderType, int stageNumber, stageTypes stageType, Model model)
+            string phaseNumber, string issueNumber, string orderType, int stageNumber, StageTypes stageType, Model model)
         {
             foreach (Part myPart in myObjects.SelectedModelParts)
             {
-                if (orderType == "Omit Material" && !myPart.HasBeenOrdered(false))
+                myPart.GetUnorderedParts();
+            }
+
+            if (orderType == "Omit Material")
+            {
+                if (ModelChecker.NotOrderedParts.Count != 0)
                 {
                     PrismWarnings.HasNotBeenOrderedOMIT();
                     return;
                 }
+            }
 
-                if (orderType != "Omit Material" && !myPart.HasBeenOrdered(true))
-                {
-                    continue;
-                }
-
-                if (orderType != "Omit Material" && myPart.HasBeenOrdered(false))
+            if (orderType != "Omit Material")
+            {
+                if (ModelChecker.OrderedParts.Count != 0)
                 {
                     PrismWarnings.HasAlreadyBeenOrdered();
                     return;
@@ -54,7 +57,6 @@ namespace Prism.ButtonOperations
                 myObjects.MoveAndRenameOmittedMembers();
             }
 
-
             myObjects.SelectedModelParts.ModifyAttributes(stageNumber, projectData);
             DialogResult finishBox = PrismWarnings.MaterialOrderComplete(projectData);
             if (finishBox == DialogResult.OK)
@@ -65,6 +67,8 @@ namespace Prism.ButtonOperations
             {
                 MessageBox.Show("FABSECS! Please ensure to add fabsec carcass drawings to your package.");
             }
+
+            Logging.LogProgress(projectData.ProjName, "Material 3", 0, myObjects.AssembliesList.Count);
         }
     }
 }

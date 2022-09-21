@@ -22,7 +22,7 @@ namespace Prism
             _projectData = new PrismProjectData(_model.GetProjectInfo(), _model.GetInfo().ModelPath);
         }
 
-        private bool InitialSetup(stageTypes stageType, bool checkForPreviousSteps)
+        private bool InitialSetup(StageTypes stageType, bool checkForPreviousSteps)
         {
             _selectedObjects = new SelectedObjects(stageType);
 
@@ -90,9 +90,9 @@ namespace Prism
         private void btn_Material1_Click(object sender, EventArgs e)
         {
             MaterialStatusLabel.Text = "Working";
-            if (!InitialSetup(stageTypes.Prelim1, false)) { return; }
+            if (!InitialSetup(StageTypes.Prelim1, false)) { return; }
 
-            _selectedObjects.MaterialButton1op(_projectData, (int)stageTypes.Prelim1);
+            _selectedObjects.MaterialButton1op(_projectData, (int)StageTypes.Prelim1);
 
             MaterialStatusLabel.Text = "Complete";
         }
@@ -100,9 +100,9 @@ namespace Prism
         private void btn_Material2_Click(object sender, EventArgs e)
         {
             MaterialStatusLabel.Text = "Working";
-            if (!InitialSetup(stageTypes.Prelim2, true)) { return; };
+            if (!InitialSetup(StageTypes.Prelim2, true)) { return; };
 
-            _selectedObjects.MaterialButton2op(txt_StartNumber.Text, (int)stageTypes.Prelim2, _projectData, _model);
+            _selectedObjects.MaterialButton2op(txt_StartNumber.Text, (int)StageTypes.Prelim2, _projectData, _model);
 
             MaterialStatusLabel.Text = "Complete";
         }
@@ -110,10 +110,10 @@ namespace Prism
         private void btn_Material3_Click(object sender, EventArgs e)
         {
             MaterialStatusLabel.Text = "Working";
-            if (!InitialSetup(stageTypes.Prelim3, true)) { return; };
+            if (!InitialSetup(StageTypes.Prelim3, true)) { return; };
 
             _selectedObjects.MaterialButton3op(_projectData, _model.GetProjectInfo(), txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text, 
-                cmb_OrderMaterial.Text, (int)stageTypes.Prelim3, stageTypes.Prelim3, _model);
+                cmb_OrderMaterial.Text, (int)StageTypes.Prelim3, StageTypes.Prelim3, _model);
             _model.CommitChanges();
             MaterialStatusLabel.Text = "Complete";
         }
@@ -121,9 +121,9 @@ namespace Prism
         private void btn_Detail1_Click(object sender, EventArgs e)
         {
             DetailingStatusLabel.Text = "Working";
-            if (!InitialSetup(stageTypes.Check1, false)) { return; }
+            if (!InitialSetup(StageTypes.Check1, false)) { return; }
 
-            _selectedObjects.DetailButton1op(_projectData, (int)stageTypes.Check1);
+            _selectedObjects.DetailButton1op(_projectData, (int)StageTypes.Check1);
 
             DetailingStatusLabel.Text = "Complete";
         }
@@ -131,9 +131,9 @@ namespace Prism
         private void btn_Detail2_Click(object sender, EventArgs e)
         {
             DetailingStatusLabel.Text = "Working";
-            if (!InitialSetup(stageTypes.Check2, true)) { return; }
+            if (!InitialSetup(StageTypes.Check2, true)) { return; }
 
-            _selectedObjects.DetailButton2op(_projectData, (int)stageTypes.Check2);
+            _selectedObjects.DetailButton2op(_projectData, (int)StageTypes.Check2);
 
             DetailingStatusLabel.Text = "Complete";
         }
@@ -141,9 +141,9 @@ namespace Prism
         private void btn_Detail3_Click(object sender, EventArgs e)
         {
             DetailingStatusLabel.Text = "Working";
-            if (!InitialSetup(stageTypes.Check3, true)) { return; }
+            if (!InitialSetup(StageTypes.Check3, true)) { return; }
 
-            DetailingStatusLabel.Text = _selectedObjects.DetailButton3op(_projectData, (int)stageTypes.Check3);
+            DetailingStatusLabel.Text = _selectedObjects.DetailButton3op(_projectData, (int)StageTypes.Check3);
         }
 
         private void btnCreatePackage1_Click(object sender, EventArgs e)
@@ -151,17 +151,17 @@ namespace Prism
             StatusLabel.Text = "Working";
             Cursor = Cursors.AppStarting;
 
-            if (!InitialSetup(stageTypes.FAB, false)) { return; }
+            if (!InitialSetup(StageTypes.FAB, false)) { return; }
             if (!_selectedObjects.NumbersNotUpToDate) { return; }
 
-            StatusLabel.Text = _selectedObjects.CreateFabPackage(_projectData, cmbPackageLocation.Text, phaseNumber.Text, issueNumber.Text, stageTypes.FAB, txt_SiteDate.Text);
+            StatusLabel.Text = _selectedObjects.CreateFabPackage(_projectData, cmbPackageLocation.Text, phaseNumber.Text, issueNumber.Text, StageTypes.FAB, txt_SiteDate.Text);
             Cursor = Cursors.Default;
         }
 
         private void btn_BoltOrder1_Click(object sender, EventArgs e)
         {
-            if (!InitialSetup(stageTypes.Bolt, false)) { return; }
-            CreatePackageButton.CreateBoltList(phaseNumber.Text, issueNumber.Text, _projectData, txt_SiteDate.Text);
+            if (!InitialSetup(StageTypes.Bolt, false)) { return; }
+            FabMisc.CreateBoltOrder(phaseNumber.Text, issueNumber.Text, _projectData, txt_SiteDate.Text);
             foreach(BoltArray bolts in _selectedObjects.AllBolts[0])
             {
                 bolts.SetUserProperty(ModelUDA.BoltOrderedBy(), _projectData.Full);
@@ -315,6 +315,11 @@ namespace Prism
             {
                 txt_SiteDate.BackColor = Color.Moccasin;
             }
+        }
+
+        private void PrismForm_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

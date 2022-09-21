@@ -2,6 +2,8 @@
 {
     public class Enums
     {
-        public enum stageTypes { Unassigned, Prelim1, Prelim2, Prelim3, Check1, Check2, Check3, FAB, Bolt, PrelimPG};
+        public enum StageTypes { Unassigned, Prelim1, Prelim2, Prelim3, Check1, Check2, Check3, FAB, Bolt, PrelimPG};
+        public enum Factory { SNI, SUK, Unknown};
+        public enum IgnoreType { AutoFix, Ignore, Stop, Unspecified };
     }
 }

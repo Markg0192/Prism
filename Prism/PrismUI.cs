@@ -1,10 +1,7 @@
 ﻿using Prism.ButtonOperations;
 using System;
 using System.Drawing;
-using System.IO;
-using System.Linq;
 using System.Windows.Forms;
-using Tekla.Structures.Dialog;
 using Tekla.Structures.Model;
 using static Prism.Enums;
 
@@ -20,11 +17,12 @@ namespace Prism
         public PrismUI()
         {
             InitializeComponent();
+            CenterToScreen();
             _model = new Model();
             _projectData = new PrismProjectData(_model.GetProjectInfo(), _model.GetInfo().ModelPath);
         }
 
-        private bool InitialSetup(stageTypes stageType, bool checkForPreviousSteps)
+        private bool InitialSetup(StageTypes stageType, bool checkForPreviousSteps)
         {
             _selectedObjects = new SelectedObjects(stageType);
 
@@ -65,13 +63,13 @@ namespace Prism
         {
             if (phaseNumber.Text.Length > 0 & issueNumber.Text.Length > 1)
             {
-                btn_BoltOrder1.Enabled = true;
-                btn_BoltOrder1.BackColor = Color.Chartreuse;
+                btn_FabMisc.Enabled = true;
+                btn_FabMisc.BackColor = Color.Chartreuse;
             }
             else
             {
-                btn_BoltOrder1.Enabled = false;
-                btn_BoltOrder1.BackColor = Color.Gainsboro;
+                btn_FabMisc.Enabled = false;
+                btn_FabMisc.BackColor = Color.Gainsboro;
             }
         }
 
@@ -110,19 +108,26 @@ namespace Prism
         private void btn_Material1_Click_1(object sender, EventArgs e)
         {
             MaterialStatusLabel.Text = "Working";
-            if (!InitialSetup(stageTypes.Prelim1, false)) { return; }
+            Cursor = Cursors.AppStarting;
+            if (!InitialSetup(StageTypes.Prelim1, false)) { return; }
 
-            _selectedObjects.MaterialButton1op(_projectData, (int)stageTypes.Prelim1);
+            if (!_selectedObjects.MaterialButton1op(_projectData, (int)StageTypes.Prelim1)) 
+            {
+                MaterialStatusLabel.Text = "Cancelled";
+                return;
+            }
 
+            ModelModifiers.RedrawViews();
+            Cursor = Cursors.Default;
             MaterialStatusLabel.Text = "Complete";
         }
 
         private void btn_Material2_Click_1(object sender, EventArgs e)
         {
             MaterialStatusLabel.Text = "Working";
-            if (!InitialSetup(stageTypes.Prelim2, true)) { return; };
+            if (!InitialSetup(StageTypes.Prelim2, true)) { return; };
 
-            _selectedObjects.MaterialButton2op(txt_StartNumber.Text, (int)stageTypes.Prelim2, _projectData, _model);
+            _selectedObjects.MaterialButton2op(txt_StartNumber.Text, (int)StageTypes.Prelim2, _projectData, _model);
 
             MaterialStatusLabel.Text = "Complete";
         }
@@ -130,10 +135,10 @@ namespace Prism
         private void btn_Material3_Click_1(object sender, EventArgs e)
         {
             MaterialStatusLabel.Text = "Working";
-            if (!InitialSetup(stageTypes.Prelim3, true)) { return; };
+            if (!InitialSetup(StageTypes.Prelim3, true)) { return; };
 
             _selectedObjects.MaterialButton3op(_projectData, _model.GetProjectInfo(), txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text,
-                cmb_OrderMaterial.Text, (int)stageTypes.Prelim3, stageTypes.Prelim3, _model);
+                cmb_OrderMaterial.Text, (int)StageTypes.Prelim3, StageTypes.Prelim3, _model);
             _model.CommitChanges();
             MaterialStatusLabel.Text = "Complete";
         }
@@ -147,9 +152,9 @@ namespace Prism
         private void btn_Detail1_Click_1(object sender, EventArgs e)
         {
             DetailingStatusLabel.Text = "Working";
-            if (!InitialSetup(stageTypes.Check1, false)) { return; }
+            if (!InitialSetup(StageTypes.Check1, false)) { return; }
 
-            _selectedObjects.DetailButton1op(_projectData, (int)stageTypes.Check1);
+            _selectedObjects.DetailButton1op(_projectData, (int)StageTypes.Check1);
 
             DetailingStatusLabel.Text = "Complete";
         }
@@ -157,9 +162,9 @@ namespace Prism
         private void btn_Detail2_Click_1(object sender, EventArgs e)
         {
             DetailingStatusLabel.Text = "Working";
-            if (!InitialSetup(stageTypes.Check2, true)) { return; }
+            if (!InitialSetup(StageTypes.Check2, true)) { return; }
 
-            _selectedObjects.DetailButton2op(_projectData, (int)stageTypes.Check2);
+            _selectedObjects.DetailButton2op(_projectData, (int)StageTypes.Check2);
 
             DetailingStatusLabel.Text = "Complete";
         }
@@ -167,9 +172,16 @@ namespace Prism
         private void btn_Detail3_Click_1(object sender, EventArgs e)
         {
             DetailingStatusLabel.Text = "Working";
-            if (!InitialSetup(stageTypes.Check3, true)) { return; }
+            if (!InitialSetup(StageTypes.Check3, true)) { return; }
 
-            DetailingStatusLabel.Text = _selectedObjects.DetailButton3op(_projectData, (int)stageTypes.Check3);
+            DetailingStatusLabel.Text = _selectedObjects.DetailButton3op(_projectData, (int)StageTypes.Check3);
+        }
+
+        private void btn_FabMisc_Click(object sender, EventArgs e)
+        {
+            if (!InitialSetup(StageTypes.Bolt, false)) { return; }
+
+            FabMisc.FabMiscOp(phaseNumber.Text, issueNumber.Text, _projectData, txt_SiteDate.Text, _selectedObjects);
         }
 
         private void btn_HomeDetail_Click_1(object sender, EventArgs e)
@@ -184,33 +196,15 @@ namespace Prism
             pnl_Package.Visible = false;
         }
 
-        private void btn_BoltOrder1_Click_1(object sender, EventArgs e)
-        {
-            if (!InitialSetup(stageTypes.Bolt, false)) { return; }
-            CreatePackageButton.CreateBoltList(phaseNumber.Text, issueNumber.Text, _projectData, txt_SiteDate.Text);
-            foreach (BoltArray bolts in _selectedObjects.AllBolts[0])
-            {
-                bolts.SetUserProperty(ModelUDA.BoltOrderedBy(), _projectData.Full);
-                bolts.SetUserProperty(ModelUDA.BoltOrderedDate(), _projectData.Date);
-            }
-
-            foreach (Part part in _selectedObjects.SelectedModelParts)
-            {
-                part.SetUserProperty(ModelUDA.FabStampUDA(), ModelUDA.FabStamp(phaseNumber.Text, issueNumber.Text));
-                part.Modify();
-            }
-            ViewManager.CreateFabView(phaseNumber.Text, issueNumber.Text, _projectData, _selectedObjects);
-        }
-
         private void btnCreatePackage1_Click_1(object sender, EventArgs e)
         {
             StatusLabel.Text = "Working";
             Cursor = Cursors.AppStarting;
 
-            if (!InitialSetup(stageTypes.FAB, false)) { return; }
+            if (!InitialSetup(StageTypes.FAB, false)) { return; }
             if (!_selectedObjects.NumbersNotUpToDate) { return; }
 
-            StatusLabel.Text = _selectedObjects.CreateFabPackage(_projectData, cmbPackageLocation.Text, phaseNumber.Text, issueNumber.Text, stageTypes.FAB, txt_SiteDate.Text);
+            StatusLabel.Text = _selectedObjects.CreateFabPackage(_projectData, cmbPackageLocation.Text, phaseNumber.Text, issueNumber.Text, StageTypes.FAB, txt_SiteDate.Text);
             Cursor = Cursors.Default;
         }
 
@@ -301,7 +295,7 @@ namespace Prism
 
         private void cmbPackageLocation_SelectedIndexChanged(object sender, EventArgs e)
         {
-            //The logic below will be needed when fab packages are ana vailable option so just commented out for now
+            //The logic below will be needed when fab packages are a vaiable option so just commented out for now
             /*if (cmbPackageLocation.Text == "SNI")
             {
                 cmbPackageLocation.BackColor = Color.White;
@@ -323,18 +317,7 @@ namespace Prism
             {
                 txt_SiteDate.BackColor = Color.Moccasin;
             }
-        }
-
-        private void button2_Click(object sender, EventArgs e)
-        {
-            _selectedObjects = new SelectedObjects(stageTypes.Bolt);
-            foreach (Part part in _selectedObjects.SelectedModelParts)
-            {
-                part.SetUserProperty(ModelUDA.FabStampUDA(), ModelUDA.FabStamp(phaseNumber.Text, issueNumber.Text));
-                part.Modify();
-            }
-            ViewManager.CreateFabView(phaseNumber.Text, issueNumber.Text, _projectData, _selectedObjects);
-        }
+        }  
 
         private void userGuideToolStripMenuItem_Click(object sender, EventArgs e)
         {
