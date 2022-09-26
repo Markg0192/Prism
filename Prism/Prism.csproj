@@ -131,6 +131,7 @@
     <Compile Include="FabsecProcessing.cs" />
     <Compile Include="FirmFolderLoc.cs" />
     <Compile Include="GdomValues.cs" />
+    <Compile Include="HDBolts.cs" />
     <Compile Include="Help.cs" />
     <Compile Include="CustomDialogs\HelpForm.cs">
       <SubType>Form</SubType>

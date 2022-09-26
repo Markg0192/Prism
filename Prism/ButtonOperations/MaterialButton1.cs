@@ -2,7 +2,6 @@
 using Tekla.Structures.Model;
 using Tekla.Structures.Model.UI;
 using static Prism.Enums;
-using static Prism.IgnoreWarning;
 
 namespace Prism.ButtonOperations
 {
@@ -10,9 +9,10 @@ namespace Prism.ButtonOperations
     {
         public static bool MaterialButton1op(this SelectedObjects myObjects, PrismProjectData projectData, int stageNumber)
         {
-            if (!NameAndClassAign(myObjects)) { return false; }            
+            if (!NameAndClassAign(myObjects)) { return false; }
             if (PartsHaveExecutionClass(myObjects))
             {
+                ModelModifiers.SelectParts(myObjects.SelectedModelParts);
                 myObjects.SelectedModelParts.ModifyAttributes(stageNumber, projectData);
                 Logging.LogProgress(projectData.ProjName, "Material 1", ModelChecker.IncorrectNameAndClass.Count + ModelChecker.MissingExecutionClass.Count, myObjects.AssembliesList.Count);
                 return true;

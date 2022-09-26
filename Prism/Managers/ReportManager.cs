@@ -103,6 +103,11 @@ namespace Prism
             Operation.CreateReportFromSelected(_reportBolts, Path.Combine(Folders.BoltPath, $"{FabReportPrefix}{_outputBolts}"), _title1, _title2, _title3);
         }
 
+        public void CreateHDBoltList()
+        {
+
+        }
+
         public void CreateFabReports(List<Part> partsList, List<List<BoltGroup>> boltList, string packageLocation)
         {
             _NCPlateSetting = "-SNI-PLATES";

@@ -4,6 +4,8 @@
     {
         public static void FabMiscOp(string phaseNumber, string issueNumber, PrismProjectData projectData, string siteDate, SelectedObjects selectedObjects)
         {
+           // ReportManager rep = new ReportManager(projectData, "1", "1");
+           // HDBolts.OrderHDBoltTopNutAndWasher(selectedObjects, rep);
             CreateBoltOrder(phaseNumber, issueNumber, projectData, siteDate);
             ModelModifiers.StampBoltUDA(selectedObjects.AllBolts[0], projectData.Full, projectData.Date);
 

@@ -10,9 +10,18 @@ namespace Prism.ButtonOperations
         public static void MaterialButton3op(this SelectedObjects myObjects, PrismProjectData projectData, ProjectInfo projectInfo,
             string phaseNumber, string issueNumber, string orderType, int stageNumber, StageTypes stageType, Model model)
         {
+            ReportManager myReportManager = new ReportManager(projectData, phaseNumber, issueNumber);
+           // HDBolts.StampConnectionCodeOnMainMember(myObjects);
+
             foreach (Part myPart in myObjects.SelectedModelParts)
             {
                 myPart.GetUnorderedParts();
+            }
+
+            if(orderType == "Order HD Bolts")
+            {
+                HDBolts.OrderHDBolts(myObjects, myReportManager);
+                Logging.LogProgress(projectData.ProjName, "Material 3 - HD Bolts", 0, myObjects.AssembliesList.Count);
             }
 
             if (orderType == "Omit Material")
@@ -45,7 +54,7 @@ namespace Prism.ButtonOperations
                 else { return; }
             }
 
-            ReportManager myReportManager = new ReportManager(projectData, phaseNumber, issueNumber);
+            
 
             myObjects.AddPrelimMarks(projectInfo);
             myReportManager.Folders.CreateMatFolder(fabsecsPresent);

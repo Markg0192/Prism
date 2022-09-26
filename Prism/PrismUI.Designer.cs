@@ -294,6 +294,7 @@ namespace Prism
             this.cmb_OrderMaterial.Size = new System.Drawing.Size(100, 21);
             this.cmb_OrderMaterial.TabIndex = 36;
             this.cmb_OrderMaterial.Text = "Order Material";
+            this.cmb_OrderMaterial.SelectedIndexChanged += new System.EventHandler(this.cmb_OrderMaterial_SelectedIndexChanged);
             // 
             // label3
             // 

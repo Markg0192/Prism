@@ -75,7 +75,7 @@ namespace Prism
 
         private void CheckForMaterialButton()
         {
-            if (txt_MaterialIssueNumber.Text.Length > 1 && txt_MaterialPhaseNumber.Text.Length > 0)
+            if (txt_MaterialIssueNumber.Text.Length > 1 && txt_MaterialPhaseNumber.Text.Length > 0 && cmb_OrderMaterial.Text != "Order HD Bolts")
             {
                 btn_Material3.Enabled = true;
                 btn_Material3.BackColor = Color.Chartreuse;
@@ -353,6 +353,11 @@ namespace Prism
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.Close();
+        }
+
+        private void cmb_OrderMaterial_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            CheckForMaterialButton();
         }
     }
 }
