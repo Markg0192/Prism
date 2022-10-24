@@ -14,14 +14,19 @@ namespace Prism
            PartFilterExpressions.CustomString PartName = new PartFilterExpressions.CustomString(ModelUDA.FabStampUDA());
            StringConstantFilterExpression phaseInfo = new StringConstantFilterExpression(ModelUDA.FabStamp(phaseNum, issueNum));
 
+           PartFilterExpressions.Name name = new PartFilterExpressions.Name();
+           StringConstantFilterExpression seversafeName = new StringConstantFilterExpression("SS*");
+
            // Creates the binary filter expressions
            BinaryFilterExpression Expression1 = new BinaryFilterExpression(PartName, StringOperatorType.IS_EQUAL, phaseInfo);
+           BinaryFilterExpression Seversafe = new BinaryFilterExpression(name, StringOperatorType.IS_NOT_EQUAL, seversafeName);
 
-           // Creates the binary filter expression collection
-           BinaryFilterExpressionCollection ExpressionCollection = new BinaryFilterExpressionCollection();
+            // Creates the binary filter expression collection
+            BinaryFilterExpressionCollection ExpressionCollection = new BinaryFilterExpressionCollection();
            ExpressionCollection.Add(new BinaryFilterExpressionItem(Expression1, BinaryFilterOperatorType.BOOLEAN_AND));
+           ExpressionCollection.Add(new BinaryFilterExpressionItem(Seversafe, BinaryFilterOperatorType.BOOLEAN_AND));
 
-           string AttributesPath = Path.Combine(projectData.ProjPath, "attributes");
+            string AttributesPath = Path.Combine(projectData.ProjPath, "attributes");
            string FilterName = Path.Combine(AttributesPath, ModelUDA.FabStamp(phaseNum, issueNum));
 
            Filter Filter = new Filter(ExpressionCollection);
