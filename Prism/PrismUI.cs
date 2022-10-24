@@ -109,6 +109,7 @@ namespace Prism
         {
             MaterialStatusLabel.Text = "Working";
             Cursor = Cursors.AppStarting;
+
             if (!InitialSetup(StageTypes.Prelim1, false)) { return; }
 
             if (!_selectedObjects.MaterialButton1op(_projectData, (int)StageTypes.Prelim1)) 
@@ -118,6 +119,7 @@ namespace Prism
             }
 
             ModelModifiers.RedrawViews();
+
             Cursor = Cursors.Default;
             MaterialStatusLabel.Text = "Complete";
         }
@@ -125,21 +127,28 @@ namespace Prism
         private void btn_Material2_Click_1(object sender, EventArgs e)
         {
             MaterialStatusLabel.Text = "Working";
+            Cursor = Cursors.AppStarting;
+
             if (!InitialSetup(StageTypes.Prelim2, true)) { return; };
 
             _selectedObjects.MaterialButton2op(txt_StartNumber.Text, (int)StageTypes.Prelim2, _projectData, _model);
 
+            Cursor = Cursors.Default;
             MaterialStatusLabel.Text = "Complete";
         }
 
         private void btn_Material3_Click_1(object sender, EventArgs e)
         {
             MaterialStatusLabel.Text = "Working";
+            Cursor = Cursors.AppStarting;
+
             if (!InitialSetup(StageTypes.Prelim3, true)) { return; };
 
             _selectedObjects.MaterialButton3op(_projectData, _model.GetProjectInfo(), txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text,
                 cmb_OrderMaterial.Text, (int)StageTypes.Prelim3, StageTypes.Prelim3, _model);
             _model.CommitChanges();
+
+            Cursor = Cursors.Default;
             MaterialStatusLabel.Text = "Complete";
         }
 
@@ -152,36 +161,53 @@ namespace Prism
         private void btn_Detail1_Click_1(object sender, EventArgs e)
         {
             DetailingStatusLabel.Text = "Working";
+            Cursor = Cursors.AppStarting;
+
             if (!InitialSetup(StageTypes.Check1, false)) { return; }
 
             _selectedObjects.DetailButton1op(_projectData, (int)StageTypes.Check1);
 
+            Cursor = Cursors.Default;
             DetailingStatusLabel.Text = "Complete";
         }
 
         private void btn_Detail2_Click_1(object sender, EventArgs e)
         {
             DetailingStatusLabel.Text = "Working";
+            Cursor = Cursors.AppStarting;
+
             if (!InitialSetup(StageTypes.Check2, true)) { return; }
 
             _selectedObjects.DetailButton2op(_projectData, (int)StageTypes.Check2);
 
+            Cursor = Cursors.Default;
             DetailingStatusLabel.Text = "Complete";
         }
 
         private void btn_Detail3_Click_1(object sender, EventArgs e)
         {
             DetailingStatusLabel.Text = "Working";
+            Cursor = Cursors.AppStarting;
+
             if (!InitialSetup(StageTypes.Check3, true)) { return; }
 
             DetailingStatusLabel.Text = _selectedObjects.DetailButton3op(_projectData, (int)StageTypes.Check3);
+
+            Cursor = Cursors.Default;
+            DetailingStatusLabel.Text = "Complete";
         }
 
         private void btn_FabMisc_Click(object sender, EventArgs e)
         {
+            StatusLabel.Text = "Working";
+            Cursor = Cursors.AppStarting;
+
             if (!InitialSetup(StageTypes.Bolt, false)) { return; }
 
             FabMisc.FabMiscOp(phaseNumber.Text, issueNumber.Text, _projectData, txt_SiteDate.Text, _selectedObjects);
+
+            Cursor = Cursors.Default;
+            StatusLabel.Text = "Complete";
         }
 
         private void btn_HomeDetail_Click_1(object sender, EventArgs e)
@@ -205,6 +231,8 @@ namespace Prism
             if (!_selectedObjects.NumbersNotUpToDate) { return; }
 
             StatusLabel.Text = _selectedObjects.CreateFabPackage(_projectData, cmbPackageLocation.Text, phaseNumber.Text, issueNumber.Text, StageTypes.FAB, txt_SiteDate.Text);
+
+            StatusLabel.Text = "Complete";
             Cursor = Cursors.Default;
         }
 

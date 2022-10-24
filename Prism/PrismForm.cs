@@ -89,61 +89,80 @@ namespace Prism
 
         private void btn_Material1_Click(object sender, EventArgs e)
         {
+            Cursor = Cursors.AppStarting;
             MaterialStatusLabel.Text = "Working";
+
             if (!InitialSetup(StageTypes.Prelim1, false)) { return; }
 
             _selectedObjects.MaterialButton1op(_projectData, (int)StageTypes.Prelim1);
 
+            Cursor = Cursors.Default;
             MaterialStatusLabel.Text = "Complete";
         }
 
         private void btn_Material2_Click(object sender, EventArgs e)
         {
+            Cursor = Cursors.AppStarting;
             MaterialStatusLabel.Text = "Working";
+
             if (!InitialSetup(StageTypes.Prelim2, true)) { return; };
 
             _selectedObjects.MaterialButton2op(txt_StartNumber.Text, (int)StageTypes.Prelim2, _projectData, _model);
 
+            Cursor = Cursors.Default;
             MaterialStatusLabel.Text = "Complete";
         }
 
         private void btn_Material3_Click(object sender, EventArgs e)
         {
+            Cursor = Cursors.AppStarting;
             MaterialStatusLabel.Text = "Working";
+
             if (!InitialSetup(StageTypes.Prelim3, true)) { return; };
 
             _selectedObjects.MaterialButton3op(_projectData, _model.GetProjectInfo(), txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text, 
                 cmb_OrderMaterial.Text, (int)StageTypes.Prelim3, StageTypes.Prelim3, _model);
             _model.CommitChanges();
+
+            Cursor = Cursors.Default;
             MaterialStatusLabel.Text = "Complete";
         }
 
         private void btn_Detail1_Click(object sender, EventArgs e)
         {
+            Cursor = Cursors.AppStarting;
             DetailingStatusLabel.Text = "Working";
+
             if (!InitialSetup(StageTypes.Check1, false)) { return; }
 
             _selectedObjects.DetailButton1op(_projectData, (int)StageTypes.Check1);
 
+            Cursor = Cursors.Default;
             DetailingStatusLabel.Text = "Complete";
         }
 
         private void btn_Detail2_Click(object sender, EventArgs e)
         {
+            Cursor = Cursors.AppStarting;
             DetailingStatusLabel.Text = "Working";
+
             if (!InitialSetup(StageTypes.Check2, true)) { return; }
 
             _selectedObjects.DetailButton2op(_projectData, (int)StageTypes.Check2);
 
+            Cursor = Cursors.Default;
             DetailingStatusLabel.Text = "Complete";
         }
 
         private void btn_Detail3_Click(object sender, EventArgs e)
         {
+            Cursor = Cursors.AppStarting;
             DetailingStatusLabel.Text = "Working";
+
             if (!InitialSetup(StageTypes.Check3, true)) { return; }
 
             DetailingStatusLabel.Text = _selectedObjects.DetailButton3op(_projectData, (int)StageTypes.Check3);
+            Cursor = Cursors.Default;
         }
 
         private void btnCreatePackage1_Click(object sender, EventArgs e)
@@ -155,11 +174,15 @@ namespace Prism
             if (!_selectedObjects.NumbersNotUpToDate) { return; }
 
             StatusLabel.Text = _selectedObjects.CreateFabPackage(_projectData, cmbPackageLocation.Text, phaseNumber.Text, issueNumber.Text, StageTypes.FAB, txt_SiteDate.Text);
+            
             Cursor = Cursors.Default;
         }
 
         private void btn_BoltOrder1_Click(object sender, EventArgs e)
         {
+            Cursor = Cursors.AppStarting;
+            StatusLabel.Text = "Working";
+
             if (!InitialSetup(StageTypes.Bolt, false)) { return; }
             FabMisc.CreateBoltOrder(phaseNumber.Text, issueNumber.Text, _projectData, txt_SiteDate.Text);
             foreach(BoltArray bolts in _selectedObjects.AllBolts[0])
@@ -167,6 +190,9 @@ namespace Prism
                 bolts.SetUserProperty(ModelUDA.BoltOrderedBy(), _projectData.Full);
                 bolts.SetUserProperty(ModelUDA.BoltOrderedDate(), _projectData.Date);
             }
+
+            DetailingStatusLabel.Text = "Complete";
+            Cursor = Cursors.Default;
         }
 
         private void btn_MainMaterialCheck_Click(object sender, EventArgs e)

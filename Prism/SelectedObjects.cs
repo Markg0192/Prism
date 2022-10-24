@@ -66,9 +66,11 @@ namespace Prism
                                 if (bolts.BoltType == BoltGroup.BoltTypeEnum.BOLT_TYPE_WORKSHOP)
                                 {
                                     ShopBolts.Add(bolts);
-                                    return;
                                 }
-                                SiteBolts.Add(bolts);
+                                else
+                                {
+                                    SiteBolts.Add(bolts);
+                                }
                             }
                         }
                     }

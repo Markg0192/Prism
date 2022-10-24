@@ -37,7 +37,7 @@ namespace Prism
 
         public static void StampBoltUDA(List<BoltGroup> allBolts, string name, string date)
         {
-            foreach (BoltArray bolts in allBolts)
+            foreach (BoltGroup bolts in allBolts)
             {
                 bolts.SetUserProperty(ModelUDA.BoltOrderedBy(), name);
                 bolts.SetUserProperty(ModelUDA.BoltOrderedDate(), date);
