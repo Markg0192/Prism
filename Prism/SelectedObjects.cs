@@ -16,7 +16,7 @@ namespace Prism
         private ModelObjectEnumerator Moe;
         // public DrawingHandler MyDrawingHandler; This will be needed when drawing functionaility is introduced
 
-        public SelectedObjects(stageTypes stageType)
+        public SelectedObjects(StageTypes stageType)
         {
             List<BoltGroup> SiteBolts = new List<BoltGroup>();
             List<BoltGroup> ShopBolts = new List<BoltGroup>();
@@ -108,12 +108,12 @@ namespace Prism
             }
         }
 
-        private void ProcessObject(object myObject, stageTypes stageType)
+        private void ProcessObject(object myObject, StageTypes stageType)
         {
             if (myObject is Part myPart)
             {
                 CheckXYZSize(myPart);
-                if (!Operation.IsNumberingUpToDate(myPart) && stageType == stageTypes.FAB)
+                if (!Operation.IsNumberingUpToDate(myPart) && stageType == StageTypes.FAB)
                 {
                     PrismWarnings.NumberingIsNotUpToDate();
                     NumbersNotUpToDate = false;

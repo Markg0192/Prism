@@ -22,6 +22,9 @@ namespace Prism.ButtonOperations
             }
 
             myObjects.SelectedModelParts.ModifyAttributes(stageNumber, projectData);
+            ModelModifiers.RedrawViews();            
+            int autoFixCount = ModelChecker.PhasesDoNotMatch.Count + ModelChecker.StartNumbersDoNotMatch.Count;
+            Logging.LogProgress(projectData.ProjName, "Detail 3", autoFixCount, myObjects.AssembliesList.Count);
             return "Complete";
         }
     }

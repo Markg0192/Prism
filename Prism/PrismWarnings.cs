@@ -1,9 +1,48 @@
 ﻿using System.Windows.Forms;
+using static Prism.Enums;
+using static Prism.IgnoreWarning;
 
 namespace Prism
 {
     public static class PrismWarnings
     {
+        public static string Warning = "";
+
+        public static Factory FactoryLocation()
+        {
+            var form = new FactoryLocation();
+            form.ShowDialog();
+            return form.myLocation;
+        }
+
+        public static IgnoreType NewIgnoreWarning()
+        {
+            var form = new IgnoreWarning();
+            form.ShowDialog();
+            return form.Ignore;
+        }
+
+        public static int ExecutionClassWarning()
+        {
+            var form = new ExecutionClass();
+            form.ShowDialog();
+            return form.executionClass;
+        }
+
+        public static void IgnoreFittingCheck()
+        {
+            const string notUpToDateMessage2 = "Without selecting a location Prism cannot filter abnormal fittings.";
+            const string notUpToDateTitle2 = "Are you sure?";
+            MessageBox.Show(notUpToDateMessage2, notUpToDateTitle2, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
+        public static void AbnormalFittings()
+        {
+            string notUpToDateMessage = $"You have selected some abnormal fittings that should either be bought out items or changed to something standard.\r {Warning}";
+            const string notUpToDateTitle = "Abnormal Fittings";
+            MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
         public static void IntumescentLoadingMissing()
         {
             const string notUpToDateMessage = "You have selected intumescent members that have no loading.";
@@ -95,15 +134,16 @@ namespace Prism
 
         public static void HasNotBeenOrdered()
         {
-            const string notUpToDateMessage = "Prism UDA 'Material Order Complete' is empty on a selected part, this indicates it has not been ordered, please correct this to continue.";
+            string notUpToDateMessage = $"Prism UDA 'Material Order Complete' (SEV-UDA-114) is empty on {Warning} selected parts, " +
+                $"this indicates it has not been ordered, please correct this to continue.";
             const string notUpToDateTitle = "Missing prelim marks";
             MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
-        public static bool IgnoreHasNotBeenOrdered()
+        public static bool IgnoreWarning()
         {
             const string notUpToDateMessage2 = "Would you like to ignore this error and continue?";
-            const string notUpToDateTitle2 = "Missing prelims";
+            const string notUpToDateTitle2 = "Ignore?";
             DialogResult result = MessageBox.Show(notUpToDateMessage2, notUpToDateTitle2, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (result == DialogResult.No)
             {
@@ -123,6 +163,18 @@ namespace Prism
            return MessageBox.Show($"Thanks {projectData.First}, your fab package is now complete, please attach your fab package, located in your model folder, " +
                        $"to the following email and send to the relevant team. PLEASE NOTE: This version of Prism does NOT print drawings, for now, you will have " +
                        $"to do this bit yourself.", "Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        public static void ErrorsFixed(int numberOfErrors)
+        {
+            string messageEnd = "errors fixed.";
+            if(numberOfErrors == 1)
+            {
+                messageEnd = "error fixed.";
+            }
+            string notUpToDateMessage = $"{numberOfErrors} {messageEnd}";
+            const string notUpToDateTitle = "Errors Fixed";
+            MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
     }
 }

@@ -14,6 +14,7 @@ namespace Prism
         public HelpForm(string name, string parent)
         {
             InitializeComponent();
+            CenterToScreen();
 
             TreeView.SelectedImageIndex = 2;
 

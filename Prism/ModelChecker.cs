@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using Tekla.Structures.Model;
+using static Prism.Enums;
+using static Prism.IgnoreWarning;
 
 namespace Prism
 {
@@ -10,7 +12,50 @@ namespace Prism
     /// </summary>
     public static class ModelChecker
     {
-        public static bool HasExecutionClass(this SelectedObjects selectedObjects)
+        public static List<ModelObject> IncorrectNameAndClass = new List<ModelObject>();
+        public static List<ModelObject> MissingExecutionClass = new List<ModelObject>();
+        public static List<ModelObject> HasNoFinish = new List<ModelObject>();
+        public static List<ModelPart> StartNumbersDoNotMatch = new List<ModelPart>();
+        public static List<ModelObject> StartNumbersDoNotMatchParts = new List<ModelObject>();
+        public static List<ModelPart> PhasesDoNotMatch = new List<ModelPart>();
+        public static List<ModelObject> PhasesDoNotMatchParts = new List<ModelObject>();
+        public static List<ModelObject> NotOrderedParts = new List<ModelObject>();
+        public static List<ModelObject> OrderedParts = new List<ModelObject>();
+        public static List<ModelObject> PartsWithoutIntumescentLoading = new List<ModelObject>();
+
+        public static bool RunStage4Checks(this SelectedObjects selectedObjects)
+        {
+            CheckFittings.IncorrectGrade.Clear();
+            CheckFittings.IncorrectLength.Clear();
+            CheckFittings.IncorrectThickness.Clear();
+            OrderedParts.Clear();
+            NotOrderedParts.Clear();
+
+            Factory location = PrismWarnings.FactoryLocation();
+            if (location == Factory.Unknown)
+            {
+                PrismWarnings.IgnoreFittingCheck();
+            }
+
+            foreach (Assembly ass in selectedObjects.AssembliesList)
+            {
+                Part myMainPart = ass.GetMainPart() as Part;
+                GetUnorderedParts(myMainPart);
+                GetPartsWithoutAFinish(myMainPart);
+                CheckForIntumescentLoading(myMainPart);
+
+                ArrayList mySecondaries = ass.GetSecondaries();
+                foreach (Part mySecondaryPart in mySecondaries)
+                {
+                    GetPartsThatStartNumbersDontMatch(myMainPart, mySecondaryPart);
+                    GetPartsWherePhasesDontMatch(myMainPart, mySecondaryPart);
+                    CheckFittings.GetIncorrectFittings(mySecondaryPart, location);
+                }
+            }
+            return CheckForAndActionErrors();
+        }
+
+        public static void HasExecutionClass(SelectedObjects selectedObjects)
         {
             foreach (Assembly ass in selectedObjects.AssembliesList)
             {
@@ -20,25 +65,21 @@ namespace Prism
 
                 if (executionClassData == 10)
                 {
-                    PrismWarnings.ExecutionClassMissing();
-                    return false;
+                    MissingExecutionClass.Add(p);
                 }
             }
-            return true;
         }
 
-        public static bool NameAndClassAligned(this SelectedObjects selectedObjects)
+        public static void NameAndClassAligned(SelectedObjects selectedObjects)
         {
             foreach (Part p in selectedObjects.SelectedModelParts)
             {
                 List<string> meantToBeClass = GdomValues.PartClass()[p.Name] as List<string>;
                 if (meantToBeClass != null && !meantToBeClass.Contains(p.Class))
                 {
-                    PrismWarnings.NameAndClassDontMatch();
-                    return false;
+                    IncorrectNameAndClass.Add(p);
                 }
             }
-            return true;
         }
 
         public static bool ArePreviousStepsComplete(SelectedObjects selectedObjects, int stageNumber)
@@ -57,55 +98,134 @@ namespace Prism
             return true;
         }
 
-        public static bool RunStage4Checks(this SelectedObjects selectedObjects)
+        private static bool CheckForAndActionErrors()
         {
-            foreach (Assembly ass in selectedObjects.AssembliesList)
+            if (!OrderErrors()) { return false; }
+            if (!FinishErrors()) { return false; }
+
+            IgnoreType startNumberError = StartNumbersErrors();
+            if (startNumberError == IgnoreType.AutoFix)
             {
-                Part myMainPart = ass.GetMainPart() as Part;
-                if (!myMainPart.HasBeenOrdered(false)) { return false; }
-                if (!myMainPart.HasAFinish()) { return false; }
-                if (!myMainPart.CheckForIntumescentLoading()) { return false; }
-                ArrayList mySecondaries = ass.GetSecondaries();
-                foreach (Part mySecondaryPart in mySecondaries)
-                {
-                    if (!myMainPart.StartNumbersMatch(mySecondaryPart)) { return false; }
-                    if (!myMainPart.PhasesMatch(mySecondaryPart)) { return false; }
-                }
+                AutoFix.AssemblyAndStartNumbers();
+            }
+            if (startNumberError == IgnoreType.Stop) { return false; }
+
+            IgnoreType phaseMatchError = PhaseMatchErrors();
+            if (phaseMatchError == IgnoreType.AutoFix)
+            {
+                AutoFix.PartPhasing();
+            }
+            if (phaseMatchError == IgnoreType.Stop) { return false; }
+
+            if (!IntumesecentLoadingErrors()) { return false; }
+
+            return CheckFittings.DisplayFittingErrors();
+        }
+
+        public static IgnoreType PhaseMatchErrors()
+        {
+            if (PhasesDoNotMatch.Count != 0)
+            {
+                PrismWarnings.Warning = PhasesDoNotMatch.Count.ToString();
+
+                PrismWarnings.PhasesDontMatch();
+
+                ModelModifiers.SetPartsRed(PhasesDoNotMatchParts);
+
+                return PrismWarnings.NewIgnoreWarning();
+            }
+            return IgnoreType.Unspecified;
+        }
+
+        public static IgnoreType StartNumbersErrors()
+        {
+            if (StartNumbersDoNotMatch.Count != 0)
+            {
+                PrismWarnings.Warning = StartNumbersDoNotMatch.Count.ToString();
+
+                PrismWarnings.StartNumbersDontMatch();
+
+                ModelModifiers.SetPartsRed(StartNumbersDoNotMatchParts);
+
+                return PrismWarnings.NewIgnoreWarning();
+            }
+            return IgnoreType.Unspecified;
+        }
+
+        public static bool OrderErrors()
+        {
+            if (NotOrderedParts.Count != 0)
+            {
+                PrismWarnings.Warning = NotOrderedParts.Count.ToString();
+
+                PrismWarnings.HasNotBeenOrdered();
+
+                ModelModifiers.SetPartsRed(NotOrderedParts);
+
+                return PrismWarnings.IgnoreWarning();
             }
             return true;
         }
 
-        public static bool StartNumbersMatch(this Part mainPart, Part secondaryPart)
+        public static bool IntumesecentLoadingErrors()
+        {
+            if (PartsWithoutIntumescentLoading.Count != 0)
+            {
+                PrismWarnings.Warning = PartsWithoutIntumescentLoading.Count.ToString();
+
+                PrismWarnings.IntumescentLoadingMissing();
+
+                ModelModifiers.SetPartsRed(PartsWithoutIntumescentLoading);
+
+                return PrismWarnings.IgnoreIntumescentLoading();
+            }
+            return true;
+        }
+
+        public static bool FinishErrors()
+        {
+            if (HasNoFinish.Count != 0)
+            {
+                PrismWarnings.Warning = HasNoFinish.Count.ToString();
+
+                PrismWarnings.HasNoFinish();
+
+                ModelModifiers.SetPartsRed(HasNoFinish);
+
+                return PrismWarnings.IgnoreWarning();
+            }
+            return true;
+        }
+
+        public static void GetPartsThatStartNumbersDontMatch(this Part mainPart, Part secondaryPart)
         {
             if (mainPart.AssemblyNumber.StartNumber != secondaryPart.PartNumber.StartNumber)
             {
-                PrismWarnings.StartNumbersDontMatch();
-                return false;
+                ModelPart newPart = new ModelPart(secondaryPart, mainPart.AssemblyNumber.StartNumber);
+                StartNumbersDoNotMatchParts.Add(secondaryPart);
+                StartNumbersDoNotMatch.Add(newPart);
             }
-            return true;
         }
 
-        public static bool PhasesMatch(this Part mainPart, Part secondaryPart)
+        public static void GetPartsWherePhasesDontMatch(this Part mainPart, Part secondaryPart)
         {
             mainPart.GetPhase(out Phase mainPartPhase);
             secondaryPart.GetPhase(out Phase secondaryPhase);
 
             if (mainPartPhase.PhaseNumber != secondaryPhase.PhaseNumber)
             {
-                PrismWarnings.PhasesDontMatch();
-                return false;
+                ModelPart p = new ModelPart(secondaryPart, mainPartPhase);
+                PhasesDoNotMatch.Add(p);
+                PhasesDoNotMatchParts.Add(secondaryPart);
             }
-            return true;
         }
 
-        public static bool HasAFinish(this Part mainPart)
+        public static void GetPartsWithoutAFinish(this Part mainPart)
         {
             if (mainPart.Finish.Length == 0)
             {
-                PrismWarnings.HasNoFinish();
-                return false;
+                HasNoFinish.Add(mainPart);
             }
-            return true;
         }
 
         public static bool HasBeenOrdered(this Part mainPart, bool skipMessages)
@@ -115,27 +235,41 @@ namespace Prism
             if (prelimMark.Length == 0)
             {
                 if (skipMessages) { return false; }
-                PrismWarnings.HasNotBeenOrdered();
-                return PrismWarnings.IgnoreHasNotBeenOrdered();
             }
             return true;
         }
 
-        private static bool CheckForIntumescentLoading(this Part mainPart)
+        public static void GetUnorderedParts(this Part mainPart)
         {
-            if (mainPart.Finish.StartsWith("IP"))
+            string prelimMark = "";
+            mainPart.GetUserProperty(ModelUDA.CurrentStageName(3), ref prelimMark); //Check prism uda material order complete for data
+            if (prelimMark.Length == 0)
             {
-                double dft = 0;
-                double wft = 0;
-                mainPart.GetUserProperty("FIRE_DFT", ref dft);
-                mainPart.GetUserProperty("FIRE_WFT", ref wft);
-                if (dft == 0 || wft == 0)
+                NotOrderedParts.Add(mainPart);
+            }
+            else
+            {
+                OrderedParts.Add(mainPart);
+            }
+        }
+
+        private static void CheckForIntumescentLoading(this Part mainPart)
+        {
+            if (mainPart.Finish.StartsWith(GdomValues.IntumescentCode))
+            {
+                string dft = "";
+                string wft = "";
+                double dftNum = 0;
+                double wftNum = 0;
+                mainPart.GetUserProperty(ModelUDA.FireDFT(), ref dft);
+                mainPart.GetUserProperty(ModelUDA.FireWFT(), ref wft);
+                mainPart.GetUserProperty(ModelUDA.FireDFT(), ref dftNum);
+                mainPart.GetUserProperty(ModelUDA.FireWFT(), ref wftNum);
+                if ((dft == "" && dftNum == 0) || (wft == "" && wftNum == 0))
                 {
-                    PrismWarnings.IntumescentLoadingMissing();
-                    return PrismWarnings.IgnoreIntumescentLoading();
+                    PartsWithoutIntumescentLoading.Add(mainPart);
                 }
             }
-            return true;
         }
     }
 }

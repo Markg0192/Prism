@@ -71,7 +71,7 @@ namespace Prism
         public readonly string FabReportPrefix;
         public readonly string MatReportPrefix;
 
-        public void CreateMaterialReports(SelectedObjects selectedObjects, string orderType, Model model, stageTypes stageType)
+        public void CreateMaterialReports(SelectedObjects selectedObjects, string orderType, Model model, StageTypes stageType)
         {
             string materialReport = "";
             string outputName = "";
@@ -101,6 +101,11 @@ namespace Prism
         {
             _reportBolts = Path.Combine(FirmFolderLoc.ReportTemplates(), _reportBoltsName);
             Operation.CreateReportFromSelected(_reportBolts, Path.Combine(Folders.BoltPath, $"{FabReportPrefix}{_outputBolts}"), _title1, _title2, _title3);
+        }
+
+        public void CreateHDBoltList()
+        {
+
         }
 
         public void CreateFabReports(List<Part> partsList, List<List<BoltGroup>> boltList, string packageLocation)

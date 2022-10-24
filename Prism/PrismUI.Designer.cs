@@ -33,6 +33,7 @@ namespace Prism
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PrismUI));
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.pnl_Home = new System.Windows.Forms.Panel();
+            this.info_Home = new System.Windows.Forms.PictureBox();
             this.button7 = new System.Windows.Forms.Button();
             this.btn_MainPackageCreation = new System.Windows.Forms.Button();
             this.btn_MainDetailCheck = new System.Windows.Forms.Button();
@@ -66,7 +67,7 @@ namespace Prism
             this.statusStrip6 = new System.Windows.Forms.StatusStrip();
             this.StatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.txt_SiteDate = new System.Windows.Forms.TextBox();
-            this.btn_BoltOrder1 = new System.Windows.Forms.Button();
+            this.btn_FabMisc = new System.Windows.Forms.Button();
             this.btnCreatePackage1 = new System.Windows.Forms.Button();
             this.label16 = new System.Windows.Forms.Label();
             this.label17 = new System.Windows.Forms.Label();
@@ -77,13 +78,13 @@ namespace Prism
             this.issueNumber = new System.Windows.Forms.TextBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.userGuideToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.info_Home = new System.Windows.Forms.PictureBox();
-            this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.flowLayoutPanel1.SuspendLayout();
             this.pnl_Home.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.info_Home)).BeginInit();
             this.pnl_Material.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.info_Mat)).BeginInit();
             this.statusStrip4.SuspendLayout();
@@ -94,7 +95,6 @@ namespace Prism
             ((System.ComponentModel.ISupportInitialize)(this.info_Fab)).BeginInit();
             this.statusStrip6.SuspendLayout();
             this.menuStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.info_Home)).BeginInit();
             this.SuspendLayout();
             // 
             // flowLayoutPanel1
@@ -124,6 +124,18 @@ namespace Prism
             this.pnl_Home.Name = "pnl_Home";
             this.pnl_Home.Size = new System.Drawing.Size(249, 249);
             this.pnl_Home.TabIndex = 5;
+            // 
+            // info_Home
+            // 
+            this.info_Home.Image = global::Prism.Properties.Resources.info;
+            this.info_Home.Location = new System.Drawing.Point(220, 220);
+            this.info_Home.Name = "info_Home";
+            this.info_Home.Size = new System.Drawing.Size(20, 20);
+            this.info_Home.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.info_Home.TabIndex = 42;
+            this.info_Home.TabStop = false;
+            this.toolTip1.SetToolTip(this.info_Home, "Help");
+            this.info_Home.Click += new System.EventHandler(this.info_Home_Click);
             // 
             // button7
             // 
@@ -282,6 +294,7 @@ namespace Prism
             this.cmb_OrderMaterial.Size = new System.Drawing.Size(100, 21);
             this.cmb_OrderMaterial.TabIndex = 36;
             this.cmb_OrderMaterial.Text = "Order Material";
+            this.cmb_OrderMaterial.SelectedIndexChanged += new System.EventHandler(this.cmb_OrderMaterial_SelectedIndexChanged);
             // 
             // label3
             // 
@@ -458,7 +471,7 @@ namespace Prism
             this.pnl_Package.Controls.Add(this.btn_HomePackage);
             this.pnl_Package.Controls.Add(this.statusStrip6);
             this.pnl_Package.Controls.Add(this.txt_SiteDate);
-            this.pnl_Package.Controls.Add(this.btn_BoltOrder1);
+            this.pnl_Package.Controls.Add(this.btn_FabMisc);
             this.pnl_Package.Controls.Add(this.btnCreatePackage1);
             this.pnl_Package.Controls.Add(this.label16);
             this.pnl_Package.Controls.Add(this.label17);
@@ -526,21 +539,21 @@ namespace Prism
             this.toolTip1.SetToolTip(this.txt_SiteDate, "dd/mm/yyyy preferred");
             this.txt_SiteDate.TextChanged += new System.EventHandler(this.txt_SiteDate_TextChanged);
             // 
-            // btn_BoltOrder1
+            // btn_FabMisc
             // 
-            this.btn_BoltOrder1.BackColor = System.Drawing.Color.Gainsboro;
-            this.btn_BoltOrder1.BackgroundImage = global::Prism.Properties.Resources.bolt;
-            this.btn_BoltOrder1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.btn_BoltOrder1.Enabled = false;
-            this.btn_BoltOrder1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btn_BoltOrder1.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btn_BoltOrder1.Location = new System.Drawing.Point(191, 69);
-            this.btn_BoltOrder1.Name = "btn_BoltOrder1";
-            this.btn_BoltOrder1.Size = new System.Drawing.Size(52, 45);
-            this.btn_BoltOrder1.TabIndex = 33;
-            this.toolTip1.SetToolTip(this.btn_BoltOrder1, "Fab Package Extras");
-            this.btn_BoltOrder1.UseVisualStyleBackColor = false;
-            this.btn_BoltOrder1.Click += new System.EventHandler(this.btn_BoltOrder1_Click_1);
+            this.btn_FabMisc.BackColor = System.Drawing.Color.Gainsboro;
+            this.btn_FabMisc.BackgroundImage = global::Prism.Properties.Resources.bolt;
+            this.btn_FabMisc.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.btn_FabMisc.Enabled = false;
+            this.btn_FabMisc.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btn_FabMisc.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btn_FabMisc.Location = new System.Drawing.Point(191, 69);
+            this.btn_FabMisc.Name = "btn_FabMisc";
+            this.btn_FabMisc.Size = new System.Drawing.Size(52, 45);
+            this.btn_FabMisc.TabIndex = 33;
+            this.toolTip1.SetToolTip(this.btn_FabMisc, "Fab Package Extras");
+            this.btn_FabMisc.UseVisualStyleBackColor = false;
+            this.btn_FabMisc.Click += new System.EventHandler(this.btn_FabMisc_Click);
             // 
             // btnCreatePackage1
             // 
@@ -651,6 +664,13 @@ namespace Prism
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "File";
             // 
+            // exitToolStripMenuItem
+            // 
+            this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(93, 22);
+            this.exitToolStripMenuItem.Text = "Exit";
+            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
+            // 
             // helpToolStripMenuItem
             // 
             this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -665,25 +685,6 @@ namespace Prism
             this.userGuideToolStripMenuItem.Size = new System.Drawing.Size(131, 22);
             this.userGuideToolStripMenuItem.Text = "User Guide";
             this.userGuideToolStripMenuItem.Click += new System.EventHandler(this.userGuideToolStripMenuItem_Click);
-            // 
-            // info_Home
-            // 
-            this.info_Home.Image = global::Prism.Properties.Resources.info;
-            this.info_Home.Location = new System.Drawing.Point(220, 220);
-            this.info_Home.Name = "info_Home";
-            this.info_Home.Size = new System.Drawing.Size(20, 20);
-            this.info_Home.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.info_Home.TabIndex = 42;
-            this.info_Home.TabStop = false;
-            this.toolTip1.SetToolTip(this.info_Home, "Help");
-            this.info_Home.Click += new System.EventHandler(this.info_Home_Click);
-            // 
-            // exitToolStripMenuItem
-            // 
-            this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.exitToolStripMenuItem.Text = "Exit";
-            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
             // PrismUI
             // 
@@ -702,6 +703,7 @@ namespace Prism
             this.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.PrismUI_PreviewKeyDown);
             this.flowLayoutPanel1.ResumeLayout(false);
             this.pnl_Home.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.info_Home)).EndInit();
             this.pnl_Material.ResumeLayout(false);
             this.pnl_Material.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.info_Mat)).EndInit();
@@ -719,7 +721,6 @@ namespace Prism
             this.statusStrip6.PerformLayout();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.info_Home)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -759,7 +760,7 @@ namespace Prism
         private System.Windows.Forms.StatusStrip statusStrip6;
         private System.Windows.Forms.ToolStripStatusLabel StatusLabel;
         private System.Windows.Forms.TextBox txt_SiteDate;
-        private System.Windows.Forms.Button btn_BoltOrder1;
+        private System.Windows.Forms.Button btn_FabMisc;
         private System.Windows.Forms.Button btnCreatePackage1;
         private System.Windows.Forms.Label label16;
         private System.Windows.Forms.Label label17;
