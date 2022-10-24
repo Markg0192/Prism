@@ -257,11 +257,15 @@ namespace Prism
         {
             if (mainPart.Finish.StartsWith(GdomValues.IntumescentCode))
             {
-                double dft = 0;
-                double wft = 0;
+                string dft = "";
+                string wft = "";
+                double dftNum = 0;
+                double wftNum = 0;
                 mainPart.GetUserProperty(ModelUDA.FireDFT(), ref dft);
                 mainPart.GetUserProperty(ModelUDA.FireWFT(), ref wft);
-                if (dft == 0 || wft == 0)
+                mainPart.GetUserProperty(ModelUDA.FireDFT(), ref dftNum);
+                mainPart.GetUserProperty(ModelUDA.FireWFT(), ref wftNum);
+                if ((dft == "" && dftNum == 0) || (wft == "" && wftNum == 0))
                 {
                     PartsWithoutIntumescentLoading.Add(mainPart);
                 }
