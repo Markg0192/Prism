@@ -36,6 +36,13 @@ namespace Prism
             MessageBox.Show(notUpToDateMessage2, notUpToDateTitle2, MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
+        public static void PrelimStartReset(string resetNo)
+        {
+            string notUpToDateMessage = $"Prelim number start point manually set to {resetNo}";
+            const string notUpToDateTitle = "Are you sure?";
+            MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
         public static void AbnormalFittings()
         {
             string notUpToDateMessage = $"You have selected some abnormal fittings that should either be bought out items or changed to something standard.\r {Warning}";
@@ -55,6 +62,18 @@ namespace Prism
             const string notUpToDateMessage2 = "Would you like to ignore this error and continue?";
             const string notUpToDateTitle2 = "Missing Intumescent Loadings";
             DialogResult result = MessageBox.Show(notUpToDateMessage2, notUpToDateTitle2, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (result == DialogResult.No)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        public static bool ResetPrelimMarking()
+        {
+            const string notUpToDateMessage = "WARNING! Selecting this button means your prelim marking will not start at the number given, Prism cannot undo this manual action. Are you sure oyu want to proceed?";
+            const string notUpToDateTitle = "Be careful";
+            DialogResult result = MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (result == DialogResult.No)
             {
                 return false;
@@ -160,15 +179,15 @@ namespace Prism
 
         public static DialogResult FabPackComplete(PrismProjectData projectData)
         {
-           return MessageBox.Show($"Thanks {projectData.First}, your fab package is now complete, please attach your fab package, located in your model folder, " +
-                       $"to the following email and send to the relevant team. PLEASE NOTE: This version of Prism does NOT print drawings, for now, you will have " +
-                       $"to do this bit yourself.", "Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return MessageBox.Show($"Thanks {projectData.First}, your fab package is now complete, please attach your fab package, located in your model folder, " +
+                        $"to the following email and send to the relevant team. PLEASE NOTE: This version of Prism does NOT print drawings, for now, you will have " +
+                        $"to do this bit yourself.", "Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         public static void ErrorsFixed(int numberOfErrors)
         {
             string messageEnd = "errors fixed.";
-            if(numberOfErrors == 1)
+            if (numberOfErrors == 1)
             {
                 messageEnd = "error fixed.";
             }

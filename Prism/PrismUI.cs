@@ -112,7 +112,7 @@ namespace Prism
 
             if (!InitialSetup(StageTypes.Prelim1, false)) { return; }
 
-            if (!_selectedObjects.MaterialButton1op(_projectData, (int)StageTypes.Prelim1)) 
+            if (!_selectedObjects.MaterialButton1op(_projectData, (int)StageTypes.Prelim1))
             {
                 MaterialStatusLabel.Text = "Cancelled";
                 return;
@@ -345,7 +345,7 @@ namespace Prism
             {
                 txt_SiteDate.BackColor = Color.Moccasin;
             }
-        }  
+        }
 
         private void userGuideToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -386,6 +386,16 @@ namespace Prism
         private void cmb_OrderMaterial_SelectedIndexChanged(object sender, EventArgs e)
         {
             CheckForMaterialButton();
+        }
+
+        private void btn_ResetPrelims_Click(object sender, EventArgs e)
+        {
+            bool performReset = PrismWarnings.ResetPrelimMarking();
+            if (performReset)
+            {
+                ModelModifiers.ClearPrelimMarking(_model.GetProjectInfo(), txt_ResetPrelimTo.Text);
+                PrismWarnings.PrelimStartReset(txt_ResetPrelimTo.Text);
+            }
         }
     }
 }

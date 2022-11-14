@@ -103,12 +103,12 @@ namespace Prism
             //This method adds prelim marks 'the old fashioned way' it rationalises members by profile, grade and length and adds numbers based on phase.
             //We have moved to numbering each piece individually but keeping this method incase we change our mind again.
             int currentLastNumber = 0;
+            pInfo.GetUserProperty(ModelUDA.LastUsedPrelim(), ref currentLastNumber);
 
             foreach (Part p in selectedObjects.SelectedModelParts)
             {
-                if (p.GetPrelimMark().Length < 1)
-                {
-                    pInfo.GetUserProperty(ModelUDA.LastUsedPrelim(), ref currentLastNumber);
+                if (p.GetPrelimMark().Length == 0)
+                {                    
                     if (currentLastNumber == 0)
                     {
                         Console.WriteLine("Failed to read last number");
@@ -121,9 +121,14 @@ namespace Prism
                     }
                     p.SetUserProperty(ModelUDA.PrelimMark(), currentLastNumber.ToString());
                 } 
-                currentLastNumber++;
-                pInfo.SetUserProperty(ModelUDA.LastUsedPrelim(), currentLastNumber);
-            }                
+                currentLastNumber++;               
+            }     
+            pInfo.SetUserProperty(ModelUDA.LastUsedPrelim(), currentLastNumber);
+        }
+
+        public static void ClearPrelimMarking(ProjectInfo pInfo, string resetNumber)
+        {
+            pInfo.SetUserProperty(ModelUDA.LastUsedPrelim(), Convert.ToInt32(resetNumber));
         }
 
         public static double GetPartLength(Part myPart)
