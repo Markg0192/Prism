@@ -54,12 +54,10 @@ namespace Prism.ButtonOperations
                 else { return; }
             }
 
-            
-
             myObjects.AddPrelimMarks(projectInfo);
             myReportManager.Folders.CreateMatFolder(fabsecsPresent);
 
-            myReportManager.CreateMaterialReports(myObjects, orderType, model, stageType);
+            myReportManager.CreateMaterialReports(myObjects, orderType, stageType);
             if (orderType == "Omit Material")
             {
                 stageNumber = 8;

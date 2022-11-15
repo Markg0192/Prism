@@ -39,6 +39,8 @@ namespace Prism
             this.btn_MainDetailCheck = new System.Windows.Forms.Button();
             this.btn_MainMaterialCheck = new System.Windows.Forms.Button();
             this.pnl_Material = new System.Windows.Forms.Panel();
+            this.txt_ResetPrelimTo = new System.Windows.Forms.TextBox();
+            this.btn_ResetPrelims = new System.Windows.Forms.Button();
             this.info_Mat = new System.Windows.Forms.PictureBox();
             this.label4 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
@@ -82,8 +84,6 @@ namespace Prism
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.userGuideToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.btn_ResetPrelims = new System.Windows.Forms.Button();
-            this.txt_ResetPrelimTo = new System.Windows.Forms.TextBox();
             this.flowLayoutPanel1.SuspendLayout();
             this.pnl_Home.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.info_Home)).BeginInit();
@@ -215,6 +215,24 @@ namespace Prism
             this.pnl_Material.Size = new System.Drawing.Size(255, 304);
             this.pnl_Material.TabIndex = 4;
             this.pnl_Material.Visible = false;
+            // 
+            // txt_ResetPrelimTo
+            // 
+            this.txt_ResetPrelimTo.Location = new System.Drawing.Point(137, 246);
+            this.txt_ResetPrelimTo.Name = "txt_ResetPrelimTo";
+            this.txt_ResetPrelimTo.Size = new System.Drawing.Size(55, 20);
+            this.txt_ResetPrelimTo.TabIndex = 44;
+            this.txt_ResetPrelimTo.Text = "0";
+            // 
+            // btn_ResetPrelims
+            // 
+            this.btn_ResetPrelims.Location = new System.Drawing.Point(15, 242);
+            this.btn_ResetPrelims.Name = "btn_ResetPrelims";
+            this.btn_ResetPrelims.Size = new System.Drawing.Size(116, 26);
+            this.btn_ResetPrelims.TabIndex = 43;
+            this.btn_ResetPrelims.Text = "Set Prelim No. Start";
+            this.btn_ResetPrelims.UseVisualStyleBackColor = true;
+            this.btn_ResetPrelims.Click += new System.EventHandler(this.btn_ResetPrelims_Click);
             // 
             // info_Mat
             // 
@@ -689,24 +707,6 @@ namespace Prism
             this.userGuideToolStripMenuItem.Size = new System.Drawing.Size(131, 22);
             this.userGuideToolStripMenuItem.Text = "User Guide";
             this.userGuideToolStripMenuItem.Click += new System.EventHandler(this.userGuideToolStripMenuItem_Click);
-            // 
-            // btn_ResetPrelims
-            // 
-            this.btn_ResetPrelims.Location = new System.Drawing.Point(15, 242);
-            this.btn_ResetPrelims.Name = "btn_ResetPrelims";
-            this.btn_ResetPrelims.Size = new System.Drawing.Size(148, 26);
-            this.btn_ResetPrelims.TabIndex = 43;
-            this.btn_ResetPrelims.Text = "Manually Reset Prelim No.";
-            this.btn_ResetPrelims.UseVisualStyleBackColor = true;
-            this.btn_ResetPrelims.Click += new System.EventHandler(this.btn_ResetPrelims_Click);
-            // 
-            // txt_ResetPrelimTo
-            // 
-            this.txt_ResetPrelimTo.Location = new System.Drawing.Point(169, 246);
-            this.txt_ResetPrelimTo.Name = "txt_ResetPrelimTo";
-            this.txt_ResetPrelimTo.Size = new System.Drawing.Size(55, 20);
-            this.txt_ResetPrelimTo.TabIndex = 44;
-            this.txt_ResetPrelimTo.Text = "0";
             // 
             // PrismUI
             // 

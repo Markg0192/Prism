@@ -49,6 +49,8 @@ namespace Prism
                 else ProcessObject(myObject, stageType);
             }
 
+            PartWeight = Math.Round(PartWeight / 1000, 3);
+
             if (AssembliesList != null)
             {
                 foreach (Assembly assembly in AssembliesList)
@@ -56,7 +58,7 @@ namespace Prism
                     List<BoltGroup> MyBolts = GetBoltsFromAssembly(assembly);
                     double weight = 0;
                     assembly.GetReportProperty(ModelUDA.Weight(), ref weight);
-                    TotalWeight = TotalWeight + weight;
+                    //TotalWeight = TotalWeight + weight;
                     if (MyBolts != null)
                     {
                         foreach (BoltGroup bolts in MyBolts)
@@ -75,7 +77,7 @@ namespace Prism
                         }
                     }
                 }
-                TotalWeight = Math.Round(TotalWeight / 1000, 3);
+                //TotalWeight = Math.Round(TotalWeight / 1000, 3);
             }
             GetCorrectModelSelection();
             AllBolts.Add(SiteBolts);
@@ -89,7 +91,8 @@ namespace Prism
         public double BiggestY = -100000000;
         public double BiggestZ = -100000000;
 
-        public double TotalWeight { get; set; }
+        //public double TotalWeight { get; set; }
+        public double PartWeight { get; set; }
         public bool NumbersNotUpToDate { get; set; }
         public List<Assembly> AssembliesList { get; set; }
         public List<List<BoltGroup>> AllBolts = new List<List<BoltGroup>>();
@@ -122,6 +125,10 @@ namespace Prism
                     return;
                 }
                 SelectedModelParts.Add(myPart);
+
+                double weight = 0;
+                myPart.GetReportProperty(ModelUDA.Weight(), ref weight);
+                PartWeight = PartWeight + weight;
 
                 MyMarks.Add(myPart.GetPartMark());
 

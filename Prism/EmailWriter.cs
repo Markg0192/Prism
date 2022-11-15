@@ -18,7 +18,7 @@ namespace Prism
                                                                                     $"This fab package contains the following;{_mailNewLine}" +
                                                                                     $"{objects.AssembliesList.Count} Assemblies.{_mailNewLine}" +
                                                                                     $"{objects.SelectedModelParts.Count} Parts.{_mailNewLine}" +
-                                                                                    $"{objects.TotalWeight} T. { _mailNewLine}" +
+                                                                                    $"{objects.PartWeight} T. { _mailNewLine}" +
                                                                                     $"{_mailNewLine}" +
                                                                                     $"Regards,{_mailNewLine}{_mailNewLine}" +
                                                                                     $"{projData.Full}");
@@ -38,16 +38,16 @@ namespace Prism
         }
 
         public static void WriteMatEmail(PrismProjectData projData, SelectedObjects objects, string fabPrefix, string issueNumber, string phaseNumber, string orderType)
-        {   
+        {
             FormIssueEmail("purchasing@severfield.com", $"{fabPrefix} {IssueType(orderType)}",
                                                                                     $"Hello,{_mailNewLine}" +
                                                                                     $"{_mailNewLine}" +
                                                                                     $"{OrderTypeText(orderType)}, issue {issueNumber}, for phase {phaseNumber} in {projData.ProjNumber}, {projData.ProjName}.{_mailNewLine}" +
                                                                                     $"{RemoveOrAddText(orderType)} as soon as possible.{_mailNewLine}" +
                                                                                     $"{_mailNewLine}" +
-                                                                                    $"This material order contains the following;{_mailNewLine}" +           
+                                                                                    $"This material order contains the following;{_mailNewLine}" +
                                                                                     $"{objects.SelectedModelParts.Count} Parts.{_mailNewLine}" +
-                                                                                    $"{objects.TotalWeight} T. { _mailNewLine}" +
+                                                                                    $"{objects.PartWeight} T. { _mailNewLine}" +
                                                                                     $"{_mailNewLine}" +
                                                                                     $"Regards,{_mailNewLine}{_mailNewLine}" +
                                                                                     $"{projData.Full}");

@@ -120,5 +120,18 @@
         {
             return "PRISM_LAST_USED_PRELIM";
         }
+
+        public static string BSWXAttributeName(Enums.StageTypes stage)
+        {
+            if(stage == Enums.StageTypes.Prelim3)
+            {
+                return "-SEV_PRELIM";
+            }
+            if(stage == Enums.StageTypes.FAB)
+            { 
+                return "-SEV_FAB";
+            }
+            return "";
+        }
     }
 }

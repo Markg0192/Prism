@@ -72,8 +72,9 @@ namespace Prism
             }
 
             bimRevExp.SetComponentInput(myInputs);
+            bimRevExp.LoadAttributesFromFile(ModelUDA.BSWXAttributeName(stageType));
             bimRevExp.SetAttribute("output_file_path", $@"{myFolder}\{modelData.ProjNumber}-{phaseNumber}-{typeString}-ISSUE{issueNumber}.bswx");
-            bimRevExp.SetAttribute("export_cam_files", 0);
+            /*bimRevExp.SetAttribute("export_cam_files", 0);
             bimRevExp.SetAttribute("cam_file_folder", "");
             bimRevExp.SetAttribute("export_gantt_charts", 0);
             bimRevExp.SetAttribute("selected_parts_only", 1);
@@ -92,7 +93,7 @@ namespace Prism
             bimRevExp.SetAttribute("drawing_file_folder", "");
             bimRevExp.SetAttribute("include_gas", 0);
             bimRevExp.SetAttribute("include_multi", 0);
-            bimRevExp.SetAttribute("drawing_extension", 0);
+            bimRevExp.SetAttribute("drawing_extension", 0);*/
             bimRevExp.Insert(); 
             ModelModifiers.HideOrRestoreTekla(9);
         }

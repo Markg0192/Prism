@@ -1,6 +1,5 @@
 ﻿using System.Windows.Forms;
 using static Prism.Enums;
-using static Prism.IgnoreWarning;
 
 namespace Prism
 {
@@ -71,7 +70,7 @@ namespace Prism
 
         public static bool ResetPrelimMarking()
         {
-            const string notUpToDateMessage = "WARNING! Selecting this button means your prelim marking will not start at the number given, Prism cannot undo this manual action. Are you sure oyu want to proceed?";
+            const string notUpToDateMessage = "WARNING! Selecting this button means your prelim marking will now start at the number given, Prism cannot undo this manual action. Are you sure you want to proceed?";
             const string notUpToDateTitle = "Be careful";
             DialogResult result = MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (result == DialogResult.No)
