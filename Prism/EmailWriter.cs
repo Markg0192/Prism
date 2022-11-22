@@ -112,7 +112,7 @@ namespace Prism
             }
             if (orderType == "Add Material")
             {
-                return "Additonal Prelim Issue";
+                return "Additional Prelim Issue";
             }
             if (orderType == "Omit Material")
             {
