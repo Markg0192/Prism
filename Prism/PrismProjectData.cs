@@ -29,6 +29,7 @@ namespace Prism
         public readonly string Last;
         public readonly string Full;
         public readonly string Initials;
+        public bool IsVariation = false;
 
         private string Capitalise(string original)
         {

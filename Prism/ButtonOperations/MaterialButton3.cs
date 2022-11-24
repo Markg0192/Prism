@@ -11,14 +11,14 @@ namespace Prism.ButtonOperations
             string phaseNumber, string issueNumber, string orderType, int stageNumber, StageTypes stageType, Model model)
         {
             ReportManager myReportManager = new ReportManager(projectData, phaseNumber, issueNumber);
-           // HDBolts.StampConnectionCodeOnMainMember(myObjects);
+            // HDBolts.StampConnectionCodeOnMainMember(myObjects);
 
             foreach (Part myPart in myObjects.SelectedModelParts)
             {
                 myPart.GetUnorderedParts();
             }
 
-            if(orderType == "Order HD Bolts")
+            if(orderType == "Order HD Bolts") //Order HD bolts not an option therefore this statement is never true(for now)
             {
                 HDBolts.OrderHDBolts(myObjects, myReportManager);
                 Logging.LogProgress(projectData.ProjName, "Material 3 - HD Bolts", 0, myObjects.AssembliesList.Count);
@@ -54,6 +54,7 @@ namespace Prism.ButtonOperations
                 else { return; }
             }
 
+            ModelModifiers.VariationCheck(phaseNumber, myObjects, projectData);
             myObjects.AddPrelimMarks(projectInfo);
             myReportManager.Folders.CreateMatFolder(fabsecsPresent);
 

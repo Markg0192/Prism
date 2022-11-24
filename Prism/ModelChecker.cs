@@ -241,6 +241,8 @@ namespace Prism
 
         public static void GetUnorderedParts(this Part mainPart)
         {
+            OrderedParts.Clear();
+            NotOrderedParts.Clear();
             string prelimMark = "";
             mainPart.GetUserProperty(ModelUDA.CurrentStageName(3), ref prelimMark); //Check prism uda material order complete for data
             if (prelimMark.Length == 0)

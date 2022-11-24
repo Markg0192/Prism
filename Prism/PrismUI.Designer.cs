@@ -109,7 +109,7 @@ namespace Prism
             this.flowLayoutPanel1.Controls.Add(this.pnl_Package);
             this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 27);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(977, 310);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(977, 283);
             this.flowLayoutPanel1.TabIndex = 2;
             // 
             // pnl_Home
@@ -212,13 +212,13 @@ namespace Prism
             this.pnl_Material.Controls.Add(this.btn_Material1);
             this.pnl_Material.Location = new System.Drawing.Point(258, 3);
             this.pnl_Material.Name = "pnl_Material";
-            this.pnl_Material.Size = new System.Drawing.Size(255, 304);
+            this.pnl_Material.Size = new System.Drawing.Size(255, 277);
             this.pnl_Material.TabIndex = 4;
             this.pnl_Material.Visible = false;
             // 
             // txt_ResetPrelimTo
             // 
-            this.txt_ResetPrelimTo.Location = new System.Drawing.Point(137, 246);
+            this.txt_ResetPrelimTo.Location = new System.Drawing.Point(137, 227);
             this.txt_ResetPrelimTo.Name = "txt_ResetPrelimTo";
             this.txt_ResetPrelimTo.Size = new System.Drawing.Size(55, 20);
             this.txt_ResetPrelimTo.TabIndex = 44;
@@ -226,7 +226,7 @@ namespace Prism
             // 
             // btn_ResetPrelims
             // 
-            this.btn_ResetPrelims.Location = new System.Drawing.Point(15, 242);
+            this.btn_ResetPrelims.Location = new System.Drawing.Point(15, 223);
             this.btn_ResetPrelims.Name = "btn_ResetPrelims";
             this.btn_ResetPrelims.Size = new System.Drawing.Size(116, 26);
             this.btn_ResetPrelims.TabIndex = 43;
@@ -249,7 +249,7 @@ namespace Prism
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(134, 193);
+            this.label4.Location = new System.Drawing.Point(87, 160);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(72, 13);
             this.label4.TabIndex = 41;
@@ -258,7 +258,7 @@ namespace Prism
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(103, 69);
+            this.label1.Location = new System.Drawing.Point(90, 89);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(69, 13);
             this.label1.TabIndex = 40;
@@ -282,7 +282,7 @@ namespace Prism
             this.statusStrip4.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.statusStrip4.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MaterialStatusLabel});
-            this.statusStrip4.Location = new System.Drawing.Point(0, 282);
+            this.statusStrip4.Location = new System.Drawing.Point(0, 255);
             this.statusStrip4.Name = "statusStrip4";
             this.statusStrip4.Size = new System.Drawing.Size(255, 22);
             this.statusStrip4.TabIndex = 38;
@@ -297,9 +297,9 @@ namespace Prism
             // txt_StartNumber
             // 
             this.txt_StartNumber.BackColor = System.Drawing.Color.LightCoral;
-            this.txt_StartNumber.Location = new System.Drawing.Point(106, 88);
+            this.txt_StartNumber.Location = new System.Drawing.Point(170, 86);
             this.txt_StartNumber.Name = "txt_StartNumber";
-            this.txt_StartNumber.Size = new System.Drawing.Size(100, 20);
+            this.txt_StartNumber.Size = new System.Drawing.Size(67, 20);
             this.txt_StartNumber.TabIndex = 37;
             this.txt_StartNumber.TextChanged += new System.EventHandler(this.txt_StartNumber_TextChanged);
             this.txt_StartNumber.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txt_StartNumber_KeyPress);
@@ -311,9 +311,9 @@ namespace Prism
             "Order Material",
             "Add Material",
             "Omit Material"});
-            this.cmb_OrderMaterial.Location = new System.Drawing.Point(106, 131);
+            this.cmb_OrderMaterial.Location = new System.Drawing.Point(90, 186);
             this.cmb_OrderMaterial.Name = "cmb_OrderMaterial";
-            this.cmb_OrderMaterial.Size = new System.Drawing.Size(100, 21);
+            this.cmb_OrderMaterial.Size = new System.Drawing.Size(147, 21);
             this.cmb_OrderMaterial.TabIndex = 36;
             this.cmb_OrderMaterial.Text = "Order Material";
             this.cmb_OrderMaterial.SelectedIndexChanged += new System.EventHandler(this.cmb_OrderMaterial_SelectedIndexChanged);
@@ -321,7 +321,7 @@ namespace Prism
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(12, 193);
+            this.label3.Location = new System.Drawing.Point(87, 134);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(77, 13);
             this.label3.TabIndex = 35;
@@ -330,9 +330,9 @@ namespace Prism
             // txt_MaterialIssueNumber
             // 
             this.txt_MaterialIssueNumber.BackColor = System.Drawing.Color.LightCoral;
-            this.txt_MaterialIssueNumber.Location = new System.Drawing.Point(137, 216);
+            this.txt_MaterialIssueNumber.Location = new System.Drawing.Point(170, 157);
             this.txt_MaterialIssueNumber.Name = "txt_MaterialIssueNumber";
-            this.txt_MaterialIssueNumber.Size = new System.Drawing.Size(100, 20);
+            this.txt_MaterialIssueNumber.Size = new System.Drawing.Size(67, 20);
             this.txt_MaterialIssueNumber.TabIndex = 32;
             this.toolTip1.SetToolTip(this.txt_MaterialIssueNumber, "Numbers only, Min 2 digits long");
             this.txt_MaterialIssueNumber.TextChanged += new System.EventHandler(this.txt_MaterialIssueNumber_TextChanged);
@@ -341,9 +341,9 @@ namespace Prism
             // txt_MaterialPhaseNumber
             // 
             this.txt_MaterialPhaseNumber.BackColor = System.Drawing.Color.LightCoral;
-            this.txt_MaterialPhaseNumber.Location = new System.Drawing.Point(15, 216);
+            this.txt_MaterialPhaseNumber.Location = new System.Drawing.Point(170, 131);
             this.txt_MaterialPhaseNumber.Name = "txt_MaterialPhaseNumber";
-            this.txt_MaterialPhaseNumber.Size = new System.Drawing.Size(100, 20);
+            this.txt_MaterialPhaseNumber.Size = new System.Drawing.Size(67, 20);
             this.txt_MaterialPhaseNumber.TabIndex = 33;
             this.toolTip1.SetToolTip(this.txt_MaterialPhaseNumber, "Or variation number");
             this.txt_MaterialPhaseNumber.TextChanged += new System.EventHandler(this.txt_MaterialPhaseNumber_TextChanged);
@@ -371,7 +371,7 @@ namespace Prism
             this.btn_Material3.ForeColor = System.Drawing.SystemColors.ControlText;
             this.btn_Material3.Location = new System.Drawing.Point(15, 131);
             this.btn_Material3.Name = "btn_Material3";
-            this.btn_Material3.Size = new System.Drawing.Size(85, 56);
+            this.btn_Material3.Size = new System.Drawing.Size(61, 76);
             this.btn_Material3.TabIndex = 30;
             this.toolTip1.SetToolTip(this.btn_Material3, "Create Material Package");
             this.btn_Material3.UseVisualStyleBackColor = false;

@@ -21,6 +21,45 @@ namespace Prism
     /// </summary>
     public static class ModelModifiers
     {
+        public static void VariationCheck(string phaseNumber, SelectedObjects myObjects, PrismProjectData projData)
+        {
+            if (phaseNumber.Contains("V") || phaseNumber.Contains("v"))
+            {
+                if (PrismWarnings.IsVariation())
+                {
+                    SetVariationAttribute(phaseNumber, myObjects);
+                    projData.IsVariation = true;
+                }                
+            }
+            else { projData.IsVariation = false; }
+        }
+
+        private static void SetVariationAttribute(string phaseNumber, SelectedObjects myObjects)
+        {
+            foreach (Part p in myObjects.SelectedModelParts)
+            {
+                string firstVNo = "";
+                string secondVNo = "";
+                p.GetUserProperty(ModelUDA.FirstVariationNumber(), ref firstVNo);
+                if (firstVNo == "")
+                {
+                    p.SetUserProperty(ModelUDA.FirstVariationNumber(), phaseNumber);
+                }
+                else
+                {
+                    p.GetUserProperty(ModelUDA.SecondVariationNumber(), ref secondVNo);
+                    if (secondVNo == "")
+                    {
+                        p.SetUserProperty(ModelUDA.SecondVariationNumber(), phaseNumber);
+                    }
+                    else
+                    {
+                        p.SetUserProperty(ModelUDA.FirstVariationNumber(), phaseNumber);
+                    }
+                }
+            }
+        }
+
         public static void ModifyAttributes(this List<Part> selectedObjects, int stageNumber, PrismProjectData projectData)
         {
             foreach (Part part in selectedObjects)
@@ -108,7 +147,7 @@ namespace Prism
             foreach (Part p in selectedObjects.SelectedModelParts)
             {
                 if (p.GetPrelimMark().Length == 0)
-                {                    
+                {
                     if (currentLastNumber == 0)
                     {
                         Console.WriteLine("Failed to read last number");
@@ -120,9 +159,9 @@ namespace Prism
                         Console.WriteLine("Last number read" + currentLastNumber);
                     }
                     p.SetUserProperty(ModelUDA.PrelimMark(), currentLastNumber.ToString());
-                } 
-                currentLastNumber++;               
-            }     
+                }
+                currentLastNumber++;
+            }
             pInfo.SetUserProperty(ModelUDA.LastUsedPrelim(), currentLastNumber);
         }
 
@@ -241,7 +280,7 @@ namespace Prism
                 }
                 else
                 {
-                   // Thread.Sleep(1000);
+                    // Thread.Sleep(1000);
                     RemoveLog(folderPath);
                 }
             }

@@ -42,7 +42,7 @@ namespace Prism
             FormIssueEmail("purchasing@severfield.com", $"{fabPrefix} {IssueType(orderType)}",
                                                                                     $"Hello,{_mailNewLine}" +
                                                                                     $"{_mailNewLine}" +
-                                                                                    $"{OrderTypeText(orderType)}, issue {issueNumber}, for phase {phaseNumber} in {projData.ProjNumber}, {projData.ProjName}.{_mailNewLine}" +
+                                                                                    $"{OrderTypeText(orderType)}, issue {issueNumber}, for {PhaseOrVariation(projData.IsVariation)} {phaseNumber} in {projData.ProjNumber}, {projData.ProjName}.{_mailNewLine}" +
                                                                                     $"{RemoveOrAddText(orderType)} as soon as possible.{_mailNewLine}" +
                                                                                     $"{_mailNewLine}" +
                                                                                     $"This material order contains the following;{_mailNewLine}" +
@@ -68,6 +68,15 @@ namespace Prism
             {
                 return siteDate;
             }            
+        }
+
+        private static string PhaseOrVariation(bool isVariation)
+        {
+            if(isVariation)
+            {
+                return "variation";
+            }
+            return "phase";
         }
 
         private static string OrderTypeText(string orderType)

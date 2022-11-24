@@ -80,6 +80,18 @@ namespace Prism
             return true;
         }
 
+        public static bool IsVariation()
+        {
+            const string notUpToDateMessage = "Is this a variation?";
+            const string notUpToDateTitle = "Variation?";
+            DialogResult result = MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (result == DialogResult.No)
+            {
+                return false;
+            }
+            return true;
+        }
+
         public static DialogResult FabsecsPresent()
         {
             const string notUpToDateMessage = "There are FABSEC members present in your selection, I will process these, have you tidied the carcass drawings?";

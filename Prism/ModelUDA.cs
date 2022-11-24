@@ -2,6 +2,16 @@
 {
     public static class ModelUDA
     {
+        public static string FirstVariationNumber()
+        {
+            return "SEV-UDA-12";
+        }
+
+        public static string SecondVariationNumber()
+        {
+            return "SEV-UDA-13";
+        }
+
         public static string FireDFT()
         {
             return "FIRE_DFT";
