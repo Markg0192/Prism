@@ -81,7 +81,6 @@ namespace Prism
                 materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report1Pname);
                 outputName = _output1Pname;
             }
-
             if (orderType == "Add Material")
             {
                 selectedObjects.ExportBSWX(Folders.MatPath, _projectData, _phaseNum, _issueNum, stageType);
@@ -93,7 +92,12 @@ namespace Prism
                 materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report1POname);
                 outputName = _output1POname;
             }
-
+            if (orderType == "Order Heavy Fittings")
+            {
+                selectedObjects.ExportBSWX(Folders.MatPath, _projectData, _phaseNum, _issueNum, stageType);
+                materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report1Pname);
+                outputName = _output4;
+            }
             Operation.CreateReportFromSelected(materialReport, Path.Combine(Folders.MatPath, $"{MatReportPrefix}{outputName}"), _title1, _title2, _title3);
         }
 

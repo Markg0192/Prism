@@ -1,4 +1,7 @@
-﻿using System.Windows.Forms;
+﻿using System.Collections.Generic;
+using System.Windows.Forms;
+using Tekla.Structures.Model;
+using Tekla.Structures.Model.UI;
 using static Prism.Enums;
 
 namespace Prism
@@ -113,6 +116,13 @@ namespace Prism
             MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
+        public static void MemberOrientationIsWrong()
+        {
+            const string notUpToDateMessage = "You have selected a member that has been input in the wrong orientation, please correct this to continue.";
+            const string notUpToDateTitle = "Incorrect member orientation";
+            MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
         public static void PreviousStepIncomplete()
         {
             const string notUpToDateMessage = "You have not completed all the required steps before this action, please correct this to continue.";
@@ -205,6 +215,31 @@ namespace Prism
             string notUpToDateMessage = $"{numberOfErrors} {messageEnd}";
             const string notUpToDateTitle = "Errors Fixed";
             MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
+        public static IgnoreType DisplayOrderErrors(List<ModelObject> errorList, Error warning)
+        {
+            if (errorList.Count != 0)
+            {
+                if (warning == Error.NameAndClass)
+                {
+                    NameAndClassDontMatch();
+                }
+                if(warning == Error.Execution)
+                {
+                    ExecutionClassMissing();
+                }
+                if(warning == Error.Orientation)
+                {
+                    MemberOrientationIsWrong();
+                }
+
+                ModelObjectVisualization.SetTransparencyForAll(TemporaryTransparency.SEMITRANSPARENT);
+                ModelObjectVisualization.SetTemporaryStateForAll(new Color(0.5, 0.5, 0.5));
+                ModelObjectVisualization.SetTemporaryState(errorList, new Color(1, 0, 0));
+                return NewIgnoreWarning();
+            }
+            return IgnoreType.Unspecified;
         }
     }
 }

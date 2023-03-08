@@ -48,9 +48,15 @@ namespace Prism
         public static List<Part> GetMyFabsecs(this SelectedObjects selectedObjects)
         {
             List<Part> fabsecList = new List<Part>();
+            string pgString = "PG";
+            /*if(Environment.UserName == "mark.gibson")
+            {
+                pgString = "XXX";
+            }*/
             foreach (Part part in selectedObjects.SelectedModelParts)
             {
-                if (part.Profile.ProfileString.StartsWith("PG"))
+                if (part.Profile.ProfileString.StartsWith(pgString))
+
                 {
                     fabsecList.Add(part);
                 }
@@ -144,7 +150,7 @@ namespace Prism
                     if (fabsecGroup == 0) // If this is zero then we are ecnountering the first PG in this model
                     {
                         fabsecGroup = 1;//so we set this to 1, PG"1"
-                    }              
+                    }
                     pInfo.SetUserProperty(fabsecProfileString, fabsecGroup); //Set the UDA named after the profile with the fabsec group for future use
                     pInfo.SetUserProperty("PG" + fabsecGroup, 1); //Create a new UDA, named after the PG type and set its value to 1, this is the current last number used
                     pInfo.SetUserProperty(ModelUDA.NextFabsecPrefixNumber(), fabsecGroup + 1); //Set this to current group plus 1 so the next group of PGs to come along will get PG"2"
@@ -190,10 +196,11 @@ namespace Prism
                 Vector myVector = new Vector(0, 0, moveDistance);
                 Part copiedFabsec = Operation.CopyObject(fabsec, myVector) as Part;
                 fabsecCarcassList.Add(copiedFabsec);
-                copiedFabsec.SetUserProperty(ModelUDA.CurrentStageName(1), fabsec.StageString(ModelUDA.CurrentStageName(1))); //Set prism values
-                copiedFabsec.SetUserProperty(ModelUDA.CurrentStageDate(1), fabsec.StageString(ModelUDA.CurrentStageDate(1)));
-                copiedFabsec.SetUserProperty(ModelUDA.CurrentStageName(2), fabsec.StageString(ModelUDA.CurrentStageName(2)));
+                copiedFabsec.SetUserProperty(ModelUDA.CurrentStageName(1), fabsec.StageString(ModelUDA.CurrentStageName(1))); //Set prism values and prelim on the new copied fabsec
+                copiedFabsec.SetUserProperty(ModelUDA.CurrentStageDate(1), fabsec.StageString(ModelUDA.CurrentStageDate(1))); //All these values are unique in the model settings
+                copiedFabsec.SetUserProperty(ModelUDA.CurrentStageName(2), fabsec.StageString(ModelUDA.CurrentStageName(2))); //This means they won't copy with the member naturally.
                 copiedFabsec.SetUserProperty(ModelUDA.CurrentStageDate(2), fabsec.StageString(ModelUDA.CurrentStageDate(2)));
+                copiedFabsec.SetUserProperty(ModelUDA.PrelimMark(), fabsec.GetPrelimMark());
                 selectedObjects.SelectedModelParts.Add(copiedFabsec);
             }
             return fabsecCarcassList;
@@ -253,6 +260,6 @@ namespace Prism
             DrawingCreator.CreateDrawings(rule, idList, out status);
             selectedObjects.SelectedModelParts.SelectParts();
         }
-        
+
     }
 }

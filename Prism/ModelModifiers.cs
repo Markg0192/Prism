@@ -11,7 +11,6 @@ using System.Collections;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Tekla.Structures.Model.UI;
-//using System.Threading;
 
 namespace Prism
 {
@@ -32,6 +31,17 @@ namespace Prism
                 }                
             }
             else { projData.IsVariation = false; }
+        }
+
+        public static void ResetWorkPlane(Model model)
+        {
+            model.GetWorkPlaneHandler().SetCurrentTransformationPlane(new TransformationPlane());
+            Point Origin = new Point(0, 0, 0);
+            Vector x = new Vector(1, 0, 0);
+            Vector y = new Vector(0, 1, 0);
+            TransformationPlane XZ_Plane = new TransformationPlane(Origin, x, y);
+            model.GetWorkPlaneHandler().SetCurrentTransformationPlane(XZ_Plane);
+            model.CommitChanges();
         }
 
         private static void SetVariationAttribute(string phaseNumber, SelectedObjects myObjects)
@@ -229,13 +239,13 @@ namespace Prism
         public static void SelectParts(this List<Part> partsToBeSelected)
         {
             ArrayList selectList = new ArrayList();
-            foreach (Part part in partsToBeSelected)
+            foreach (Beam part in partsToBeSelected)
             {
                 selectList.Add(part);
             }
             Tekla.Structures.Model.UI.ModelObjectSelector ms = new Tekla.Structures.Model.UI.ModelObjectSelector();
             ms.Select(selectList);
-            foreach (Part part in partsToBeSelected)
+            foreach (Beam part in selectList)
             {
                 part.Modify();
             }

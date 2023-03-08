@@ -117,31 +117,59 @@ namespace Prism
         {
             if (myObject is Part myPart)
             {
-                CheckXYZSize(myPart);
-                if (!Operation.IsNumberingUpToDate(myPart) && stageType == StageTypes.FAB)
+                if (IsValidPart(myPart))
                 {
-                    PrismWarnings.NumberingIsNotUpToDate();
-                    NumbersNotUpToDate = false;
-                    return;
-                }
-                SelectedModelParts.Add(myPart);
-
-                double weight = 0;
-                myPart.GetReportProperty(ModelUDA.Weight(), ref weight);
-                PartWeight = PartWeight + weight;
-
-                MyMarks.Add(myPart.GetPartMark());
-
-                if (myPart.GetAssembly() is Assembly assembly)
-                {
-                    Assembly matchingAssembly = null;
-                    matchingAssembly = AssembliesList.Find(x => x.Identifier.ToString() == assembly.Identifier.ToString());
-                    if (matchingAssembly == null)
+                    if (stageType == StageTypes.FAB)
                     {
-                        AssembliesList.Add(assembly);
+                        CheckXYZSize(myPart);
+                        if (!Operation.IsNumberingUpToDate(myPart))
+                        {
+                            PrismWarnings.NumberingIsNotUpToDate();
+                            NumbersNotUpToDate = false;
+                            return;
+                        }
+                    }
+
+                    SelectedModelParts.Add(myPart);
+
+                    double weight = 0;
+                    myPart.GetReportProperty(ModelUDA.Weight(), ref weight);
+                    PartWeight = PartWeight + weight;
+
+                    MyMarks.Add(myPart.GetPartMark());
+
+                    if (myPart.GetAssembly() is Assembly assembly)
+                    {
+                        Assembly matchingAssembly = null;
+                        matchingAssembly = AssembliesList.Find(x => x.Identifier.ToString() == assembly.Identifier.ToString());
+                        if (matchingAssembly == null)
+                        {
+                            AssembliesList.Add(assembly);
+                        }
                     }
                 }
             }
+        }
+
+        private bool IsValidPart(Part p)
+        {
+            if(p.Name == "GROUT")
+            {
+                return false;
+            }
+            if(p.Profile.ProfileString.StartsWith("HEX"))
+            {
+                return false;
+            }
+            if(p.Profile.ProfileString.StartsWith("ROD"))
+            {
+                return false;
+            }
+            if(p.Name.StartsWith("HD"))
+            {
+                return false;
+            }
+            return true;
         }
 
         public void GetCorrectModelSelection()
@@ -170,13 +198,16 @@ namespace Prism
                     foreach (var setOfBolts in bolts)
                     {
                         BoltGroup bolt = setOfBolts as BoltGroup;
-                        if (bolt.PartToBeBolted.Identifier.GUID == part.Identifier.GUID)
+                        if (bolt != null)
                         {
-                            BoltGroup matchingBolt = null;
-                            matchingBolt = myBoltsList.Find(x => x.Identifier.GUID == bolt.Identifier.GUID);
-                            if (matchingBolt == null)
+                            if (bolt.PartToBeBolted.Identifier.GUID == part.Identifier.GUID)
                             {
-                                myBoltsList.Add(bolt);
+                                BoltGroup matchingBolt = null;
+                                matchingBolt = myBoltsList.Find(x => x.Identifier.GUID == bolt.Identifier.GUID);
+                                if (matchingBolt == null)
+                                {
+                                    myBoltsList.Add(bolt);
+                                }
                             }
                         }
                     }

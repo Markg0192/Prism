@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Tekla.Structures.Model;
@@ -12,6 +13,7 @@ namespace Prism
         public static List<ModelObject> IncorrectGrade = new List<ModelObject>();
         public static List<ModelObject> IncorrectThickness = new List<ModelObject>();
         public static List<ModelObject> IncorrectLength = new List<ModelObject>();
+        public static List<Part> AllIncorrectPlate = new List<Part>();
 
         public static void GetIncorrectFittings(this Part part, Factory factory)
         {
@@ -24,8 +26,8 @@ namespace Prism
         private static void GetIncorrectPlate(Part myPart, Factory factory)
         {
             string profile = myPart.Profile.ProfileString;
-            string[] splitString = profile.Split('*');
-            int plateThickness = Convert.ToInt32(splitString[0].Remove(0, 3));
+            double plateThickness = 0;
+            myPart.GetReportProperty("WEB_THICKNESS", ref plateThickness);
 
             double length = ModelModifiers.GetPartLength(myPart);
             bool isFlat = IsPartFlatBar(factory, profile, myPart.Material.MaterialString, length, plateThickness);
@@ -41,29 +43,32 @@ namespace Prism
             string approvedGrade = approvedGrades.FirstOrDefault(x => grade == x);
             if (approvedGrade == null)
             {
+                AllIncorrectPlate.Add(myPart);
                 IncorrectGrade.Add(myPart);
             }
         }
 
-        private static void GetFittingsWithIncorrectThickness(int plateThickness, Factory factory, Part myPart)
+        private static void GetFittingsWithIncorrectThickness(double plateThickness, Factory factory, Part myPart)
         {
             List<int> approvedThicknesses = GdomValues.ApprovedFittingThickness(factory);
             int thickness = approvedThicknesses.FirstOrDefault(x => plateThickness == x);
             if (thickness == 0)
             {
+                AllIncorrectPlate.Add(myPart);
                 IncorrectThickness.Add(myPart);
             }
         }
 
-        private static void GetFittingsWhichAreTooLong(Part myPart, Factory factory, int plateThickness, bool isFlat, double length)
+        private static void GetFittingsWhichAreTooLong(Part myPart, Factory factory, double plateThickness, bool isFlat, double length)
         {
             if (length > GdomValues.MaxFittingLength(factory, plateThickness, isFlat))
             {
+                AllIncorrectPlate.Add(myPart);
                 IncorrectLength.Add(myPart);
             }
         }
 
-        private static bool IsPartFlatBar(Factory factory, string profile, string grade, double length, int plateThickness)
+        private static bool IsPartFlatBar(Factory factory, string profile, string grade, double length, double plateThickness)
         {
             if (factory == Factory.SUK)
             {
@@ -114,7 +119,7 @@ namespace Prism
                 $"There are {IncorrectLength.Count()} parts selected with a non-standard length (See green in the model).\r" +
                 $"There are {IncorrectThickness.Count()} parts selected with a non-standard thickness (See blue in the model).";
 
-                PrismWarnings.AbnormalFittings(); 
+                PrismWarnings.AbnormalFittings();
 
                 ModelObjectVisualization.SetTransparencyForAll(TemporaryTransparency.SEMITRANSPARENT);
                 ModelObjectVisualization.SetTemporaryStateForAll(new Color(0.5, 0.5, 0.5));

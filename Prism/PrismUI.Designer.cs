@@ -56,6 +56,10 @@ namespace Prism
             this.btn_Material3 = new System.Windows.Forms.Button();
             this.btn_Material1 = new System.Windows.Forms.Button();
             this.pnl_Detail = new System.Windows.Forms.Panel();
+            this.txt_PlateOnFlange = new System.Windows.Forms.TextBox();
+            this.lbl_PltOnFlange = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.cmb_ColumnOrientationType = new System.Windows.Forms.ComboBox();
             this.info_Detail = new System.Windows.Forms.PictureBox();
             this.btn_HomeDetail = new System.Windows.Forms.Button();
             this.statusStrip5 = new System.Windows.Forms.StatusStrip();
@@ -109,7 +113,7 @@ namespace Prism
             this.flowLayoutPanel1.Controls.Add(this.pnl_Package);
             this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 27);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(977, 283);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(1014, 283);
             this.flowLayoutPanel1.TabIndex = 2;
             // 
             // pnl_Home
@@ -310,7 +314,8 @@ namespace Prism
             this.cmb_OrderMaterial.Items.AddRange(new object[] {
             "Order Material",
             "Add Material",
-            "Omit Material"});
+            "Omit Material",
+            "Order Heavy Fittings"});
             this.cmb_OrderMaterial.Location = new System.Drawing.Point(90, 186);
             this.cmb_OrderMaterial.Name = "cmb_OrderMaterial";
             this.cmb_OrderMaterial.Size = new System.Drawing.Size(147, 21);
@@ -393,6 +398,10 @@ namespace Prism
             // pnl_Detail
             // 
             this.pnl_Detail.BackColor = System.Drawing.Color.White;
+            this.pnl_Detail.Controls.Add(this.txt_PlateOnFlange);
+            this.pnl_Detail.Controls.Add(this.lbl_PltOnFlange);
+            this.pnl_Detail.Controls.Add(this.label2);
+            this.pnl_Detail.Controls.Add(this.cmb_ColumnOrientationType);
             this.pnl_Detail.Controls.Add(this.info_Detail);
             this.pnl_Detail.Controls.Add(this.btn_HomeDetail);
             this.pnl_Detail.Controls.Add(this.statusStrip5);
@@ -401,14 +410,58 @@ namespace Prism
             this.pnl_Detail.Controls.Add(this.btn_Detail1);
             this.pnl_Detail.Location = new System.Drawing.Point(519, 3);
             this.pnl_Detail.Name = "pnl_Detail";
-            this.pnl_Detail.Size = new System.Drawing.Size(191, 236);
+            this.pnl_Detail.Size = new System.Drawing.Size(228, 236);
             this.pnl_Detail.TabIndex = 2;
             this.pnl_Detail.Visible = false;
+            // 
+            // txt_PlateOnFlange
+            // 
+            this.txt_PlateOnFlange.BackColor = System.Drawing.Color.Salmon;
+            this.txt_PlateOnFlange.Location = new System.Drawing.Point(169, 110);
+            this.txt_PlateOnFlange.Name = "txt_PlateOnFlange";
+            this.txt_PlateOnFlange.Size = new System.Drawing.Size(48, 20);
+            this.txt_PlateOnFlange.TabIndex = 45;
+            this.txt_PlateOnFlange.Visible = false;
+            this.txt_PlateOnFlange.TextChanged += new System.EventHandler(this.txt_PlateOnFlange_TextChanged);
+            // 
+            // lbl_PltOnFlange
+            // 
+            this.lbl_PltOnFlange.AutoSize = true;
+            this.lbl_PltOnFlange.Location = new System.Drawing.Point(88, 113);
+            this.lbl_PltOnFlange.Name = "lbl_PltOnFlange";
+            this.lbl_PltOnFlange.Size = new System.Drawing.Size(75, 13);
+            this.lbl_PltOnFlange.TabIndex = 44;
+            this.lbl_PltOnFlange.Text = "Plt on flange >";
+            this.lbl_PltOnFlange.Visible = false;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(88, 67);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(129, 13);
+            this.label2.TabIndex = 44;
+            this.label2.Text = "Column orientation marker";
+            // 
+            // cmb_ColumnOrientationType
+            // 
+            this.cmb_ColumnOrientationType.FormattingEnabled = true;
+            this.cmb_ColumnOrientationType.Items.AddRange(new object[] {
+            "Holes only",
+            "Plate only",
+            "Holes and plate",
+            "None"});
+            this.cmb_ColumnOrientationType.Location = new System.Drawing.Point(91, 83);
+            this.cmb_ColumnOrientationType.Name = "cmb_ColumnOrientationType";
+            this.cmb_ColumnOrientationType.Size = new System.Drawing.Size(126, 21);
+            this.cmb_ColumnOrientationType.TabIndex = 43;
+            this.cmb_ColumnOrientationType.Text = "Holes only";
+            this.cmb_ColumnOrientationType.SelectedIndexChanged += new System.EventHandler(this.cmb_ColumnOrientationType_SelectedIndexChanged);
             // 
             // info_Detail
             // 
             this.info_Detail.Image = global::Prism.Properties.Resources.info;
-            this.info_Detail.Location = new System.Drawing.Point(122, 7);
+            this.info_Detail.Location = new System.Drawing.Point(159, 7);
             this.info_Detail.Name = "info_Detail";
             this.info_Detail.Size = new System.Drawing.Size(20, 20);
             this.info_Detail.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -422,7 +475,7 @@ namespace Prism
             this.btn_HomeDetail.BackColor = System.Drawing.Color.White;
             this.btn_HomeDetail.BackgroundImage = global::Prism.Properties.Resources.Home;
             this.btn_HomeDetail.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.btn_HomeDetail.Location = new System.Drawing.Point(148, 5);
+            this.btn_HomeDetail.Location = new System.Drawing.Point(185, 5);
             this.btn_HomeDetail.Name = "btn_HomeDetail";
             this.btn_HomeDetail.Size = new System.Drawing.Size(40, 40);
             this.btn_HomeDetail.TabIndex = 24;
@@ -437,7 +490,7 @@ namespace Prism
             this.DetailingStatusLabel});
             this.statusStrip5.Location = new System.Drawing.Point(0, 214);
             this.statusStrip5.Name = "statusStrip5";
-            this.statusStrip5.Size = new System.Drawing.Size(191, 22);
+            this.statusStrip5.Size = new System.Drawing.Size(228, 22);
             this.statusStrip5.TabIndex = 23;
             this.statusStrip5.Text = "statusStrip5";
             // 
@@ -502,7 +555,7 @@ namespace Prism
             this.pnl_Package.Controls.Add(this.label19);
             this.pnl_Package.Controls.Add(this.phaseNumber);
             this.pnl_Package.Controls.Add(this.issueNumber);
-            this.pnl_Package.Location = new System.Drawing.Point(716, 3);
+            this.pnl_Package.Location = new System.Drawing.Point(753, 3);
             this.pnl_Package.Name = "pnl_Package";
             this.pnl_Package.Size = new System.Drawing.Size(258, 227);
             this.pnl_Package.TabIndex = 3;
@@ -714,7 +767,7 @@ namespace Prism
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(1022, 369);
+            this.ClientSize = new System.Drawing.Size(1022, 331);
             this.Controls.Add(this.flowLayoutPanel1);
             this.Controls.Add(this.menuStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -803,5 +856,9 @@ namespace Prism
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.Button btn_ResetPrelims;
         private System.Windows.Forms.TextBox txt_ResetPrelimTo;
+        private System.Windows.Forms.ComboBox cmb_ColumnOrientationType;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TextBox txt_PlateOnFlange;
+        private System.Windows.Forms.Label lbl_PltOnFlange;
     }
 }

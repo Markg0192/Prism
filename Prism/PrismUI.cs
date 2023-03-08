@@ -19,15 +19,26 @@ namespace Prism
             InitializeComponent();
             CenterToScreen();
             _model = new Model();
+
+            if (!_model.GetConnectionStatus())
+            {
+                MessageBox.Show("Failed to connect to a correct version of Tekla Model");
+                Logging.DebugLog("Incorrect Connection to model", _model.GetProjectInfo().Name);
+                Application.Exit();
+            }
+
             _projectData = new PrismProjectData(_model.GetProjectInfo(), _model.GetInfo().ModelPath);
+            Logging.Login(_projectData.ProjName);
         }
 
         private bool InitialSetup(StageTypes stageType, bool checkForPreviousSteps)
         {
+            ModelChecker.ClearOldLists();
             _selectedObjects = new SelectedObjects(stageType);
 
             if (checkForPreviousSteps && !ModelChecker.ArePreviousStepsComplete(_selectedObjects, (int)stageType))
             {
+                MaterialStatusLabel.Text = "Cancelled";
                 DetailingStatusLabel.Text = "Cancelled";
                 return false;
             }
@@ -129,9 +140,15 @@ namespace Prism
             MaterialStatusLabel.Text = "Working";
             Cursor = Cursors.AppStarting;
 
-            if (!InitialSetup(StageTypes.Prelim2, true)) { return; };
+            if (!InitialSetup(StageTypes.Prelim2, true)) { Cursor = Cursors.Default;  return; };
 
-            _selectedObjects.MaterialButton2op(txt_StartNumber.Text, (int)StageTypes.Prelim2, _projectData, _model);
+            if (!_selectedObjects.MaterialButton2op(txt_StartNumber.Text, (int)StageTypes.Prelim2, _projectData, _model))
+            {
+                MaterialStatusLabel.Text = "Cancelled";
+                return;
+            }
+
+            ModelModifiers.RedrawViews();
 
             Cursor = Cursors.Default;
             MaterialStatusLabel.Text = "Complete";
@@ -142,7 +159,7 @@ namespace Prism
             MaterialStatusLabel.Text = "Working";
             Cursor = Cursors.AppStarting;
 
-            if (!InitialSetup(StageTypes.Prelim3, true)) { return; };
+            if (!InitialSetup(StageTypes.Prelim3, true)) { Cursor = Cursors.Default; return; };
 
             _selectedObjects.MaterialButton3op(_projectData, _model.GetProjectInfo(), txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text,
                 cmb_OrderMaterial.Text, (int)StageTypes.Prelim3, StageTypes.Prelim3, _model);
@@ -163,7 +180,7 @@ namespace Prism
             DetailingStatusLabel.Text = "Working";
             Cursor = Cursors.AppStarting;
 
-            if (!InitialSetup(StageTypes.Check1, false)) { return; }
+            if (!InitialSetup(StageTypes.Check1, false)) { Cursor = Cursors.Default; return; }
 
             _selectedObjects.DetailButton1op(_projectData, (int)StageTypes.Check1);
 
@@ -176,9 +193,10 @@ namespace Prism
             DetailingStatusLabel.Text = "Working";
             Cursor = Cursors.AppStarting;
 
-            if (!InitialSetup(StageTypes.Check2, true)) { return; }
+            ModelModifiers.ResetWorkPlane(_model);
+            if (!InitialSetup(StageTypes.Check2, true)) { Cursor = Cursors.Default; return; }
 
-            _selectedObjects.DetailButton2op(_projectData, (int)StageTypes.Check2);
+            _selectedObjects.DetailButton2op(_projectData, (int)StageTypes.Check2, cmb_ColumnOrientationType.Text, txt_PlateOnFlange.Text);
 
             Cursor = Cursors.Default;
             DetailingStatusLabel.Text = "Complete";
@@ -189,7 +207,7 @@ namespace Prism
             DetailingStatusLabel.Text = "Working";
             Cursor = Cursors.AppStarting;
 
-            if (!InitialSetup(StageTypes.Check3, true)) { return; }
+            if (!InitialSetup(StageTypes.Check3, true)) { Cursor = Cursors.Default; return; }
 
             DetailingStatusLabel.Text = _selectedObjects.DetailButton3op(_projectData, (int)StageTypes.Check3);
 
@@ -396,6 +414,47 @@ namespace Prism
                 ModelModifiers.ClearPrelimMarking(_model.GetProjectInfo(), txt_ResetPrelimTo.Text);
                 PrismWarnings.PrelimStartReset(txt_ResetPrelimTo.Text);
             }
+        }
+
+        private void cmb_ColumnOrientationType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (cmb_ColumnOrientationType.Text == "Holes and plate")
+            {
+                txt_PlateOnFlange.Visible = true;
+                lbl_PltOnFlange.Visible = true;
+                btn_Detail2.Enabled = false;
+                btn_Detail2.BackColor = Color.Gainsboro;
+            }
+            else
+            {   
+                txt_PlateOnFlange.Text = "";
+                txt_PlateOnFlange.Visible = false;
+                lbl_PltOnFlange.Visible = false;
+                btn_Detail2.Enabled = true;
+                btn_Detail2.BackColor = Color.Gold;
+            }
+        }
+
+        private void txt_PlateOnFlange_TextChanged(object sender, EventArgs e)
+        {
+            if (txt_PlateOnFlange.Text.Length > 0)
+            {
+                txt_PlateOnFlange.BackColor = Color.White;
+                btn_Detail2.BackColor = Color.Gold;
+                btn_Detail2.Enabled = true;
+            }
+            else
+            {
+                txt_PlateOnFlange.BackColor = Color.LightCoral;
+                btn_Detail2.BackColor = Color.Gainsboro;
+                btn_Detail2.Enabled = false;
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            InitialSetup(StageTypes.Check1, false);
+            ModelChecker.BoltThrough2Ply(_selectedObjects);
         }
     }
 }

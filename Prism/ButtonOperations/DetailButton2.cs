@@ -2,9 +2,11 @@
 {
     public static class DetailButton2
     {
-        public static void DetailButton2op(this SelectedObjects myObjects, PrismProjectData projectData, int stageNumber)
+        public static void DetailButton2op(this SelectedObjects myObjects, PrismProjectData projectData, int stageNumber, string columnOrientationType, string flangeThickness)
         {
             if (!myObjects.RunStage4Checks()) { return; }
+
+            ColumnOrientation.DetailColumnOrientationHoles(myObjects, columnOrientationType, flangeThickness);
 
             myObjects.SelectedModelParts.ModifyAttributes(stageNumber, projectData);
             ModelModifiers.RedrawViews();

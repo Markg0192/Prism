@@ -11,8 +11,13 @@ namespace Prism
         public static string AssemblyPrefix = "";
         public static string FabsecName = "FABSEC";
         public static string FabsecClass = "7";
+        public static string ColumnName = "COLUMN";
+        public static string BeamName = "BEAM";
+        public static string RafterName = "RAFTER";
+        public static string PortalRafterName = "PORTAL-RAFTER";
+        public static string BraceName = "BRACE";
 
-        public static int MaxFittingLength(Factory factory, int plateThickness, bool isFlat)
+        public static int MaxFittingLength(Factory factory, double plateThickness, bool isFlat)
         {
             if(factory == Factory.SUK)
             {
@@ -34,13 +39,15 @@ namespace Prism
 
         public static Hashtable PartClass() // This table matches a part name to its correct class according to the GDOM
         {
-            Hashtable partClassTable = new Hashtable();
-            partClassTable.Add("BEAM", new List<string> { "3" });
-            partClassTable.Add("COLUMN", new List<string> { "2", "5" });
-            partClassTable.Add("BRACE", new List<string> { "4", "13" });
-            partClassTable.Add(FabsecName, new List<string> { FabsecClass });
-            partClassTable.Add("RAFTER", new List<string> { "8" });
-            partClassTable.Add("PORTAL-RAFTER", new List<string> { "8" });
+            Hashtable partClassTable = new Hashtable
+            {
+                { BeamName, new List<string> { "3" } },
+                { ColumnName, new List<string> { "2", "5" } },
+                { BraceName, new List<string> { "4", "13" } },
+                { FabsecName, new List<string> { FabsecClass } },
+                { RafterName, new List<string> { "8" } },
+                { PortalRafterName, new List<string> { "8" } }
+            };
             return partClassTable;
         }
 
@@ -68,85 +75,87 @@ namespace Prism
 
         public static List<string> FlatBarList()
         {
-            List<string> flatBarList = new List<string>();
-            flatBarList.Add("PLT6*25");
-            flatBarList.Add("PLT6*40");
-            flatBarList.Add("PLT6*50");
-            flatBarList.Add("PLT6*60");
-            flatBarList.Add("PLT6*65");
-            flatBarList.Add("PLT6*80");
-            flatBarList.Add("PLT6*100");
-            flatBarList.Add("PLT6*150");
+            List<string> flatBarList = new List<string>
+            {
+                "PLT6*25",
+                "PLT6*40",
+                "PLT6*50",
+                "PLT6*60",
+                "PLT6*65",
+                "PLT6*80",
+                "PLT6*100",
+                "PLT6*150",
 
-            flatBarList.Add("PLT8*80");
-            flatBarList.Add("PLT8*100");
-            flatBarList.Add("PLT8*150");
+                "PLT8*80",
+                "PLT8*100",
+                "PLT8*150",
 
-            flatBarList.Add("PLT10*40");
-            flatBarList.Add("PLT10*50");
-            flatBarList.Add("PLT10*60");
-            flatBarList.Add("PLT10*65");
-            flatBarList.Add("PLT10*70");
-            flatBarList.Add("PLT10*75");
-            flatBarList.Add("PLT10*80");
-            flatBarList.Add("PLT10*90");
-            flatBarList.Add("PLT10*100");
-            flatBarList.Add("PLT10*120");
-            flatBarList.Add("PLT10*130");
-            flatBarList.Add("PLT10*150");
-            flatBarList.Add("PLT10*180");
-            flatBarList.Add("PLT10*200");
-            flatBarList.Add("PLT10*250");
-            flatBarList.Add("PLT10*300");
-            flatBarList.Add("PLT10*350");
+                "PLT10*40",
+                "PLT10*50",
+                "PLT10*60",
+                "PLT10*65",
+                "PLT10*70",
+                "PLT10*75",
+                "PLT10*80",
+                "PLT10*90",
+                "PLT10*100",
+                "PLT10*120",
+                "PLT10*130",
+                "PLT10*150",
+                "PLT10*180",
+                "PLT10*200",
+                "PLT10*250",
+                "PLT10*300",
+                "PLT10*350",
 
-            flatBarList.Add("PLT12*50");
-            flatBarList.Add("PLT12*65");
-            flatBarList.Add("PLT12*80");
-            flatBarList.Add("PLT12*100");
-            flatBarList.Add("PLT12*120");
-            flatBarList.Add("PLT12*130");
-            flatBarList.Add("PLT12*150");
-            flatBarList.Add("PLT12*180");
-            flatBarList.Add("PLT12*200");
-            flatBarList.Add("PLT12*250");
-            flatBarList.Add("PLT12*300");
-            flatBarList.Add("PLT12*350");
-            flatBarList.Add("PLT12*450");
+                "PLT12*50",
+                "PLT12*65",
+                "PLT12*80",
+                "PLT12*100",
+                "PLT12*120",
+                "PLT12*130",
+                "PLT12*150",
+                "PLT12*180",
+                "PLT12*200",
+                "PLT12*250",
+                "PLT12*300",
+                "PLT12*350",
+                "PLT12*450",
 
-            flatBarList.Add("PLT15*100");
-            flatBarList.Add("PLT15*120");
-            flatBarList.Add("PLT15*130");
-            flatBarList.Add("PLT15*150");
-            flatBarList.Add("PLT15*180");
-            flatBarList.Add("PLT15*200");
-            flatBarList.Add("PLT15*250");
-            flatBarList.Add("PLT15*300");
-            flatBarList.Add("PLT15*350");
-            flatBarList.Add("PLT15*400");
-            flatBarList.Add("PLT15*450");
+                "PLT15*100",
+                "PLT15*120",
+                "PLT15*130",
+                "PLT15*150",
+                "PLT15*180",
+                "PLT15*200",
+                "PLT15*250",
+                "PLT15*300",
+                "PLT15*350",
+                "PLT15*400",
+                "PLT15*450",
 
-            flatBarList.Add("PLT20*100");
-            flatBarList.Add("PLT20*120");
-            flatBarList.Add("PLT20*130");
-            flatBarList.Add("PLT20*150");
-            flatBarList.Add("PLT20*180");
-            flatBarList.Add("PLT20*200");
-            flatBarList.Add("PLT20*250");
-            flatBarList.Add("PLT20*300");
-            flatBarList.Add("PLT20*350");
-            flatBarList.Add("PLT20*400");
-            flatBarList.Add("PLT20*450");
+                "PLT20*100",
+                "PLT20*120",
+                "PLT20*130",
+                "PLT20*150",
+                "PLT20*180",
+                "PLT20*200",
+                "PLT20*250",
+                "PLT20*300",
+                "PLT20*350",
+                "PLT20*400",
+                "PLT20*450",
 
-            flatBarList.Add("PLT25*100");
-            flatBarList.Add("PLT25*150");
-            flatBarList.Add("PLT25*180");
-            flatBarList.Add("PLT25*200");
-            flatBarList.Add("PLT25*250");
-            flatBarList.Add("PLT25*300");
-            flatBarList.Add("PLT25*350");
-            flatBarList.Add("PLT25*400");
-            flatBarList.Add("PLT25*450");
+                "PLT25*100",
+                "PLT25*150",
+                "PLT25*180",
+                "PLT25*200",
+                "PLT25*250",
+                "PLT25*300",
+                "PLT25*350",
+                "PLT25*400",
+                "PLT25*450"
+            };
 
             return flatBarList;
         }

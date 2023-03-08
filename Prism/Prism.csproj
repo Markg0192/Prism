@@ -23,7 +23,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>10</ApplicationRevision>
+    <ApplicationRevision>13</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -109,6 +109,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Geometry\AnglesHelper.cs" />
     <Compile Include="AutoFix.cs" />
     <Compile Include="BswxExporter.cs" />
     <Compile Include="ButtonOperations\CreatePackageButton.cs" />
@@ -119,6 +120,8 @@
     <Compile Include="ButtonOperations\MaterialButton2.cs" />
     <Compile Include="ButtonOperations\MaterialButton3.cs" />
     <Compile Include="CheckFittings.cs" />
+    <Compile Include="ColumnOrientation.cs" />
+    <Compile Include="Geometry\Distances.cs" />
     <Compile Include="EmailWriter.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="CustomDialogs\ExecutionClass.cs">
@@ -145,10 +148,13 @@
     <Compile Include="CustomDialogs\IgnoreWarning.Designer.cs">
       <DependentUpon>IgnoreWarning.cs</DependentUpon>
     </Compile>
+    <Compile Include="Geometry\Line1D.cs" />
     <Compile Include="Logging.cs" />
     <Compile Include="Managers\ViewManager.cs" />
     <Compile Include="ModelPart.cs" />
     <Compile Include="ModelUDA.cs" />
+    <Compile Include="Geometry\Plane2D.cs" />
+    <Compile Include="Geometry\Point3D.cs" />
     <Compile Include="PrismDrawing.cs" />
     <Compile Include="PrismPlugin.cs" />
     <Compile Include="Managers\DrawingManager.cs" />
@@ -176,6 +182,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="ReportProperties.cs" />
+    <Compile Include="ReportProperty.cs" />
     <Compile Include="SelectedObjects.cs" />
     <Compile Include="TeklaAppLibrary\MacroBuilder.cs" />
     <Compile Include="TeklaAppLibrary\ModelConnection.cs" />
@@ -192,6 +200,9 @@
     <Compile Include="CustomDialogs\FactoryLocation.Designer.cs">
       <DependentUpon>FactoryLocation.cs</DependentUpon>
     </Compile>
+    <Compile Include="Geometry\Vector.cs" />
+    <Compile Include="UserProperties.cs" />
+    <Compile Include="UserProperty.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="CustomDialogs\ExecutionClass.resx">
@@ -302,6 +313,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="ico.ico" />
+    <None Include="Resources\ReportProperties.lst" />
     <None Include="Resources\Question.PNG" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

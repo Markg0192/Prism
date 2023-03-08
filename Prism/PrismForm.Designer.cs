@@ -470,7 +470,8 @@ namespace Prism
             this.cmb_OrderMaterial.Items.AddRange(new object[] {
             "Order Material",
             "Add Material",
-            "Omit Material"});
+            "Omit Material",
+            "Order Heavy Fittings"});
             this.cmb_OrderMaterial.Location = new System.Drawing.Point(106, 150);
             this.cmb_OrderMaterial.Name = "cmb_OrderMaterial";
             this.cmb_OrderMaterial.Size = new System.Drawing.Size(100, 21);

@@ -1,0 +1,770 @@
+ADDED_TO_POUR_UNIT              INTEGER     LEFT     TRUE       1
+ADDRESS                         CHARACTER   LEFT     TRUE      20
+ACN                             INTEGER     LEFT     TRUE       5
+ACTIVE_DESIGN_CODE              INTEGER     RIGHT    TRUE       3
+ACTUAL_STARTDATE                INTEGER     LEFT     TRUE      12       0         Date       dd.mm.yyyy
+ACTUAL_ENDDATE                  INTEGER     LEFT     TRUE      12       0         Date       dd.mm.yyyy
+ALIAS_NAME1                     CHARACTER   LEFT     TRUE      20
+ALIAS_NAME2                     CHARACTER   LEFT     TRUE      20
+ALIAS_NAME3                     CHARACTER   LEFT     TRUE      20
+ANALYSIS_MODEL_NAME             CHARACTER   LEFT     TRUE      20
+ANG_S                           FLOAT       RIGHT    TRUE       8       0         Angle      Degrees
+ANG_T                           FLOAT       RIGHT    TRUE       8       0         Angle      Degrees
+ANG_U                           FLOAT       RIGHT    TRUE       8       0         Angle      Degrees
+ANG_U_MAX                       FLOAT       RIGHT    TRUE       8       0         Angle      Degrees
+ANG_U_MIN                       FLOAT       RIGHT    TRUE       8       0         Angle      Degrees
+ANG_V                           FLOAT       RIGHT    TRUE       8       0         Angle      Degrees
+ANG_V_MAX                       FLOAT       RIGHT    TRUE       8       0         Angle      Degrees
+ANG_V_MIN                       FLOAT       RIGHT    TRUE       8       0         Angle      Degrees
+ANGLE                           FLOAT       RIGHT    TRUE       7       2         Angle      Degrees
+AREA                            FLOAT       RIGHT    TRUE       8       0         Area       m2
+AREA_GROSS                      FLOAT       RIGHT    TRUE       8       0         Area       m2
+AREA_NET                        FLOAT       RIGHT    TRUE       8       0         Area       m2
+AREA_PER_TONS                   FLOAT       RIGHT    TRUE       8       0         Area       m2
+AREA_PLAN                       FLOAT       RIGHT    TRUE       8       0         Area       m2
+AREA_PROJECTION_GXY_NET         FLOAT       RIGHT    TRUE       8       0         Area       mm2
+AREA_PROJECTION_GXZ_NET         FLOAT       RIGHT    TRUE       8       0         Area       mm2
+AREA_PROJECTION_GYZ_NET         FLOAT       RIGHT    TRUE       8       0         Area       mm2
+AREA_PROJECTION_GXY_GROSS       FLOAT       RIGHT    TRUE       8       0         Area       mm2
+AREA_PROJECTION_GXZ_GROSS       FLOAT       RIGHT    TRUE       8       0         Area       mm2
+AREA_PROJECTION_GYZ_GROSS       FLOAT       RIGHT    TRUE       8       0         Area       mm2
+AREA_PROJECTION_XY_NET          FLOAT       RIGHT    TRUE       8       0         Area       mm2
+AREA_PROJECTION_XZ_NET          FLOAT       RIGHT    TRUE       8       0         Area       mm2
+AREA_PROJECTION_YZ_NET          FLOAT       RIGHT    TRUE       8       0         Area       mm2
+AREA_PROJECTION_XY_GROSS        FLOAT       RIGHT    TRUE       8       0         Area       mm2
+AREA_PROJECTION_XZ_GROSS        FLOAT       RIGHT    TRUE       8       0         Area       mm2
+AREA_PROJECTION_YZ_GROSS        FLOAT       RIGHT    TRUE       8       0         Area       mm2
+AREA_PGZ                        FLOAT       RIGHT    TRUE       8       0         Area       mm2
+AREA_NGZ                        FLOAT       RIGHT    TRUE       8       0         Area       mm2
+AREA_PGX                        FLOAT       RIGHT    TRUE       8       0         Area       mm2
+AREA_NGX                        FLOAT       RIGHT    TRUE       8       0         Area       mm2
+AREA_PGY                        FLOAT       RIGHT    TRUE       8       0         Area       mm2
+AREA_NGY                        FLOAT       RIGHT    TRUE       8       0         Area       mm2
+AREA_PZ                         FLOAT       RIGHT    TRUE       8       0         Area       mm2
+AREA_NZ                         FLOAT       RIGHT    TRUE       8       0         Area       mm2
+AREA_PX                         FLOAT       RIGHT    TRUE       8       0         Area       mm2
+AREA_NX                         FLOAT       RIGHT    TRUE       8       0         Area       mm2
+AREA_PY                         FLOAT       RIGHT    TRUE       8       0         Area       mm2
+AREA_NY                         FLOAT       RIGHT    TRUE       8       0         Area       mm2
+AREA_FORM_TOP                   FLOAT       RIGHT    TRUE       8       0         Area       mm2
+AREA_FORM_BOTTOM                FLOAT       RIGHT    TRUE       8       0         Area       mm2
+AREA_FORM_SIDE                  FLOAT       RIGHT    TRUE       8       0         Area       mm2
+AREA_FORM_TOP_GLOBAL            FLOAT       RIGHT    TRUE       8       0         Area       mm2
+AREA_FORM_BOTTOM_GLOBAL         FLOAT       RIGHT    TRUE       8       0         Area       mm2
+AREA_FORM_SIDE_GLOBAL           FLOAT       RIGHT    TRUE       8       0         Area       mm2
+ASSEMBLY_BOTTOM_LEVEL           CHARACTER   LEFT     TRUE      10
+ASSEMBLY_BOTTOM_LEVEL_BASEPOINT CHARACTER   LEFT     TRUE      10
+ASSEMBLY_BOTTOM_LEVEL_GLOBAL    CHARACTER   LEFT     TRUE      10
+ASSEMBLY_BOTTOM_LEVEL_PROJECT   CHARACTER   LEFT     TRUE      10
+ASSEMBLY_BOTTOM_LEVEL_UNFORMATTED FLOAT       LEFT     TRUE      10       0         Length     mm
+ASSEMBLY_BOTTOM_LEVEL_UNFORMATTED_BASEPOINT FLOAT       LEFT     TRUE      10       0         Length     mm
+ASSEMBLY_BOTTOM_LEVEL_UNFORMATTED_PROJECT FLOAT       LEFT     TRUE      10       0         Length     mm
+ASSEMBLY_BOTTOM_LEVEL_GLOBAL_UNFORMATTED FLOAT       LEFT     TRUE      10       0         Length     mm
+ASSEMBLY_DEFAULT_PREFIX			CHARACTER   LEFT     TRUE       2	
+ASSEMBLY_NAME                   CHARACTER   LEFT     TRUE      20
+ASSEMBLY_PLWEIGHT               FLOAT       RIGHT    TRUE      10       0         Weight     kg
+ASSEMBLY_POS                    CHARACTER   LEFT     TRUE      10
+ASSEMBLY_POSITION_CODE          CHARACTER   LEFT     TRUE      10
+ASSEMBLY_PREFIX                 CHARACTER   LEFT     TRUE      10
+ASSEMBLY_SERIAL_NUMBER          INTEGER     LEFT     TRUE      10
+ASSEMBLY_START_NUMBER           INTEGER     LEFT     TRUE      10
+ASSEMBLY_TOP_LEVEL              CHARACTER   LEFT     TRUE      10
+ASSEMBLY_TOP_LEVEL_BASEPOINT    CHARACTER   LEFT     TRUE      10
+ASSEMBLY_TOP_LEVEL_GLOBAL       CHARACTER   LEFT     TRUE      10
+ASSEMBLY_TOP_LEVEL_PROJECT      CHARACTER   LEFT     TRUE      10
+ASSEMBLY_TOP_LEVEL_UNFORMATTED  FLOAT       LEFT     TRUE      10       0         Length     mm
+ASSEMBLY_TOP_LEVEL_UNFORMATTED_BASEPOINT FLOAT       LEFT     TRUE      10       0         Length     mm
+ASSEMBLY_TOP_LEVEL_UNFORMATTED_PROJECT FLOAT       LEFT     TRUE      10       0         Length     mm
+ASSEMBLY_TOP_LEVEL_GLOBAL_UNFORMATTED FLOAT       LEFT     TRUE      10       0         Length     mm
+ASSOCIATED_OBJECT_ID            INTEGER     LEFT     TRUE      10
+ATTACHED_TO	                    INTEGER     LEFT     TRUE       1
+ATTACHEDPARTID                  INTEGER     LEFT     TRUE      10
+AUTOPRIMARYWEIGHT               INTEGER     LEFT     TRUE       1
+BOLT_COUNTERSUNK                INTEGER     LEFT     TRUE       1       0         
+BOLT_EDGE_DISTANCE              FLOAT       LEFT     TRUE       5       0         Length     mm
+BOLT_EDGE_DISTANCE_MIN          FLOAT       LEFT     TRUE       5       0         Length     mm
+BOLT_MATERIAL_LENGTH            FLOAT       LEFT     TRUE       4       0         Length     mm
+BOLT_NPARTS                     INTEGER     LEFT     TRUE       3
+BOLT_STANDARD                   CHARACTER   LEFT     TRUE      10
+BOLT_THREAD_LENGTH              FLOAT       LEFT     TRUE       5       0         Length     mm
+BOTTOM_LEVEL                    CHARACTER   LEFT     TRUE      10
+BOTTOM_LEVEL_BASEPOINT          CHARACTER   LEFT     TRUE      10
+BOTTOM_LEVEL_GLOBAL             CHARACTER   LEFT     TRUE      10
+BOTTOM_LEVEL_PROJECT            CHARACTER   LEFT     TRUE      10
+BOTTOM_LEVEL_UNFORMATTED        FLOAT       LEFT     TRUE      10       0         Length     mm
+BOTTOM_LEVEL_UNFORMATTED_BASEPOINT FLOAT       LEFT     TRUE      10       0         Length     mm
+BOTTOM_LEVEL_UNFORMATTED_PROJECT FLOAT       LEFT     TRUE      10       0         Length     mm
+BOTTOM_LEVEL_GLOBAL_UNFORMATTED FLOAT       LEFT     TRUE      10       0         Length     mm
+BOUNDING_BOX_MIN_X              FLOAT       RIGHT    TRUE       8       2         Length     mm
+BOUNDING_BOX_MIN_Y              FLOAT       RIGHT    TRUE       8       2         Length     mm
+BOUNDING_BOX_MIN_Z              FLOAT       RIGHT    TRUE       8       2         Length     mm
+BOUNDING_BOX_MIN_X_BASEPOINT    FLOAT       RIGHT    TRUE       8       2         Length     mm
+BOUNDING_BOX_MIN_Y_BASEPOINT    FLOAT       RIGHT    TRUE       8       2         Length     mm
+BOUNDING_BOX_MIN_Z_BASEPOINT    FLOAT       RIGHT    TRUE       8       2         Length     mm
+BOUNDING_BOX_MIN_X_PROJECT      FLOAT       RIGHT    TRUE       8       2         Length     mm
+BOUNDING_BOX_MIN_Y_PROJECT      FLOAT       RIGHT    TRUE       8       2         Length     mm
+BOUNDING_BOX_MIN_Z_PROJECT      FLOAT       RIGHT    TRUE       8       2         Length     mm
+BOUNDING_BOX_MAX_X              FLOAT       RIGHT    TRUE       8       2         Length     mm
+BOUNDING_BOX_MAX_Y              FLOAT       RIGHT    TRUE       8       2         Length     mm
+BOUNDING_BOX_MAX_Z              FLOAT       RIGHT    TRUE       8       2         Length     mm
+BOUNDING_BOX_MAX_X_BASEPOINT    FLOAT       RIGHT    TRUE       8       2         Length     mm
+BOUNDING_BOX_MAX_Y_BASEPOINT    FLOAT       RIGHT    TRUE       8       2         Length     mm
+BOUNDING_BOX_MAX_Z_BASEPOINT    FLOAT       RIGHT    TRUE       8       2         Length     mm
+BOUNDING_BOX_MAX_X_PROJECT      FLOAT       RIGHT    TRUE       8       2         Length     mm
+BOUNDING_BOX_MAX_Y_PROJECT      FLOAT       RIGHT    TRUE       8       2         Length     mm
+BOUNDING_BOX_MAX_Z_PROJECT      FLOAT       RIGHT    TRUE       8       2         Length     mm
+BOUNDING_BOX_X                  FLOAT       LEFT     TRUE       6       0         Length     mm
+BOUNDING_BOX_Y                  FLOAT       LEFT     TRUE       6       0         Length     mm
+BOUNDING_BOX_Z                  FLOAT       LEFT     TRUE       6       0         Length     mm
+BUILDER                         CHARACTER   LEFT     TRUE      20
+CANTILEVER                      FLOAT       RIGHT    TRUE       7       0         Length     mm
+CAST_UNIT_HEIGHT_ONLY_CONCRETE_PARTS FLOAT       RIGHT    TRUE       8       0         Length     mm 
+CAST_UNIT_HEIGHT_ONLY_PARTS     FLOAT       RIGHT    TRUE       8       0         Length     mm
+CAST_UNIT_HEIGHT_TOTAL          FLOAT       RIGHT    TRUE       8       0         Length     mm
+CAST_UNIT_LENGTH_ONLY_CONCRETE_PARTS  FLOAT       RIGHT    TRUE       8       0         Length     mm
+CAST_UNIT_LENGTH_ONLY_PARTS     FLOAT       RIGHT    TRUE       8       0         Length     mm
+CAST_UNIT_LENGTH_TOTAL          FLOAT       RIGHT    TRUE       8       0         Length     mm
+CAST_UNIT_NAME                  CHARACTER   LEFT     TRUE      20
+CAST_UNIT_POS                   CHARACTER   LEFT     TRUE      10
+CAST_UNIT_POSITION_CODE         CHARACTER   LEFT     TRUE      10
+CAST_UNIT_PREFIX                CHARACTER   LEFT     TRUE      10
+CAST_UNIT_REBAR_WEIGHT          FLOAT       RIGHT    TRUE       8       0         Weight     kg
+CAST_UNIT_SERIAL_NUMBER         INTEGER     LEFT     TRUE      10
+CAST_UNIT_TYPE                  CHARACTER   LEFT     TRUE      20
+CAST_UNIT_VERTICAL_POSITION_CODE CHARACTER  LEFT     TRUE      10
+CAST_UNIT_WIDTH_ONLY_CONCRETE_PARTS FLOAT   RIGHT    TRUE       8       0         Length     mm
+CAST_UNIT_WIDTH_ONLY_PARTS      FLOAT       RIGHT    TRUE       8       0         Length     mm
+CAST_UNIT_WIDTH_TOTAL           FLOAT       RIGHT    TRUE       8       0         Length     mm
+CATALOG_NAME                    CHARACTER   LEFT     TRUE      20
+CC                              CHARACTER   LEFT     TRUE      20                     
+CC_CROSS                        CHARACTER   LEFT     TRUE      20                     
+CC_DIAMETER_CROSS               CHARACTER   LEFT     TRUE      20                     
+CC_DIAMETER_LONG                CHARACTER   LEFT     TRUE      20                     
+CC_DIAMETER_MAX_CROSS           FLOAT       RIGHT    TRUE       8       0         Length     mm
+CC_DIAMETER_MAX_LONG            FLOAT       RIGHT    TRUE       8       0         Length     mm
+CC_DIAMETER_MIN_CROSS           FLOAT       RIGHT    TRUE       8       0         Length     mm
+CC_DIAMETER_MIN_LONG            FLOAT       RIGHT    TRUE       8       0         Length     mm
+CC_EXACT                        CHARACTER   LEFT     TRUE      20                     
+CC_EXACT_CROSS                  CHARACTER   LEFT     TRUE      20                     
+CC_EXACT_LONG                   CHARACTER   LEFT     TRUE      20                     
+CC_LONG                         CHARACTER   LEFT     TRUE      20                     
+CC_MAX                          FLOAT       RIGHT    TRUE       8       0         Length     mm
+CC_MAX_CROSS                    FLOAT       RIGHT    TRUE       8       0         Length     mm
+CC_MAX_LONG                     FLOAT       RIGHT    TRUE       8       0         Length     mm
+CC_MIN                          FLOAT       RIGHT    TRUE       8       0         Length     mm
+CC_MIN_CROSS                    FLOAT       RIGHT    TRUE       8       0         Length     mm
+CC_MIN_LONG                     FLOAT       RIGHT    TRUE       8       0         Length     mm
+CC_PITCHING_CROSS               CHARACTER   LEFT     TRUE      20                     
+CC_PITCHING_LONG                CHARACTER   LEFT     TRUE      20                     
+CC_TARGET                       FLOAT       RIGHT    TRUE       8       0         Length     mm
+CHANGES                         CHARACTER   LEFT     TRUE      20       
+CHECKED_BY                      CHARACTER   LEFT     TRUE      20
+CLASS                           CHARACTER   LEFT     TRUE       6
+CLASS_ATTR                      CHARACTER   LEFT     TRUE       6
+CODE                            CHARACTER   LEFT     TRUE      12
+COG_X                           FLOAT       RIGHT    TRUE       8       0         Length     mm
+COG_Y                           FLOAT       RIGHT    TRUE       8       0         Length     mm
+COG_Z                           FLOAT       RIGHT    TRUE       8       0         Length     mm
+COG_X_BASEPOINT                 FLOAT       RIGHT    TRUE       8       0         Length     mm
+COG_Y_BASEPOINT                 FLOAT       RIGHT    TRUE       8       0         Length     mm
+COG_Z_BASEPOINT                 FLOAT       RIGHT    TRUE       8       0         Length     mm
+COG_X_PROJECT                   FLOAT       RIGHT    TRUE       8       0         Length     mm
+COG_Y_PROJECT                   FLOAT       RIGHT    TRUE       8       0         Length     mm
+COG_Z_PROJECT                   FLOAT       RIGHT    TRUE       8       0         Length     mm
+COLOR                           CHARACTER   LEFT     TRUE      20
+COMMENT                         CHARACTER   LEFT     TRUE      20
+COMPATIBLE                      INTEGER     LEFT     TRUE       5
+COMPLETENESS                    CHARACTER   LEFT     TRUE      20
+CONCRETE_COVER_END              FLOAT       RIGHT    TRUE       8       0         Length     mm
+CONCRETE_COVER_FROM_PLANE       FLOAT       RIGHT    TRUE       8       0         Length     mm
+CONCRETE_COVER_ON_PLANE         FLOAT       RIGHT    TRUE       8       0         Length     mm
+CONCRETE_COVER_ON_PLANE_MAX     FLOAT       RIGHT    TRUE       8       0         Length     mm
+CONCRETE_COVER_ON_PLANE_MIN     FLOAT       RIGHT    TRUE       8       0         Length     mm
+CONCRETE_COVER_START            FLOAT       RIGHT    TRUE       8       0         Length     mm
+CONCRETE_MIXTURE                CHARACTER   LEFT     TRUE      20
+CONNECTED_ASSEMBLIES            CHARACTER   LEFT     TRUE      20
+CONNECTED_PARTS                 CHARACTER   LEFT     TRUE      20
+CONNECTION_CODE                 CHARACTER   LEFT     TRUE      12
+CONNECTION_DSTV                 CHARACTER   LEFT     TRUE      10
+CONNECTION_ERROR                INTEGER     LEFT     TRUE       2
+CONNECTION_GROUP                INTEGER     LEFT     TRUE       3
+CONNECTION_NUMBER               INTEGER     LEFT     TRUE      10
+CONNECTION_RUNNING_NUMBER       INTEGER     LEFT     TRUE       8
+CONTENTTYPE                     CHARACTER   LEFT     TRUE      20
+CONTINUOUSBEAMMODE              INTEGER     LEFT     TRUE       1
+CONTRACTOR                      CHARACTER   LEFT     TRUE      20
+COUNTRY                         CHARACTER   LEFT     TRUE      20
+COVER_AREA                      FLOAT       RIGHT    TRUE       7       2         Area       mm2
+CROSS_SECTION_AREA              FLOAT       RIGHT    TRUE       7       2         Area       mm2
+CROSS_SECTION_AREA_START        FLOAT       RIGHT    TRUE       7       2         Area       mm2
+CROSS_SECTION_AREA_END          FLOAT       RIGHT    TRUE       7       2         Area       mm2
+CURRENT_PHASE                   INTEGER     RIGHT    TRUE       5
+CURRENT_USER                    CHARACTER   LEFT     TRUE      20
+CURVED_SEGMENTS                 INTEGER	    RIGHT    TRUE       4		0
+CREATED                         CHARACTER   LEFT     TRUE      14
+CREATED_BY                      CHARACTER   LEFT     TRUE      14
+DATE                            INTEGER     LEFT     TRUE      12       0         Date       dd.mm.yyyy
+DATE_CHECKED                    INTEGER     LEFT     TRUE      12       0         Date       dd.mm.yyyy	
+DATE_CREATE                     INTEGER     LEFT     TRUE      12       0         Date       dd.mm.yyyy
+DATE_END                        CHARACTER   LEFT     TRUE      12       0         Date       dd.mm.yyyy
+DATE_ISSUE                      INTEGER     LEFT     TRUE      12       0         Date       dd.mm.yyyy
+DATE_LAST                       INTEGER     LEFT     TRUE      12       0         Date       dd.mm.yyyy
+DATE_MODIFY                     INTEGER     LEFT     TRUE      12       0         Date       dd.mm.yyyy
+DATE_PLOT                       INTEGER     LEFT     TRUE      12       0         Date       dd.mm.yyyy
+DATE_APPROVED                   INTEGER     LEFT     TRUE      12       0         Date       dd.mm.yyyy
+DATE_START                      CHARACTER   LEFT     TRUE      12       0         Date       dd.mm.yyyy
+DELIVERY                        CHARACTER   LEFT     TRUE      20
+DEPTH                           FLOAT       LEFT     TRUE       4       0         Length     mm
+DESCRIPTION                     CHARACTER   LEFT     TRUE      20
+DESIGNER                        CHARACTER   LEFT     TRUE      20
+DIAMETER                        FLOAT       RIGHT    TRUE       5       0         Length     mm
+DIAMETER_1                      FLOAT       RIGHT    TRUE       7       2         Length     mm
+DIAMETER_2                      FLOAT       RIGHT    TRUE       7       2         Length     mm
+DIAMETER_ACTUAL                 FLOAT       RIGHT    TRUE       7       2         Length     mm
+DIAMETER_NOMINAL                FLOAT       RIGHT    TRUE       7       2         Length     mm
+DIAMETER_X                      FLOAT       RIGHT    TRUE       5       0         Length     mm
+DIAMETER_Y                      FLOAT       RIGHT    TRUE       5       0         Length     mm
+DIM_A                           FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_A_MAX                       FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_A_MIN                       FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_B                           FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_B_MAX                       FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_B_MIN                       FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_C                           FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_C_MAX                       FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_C_MIN                       FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_D                           FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_D_MAX                       FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_D_MIN                       FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_E                           FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_E_MAX                       FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_E_MIN                       FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_F                           FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_F_MAX                       FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_F_MIN                       FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_G                           FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_G_MAX                       FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_G_MIN                       FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_H1                          FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_H1_MAX                      FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_H1_MIN                      FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_H2                          FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_H2_MAX                      FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_H2_MIN                      FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_I                           FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_I_MAX                       FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_I_MIN                       FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_J                           FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_J_MAX                       FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_J_MIN                       FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_K1                          FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_K1_MAX                      FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_K1_MIN                      FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_K2                          FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_K2_MAX                      FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_K2_MIN                      FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_K  	                      	FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_K_MAX                      	FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_K_MIN                      	FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_L  	                      	FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_L_MAX                      	FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_L_MIN                      	FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_O                           FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_O_MAX                       FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_O_MIN                       FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_R                           FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_R_ALL                       CHARACTER   LEFT     TRUE      40
+DIM_R_MAX                       FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_R_MIN                       FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_TD                          FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_TD_MAX                      FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_TD_MIN                      FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_WEIGHT                      FLOAT       RIGHT    TRUE       8       0         Weight     kg
+DIM_X                           FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_X_MAX                       FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_X_MIN                       FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_Y                           FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_Y_MAX                       FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIM_Y_MIN                       FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIMENSION_A                     FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIMENSION_B                     FLOAT       RIGHT    TRUE       8       0         Length     mm
+DIRECTION                       CHARACTER   LEFT     TRUE       3
+DISCIPLINE                      CHARACTER   LEFT     TRUE      20
+DISPERSIONANGLE                 FLOAT       LEFT     TRUE       3       0         Angle      Degrees
+DR_DEFAULT_HOLE_SIZE            FLOAT       LEFT     TRUE       2       0         Length     mm
+DR_DEFAULT_WELD_SIZE            FLOAT       LEFT     TRUE       3       0         Length     mm
+DR_PART_POS                     CHARACTER   LEFT     TRUE      20
+ECCENTRICITY_X                  FLOAT       RIGHT    TRUE       7       2         Length     mm
+ECCENTRICITY_Y                  FLOAT       RIGHT    TRUE       7       2         Length     mm
+EDGE_FOLD                       FLOAT       RIGHT    TRUE       7       2
+EDGE_FOLD_1                     FLOAT       RIGHT    TRUE       7       2
+EDGE_FOLD_2                     FLOAT       RIGHT    TRUE       7       2
+END_X                           FLOAT       RIGHT    TRUE      20       0         Length     mm
+END_Y                           FLOAT       RIGHT    TRUE      20       0         Length     mm
+END_Z                           FLOAT       RIGHT    TRUE      20       0         Length     mm
+END_X_BASEPOINT                 FLOAT       RIGHT    TRUE      20       0         Length     mm
+END_Y_BASEPOINT                 FLOAT       RIGHT    TRUE      20       0         Length     mm
+END_Z_BASEPOINT                 FLOAT       RIGHT    TRUE      20       0         Length     mm
+END_X_PROJECT                    FLOAT       RIGHT    TRUE      20       0         Length     mm
+END_Y_PROJECT                    FLOAT       RIGHT    TRUE      20       0         Length     mm
+END_Z_PROJECT                    FLOAT       RIGHT    TRUE      20       0         Length     mm
+END_X_IN_WORK_PLANE             FLOAT       RIGHT    TRUE      20       0         Length     mm
+END_Y_IN_WORK_PLANE             FLOAT       RIGHT    TRUE      20       0         Length     mm
+END_Z_IN_WORK_PLANE             FLOAT       RIGHT    TRUE      20       0         Length     mm
+END1_ANGLE_Y                    FLOAT       LEFT     TRUE       8       1         Angle      Degrees
+END1_ANGLE_Z                    FLOAT       LEFT     TRUE       8       1         Angle      Degrees
+END1_CUT_ANGLE_Y                FLOAT       LEFT     TRUE       8       1         Angle      Degrees
+END1_CUT_ANGLE_Z                FLOAT       LEFT     TRUE       8       1         Angle      Degrees
+END1_CODE                       INTEGER     LEFT     TRUE       3
+END1_SKEW                       INTEGER     LEFT     TRUE       3
+END2_ANGLE_Y                    FLOAT       LEFT     TRUE       8       1         Angle      Degrees
+END2_ANGLE_Z                    FLOAT       LEFT     TRUE       8       1         Angle      Degrees
+END2_CUT_ANGLE_Y                FLOAT       LEFT     TRUE       8       1         Angle      Degrees
+END2_CUT_ANGLE_Z                FLOAT       LEFT     TRUE       8       1         Angle      Degrees
+END2_CODE                       INTEGER     LEFT     TRUE       3
+END2_SKEW                       INTEGER     LEFT     TRUE       3
+EXTERNAL_GUID                   CHARACTER   LEFT     TRUE      40
+EXTRA_LENGTH                    FLOAT       RIGHT    TRUE       8       0         Length     mm
+FILTER                          CHARACTER   LEFT     TRUE      20
+FILTERINCLUDE                   INTEGER     LEFT     TRUE       1
+FLANGE_LENGTH_B                 FLOAT       LEFT     TRUE       8       0         Length     mm
+FLANGE_LENGTH_U                 FLOAT       LEFT     TRUE       8       0         Length     mm
+FLANGE_SLOPE_RATIO              FLOAT       RIGHT    TRUE       7       2
+FLANGE_THICKNESS                FLOAT       RIGHT    TRUE       7       1         Length     mm
+FLANGE_THICKNESS_1              FLOAT       RIGHT    TRUE       7       1         Length     mm
+FLANGE_THICKNESS_2              FLOAT       RIGHT    TRUE       7       1         Length     mm
+FLANGE_THICKNESS_B              FLOAT       LEFT     TRUE       4       1         Length     mm
+FLANGE_THICKNESS_U              FLOAT       LEFT     TRUE       4       1         Length     mm
+FLANGE_WIDTH                    FLOAT       RIGHT    TRUE       7       0         Length     mm
+FLANGE_WIDTH_1                  FLOAT       RIGHT    TRUE       7       0         Length     mm
+FLANGE_WIDTH_2                  FLOAT       RIGHT    TRUE       7       0         Length     mm
+FLANGE_WIDTH_B                  FLOAT       LEFT     TRUE       4       0         Length     mm
+FLANGE_WIDTH_U                  FLOAT       LEFT     TRUE       4       0         Length     mm
+FINISH                          CHARACTER   LEFT     TRUE      20
+GRADE                           CHARACTER   LEFT     TRUE      10
+GROUP_ID                        INTEGER     LEFT     TRUE      10
+GROUP_NAME                      CHARACTER   LEFT     TRUE      20
+GROUP_POS                       CHARACTER   LEFT     TRUE      20
+GROUP_TYPE                      INTEGER     LEFT     TRUE       5
+GROUP_TYPENAME                  CHARACTER   LEFT     TRUE      25
+GUID                            CHARACTER   LEFT     TRUE      40
+HAS_CONNECTIONS                 INTEGER     LEFT     TRUE       1
+HAS_HOLES                       INTEGER     LEFT     TRUE       1
+HEAD_DIAMETER                   FLOAT       LEFT     TRUE       5       0         Length     mm
+HEAD_THICKNESS                  FLOAT       LEFT     TRUE       5       0         Length     mm
+HEAD_TYPE                       CHARACTER   LEFT     TRUE      20       0
+HEIGHT                          FLOAT       RIGHT    TRUE       8       0         Length     mm
+HEIGHT_1                        FLOAT       RIGHT    TRUE       7       0         Length     mm
+HEIGHT_2                        FLOAT       RIGHT    TRUE       7       0         Length     mm
+HEIGHT_3                        FLOAT       RIGHT    TRUE       7       0         Length     mm
+HEIGHT_4                        FLOAT       RIGHT    TRUE       7       0         Length     mm
+HIERARCHY_LEVEL                 INTEGER     RIGHT    TRUE       2
+HOLE_TOLERANCE                  FLOAT       RIGHT    TRUE       2       0         Length     mm
+HOOK_END                        FLOAT       RIGHT    TRUE       1       0
+HOOK_END_ANGLE                  CHARACTER   RIGHT    TRUE       3       0         Angle      Degrees
+HOOK_END_RADIUS                 FLOAT       RIGHT    TRUE       7       0
+HOOK_END_LENGTH                 FLOAT       RIGHT    TRUE       7       0         Length     mm
+HOOK_START                      FLOAT       RIGHT    TRUE       1       0
+HOOK_START_ANGLE                CHARACTER   RIGHT    TRUE       3       0         Angle      Degrees
+HOOK_START_RADIUS               FLOAT	    RIGHT    TRUE       7       0
+HOOK_START_LENGTH               FLOAT	    RIGHT    TRUE       7       0         Length     mm
+ID                              INTEGER     LEFT     TRUE      10
+INCOMPATIBLE                    INTEGER     LEFT     TRUE       5
+INFO1                           CHARACTER   LEFT     TRUE      20
+INFO2                           CHARACTER   LEFT     TRUE      20
+INNER_DIAMETER                  FLOAT       RIGHT    TRUE       5       0         Length     mm
+IS_BENT_PLATE                   INTEGER     LEFT     TRUE       1
+IS_CONCEPTUAL                   INTEGER     LEFT     TRUE       1
+IS_CURVED                       INTEGER     LEFT     TRUE       1
+IS_FROZEN                       INTEGER     LEFT     TRUE       1
+IS_ISSUED                       INTEGER     LEFT     TRUE       1
+IS_ITEM                         INTEGER     LEFT     TRUE       1
+IS_LOCKED                       INTEGER     LEFT     TRUE	1
+IS_READY_FOR_ISSUE              INTEGER     LEFT     TRUE	1
+IS_POLYBEAM                     INTEGER     LEFT     TRUE       1
+IS_POUR_BREAK_VALID             INTEGER     LEFT     TRUE       1
+IS_REBARSET_BAR                 INTEGER     LEFT     TRUE       1
+IS_SPIRAL_BEAM                  INTEGER     LEFT     TRUE       1
+IS_LOFTED_PART                  INTEGER     LEFT     TRUE       1
+LAST                            CHARACTER   LEFT     TRUE      10
+LAST_CREATED_BY                 CHARACTER   LEFT     TRUE      40
+LAST_CHECKED_BY                 CHARACTER   LEFT     TRUE      40
+LAST_DATE_CREATE                INTEGER     LEFT     TRUE      12       0         Date       dd.mm.yyyy
+LAST_DATE_CHECKED               INTEGER     LEFT     TRUE      12       0         Date       dd.mm.yyyy
+LAST_DATE_APPROVED              INTEGER     LEFT     TRUE      12       0         Date       dd.mm.yyyy
+LAST_DESCRIPTION                CHARACTER   LEFT     TRUE      20
+LAST_DELIVERY                   CHARACTER   LEFT     TRUE      40
+LAST_INFO1                      CHARACTER   LEFT     TRUE      40
+LAST_INFO2                      CHARACTER   LEFT     TRUE      40
+LAST_MARK                       CHARACTER   LEFT     TRUE      10
+LAST_APPROVED_BY                CHARACTER   LEFT     TRUE      40
+LAST_TEXT1                      CHARACTER   LEFT     TRUE      40
+LAST_TEXT2                      CHARACTER   LEFT     TRUE      40
+LAST_TEXT3                      CHARACTER   LEFT     TRUE      40
+LAYER                           CHARACTER   LEFT     TRUE      20
+LEG_LENGTH_END                  FLOAT       RIGHT    TRUE       8       0         Length     mm
+LEG_LENGTH_START                FLOAT       RIGHT    TRUE       8       0         Length     mm
+LENGTH                          FLOAT       RIGHT    TRUE       8       0         Length     mm
+LENGTH_GROSS                    FLOAT       RIGHT    TRUE       8       0         Length     mm
+LENGTH_MAX                      FLOAT       RIGHT    TRUE       8       0         Length     mm
+LENGTH_MIN                      FLOAT       RIGHT    TRUE       8       0         Length     mm
+LONGHOLE_MAX                    FLOAT       RIGHT    TRUE       2       0         Length     mm
+LONGHOLE_MIN                    FLOAT       RIGHT    TRUE       2       0         Length     mm
+LENGTH_NET	                    FLOAT       RIGHT    TRUE       8       0         Length     mm
+LOCATION                        CHARACTER   LEFT     TRUE      20
+LOCKED_BY                       CHARACTER   LEFT     TRUE      50
+READY_FOR_ISSUE_BY              CHARACTER   LEFT     TRUE      50
+LONG_HOLE_X                     FLOAT       RIGHT    TRUE       2       0         Length     mm
+LONG_HOLE_Y                     FLOAT       RIGHT    TRUE       2       0         Length     mm
+LOT_NAME                        CHARACTER   LEFT     TRUE      20
+LOT_NUMBER                      INTEGER     LEFT     TRUE       5
+MAGNITUDEINFO                   CHARACTER   LEFT     TRUE      30
+MAIN_PART                       INTEGER     LEFT     TRUE       1
+MAJOR_AXIS_LENGTH_1             FLOAT       RIGHT    TRUE       7       2         Length     mm
+MAJOR_AXIS_LENGTH_2             FLOAT       RIGHT    TRUE       7       2         Length     mm
+MARK                            CHARACTER   LEFT     TRUE      10
+MATERIAL                        CHARACTER   LEFT     TRUE       7
+MATERIAL_TYPE                   CHARACTER   LEFT     TRUE      20
+MESH_POS                        CHARACTER   LEFT     TRUE      12
+MINOR_AXIS_LENGTH_1             FLOAT       RIGHT    TRUE       7       2         Length     mm
+MINOR_AXIS_LENGTH_2             FLOAT       RIGHT    TRUE       7       2         Length     mm
+MODEL                           CHARACTER   LEFT     TRUE      20
+MODEL_PATH                      CHARACTER   LEFT     TRUE      30
+MODEL_TOTAL                     INTEGER     LEFT     TRUE       5
+MODIFIED                        CHARACTER   LEFT     TRUE      14
+MODIFIED_ACTION                 CHARACTER   LEFT     TRUE      14
+MODIFIED_BY                     CHARACTER   LEFT     TRUE      14
+MODULUS_OF_ELASTICITY           FLOAT       RIGHT    TRUE       8       2
+MOMENT_OF_INERTIA_X             FLOAT       RIGHT    TRUE       7       2         Moment_of_inertia  mm4
+MOMENT_OF_INERTIA_Y             FLOAT       RIGHT    TRUE       7       2         Moment_of_inertia  mm4
+MORTAR_VOLUME                   FLOAT       LEFT     TRUE       8       2         Volume     m3
+NAME                            CHARACTER   LEFT     TRUE      20
+NAME_BASE                       CHARACTER   LEFT     TRUE      20
+NAME_FULL                       CHARACTER   LEFT     TRUE      20
+NAME_SHORT                      CHARACTER   LEFT     TRUE      20
+NEUTRAL_AXIS_LOCATION_ELASTIC_X FLOAT       RIGHT    TRUE       7       2         Length     mm
+NEUTRAL_AXIS_LOCATION_ELASTIC_Y FLOAT       RIGHT    TRUE       7       2         Length     mm
+NEUTRAL_AXIS_LOCATION_PLASTIC_X FLOAT       RIGHT    TRUE       7       2         Length     mm
+NEUTRAL_AXIS_LOCATION_PLASTIC_Y FLOAT       RIGHT    TRUE       7       2         Length     mm
+NORMALIZED_WARPING_CONSTANT     FLOAT       RIGHT    TRUE       7       2
+NUMBER#1                        INTEGER     LEFT     TRUE       5
+NUMBER#2                        CHARACTER   LEFT     TRUE      10
+NUMBER_IN_PHASE(X)              INTEGER     RIGHT    TRUE       3
+NUMBER_OF_BARS_IN_GROUP         INTEGER     LEFT     TRUE       5
+NUMBER_OF_TILE_TYPES            INTEGER     LEFT     TRUE       2
+OBJECT                          CHARACTER   LEFT     TRUE      20
+OBJECT_DESCRIPTION              CHARACTER   LEFT     TRUE      30
+OBJECT_LOCKED                   CHARACTER   LEFT     TRUE       3
+OBJECT_TYPE                     CHARACTER   LEFT     TRUE       2
+ORIGIN_X                        FLOAT       RIGHT    TRUE       8       0         Length     mm
+ORIGIN_Y                        FLOAT       RIGHT    TRUE       8       0         Length     mm
+ORIGIN_Z                        FLOAT       RIGHT    TRUE       8       0         Length     mm
+ORIGIN_X_BASEPOINT              FLOAT       RIGHT    TRUE       8       0         Length     mm
+ORIGIN_Y_BASEPOINT              FLOAT       RIGHT    TRUE       8       0         Length     mm
+ORIGIN_Z_BASEPOINT              FLOAT       RIGHT    TRUE       8       0         Length     mm
+ORIGIN_X_PROJECT                FLOAT       RIGHT    TRUE       8       0         Length     mm
+ORIGIN_Y_PROJECT                FLOAT       RIGHT    TRUE       8       0         Length     mm
+ORIGIN_Z_PROJECT                FLOAT       RIGHT    TRUE       8       0         Length     mm
+OWNER                           CHARACTER   LEFT     TRUE      10
+PAGE                            INTEGER     LEFT     FALSE      2
+PART_POS                        CHARACTER   LEFT     TRUE      10
+PART_PREFIX                     CHARACTER   LEFT     TRUE      10
+PART_SERIAL_NUMBER              INTEGER     LEFT     TRUE      10
+PART_START_NUMBER               INTEGER     LEFT     TRUE      10
+PCS                             INTEGER     RIGHT    TRUE       4
+PERCENT_COMPLETE                FLOAT	    LEFT     TRUE       3       2
+PERIMETER                       FLOAT       RIGHT    TRUE       8       0         Length     mm
+PHASE                           INTEGER     LEFT     TRUE       5
+PLANNED_STARTDATE               INTEGER     LEFT     TRUE      12       0         Date       dd.mm.yyyy
+PLANNED_ENDDATE                 INTEGER     LEFT     TRUE      12       0         Date       dd.mm.yyyy
+PLASTIC_MODULUS_X               FLOAT       RIGHT    TRUE       7       2
+PLASTIC_MODULUS_Y               FLOAT       RIGHT    TRUE       7       2
+PLATE_DENSITY                   FLOAT       RIGHT    TRUE       8       0         Density    kg/m3
+PLATE_THICKNESS                 FLOAT       RIGHT    TRUE       7       0         Length     mm
+PLATE_TOP_VIEW                  CHARACTER   LEFT     TRUE      20
+PLOTFILE                        CHARACTER   LEFT     TRUE      20
+POISSONS_RATIO                  FLOAT       RIGHT    TRUE       8       2
+POLAR_RADIUS_OF_GYRATION        FLOAT       RIGHT    TRUE       7       2
+POSITION_X                      FLOAT       LEFT     TRUE      10       0         Length     mm
+POSITION_Y                      FLOAT       LEFT     TRUE      10       0         Length     mm
+POSITION_Z                      FLOAT       LEFT     TRUE      10       0         Length     mm
+POSTAL_BOX                      CHARACTER   LEFT     TRUE      20
+POSTAL_CODE                     CHARACTER   LEFT     TRUE      20
+POUR_NUMBER                     CHARACTER   LEFT     TRUE      14
+POUR_PHASE                      INTEGER     LEFT     TRUE      10
+POUR_TYPE                       CHARACTER   LEFT     TRUE      20
+PREFIX                          CHARACTER   LEFT     TRUE      10
+PRELIM_MARK                     CHARACTER   LEFT     TRUE      20
+PRELIM_ASSEM_MARK               CHARACTER   LEFT     TRUE      20
+PRIMARYWEIGHT                   FLOAT       LEFT     TRUE       4       2
+PRODUCT_NAME                    CHARACTER   LEFT     TRUE      20
+PROFILE                         CHARACTER   LEFT     TRUE      14
+PROFILE_DENSITY                 FLOAT       RIGHT    TRUE       8       0         Density    kg/m3
+PROFILE_TYPE                    CHARACTER   LEFT     TRUE      14
+PROFILE_WEIGHT                  FLOAT       RIGHT    TRUE       8       0         Weight     kg
+PROFILE_WEIGHT_NET              FLOAT       RIGHT    TRUE       8       0         Weight     kg
+APPROVED_BY                     CHARACTER   LEFT     TRUE      20	
+PULLOUT                         CHARACTER   LEFT     TRUE      14
+RADIUS                          FLOAT	    RIGHT    TRUE	    7	  2
+RADIUS_OF_GYRATION_X            FLOAT       RIGHT    TRUE       7       2
+RADIUS_OF_GYRATION_Y            FLOAT       RIGHT    TRUE       7       2
+RAIL_ANGLE                      FLOAT       LEFT     TRUE       8       1         Angle      Degrees
+RAIL_OFFSET                     FLOAT       RIGHT    TRUE       7       2         Length     mm
+RAIL_RADIUS                     FLOAT       RIGHT    TRUE       8       0         Length     mm
+REBAR_MESH_LEFT_OVERHANG_LONG   FLOAT       RIGHT    TRUE       7       0         Length     mm
+REBAR_MESH_RIGHT_OVERHANG_LONG  FLOAT       RIGHT    TRUE       7       0         Length     mm
+REBAR_MESH_LEFT_OVERHANG_CROSS  FLOAT       RIGHT    TRUE       7       0         Length     mm
+REBAR_MESH_RIGHT_OVERHANG_CROSS FLOAT       RIGHT    TRUE       7       0         Length     mm
+REBAR_POS                       CHARACTER   LEFT     TRUE      20
+REGION                          CHARACTER   LEFT     TRUE      20
+RESULTANT_X                     FLOAT       LEFT     TRUE       8       1         Force     kN
+RESULTANT_Y                     FLOAT       LEFT     TRUE       8       1         Force     kN
+RESULTANT_Z                     FLOAT       LEFT     TRUE       8       1         Force     kN
+RESULTANT_LOCAL_X               FLOAT       LEFT     TRUE       8       1         Force     kN
+RESULTANT_LOCAL_Y               FLOAT       LEFT     TRUE       8       1         Force     kN
+RESULTANT_LOCAL_Z               FLOAT       LEFT     TRUE       8       1         Force     kN
+RESULTANT_CURRENT_X             FLOAT       LEFT     TRUE       8       1         Force     kN
+RESULTANT_CURRENT_Y             FLOAT       LEFT     TRUE       8       1         Force     kN
+RESULTANT_CURRENT_Z             FLOAT       LEFT     TRUE       8       1         Force     kN
+REVISION_CODE                   CHARACTER   LEFT     TRUE      10
+ROUNDING_RADIUS                 FLOAT       RIGHT    TRUE       7       2         Length     mm
+ROUNDING_RADIUS_1               FLOAT       RIGHT    TRUE       7       2         Length     mm
+ROUNDING_RADIUS_2               FLOAT       RIGHT    TRUE       7       2         Length     mm
+ROW_IN_ALLPAGES                 INTEGER     LEFT     FALSE      3
+ROW_IN_PAGE                     INTEGER     LEFT     FALSE      3
+SAWING_ITEM                     CHARACTER 	LEFT 	 TRUE 	   20
+SCALE                           CHARACTER   LEFT     TRUE      5
+SCALE1                          CHARACTER   LEFT     TRUE      10
+SCALE2                          CHARACTER   LEFT     TRUE      10
+SCALE3                          CHARACTER   LEFT     TRUE      10
+SCALE4                          CHARACTER   LEFT     TRUE      10
+SCALE5                          CHARACTER   LEFT     TRUE      10
+SECTION_MODULUS_X               FLOAT       RIGHT    TRUE       7       2         Volume     mm3
+SECTION_MODULUS_Y               FLOAT       RIGHT    TRUE       7       2         Volume     mm3
+SERIAL_NUMBER                   INTEGER     LEFT     TRUE      10
+START_NUMBER                    INTEGER     LEFT     TRUE      10
+SHAPE                           CHARACTER   LEFT     TRUE      20
+SHAPE_INTERNAL                  CHARACTER   LEFT     TRUE      10
+SHEAR_CENTER_LOCATION           FLOAT       RIGHT    TRUE       7       2         Length     mm
+SIMILAR_TO_MAIN_PART            INTEGER     LEFT     TRUE       1
+SITE_WORKSHOP                   CHARACTER   LEFT     TRUE      10
+SIZE                            CHARACTER   LEFT     TRUE      20
+SORT_OF_E_x_Cw_PER_G_x_J        FLOAT       RIGHT    TRUE       7       2
+SPANNING                        INTEGER     LEFT     TRUE       1
+SPANNINGDIRECTION_X             FLOAT       LEFT     TRUE       4       2
+SPANNINGDIRECTION_Y             FLOAT       LEFT     TRUE       4       2
+SPANNINGDIRECTION_Z             FLOAT       LEFT     TRUE       4       2
+SPIRAL_ROTATION_ANGLE           FLOAT       RIGHT    TRUE       7       2         Angle      Degrees
+SPIRAL_ROTATION_AXIS_BASE_POINT_X                FLOAT       RIGHT    TRUE      20       0         Length     mm
+SPIRAL_ROTATION_AXIS_BASE_POINT_Y                FLOAT       RIGHT    TRUE      20       0         Length     mm
+SPIRAL_ROTATION_AXIS_BASE_POINT_Z                FLOAT       RIGHT    TRUE      20       0         Length     mm
+SPIRAL_ROTATION_AXIS_BASE_POINT_X_PROJECT        FLOAT       RIGHT    TRUE      20       0         Length     mm
+SPIRAL_ROTATION_AXIS_BASE_POINT_Y_PROJECT        FLOAT       RIGHT    TRUE      20       0         Length     mm
+SPIRAL_ROTATION_AXIS_BASE_POINT_Z_PROJECT        FLOAT       RIGHT    TRUE      20       0         Length     mm
+SPIRAL_ROTATION_AXIS_BASE_POINT_X_BASEPOINT      FLOAT       RIGHT    TRUE      20       0         Length     mm
+SPIRAL_ROTATION_AXIS_BASE_POINT_Y_BASEPOINT      FLOAT       RIGHT    TRUE      20       0         Length     mm
+SPIRAL_ROTATION_AXIS_BASE_POINT_Z_BASEPOINT      FLOAT       RIGHT    TRUE      20       0         Length     mm
+SPIRAL_ROTATION_AXIS_BASE_POINT_X_IN_WORK_PLANE  FLOAT       RIGHT    TRUE      20       0         Length     mm
+SPIRAL_ROTATION_AXIS_BASE_POINT_Y_IN_WORK_PLANE  FLOAT       RIGHT    TRUE      20       0         Length     mm
+SPIRAL_ROTATION_AXIS_BASE_POINT_Z_IN_WORK_PLANE  FLOAT       RIGHT    TRUE      20       0         Length     mm
+SPIRAL_ROTATION_AXIS_UP_POINT_X                  FLOAT       RIGHT    TRUE      20       0         Length     mm
+SPIRAL_ROTATION_AXIS_UP_POINT_Y                  FLOAT       RIGHT    TRUE      20       0         Length     mm
+SPIRAL_ROTATION_AXIS_UP_POINT_Z                  FLOAT       RIGHT    TRUE      20       0         Length     mm
+SPIRAL_ROTATION_AXIS_UP_POINT_X_PROJECT          FLOAT       RIGHT    TRUE      20       0         Length     mm
+SPIRAL_ROTATION_AXIS_UP_POINT_Y_PROJECT          FLOAT       RIGHT    TRUE      20       0         Length     mm
+SPIRAL_ROTATION_AXIS_UP_POINT_Z_PROJECT          FLOAT       RIGHT    TRUE      20       0         Length     mm
+SPIRAL_ROTATION_AXIS_UP_POINT_X_BASEPOINT        FLOAT       RIGHT    TRUE      20       0         Length     mm
+SPIRAL_ROTATION_AXIS_UP_POINT_Y_BASEPOINT        FLOAT       RIGHT    TRUE      20       0         Length     mm
+SPIRAL_ROTATION_AXIS_UP_POINT_Z_BASEPOINT        FLOAT       RIGHT    TRUE      20       0         Length     mm
+SPIRAL_ROTATION_AXIS_UP_POINT_X_IN_WORK_PLANE    FLOAT       RIGHT    TRUE      20       0         Length     mm
+SPIRAL_ROTATION_AXIS_UP_POINT_Y_IN_WORK_PLANE    FLOAT       RIGHT    TRUE      20       0         Length     mm
+SPIRAL_ROTATION_AXIS_UP_POINT_Z_IN_WORK_PLANE    FLOAT       RIGHT    TRUE      20       0         Length     mm
+SPIRAL_TOTAL_RISE               FLOAT       RIGHT    TRUE       7       0         Length     mm
+SPIRAL_TWIST_START              FLOAT       RIGHT    TRUE       7       2         Angle      Degrees
+SPIRAL_TWIST_END                FLOAT       RIGHT    TRUE       7       2         Angle      Degrees
+START_X                         FLOAT       RIGHT    TRUE       8       0         Length     mm
+START_Y                         FLOAT       RIGHT    TRUE       8       0         Length     mm
+START_Z                         FLOAT       RIGHT    TRUE       8       0         Length     mm
+START_X_BASEPOINT               FLOAT       RIGHT    TRUE       8       0         Length     mm
+START_Y_BASEPOINT               FLOAT       RIGHT    TRUE       8       0         Length     mm
+START_Z_BASEPOINT               FLOAT       RIGHT    TRUE       8       0         Length     mm
+START_X_IN_WORK_PLANE           FLOAT       RIGHT    TRUE       8       0         Length     mm
+START_Y_IN_WORK_PLANE           FLOAT       RIGHT    TRUE       8       0         Length     mm
+START_Z_IN_WORK_PLANE           FLOAT       RIGHT    TRUE       8       0         Length     mm
+START_X_PROJECT                 FLOAT       RIGHT    TRUE       8       0         Length     mm
+START_Y_PROJECT                 FLOAT       RIGHT    TRUE       8       0         Length     mm
+START_Z_PROJECT                 FLOAT       RIGHT    TRUE       8       0         Length     mm
+STATICAL_MOMENT_Qf              FLOAT       RIGHT    TRUE       7       2
+STATICAL_MOMENT_Qw              FLOAT       RIGHT    TRUE       7       2
+STIFFENER_DIMENSION             FLOAT       RIGHT    TRUE       7       2         Length     mm
+STIFFENER_DIMENSION_1           FLOAT       RIGHT    TRUE       7       2         Length     mm
+STIFFENER_DIMENSION_2           FLOAT       RIGHT    TRUE       7       2         Length     mm
+STIFFENER_DIMENSION_3           FLOAT       RIGHT    TRUE       7       2         Length     mm
+STRAND_PULL_FORCE               FLOAT       RIGHT    TRUE       8       0         Force      kN
+STRAND_N_PATTERN                INTEGER     RIGHT    TRUE       5
+STRAND_N_STRAND                 INTEGER     RIGHT    TRUE       5
+STRAND_POS                      CHARACTER   LEFT     TRUE      10
+STRAND_UNBONDED                 CHARACTER   LEFT     TRUE      10
+STRAND_DEBONDED_STRANDS_1       CHARACTER   LEFT     TRUE     128
+STRAND_DEBOND_LEN_FROM_START_1      FLOAT   RIGHT    TRUE       7       0         Length     mm
+STRAND_DEBOND_LEN_MIDDLE_TO_START_1 FLOAT   RIGHT    TRUE       7       0         Length     mm
+STRAND_DEBOND_LEN_MIDDLE_TO_END_1   FLOAT   RIGHT    TRUE       7       0         Length     mm
+STRAND_DEBOND_LEN_FROM_END_1        FLOAT   RIGHT    TRUE       7       0         Length     mm
+STRAND_DEBONDED_STRANDS_2       CHARACTER   LEFT     TRUE     128
+STRAND_DEBOND_LEN_FROM_START_2      FLOAT   RIGHT    TRUE       7       0         Length     mm
+STRAND_DEBOND_LEN_MIDDLE_TO_START_2 FLOAT   RIGHT    TRUE       7       0         Length     mm
+STRAND_DEBOND_LEN_MIDDLE_TO_END_2   FLOAT   RIGHT    TRUE       7       0         Length     mm
+STRAND_DEBOND_LEN_FROM_END_2        FLOAT   RIGHT    TRUE       7       0         Length     mm
+STRAND_DEBONDED_STRANDS_3       CHARACTER   LEFT     TRUE     128
+STRAND_DEBOND_LEN_FROM_START_3      FLOAT   RIGHT    TRUE       7       0         Length     mm
+STRAND_DEBOND_LEN_MIDDLE_TO_START_3 FLOAT   RIGHT    TRUE       7       0         Length     mm
+STRAND_DEBOND_LEN_MIDDLE_TO_END_3   FLOAT   RIGHT    TRUE       7       0         Length     mm
+STRAND_DEBOND_LEN_FROM_END_3        FLOAT   RIGHT    TRUE       7       0         Length     mm
+STRAND_DEBONDED_STRANDS_4       CHARACTER   LEFT     TRUE     128
+STRAND_DEBOND_LEN_FROM_START_4      FLOAT   RIGHT    TRUE       7       0         Length     mm
+STRAND_DEBOND_LEN_MIDDLE_TO_START_4 FLOAT   RIGHT    TRUE       7       0         Length     mm
+STRAND_DEBOND_LEN_MIDDLE_TO_END_4   FLOAT   RIGHT    TRUE       7       0         Length     mm
+STRAND_DEBOND_LEN_FROM_END_4        FLOAT   RIGHT    TRUE       7       0         Length     mm
+STRAND_DEBONDED_STRANDS_5       CHARACTER   LEFT     TRUE     128
+STRAND_DEBOND_LEN_FROM_START_5      FLOAT   RIGHT    TRUE       7       0         Length     mm
+STRAND_DEBOND_LEN_MIDDLE_TO_START_5 FLOAT   RIGHT    TRUE       7       0         Length     mm
+STRAND_DEBOND_LEN_MIDDLE_TO_END_5   FLOAT   RIGHT    TRUE       7       0         Length     mm
+STRAND_DEBOND_LEN_FROM_END_5        FLOAT   RIGHT    TRUE       7       0         Length     mm
+SUBTYPE                         FLOAT       LEFT     TRUE      14       1
+SUPPLEMENT_PART_WEIGHT          FLOAT       LEFT     TRUE       8       0         Weight     kg
+SURFACING_NAME                  CHARACTER   LEFT     TRUE      20
+TANGENT_OF_PRINCIPAL_AXIS_ANGLE FLOAT 	    RIGHT    TRUE       7       2
+TASKTYPE                        CHARACTER   LEFT     TRUE      20
+TEXT1                           CHARACTER   LEFT     TRUE      40
+TEXT2                           CHARACTER   LEFT     TRUE      40
+TEXT3                           CHARACTER   LEFT     TRUE      40
+THERMAL_DILATATION              FLOAT       RIGHT    TRUE       8       6
+THICKNESS                       FLOAT       LEFT     TRUE       8       0         Length     mm
+THREAD_IN_MATERIAL              INTEGER     LEFT     TRUE       3
+THREAD_TYPE_START               CHARACTER   LEFT     TRUE       8
+THREAD_TYPE_END                 CHARACTER   LEFT     TRUE       8
+THREAD_LENGTH_START             FLOAT       LEFT     TRUE       8
+THREAD_LENGTH_END               FLOAT       LEFT     TRUE       8
+EXTRA_LENGTH_START              FLOAT       LEFT     TRUE       8
+EXTRA_LENGTH_END                FLOAT       LEFT     TRUE       8
+TILE_VOLUME                     FLOAT       LEFT     TRUE       8       2         Volume     m3
+TIME                            CHARACTER   LEFT     TRUE      10
+TITLE                           CHARACTER   LEFT     TRUE      20
+TITLE1                          CHARACTER   LEFT     TRUE      40
+TITLE2                          CHARACTER   LEFT     TRUE      40
+TITLE3                          CHARACTER   LEFT     TRUE      40
+TOP_LEVEL                       CHARACTER   LEFT     TRUE      10
+TOP_LEVEL_BASEPOINT             CHARACTER   LEFT     TRUE      10
+TOP_LEVEL_GLOBAL                CHARACTER   LEFT     TRUE      10
+TOP_LEVEL_PROJECT               CHARACTER   LEFT     TRUE      10
+TOP_LEVEL_UNFORMATTED           FLOAT       LEFT     TRUE      10       0         Length     mm
+TOP_LEVEL_UNFORMATTED_BASEPOINT FLOAT       LEFT     TRUE      10       0         Length     mm
+TOP_LEVEL_UNFORMATTED_PROJECT   FLOAT       LEFT     TRUE      10       0         Length     mm
+TOP_LEVEL_GLOBAL_UNFORMATTED    FLOAT       LEFT     TRUE      10       0         Length     mm
+TORSIONAL_CONSTANT              FLOAT       RIGHT    TRUE       7       2
+TOUCHED                         CHARACTER   LEFT     TRUE      14
+TOUCHED_ACTION                  CHARACTER   LEFT     TRUE      14
+TOUCHED_BY                      CHARACTER   LEFT     TRUE      14
+TOWN                            CHARACTER   LEFT     TRUE      20
+TYPE                            CHARACTER   LEFT     TRUE      20
+TYPE1                           CHARACTER   LEFT     TRUE      30
+TYPE2                           CHARACTER   LEFT     TRUE      10
+TYPE3                           CHARACTER   LEFT     TRUE      10
+TYPE4                           CHARACTER   LEFT     TRUE      10
+TYPENUMBER                      INTEGER     LEFT     TRUE       6
+TYPENAME                        CHARACTER   LEFT     TRUE      25
+USAGE                           CHARACTER   LEFT     TRUE      20
+USAGE_VALUE                     INTEGER     LEFT     TRUE       6
+USER                            CHARACTER   LEFT     TRUE      20
+USER_PHASE                      CHARACTER   LEFT     TRUE      20
+VENDOR                          CHARACTER   LEFT     TRUE      20
+WARPING_CONSTANT                FLOAT       RIGHT    TRUE       7       2
+WARPING_STATICAL_MOMENT         FLOAT       RIGHT    TRUE       7       2
+WASHER_THICKNESS                FLOAT       RIGHT    TRUE       7       1         Length     mm
+WEB_HEIGHT                      FLOAT       RIGHT    TRUE       7       0         Length     mm
+WEB_LENGTH                      FLOAT       RIGHT    TRUE       7       0         Length     mm
+WEB_THICKNESS                   FLOAT       RIGHT    TRUE       7       1         Length     mm
+WEB_THICKNESS_1                 FLOAT       RIGHT    TRUE       7       1         Length     mm
+WEB_THICKNESS_2                 FLOAT       RIGHT    TRUE       7       1         Length     mm
+WEB_WIDTH                       FLOAT       RIGHT    TRUE       7       1         Length     mm
+WEIGHT                          FLOAT       RIGHT    TRUE       8       0         Weight     kg
+WEIGHT_GROSS                    FLOAT       RIGHT    TRUE       8       0         Weight     kg
+WEIGHT_M                        FLOAT       RIGHT    TRUE       8       0         Weight     kg
+WEIGHT_MAX                      FLOAT       RIGHT    TRUE       8       0         Weight     kg
+WEIGHT_MIN                      FLOAT       RIGHT    TRUE       8       0         Weight     kg
+WEIGHT_NET                      FLOAT       RIGHT    TRUE       8       0         Weight     kg
+WEIGHT_ONLY_CONCRETE_PARTS      FLOAT       RIGHT    TRUE       8       0         Weight     kg
+WEIGHT_ONLY_POUR_OBJECT         FLOAT       RIGHT    TRUE       8       0         Weight     kg
+WEIGHT_NET_ONLY_CONCRETE_PARTS  FLOAT       RIGHT    TRUE       8       0         Weight     kg
+WEIGHT_NET_ONLY_POUR_OBJECT     FLOAT       RIGHT    TRUE       8       0         Weight     kg
+WEIGHT_ONLY_REBARS              FLOAT       RIGHT    TRUE       8       0         Weight     kg
+WEIGHT_PER_UNIT_LENGTH          FLOAT       RIGHT    TRUE       7       0         Weight/length kg/m
+WEIGHT_TOTAL                    FLOAT       RIGHT    TRUE       8       0         Weight     kg
+WEIGHT_TOTAL_IN_GROUP           FLOAT       RIGHT    TRUE       8       0         Weight     kg
+WELD_ACTUAL_LENGTH1             FLOAT       LEFT     TRUE       5       0         Length     mm
+WELD_ACTUAL_LENGTH2             FLOAT       LEFT     TRUE       5       0         Length     mm
+WELD_ADDITIONAL_SIZE1           FLOAT       LEFT     TRUE       5       1
+WELD_ADDITIONAL_SIZE2           FLOAT       LEFT     TRUE       5       1
+WELD_ANGLE1                     FLOAT       LEFT     TRUE       5       1         Angle      Degrees
+WELD_ANGLE2                     FLOAT       LEFT     TRUE       5       1         Angle      Degrees
+WELD_ASSEMBLYTYPE               CHARACTER   LEFT     TRUE       8
+WELD_CROSSSECTION_AREA1         FLOAT       RIGHT    TRUE       8       0         Area       mm2
+WELD_CROSSSECTION_AREA2         FLOAT       RIGHT    TRUE       8       0         Area       mm2
+WELD_DEFAULT                    FLOAT       RIGHT    TRUE       5       1
+WELD_DIM_TYPE                   CHARACTER   LEFT     TRUE       5
+WELD_DIRECTION_X                FLOAT       LEFT     TRUE       7       1
+WELD_DIRECTION_Y                FLOAT       LEFT     TRUE       7       1
+WELD_DIRECTION_Z                FLOAT       LEFT     TRUE       7       1
+WELD_EDGE_AROUND                CHARACTER   LEFT     TRUE      20
+WELD_ERRORLIST                  CHARACTER   LEFT     TRUE      80
+WELD_EFFECTIVE_THROAT           FLOAT       LEFT     TRUE       5       1         Length     mm
+WELD_EFFECTIVE_THROAT2          FLOAT       LEFT     TRUE       5       1         Length     mm
+WELD_ELECTRODE_CLASSIFICATION   CHARACTER   LEFT     TRUE      22
+WELD_ELECTRODE_COEFFICIENT      FLOAT       LEFT     TRUE       5       2
+WELD_ELECTRODE_STRENGTH         FLOAT       LEFT     TRUE       5       2
+WELD_ERRORLIST                  CHARACTER   LEFT     TRUE      22
+WELD_FATHER_CODE                CHARACTER   LEFT     TRUE      22
+WELD_FATHER_NUMBER              CHARACTER   LEFT     TRUE       5
+WELD_FILLTYPE1                  CHARACTER   LEFT     TRUE      10
+WELD_FILLTYPE2                  CHARACTER   LEFT     TRUE      10
+WELD_FINISH1                    CHARACTER   LEFT     TRUE       4
+WELD_FINISH2                    CHARACTER   LEFT     TRUE       4
+WELD_INCREMENT_AMOUNT1          INTEGER     RIGHT    TRUE       3
+WELD_INCREMENT_AMOUNT2          INTEGER     RIGHT    TRUE       3
+WELD_INTERMITTENT_TYPE          CHARACTER   LEFT     TRUE       3
+WELD_LENGTH1                    FLOAT       RIGHT    TRUE       5       0         Length     mm
+WELD_LENGTH2                    FLOAT       RIGHT    TRUE       5       0         Length     mm
+WELD_LOGICAL_WELD               CHARACTER   LEFT     TRUE       3
+WELD_NDT_INSPECTION             CHARACTER   LEFT     TRUE      22
+WELD_NUMBER                     CHARACTER   LEFT     TRUE       5
+WELD_NUMBER_PREFIX              CHARACTER   LEFT     TRUE      22
+WELD_PERIOD1                    FLOAT       LEFT     TRUE       5       0
+WELD_PERIOD2                    FLOAT       LEFT     TRUE       5       0
+WELD_POSITION                   CHARACTER   LEFT     TRUE       3
+WELD_POSITION_X                 FLOAT       LEFT     TRUE       7       1
+WELD_POSITION_Y                 FLOAT       LEFT     TRUE       7       1
+WELD_POSITION_Z                 FLOAT       LEFT     TRUE       7       1
+WELD_PROCESS_TYPE               CHARACTER   LEFT     TRUE      22
+WELD_ROOT_FACE_THICKNESS        FLOAT       LEFT     TRUE       5       1         Length     mm
+WELD_ROOT_FACE_THICKNESS2       FLOAT       LEFT     TRUE       5       1         Length     mm
+WELD_ROOT_OPENING               FLOAT       LEFT     TRUE       5       1         Length     mm
+WELD_ROOT_OPENING2              FLOAT       LEFT     TRUE       5       1         Length     mm
+WELD_SIZE_PREFIX_ABOVE          CHARACTER   LEFT     TRUE      21
+WELD_SIZE_PREFIX_BELOW          CHARACTER   LEFT     TRUE      21
+WELD_SIZE1                      FLOAT       LEFT     TRUE       5       1
+WELD_SIZE2                      FLOAT       LEFT     TRUE       5       1
+WELD_TEXT                       CHARACTER   LEFT     TRUE      12
+WELD_TYPE1                      CHARACTER   LEFT     TRUE       4
+WELD_TYPE2                      CHARACTER   LEFT     TRUE       4
+WELD_VOLUME                     FLOAT       LEFT     TRUE       8       0         Volume     mm3
+WIDTH                           FLOAT       RIGHT    TRUE       8       0         Length     mm
+WIDTH_1                         FLOAT       RIGHT    TRUE       7       0         Length     mm
+WIDTH_2                         FLOAT       RIGHT    TRUE       7       0         Length     mm
+VOLUME                          FLOAT       RIGHT    TRUE       8       2         Volume     m3
+VOLUME_GROSS                    FLOAT       RIGHT    TRUE       8       2         Volume     m3
+VOLUME_NET                      FLOAT       RIGHT    TRUE       8       2         Volume     m3
+VOLUME_ONLY_CONCRETE_PARTS      FLOAT       RIGHT    TRUE       8       2         Volume     m3
+VOLUME_ONLY_POUR_OBJECT         FLOAT       RIGHT    TRUE       8       2         Volume     m3
+VOLUME_NET_ONLY_CONCRETE_PARTS  FLOAT       RIGHT    TRUE       8       2         Volume     m3
+X_DIRECTION_WIDTH               FLOAT       RIGHT    TRUE       7       0         Length     mm
+Y_DIRECTION_WIDTH               FLOAT       RIGHT    TRUE       7       0         Length     mm

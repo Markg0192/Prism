@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Windows.Forms;
 using Tekla.Structures.Model;
 using static Prism.Enums;
@@ -12,16 +13,39 @@ namespace Prism.ButtonOperations
         {
             ReportManager myReportManager = new ReportManager(projectData, phaseNumber, issueNumber);
             // HDBolts.StampConnectionCodeOnMainMember(myObjects);
+            bool fabsecsPresent = FabsecProcessing.AddCarcassToSelection(model, myObjects, out List<Part> originalFabsecs);
 
             foreach (Part myPart in myObjects.SelectedModelParts)
             {
                 myPart.GetUnorderedParts();
             }
 
-            if(orderType == "Order HD Bolts") //Order HD bolts not an option therefore this statement is never true(for now)
+            if (orderType == "Order HD Bolts") //Order HD bolts not an option therefore this statement is never true(for now)
             {
                 HDBolts.OrderHDBolts(myObjects, myReportManager);
                 Logging.LogProgress(projectData.ProjName, "Material 3 - HD Bolts", 0, myObjects.AssembliesList.Count);
+                return;
+            }
+
+            if (orderType == "Order Heavy Fittings")
+            {
+                Factory location = PrismWarnings.FactoryLocation();
+                if (location == Factory.Unknown)
+                {
+                    PrismWarnings.IgnoreFittingCheck();
+                }
+                foreach (Assembly ass in myObjects.AssembliesList)
+                {
+                    ArrayList mySecondaries = ass.GetSecondaries();
+                    foreach (Part mySecondaryPart in mySecondaries)
+                    {
+                        CheckFittings.GetIncorrectFittings(mySecondaryPart, location);
+                    }
+                }
+                CheckFittings.AllIncorrectPlate.SelectParts();
+                fabsecsPresent = false;
+                // myReportManager.Folders.CreateMatFolder(false);
+                //  myReportManager.CreateMaterialReports(myObjects, orderType, stageType);
             }
 
             if (orderType == "Omit Material")
@@ -41,8 +65,7 @@ namespace Prism.ButtonOperations
                     return;
                 }
             }
-
-            bool fabsecsPresent = FabsecProcessing.AddCarcassToSelection(model, myObjects, out List<Part> originalFabsecs);
+        
             if (fabsecsPresent)
             {
                 DialogResult fabsecWarning = PrismWarnings.FabsecsPresent();

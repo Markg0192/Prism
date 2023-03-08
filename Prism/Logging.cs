@@ -17,5 +17,31 @@ namespace Prism
                 }
             }
         }
+
+        public static void Login(string modelName)
+        {
+            if (Environment.UserName != "mark.gibson")
+            {
+                using (StreamWriter log = new StreamWriter(@"\\sev-los-fs1\application data$\Prism\LoginLog.txt", true))
+                {
+                    log.WriteLine("--------------------------------------------------------------------------------------------------");
+                    log.WriteLine($"{DateTime.Now} - User: {Environment.UserName} - Model: {modelName}");
+                    log.WriteLine($"Log in succesful");
+                }
+            }
+        }
+
+        public static void DebugLog(string debugText, string modelName)
+        {
+            if (Environment.UserName != "mark.gibson")
+            {
+                using (StreamWriter log = new StreamWriter(@"\\sev-los-fs1\application data$\Prism\DebugLog.txt", true))
+                {
+                    log.WriteLine("--------------------------------------------------------------------------------------------------");
+                    log.WriteLine($"{DateTime.Now} - User: {Environment.UserName} - Model: {modelName}");
+                    log.WriteLine($"{debugText}");
+                }
+            }
+        }
     }
 }
