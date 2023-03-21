@@ -28,7 +28,7 @@ namespace Prism
                 {
                     SetVariationAttribute(phaseNumber, myObjects);
                     projData.IsVariation = true;
-                }                
+                }
             }
             else { projData.IsVariation = false; }
         }
@@ -79,6 +79,7 @@ namespace Prism
                 if (stageNumber == 7)
                 {
                     part.SetUserProperty(ModelUDA.PartMarkAtFab(), part.GetPartMark());
+                    part.LockPart();
                 }
                 part.Modify();
             }
@@ -189,12 +190,9 @@ namespace Prism
             return Length;
         }
 
-        public static void LockSelected(this SelectedObjects selectedObjects)
+        public static void LockPart(this Part part)
         {
-            foreach (Part part in selectedObjects.SelectedModelParts)
-            {
-                part.SetUserProperty(ModelUDA.ObjectLock(), 1);
-            }
+            part.SetUserProperty(ModelUDA.ObjectLock(), 1);
         }
 
         public static void MoveAndRenameOmittedMembers(this SelectedObjects selectedObjects)
@@ -239,13 +237,13 @@ namespace Prism
         public static void SelectParts(this List<Part> partsToBeSelected)
         {
             ArrayList selectList = new ArrayList();
-            foreach (Beam part in partsToBeSelected)
+            foreach (Part part in partsToBeSelected)
             {
                 selectList.Add(part);
             }
             Tekla.Structures.Model.UI.ModelObjectSelector ms = new Tekla.Structures.Model.UI.ModelObjectSelector();
             ms.Select(selectList);
-            foreach (Beam part in selectList)
+            foreach (Part part in selectList)
             {
                 part.Modify();
             }
@@ -293,6 +291,30 @@ namespace Prism
                     // Thread.Sleep(1000);
                     RemoveLog(folderPath);
                 }
+            }
+        }
+
+        public static void RemoveIDDessin(string folderPath)
+        {
+            List<string> fileTypes = new List<string>();
+            if (Directory.Exists(folderPath))
+            {
+                foreach (string subFile in Directory.GetFiles(folderPath))
+                {
+                    fileTypes.Add(subFile.Substring(subFile.Length - 3));
+                    if (subFile.Contains("ID_dessins_KP1"))
+                    {
+                        File.Delete(subFile);
+                    }
+                }
+            }
+        }
+
+        public static void RemoveFolders(string folderPath)
+        {
+            if (Directory.Exists(folderPath))
+            {
+                File.Delete(folderPath);
             }
         }
 

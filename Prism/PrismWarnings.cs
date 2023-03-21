@@ -137,6 +137,34 @@ namespace Prism
             MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
+       /* public static DialogResult FabFolderAlreadyExists()
+        {
+            const string notUpToDateMessage = "The fab folder you are trying to create already exists in the model folder, can I replace it?";
+            const string notUpToDateTitle = "Fab folder exists.";
+            return MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+        }*/
+
+        public static void FabFolderAlreadyExists()
+        {
+            const string notUpToDateMessage = "The fab folder you are trying to create already exists in the model folder, it must be removed from the model folder before continuing";
+            const string notUpToDateTitle = "Fab folder exists.";
+            MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
+        public static void KeepExistingPackage()
+        {
+            const string notUpToDateMessage = "You have decided to keep the existing package, Prism will now close, Goodbye.";
+            const string notUpToDateTitle = "Keep existing.";
+            MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
+        public static DialogResult AreYouHappyWithNumbering()
+        {
+            const string notUpToDateMessage = "Are you happy with your numbering?";
+            const string notUpToDateTitle = "Numbering";
+            return MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+        }
+
         public static void HasAlreadyBeenOrdered()
         {
             const string notUpToDateMessage = "You are trying to order material that appears to have already been ordered.";
@@ -172,6 +200,13 @@ namespace Prism
             MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
+        public static void NoPartsSelected()
+        {
+            const string notUpToDateMessage = "You have not selected any members in the model, please make a selection and try again.";
+            const string notUpToDateTitle = "Nothing selected";
+            MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
         public static void HasNotBeenOrdered()
         {
             string notUpToDateMessage = $"Prism UDA 'Material Order Complete' (SEV-UDA-114) is empty on {Warning} selected parts, " +
@@ -180,6 +215,13 @@ namespace Prism
             MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
+        public static void DrawingsNotUpToDate()
+        {
+            string notUpToDateMessage = "There are drawings in your selection that are not up to date. These must be updated before continuing.";
+            const string notUpToDateTitle = "Update drawings";
+            MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+        }
         public static bool IgnoreWarning()
         {
             const string notUpToDateMessage2 = "Would you like to ignore this error and continue?";
@@ -200,9 +242,11 @@ namespace Prism
 
         public static DialogResult FabPackComplete(PrismProjectData projectData)
         {
-            return MessageBox.Show($"Thanks {projectData.First}, your fab package is now complete, please attach your fab package, located in your model folder, " +
-                        $"to the following email and send to the relevant team. PLEASE NOTE: This version of Prism does NOT print drawings, for now, you will have " +
-                        $"to do this bit yourself.", "Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            //return MessageBox.Show($"Thanks {projectData.First}, your fab package is now complete, please attach your fab package, located in your model folder, " +
+            //            $"to the following email and send to the relevant team. PLEASE NOTE: This version of Prism does NOT print drawings, for now, you will have " +
+            //            $"to do this bit yourself.", "Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+             return MessageBox.Show($"Thanks {projectData.First}, your fab package is now complete, please attach your fab package, located in your model folder, " +
+                        $"to the following email and send to the relevant team.", "Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         public static void ErrorsFixed(int numberOfErrors)

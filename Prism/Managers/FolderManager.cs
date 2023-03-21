@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Windows.Forms;
 
 namespace Prism
 {
@@ -18,7 +19,7 @@ namespace Prism
         private const string _ncFolder = "NC";
         private const string _reportFolder = "Lists";
         private const string _ifcFolder = "IFC";
-        private List<string> _folderNames;    
+        private List<string> _folderNames;
 
         public FolderManager(PrismProjectData projectData, string phaseNum, string issueNum)
         {
@@ -46,10 +47,25 @@ namespace Prism
         public readonly string NcPath;
         public readonly string ReportPath;
         public readonly string DspPath;
-        private readonly string FabsecCarcassPath;
+        public readonly string FabsecCarcassPath;
 
-        public void CreateFabFolders()
-        {        
+        public bool CreateFabFolders()
+        {
+            if (Directory.Exists(FabPath))
+            {
+                PrismWarnings.FabFolderAlreadyExists();
+                return false;
+                /*
+                DialogResult keepExistingFolder = PrismWarnings.FabFolderAlreadyExists();
+
+                if (keepExistingFolder == DialogResult.No)
+                {
+                    PrismWarnings.KeepExistingPackage();
+                    return false;
+                }
+                ModelModifiers.RemoveFolders(FabPath);*/
+
+            }
             foreach (string folder in _folderNames)
             {
                 if (!Directory.Exists(folder))
@@ -57,12 +73,13 @@ namespace Prism
                     Directory.CreateDirectory(folder);
                 }
             }
-        }    
-        
+            return true;
+        }
+
         public void CreateMatFolder(bool fabsecsPresent)
         {
             Directory.CreateDirectory(MatPath);
-            if(fabsecsPresent)
+            if (fabsecsPresent)
             {
                 Directory.CreateDirectory(FabsecCarcassPath);
             }
@@ -90,10 +107,13 @@ namespace Prism
                 {
                     if (subFile.Substring(subFile.Length - 3) == "dpm")
                     {
-                           File.Delete(subFile);
+                        File.Delete(subFile);
                     }
                 }
+                ModelModifiers.RemoveLog(DspPath);
+                ModelModifiers.RemoveIDDessin(DspPath);
+
             }
-        }      
+        }
     }
 }

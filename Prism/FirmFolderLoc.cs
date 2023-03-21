@@ -11,7 +11,8 @@
 
         public static string ReportTemplates()
         {
-            return $@"{firmFolder2021Location}Reports";
+            //return $@"{firmFolder2021Location}Reports";
+            return "C:\\Users\\mark.gibson\\Desktop\\Project Documents\\Prism\\Test Reports";
         }
 
         public static string FabsecCarcassDrawingWizard()

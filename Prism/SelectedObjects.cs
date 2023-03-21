@@ -2,9 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Windows.Forms;
+using Tekla.Structures.Drawing;
 using Tekla.Structures.Model;
 using Tekla.Structures.Model.Operations;
 using static Prism.Enums;
+using Part = Tekla.Structures.Model.Part;
 
 namespace Prism
 {
@@ -14,22 +16,23 @@ namespace Prism
     public class SelectedObjects
     {
         private ModelObjectEnumerator Moe;
-        // public DrawingHandler MyDrawingHandler; This will be needed when drawing functionaility is introduced
+        public DrawingHandler MyDrawingHandler;
 
         public SelectedObjects(StageTypes stageType)
         {
             List<BoltGroup> SiteBolts = new List<BoltGroup>();
             List<BoltGroup> ShopBolts = new List<BoltGroup>();
 
-            NumbersNotUpToDate = true;
+            NumbersUpToDate = true;
             AssembliesList = new List<Assembly>();
             SelectedModelParts = new List<Part>();
-            //MyDrawingHandler = new DrawingHandler();
+            MyDrawingHandler = new DrawingHandler();
             Moe = new Tekla.Structures.Model.UI.ModelObjectSelector().GetSelectedObjects();
             MyMarks = new List<string>();
 
             foreach (object myObject in Moe) // This selects all items, if it is a part add to list, if it is a component get the objects within and add, do this twice to deal with components inside components.
             {
+                if (!NumbersUpToDate) return;
                 if (myObject is BaseComponent myComponent)
                 {
                     ModelObjectEnumerator children = myComponent.GetChildren();
@@ -79,7 +82,7 @@ namespace Prism
                 }
                 //TotalWeight = Math.Round(TotalWeight / 1000, 3);
             }
-            GetCorrectModelSelection();
+            // GetCorrectModelSelection();
             AllBolts.Add(SiteBolts);
             AllBolts.Add(ShopBolts);
         }
@@ -93,7 +96,7 @@ namespace Prism
 
         //public double TotalWeight { get; set; }
         public double PartWeight { get; set; }
-        public bool NumbersNotUpToDate { get; set; }
+        public bool NumbersUpToDate { get; set; }
         public List<Assembly> AssembliesList { get; set; }
         public List<List<BoltGroup>> AllBolts = new List<List<BoltGroup>>();
         public List<Part> SelectedModelParts { get; set; }
@@ -125,7 +128,7 @@ namespace Prism
                         if (!Operation.IsNumberingUpToDate(myPart))
                         {
                             PrismWarnings.NumberingIsNotUpToDate();
-                            NumbersNotUpToDate = false;
+                            NumbersUpToDate = false;
                             return;
                         }
                     }
@@ -153,19 +156,19 @@ namespace Prism
 
         private bool IsValidPart(Part p)
         {
-            if(p.Name == "GROUT")
+            if (p.Name == "GROUT")
             {
                 return false;
             }
-            if(p.Profile.ProfileString.StartsWith("HEX"))
+            if (p.Profile.ProfileString.StartsWith("HEX"))
             {
                 return false;
             }
-            if(p.Profile.ProfileString.StartsWith("ROD"))
+            if (p.Profile.ProfileString.StartsWith("ROD"))
             {
                 return false;
             }
-            if(p.Name.StartsWith("HD"))
+            if (p.Name.StartsWith("HD"))
             {
                 return false;
             }
@@ -189,7 +192,7 @@ namespace Prism
             ArrayList secondaries = assembly.GetSecondaries();
             secondaries.Add(assembly.GetMainPart());
 
-            foreach (ModelObject item in secondaries)
+            foreach (Tekla.Structures.Model.ModelObject item in secondaries)
             {
                 if (item is Part part)
                 {

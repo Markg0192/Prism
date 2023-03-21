@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Prism
@@ -8,7 +10,7 @@ namespace Prism
         public static void LogProgress(string modelName, string buttonPress, int autoFixCount, int totalObjects)
         {
             if (Environment.UserName != "mark.gibson")
-            {
+            { 
                 using (StreamWriter log = new StreamWriter(@"\\sev-los-fs1\application data$\Prism\Log.txt", true))
                 {
                     log.WriteLine("--------------------------------------------------------------------------------------------------");

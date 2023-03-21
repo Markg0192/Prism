@@ -76,7 +76,9 @@ namespace Prism
                 Part myCarcass = mathcingMembers.FirstOrDefault(x => x.Identifier.GUID != fabsec.Identifier.GUID);
                 myCarcasses.Add(myCarcass);
                 selectedObjects.SelectedModelParts.Add(myCarcass);
+                selectedObjects.MyMarks.Add(myCarcass.GetPartMark());
                 selectedObjects.SelectedModelParts.Remove(fabsec);
+                selectedObjects.MyMarks.Remove(fabsec.GetPartMark());
             }
             return myCarcasses;
         }

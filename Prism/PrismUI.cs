@@ -4,13 +4,13 @@ using System.Drawing;
 using System.Windows.Forms;
 using Tekla.Structures.Model;
 using static Prism.Enums;
+using Task = System.Threading.Tasks.Task;
 
 namespace Prism
 {
     public partial class PrismUI : Form
     {
         private Model _model;
-        //private DrawingManager _myDrawingManager; temporarily not in use
         private PrismProjectData _projectData;
         private SelectedObjects _selectedObjects;
 
@@ -33,224 +33,138 @@ namespace Prism
 
         private bool InitialSetup(StageTypes stageType, bool checkForPreviousSteps)
         {
+            SetStatusLabels("Gathering Parts");
             ModelChecker.ClearOldLists();
             _selectedObjects = new SelectedObjects(stageType);
 
             if (checkForPreviousSteps && !ModelChecker.ArePreviousStepsComplete(_selectedObjects, (int)stageType))
             {
-                MaterialStatusLabel.Text = "Cancelled";
-                DetailingStatusLabel.Text = "Cancelled";
+                SetStatusLabels("Previous Steps Incomplete");
                 return false;
             }
+            if (_selectedObjects.NumbersUpToDate && _selectedObjects.AssembliesList.Count == 0)
+            {
+                SetStatusLabels("No Parts Selected");
+                PrismWarnings.NoPartsSelected();
+                return false;
+            }
+            SetStatusLabels("Running Operation");
             return true;
         }
 
-        private void AllowNumbersAndDeleteOnly(KeyPressEventArgs e)
+        private async void btn_Material1_Click_1(object sender, EventArgs e)
         {
-            char delete = new char();
-            delete = '\b'; //This is the code created when backspace is pressed.
-            if (!Char.IsNumber(e.KeyChar) && (e.KeyChar != delete)) //If the key press is neither a number or delete key then ignore.
-            {
-                e.Handled = true;
-                return;
-            }
-        }
+            StartFunction();
 
-        private void CheckForFabButton()
-        {
-            if (phaseNumber.Text.Length > 0 & issueNumber.Text.Length > 1 && cmbPackageLocation.Text == "SNI")
-            {
-                btnCreatePackage1.Enabled = true;
-                btnCreatePackage1.BackColor = Color.Chartreuse;
-            }
-            else
-            {
-                btnCreatePackage1.Enabled = false;
-                btnCreatePackage1.BackColor = Color.Gainsboro;
-            }
-        }
+            if (!await Task.Run(() => InitialSetup(StageTypes.Prelim1, false))) { EndFunction(0); return; }
 
-        private void CheckForBoltOrderButton()
-        {
-            if (phaseNumber.Text.Length > 0 & issueNumber.Text.Length > 1)
-            {
-                btn_FabMisc.Enabled = true;
-                btn_FabMisc.BackColor = Color.Chartreuse;
-            }
-            else
-            {
-                btn_FabMisc.Enabled = false;
-                btn_FabMisc.BackColor = Color.Gainsboro;
-            }
-        }
-
-        private void CheckForMaterialButton()
-        {
-            if (txt_MaterialIssueNumber.Text.Length > 1 && txt_MaterialPhaseNumber.Text.Length > 0 && cmb_OrderMaterial.Text != "Order HD Bolts")
-            {
-                btn_Material3.Enabled = true;
-                btn_Material3.BackColor = Color.Chartreuse;
-            }
-            else
-            {
-                btn_Material3.Enabled = false;
-                btn_Material3.BackColor = Color.Gainsboro;
-            }
-        }
-
-        private void btn_MainMaterialCheck_Click_1(object sender, EventArgs e)
-        {
-            pnl_Material.Visible = true;
-            pnl_Home.Visible = false;
-        }
-
-        private void btn_MainPackageCreation_Click_1(object sender, EventArgs e)
-        {
-            pnl_Home.Visible = false;
-            pnl_Package.Visible = true;
-        }
-
-        private void btn_MainDetailCheck_Click_1(object sender, EventArgs e)
-        {
-            pnl_Home.Visible = false;
-            pnl_Detail.Visible = true;
-        }
-
-        private void btn_Material1_Click_1(object sender, EventArgs e)
-        {
-            MaterialStatusLabel.Text = "Working";
-            Cursor = Cursors.AppStarting;
-
-            if (!InitialSetup(StageTypes.Prelim1, false)) { return; }
-
-            if (!_selectedObjects.MaterialButton1op(_projectData, (int)StageTypes.Prelim1))
-            {
-                MaterialStatusLabel.Text = "Cancelled";
-                return;
-            }
+            if (!await Task.Run(() => _selectedObjects.MaterialButton1op(_projectData, (int)StageTypes.Prelim1))) { EndFunction(0); return; }
 
             ModelModifiers.RedrawViews();
 
-            Cursor = Cursors.Default;
-            MaterialStatusLabel.Text = "Complete";
+            EndFunction(1);
         }
 
-        private void btn_Material2_Click_1(object sender, EventArgs e)
+        private async void btn_Material2_Click_1(object sender, EventArgs e)
         {
-            MaterialStatusLabel.Text = "Working";
-            Cursor = Cursors.AppStarting;
+            StartFunction();
 
-            if (!InitialSetup(StageTypes.Prelim2, true)) { Cursor = Cursors.Default;  return; };
+            if (!await Task.Run(() => InitialSetup(StageTypes.Prelim2, true))) { EndFunction(0); return; };
 
-            if (!_selectedObjects.MaterialButton2op(txt_StartNumber.Text, (int)StageTypes.Prelim2, _projectData, _model))
-            {
-                MaterialStatusLabel.Text = "Cancelled";
-                return;
-            }
+            if (!await Task.Run(() => _selectedObjects.MaterialButton2op(txt_StartNumber.Text, (int)StageTypes.Prelim2, _projectData, _model))) { EndFunction(0); return; }
 
             ModelModifiers.RedrawViews();
 
-            Cursor = Cursors.Default;
-            MaterialStatusLabel.Text = "Complete";
+            EndFunction(1);
         }
 
-        private void btn_Material3_Click_1(object sender, EventArgs e)
+        private async void btn_Material3_Click_1(object sender, EventArgs e)
         {
-            MaterialStatusLabel.Text = "Working";
-            Cursor = Cursors.AppStarting;
+            StartFunction();
 
-            if (!InitialSetup(StageTypes.Prelim3, true)) { Cursor = Cursors.Default; return; };
+            if (!await Task.Run(() => InitialSetup(StageTypes.Prelim3, true))) { EndFunction(0); return; };
 
-            _selectedObjects.MaterialButton3op(_projectData, _model.GetProjectInfo(), txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text,
-                cmb_OrderMaterial.Text, (int)StageTypes.Prelim3, StageTypes.Prelim3, _model);
+            string orderType = cmb_OrderMaterial.Text;
+            if (!await Task.Run(() => _selectedObjects.MaterialButton3op(_projectData, _model.GetProjectInfo(), txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text,
+                orderType, (int)StageTypes.Prelim3, StageTypes.Prelim3, _model))){ EndFunction(0); return; }
+
             _model.CommitChanges();
 
-            Cursor = Cursors.Default;
-            MaterialStatusLabel.Text = "Complete";
+            EndFunction(1);
         }
 
-        private void btn_HomeMaterial_Click_1(object sender, EventArgs e)
+        private async void btn_Detail1_Click_1(object sender, EventArgs e)
         {
-            pnl_Home.Visible = true;
-            pnl_Material.Visible = false;
+            StartFunction();
+
+            if (!await Task.Run(() => InitialSetup(StageTypes.Check1, false))) { EndFunction(0); return; }
+
+            await Task.Run(() => _selectedObjects.DetailButton1op(_projectData, (int)StageTypes.Check1));
+
+            EndFunction(1);
         }
 
-        private void btn_Detail1_Click_1(object sender, EventArgs e)
+        private async void btn_Detail2_Click_1(object sender, EventArgs e)
         {
-            DetailingStatusLabel.Text = "Working";
-            Cursor = Cursors.AppStarting;
+            StartFunction();
 
-            if (!InitialSetup(StageTypes.Check1, false)) { Cursor = Cursors.Default; return; }
-
-            _selectedObjects.DetailButton1op(_projectData, (int)StageTypes.Check1);
-
-            Cursor = Cursors.Default;
-            DetailingStatusLabel.Text = "Complete";
-        }
-
-        private void btn_Detail2_Click_1(object sender, EventArgs e)
-        {
-            DetailingStatusLabel.Text = "Working";
-            Cursor = Cursors.AppStarting;
 
             ModelModifiers.ResetWorkPlane(_model);
-            if (!InitialSetup(StageTypes.Check2, true)) { Cursor = Cursors.Default; return; }
+            if (!await Task.Run(() => InitialSetup(StageTypes.Check2, true))) { EndFunction(0); return; }
+            string orientationType = cmb_ColumnOrientationType.Text; //we need this to avoid cross threading. (unsure why...)
+            await Task.Run(() => _selectedObjects.DetailButton2op(_projectData, (int)StageTypes.Check2, orientationType, txt_PlateOnFlange.Text));
 
-            _selectedObjects.DetailButton2op(_projectData, (int)StageTypes.Check2, cmb_ColumnOrientationType.Text, txt_PlateOnFlange.Text);
-
-            Cursor = Cursors.Default;
-            DetailingStatusLabel.Text = "Complete";
+            EndFunction(1);
         }
 
-        private void btn_Detail3_Click_1(object sender, EventArgs e)
+        private async void btn_Detail3_Click_1(object sender, EventArgs e)
         {
-            DetailingStatusLabel.Text = "Working";
+            StartFunction();
+
+            if (!await Task.Run(() => InitialSetup(StageTypes.Check3, true))) { EndFunction(0); return; }
+
+            if(!_selectedObjects.DetailButton3op(_projectData, (int)StageTypes.Check3)) { EndFunction(0); return; }
+
+            EndFunction(1);
+        }
+
+        private async void btn_FabMisc_Click(object sender, EventArgs e)
+        {
+            StartFunction();
+
+            if (!await Task.Run(() => InitialSetup(StageTypes.Bolt, false))) { EndFunction(0); return; }
+
+            await Task.Run(() => FabMisc.FabMiscOp(phaseNumber.Text, issueNumber.Text, _projectData, txt_SiteDate.Text, _selectedObjects));
+
+            EndFunction(1);
+        }
+
+        private async void btnCreatePackage1_Click_1(object sender, EventArgs e)
+        {
+            StartFunction();
+
+            if (!await Task.Run(() => InitialSetup(StageTypes.FAB, true))) { EndFunction(0); return; }
+
+            if (!_selectedObjects.NumbersUpToDate) { SetStatusLabels("Numbers not up to date"); EndFunction(0); return; }
+
+            SetStatusLabels("Creating Fab Package");
+
+            await Task.Run(() => _selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber.Text, issueNumber.Text, StageTypes.FAB, txt_SiteDate.Text));
+
+            EndFunction(1);
+        }
+
+        private void StartFunction()
+        {
             Cursor = Cursors.AppStarting;
-
-            if (!InitialSetup(StageTypes.Check3, true)) { Cursor = Cursors.Default; return; }
-
-            DetailingStatusLabel.Text = _selectedObjects.DetailButton3op(_projectData, (int)StageTypes.Check3);
-
-            Cursor = Cursors.Default;
-            DetailingStatusLabel.Text = "Complete";
+            flowLayoutPanel1.Enabled = false;
         }
 
-        private void btn_FabMisc_Click(object sender, EventArgs e)
+        private void EndFunction(int cancelledOrComplete) //0 = cancelled 1 = Complete
         {
-            StatusLabel.Text = "Working";
-            Cursor = Cursors.AppStarting;
-
-            if (!InitialSetup(StageTypes.Bolt, false)) { return; }
-
-            FabMisc.FabMiscOp(phaseNumber.Text, issueNumber.Text, _projectData, txt_SiteDate.Text, _selectedObjects);
-
-            Cursor = Cursors.Default;
-            StatusLabel.Text = "Complete";
-        }
-
-        private void btn_HomeDetail_Click_1(object sender, EventArgs e)
-        {
-            pnl_Home.Visible = true;
-            pnl_Detail.Visible = false;
-        }
-
-        private void btn_HomePackage_Click_1(object sender, EventArgs e)
-        {
-            pnl_Home.Visible = true;
-            pnl_Package.Visible = false;
-        }
-
-        private void btnCreatePackage1_Click_1(object sender, EventArgs e)
-        {
-            StatusLabel.Text = "Working";
-            Cursor = Cursors.AppStarting;
-
-            if (!InitialSetup(StageTypes.FAB, false)) { return; }
-            if (!_selectedObjects.NumbersNotUpToDate) { return; }
-
-            StatusLabel.Text = _selectedObjects.CreateFabPackage(_projectData, cmbPackageLocation.Text, phaseNumber.Text, issueNumber.Text, StageTypes.FAB, txt_SiteDate.Text);
-
-            StatusLabel.Text = "Complete";
+            string message = cancelledOrComplete == 0 ? "Cancelled" : "Complete";
+            flowLayoutPanel1.Enabled = true;
+            SetStatusLabels(message);
             Cursor = Cursors.Default;
         }
 
@@ -426,7 +340,7 @@ namespace Prism
                 btn_Detail2.BackColor = Color.Gainsboro;
             }
             else
-            {   
+            {
                 txt_PlateOnFlange.Text = "";
                 txt_PlateOnFlange.Visible = false;
                 lbl_PltOnFlange.Visible = false;
@@ -451,10 +365,100 @@ namespace Prism
             }
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void btn_HomeDetail_Click_1(object sender, EventArgs e)
         {
-            InitialSetup(StageTypes.Check1, false);
-            ModelChecker.BoltThrough2Ply(_selectedObjects);
+            pnl_Home.Visible = true;
+            pnl_Detail.Visible = false;
+        }
+
+        private void btn_HomePackage_Click_1(object sender, EventArgs e)
+        {
+            pnl_Home.Visible = true;
+            pnl_Package.Visible = false;
+        }
+
+        private void btn_HomeMaterial_Click_1(object sender, EventArgs e)
+        {
+            pnl_Home.Visible = true;
+            pnl_Material.Visible = false;
+        }
+
+        private void btn_MainMaterialCheck_Click_1(object sender, EventArgs e)
+        {
+            pnl_Material.Visible = true;
+            pnl_Home.Visible = false;
+        }
+
+        private void btn_MainPackageCreation_Click_1(object sender, EventArgs e)
+        {
+            pnl_Home.Visible = false;
+            pnl_Package.Visible = true;
+        }
+
+        private void btn_MainDetailCheck_Click_1(object sender, EventArgs e)
+        {
+            pnl_Home.Visible = false;
+            pnl_Detail.Visible = true;
+        }
+
+        private void SetStatusLabels(string message)
+        {
+            MaterialStatusLabel.Text = message;
+            DetailingStatusLabel.Text = message;
+            StatusLabel.Text = message;
+        }
+
+        private void CheckForFabButton()
+        {
+            if (phaseNumber.Text.Length > 0 & issueNumber.Text.Length > 1)
+            {
+                btnCreatePackage1.Enabled = true;
+                btnCreatePackage1.BackColor = Color.Chartreuse;
+            }
+            else
+            {
+                btnCreatePackage1.Enabled = false;
+                btnCreatePackage1.BackColor = Color.Gainsboro;
+            }
+        }
+
+        private void CheckForBoltOrderButton()
+        {
+            if (phaseNumber.Text.Length > 0 & issueNumber.Text.Length > 1)
+            {
+                btn_FabMisc.Enabled = true;
+                btn_FabMisc.BackColor = Color.Chartreuse;
+            }
+            else
+            {
+                btn_FabMisc.Enabled = false;
+                btn_FabMisc.BackColor = Color.Gainsboro;
+            }
+        }
+
+        private void CheckForMaterialButton()
+        {
+            if (txt_MaterialIssueNumber.Text.Length > 1 && txt_MaterialPhaseNumber.Text.Length > 0 && cmb_OrderMaterial.Text != "Order HD Bolts")
+            {
+                btn_Material3.Enabled = true;
+                btn_Material3.BackColor = Color.Chartreuse;
+            }
+            else
+            {
+                btn_Material3.Enabled = false;
+                btn_Material3.BackColor = Color.Gainsboro;
+            }
+        }
+
+        private void AllowNumbersAndDeleteOnly(KeyPressEventArgs e)
+        {
+            char delete = new char();
+            delete = '\b'; //This is the code created when backspace is pressed.
+            if (!Char.IsNumber(e.KeyChar) && (e.KeyChar != delete)) //If the key press is neither a number or delete key then ignore.
+            {
+                e.Handled = true;
+                return;
+            }
         }
     }
 }

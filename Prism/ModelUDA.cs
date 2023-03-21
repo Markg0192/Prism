@@ -58,7 +58,6 @@
 
         public static string CurrentStageName(int stageNumber)
         {
-
             return $"SEV-UDA-{GetUDANoFromStageNumber(stageNumber)}";
         }
 

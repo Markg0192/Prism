@@ -1,14 +1,16 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Windows.Forms;
 using Tekla.Structures.Model;
+using Tekla.Structures.Model.Operations;
 using static Prism.Enums;
 
 namespace Prism.ButtonOperations
 {
     public static class MaterialButton3
     {
-        public static void MaterialButton3op(this SelectedObjects myObjects, PrismProjectData projectData, ProjectInfo projectInfo,
+        public static bool MaterialButton3op(this SelectedObjects myObjects, PrismProjectData projectData, ProjectInfo projectInfo,
             string phaseNumber, string issueNumber, string orderType, int stageNumber, StageTypes stageType, Model model)
         {
             ReportManager myReportManager = new ReportManager(projectData, phaseNumber, issueNumber);
@@ -23,8 +25,7 @@ namespace Prism.ButtonOperations
             if (orderType == "Order HD Bolts") //Order HD bolts not an option therefore this statement is never true(for now)
             {
                 HDBolts.OrderHDBolts(myObjects, myReportManager);
-                Logging.LogProgress(projectData.ProjName, "Material 3 - HD Bolts", 0, myObjects.AssembliesList.Count);
-                return;
+                Logging.LogProgress(projectData.ProjName, "Material 3 - HD Bolts", 0, myObjects.AssembliesList.Count);                
             }
 
             if (orderType == "Order Heavy Fittings")
@@ -53,7 +54,7 @@ namespace Prism.ButtonOperations
                 if (ModelChecker.NotOrderedParts.Count != 0)
                 {
                     PrismWarnings.HasNotBeenOrderedOMIT();
-                    return;
+                    return false;
                 }
             }
 
@@ -62,25 +63,29 @@ namespace Prism.ButtonOperations
                 if (ModelChecker.OrderedParts.Count != 0)
                 {
                     PrismWarnings.HasAlreadyBeenOrdered();
-                    return;
+                    return false;
                 }
-            }
-        
-            if (fabsecsPresent)
-            {
-                DialogResult fabsecWarning = PrismWarnings.FabsecsPresent();
-                if (fabsecWarning == DialogResult.Yes)
-                {
-                    originalFabsecs.ModifyAttributes(stageNumber, projectData);
-                    MessageBox.Show("Sorry! I cannot get your carcass drawings, please create these manually.");
-                }
-                else { return; }
             }
 
             ModelModifiers.VariationCheck(phaseNumber, myObjects, projectData);
             myObjects.AddPrelimMarks(projectInfo);
             myReportManager.Folders.CreateMatFolder(fabsecsPresent);
 
+            if (fabsecsPresent)
+            {
+                DialogResult fabsecWarning = PrismWarnings.FabsecsPresent();
+                if (fabsecWarning == DialogResult.Yes)
+                {
+                    ReportManager.SelectDrawingsInDocManager();
+                    Operation.CreateReportFromSelected(myReportManager.DrawingDpmReportRpt, Path.Combine(myReportManager.Folders.FabsecCarcassPath, myReportManager.DrawingDpmReportXsr), "", "", "");
+                    DrawingManager dm = new DrawingManager(model, projectData, phaseNumber, issueNumber, myObjects, myReportManager.Folders.FabsecCarcassPath);
+                    dm.PrintDPM(myReportManager.Folders.FabsecCarcassPath);
+                    originalFabsecs.ModifyAttributes(stageNumber, projectData);
+                    ModelModifiers.RemoveIDDessin(myReportManager.Folders.FabsecCarcassPath);
+                    //MessageBox.Show("Sorry! I cannot get your carcass drawings, please create these manually.");
+                }
+                else { return false; }
+            }
             myReportManager.CreateMaterialReports(myObjects, orderType, stageType);
             if (orderType == "Omit Material")
             {
@@ -94,12 +99,9 @@ namespace Prism.ButtonOperations
             {
                 EmailWriter.WriteMatEmail(projectData, myObjects, myReportManager.MatReportPrefix, issueNumber, phaseNumber, orderType);
             }
-            if (fabsecsPresent)
-            {
-                MessageBox.Show("FABSECS! Please ensure to add fabsec carcass drawings to your package.");
-            }
 
             Logging.LogProgress(projectData.ProjName, "Material 3", 0, myObjects.AssembliesList.Count);
+            return true;
         }
     }
 }

@@ -93,6 +93,10 @@ namespace Prism
             {
                 return "This is an omit material order";
             }
+            if (orderType == "Order Special Fittings")
+            {
+                return "This is a special fitting order";
+            }
             return "";
         }
 
@@ -109,6 +113,10 @@ namespace Prism
             if (orderType == "Omit Material")
             {
                 return "Please remove this from the material order of this phase";
+            }
+            if(orderType == "Order Special Fittings")
+            {
+                return "Please order these special fittings";
             }
             return "";
         }
