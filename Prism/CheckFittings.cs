@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms;
 using Tekla.Structures.Model;
 using Tekla.Structures.Model.UI;
 using static Prism.Enums;
@@ -118,7 +119,13 @@ namespace Prism
                 $"There are {IncorrectThickness.Count()} parts selected with a non-standard thickness (See blue in the model).";
 
                 PrismWarnings.AbnormalFittings();
-
+                DialogResult tagFittings = PrismWarnings.TagAbnormalFittings();
+                if(tagFittings == DialogResult.Yes)
+                {
+                    ModelModifiers.ModifySpecialTag("Special", IncorrectLength);
+                    ModelModifiers.ModifySpecialTag("Special", IncorrectThickness);
+                    ModelModifiers.ModifySpecialTag("Special", IncorrectGrade);
+                }
                 ModelObjectVisualization.SetTransparencyForAll(TemporaryTransparency.SEMITRANSPARENT);
                 ModelObjectVisualization.SetTemporaryStateForAll(new Color(0.5, 0.5, 0.5));
 

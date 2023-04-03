@@ -14,7 +14,7 @@ namespace Prism.ButtonOperations
 
             if (result == DialogResult.Yes)
             {
-                myObjects.CreateDrawings();                
+                myObjects.CreateDrawings();        
             }
             else
             {

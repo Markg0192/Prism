@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 using Tekla.Structures.Drawing;
+using Tekla.Structures.Filtering;
 using Tekla.Structures.Model;
 using Tekla.Structures.Model.Operations;
 using static Prism.Enums;
+using ModelObject = Tekla.Structures.Model.ModelObject;
 using Part = Tekla.Structures.Model.Part;
 
 namespace Prism
@@ -26,6 +29,7 @@ namespace Prism
             NumbersUpToDate = true;
             AssembliesList = new List<Assembly>();
             SelectedModelParts = new List<Part>();
+            LockedParts = new List<ModelObject>();
             MyDrawingHandler = new DrawingHandler();
             Moe = new Tekla.Structures.Model.UI.ModelObjectSelector().GetSelectedObjects();
             MyMarks = new List<string>();
@@ -101,6 +105,7 @@ namespace Prism
         public List<List<BoltGroup>> AllBolts = new List<List<BoltGroup>>();
         public List<Part> SelectedModelParts { get; set; }
         public List<string> MyMarks { get; set; }
+        public List<ModelObject> LockedParts { get; set; }
 
         private void CheckXYZSize(Part myPart)
         {
@@ -135,6 +140,8 @@ namespace Prism
 
                     SelectedModelParts.Add(myPart);
 
+                    if (IsLocked(myPart)) LockedParts.Add(myPart);
+
                     double weight = 0;
                     myPart.GetReportProperty(ModelUDA.Weight(), ref weight);
                     PartWeight = PartWeight + weight;
@@ -152,6 +159,17 @@ namespace Prism
                     }
                 }
             }
+        }
+
+        private bool IsLocked(Part myPart)
+        {
+            string isLocked = "";
+            myPart.GetReportProperty("OBJECT_LOCKED", ref isLocked);
+            if (isLocked == "Yes")
+            {
+                return true;
+            }
+            return false;
         }
 
         private bool IsValidPart(Part p)

@@ -30,16 +30,24 @@ namespace Prism
         private const string _output1POname = "-1o-PrelimHotRolledMemList-OMIT.pdf";
         private string _report1POname = $"{_output1POname}.rpt";
 
-        private const string _output1PFname = "-1F-SEV-PrelimHRFitList.pdf";
+        private const string _output1PFname = "-1F-PrelimSpecialFitList.pdf";
         private string _report1PFname = $"{_output1PFname}.rpt";
-        private const string _output1PFAname = "-1FA-SEV-PrelimHRFitList-ADD.pdf";
+        private const string _output1PFAname = "-1Fa-PrelimSpecialFitList-ADD.pdf";
         private string _report1PFAname = $"{_output1PFAname}.rpt";
-        private const string _output1PFOname = "-1FO-SEV-PrelimHRFitList-OMIT.pdf";
+        private const string _output1PFOname = "-1Fo-PrelimSpecialFitList-OMIT.pdf";
         private string _report1PFOname = $"{_output1PFOname}.rpt";
 
         //Bolt ordering
         private const string _outputBolts = "-SEV-BOLTS-STRUMIS-SUMMARY_v3.xsr";
         private const string _reportBoltsName = "-SEV-BOLTS-STRUMIS-SUMMARY_v3.rpt";
+
+        private const string _outputSelectedBolts = "-SEV-BOLTS-STRUMIS-ONLY-SELECTED_v1.xsr";
+        private const string _reportSelectedBoltsName = "-SEV-BOLTS-STRUMIS-ONLY-SELECTED_v1.rpt";
+
+        private const string _output5OName = "-5o-Bolt-OMIT.pdf";
+        private string _report5OName = $"{_output5OName}.rpt";
+        private const string _output5ONameSelected = "-5o-Bolt-OMIT-SelectedOnly.pdf";
+        private string _report5ONameSelected = $"{_output5ONameSelected}.rpt";
 
         //Fab Packages
         private const string _output2Name = "-2-HotRolledMemList.pdf";
@@ -62,15 +70,14 @@ namespace Prism
         private string _report4AName = $"{_output4AName}.rpt";
         private const string _output4OName = "-4o-ShopBoltList-OMIT.pdf";
         private string _report4OName = $"{_output4OName}.rpt";
-        private const string _output4LName = "-4l--ShopBoltLocationList.pdf";
+        private const string _output4LName = "-4l-ShopBoltLocationList.pdf";
         private string _report4LName = $"{_output4LName}.rpt";
 
         private const string _output5Name = "-5-SiteBoltList.pdf";
         private string _report5Name = $"{_output5Name}.rpt";
         private const string _output5AName = "-5a-SiteBoltList-ADD.pdf";
         private string _report5AName = $"{_output5AName}.rpt";
-        private const string _output5OName = "-5o-SiteBoltList-OMIT.pdf";
-        private string _report5OName = $"{_output5OName}.rpt";
+
         private const string _output5LName = "-5l-SiteBoltLocationList.pdf";
         private string _report5LName = $"{_output5LName}.rpt";
 
@@ -81,8 +88,8 @@ namespace Prism
         private const string _reportQSname = "-QS-AssemblyBreakdownList.rpt";
         private const string _outputQSname = "-QS-AssemblyBreakdownList.xsr";
 
-        public string DrawingDpmReportRpt = "ID_dessins_KP1.rpt";
-        public string DrawingDpmReportXsr = "ID_dessins_KP1.xsr";
+        public string _drawingDpmReportRpt = "ID_dessins_KP1.rpt";
+        public string _drawingDpmReportXsr = "ID_dessins_KP1.xsr";
         #endregion
 
         private string _NCPlateSetting;
@@ -100,6 +107,7 @@ namespace Prism
             Folders = new FolderManager(projectData, phaseNum, issueNum);
             FabReportPrefix = ($"{projectData.ProjNumber}-{phaseNum}-FAB-ISSUE{issueNum}");
             MatReportPrefix = ($"{projectData.ProjNumber}-{phaseNum}-PRELIM-ISSUE{issueNum}");
+            BoltReportPrefix = $"{projectData.ProjNumber}-{phaseNum}-BOLT-ISSUE{issueNum}";
             _title1 = phaseNum;
             _title2 = projectData.Initials;
             _title3 = issueNum;
@@ -108,43 +116,78 @@ namespace Prism
         public FolderManager Folders;
         public readonly string FabReportPrefix;
         public readonly string MatReportPrefix;
+        public readonly string BoltReportPrefix;
 
         public void CreateMaterialReports(SelectedObjects selectedObjects, string orderType, StageTypes stageType)
         {
-            string materialReport = "";
-            string outputName = "";
-            if (orderType == "Order Material")
+            if (!orderType.Contains("Order Bolts"))
             {
-                selectedObjects.ExportBSWX(Folders.MatPath, _projectData, _phaseNum, _issueNum, stageType);
-                ModelModifiers.RemoveLog(Folders.MatPath);
-                materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report1Pname);
-                outputName = _output1Pname;
+                string materialReport = "";
+                string outputName = "";
+                if (orderType == "Order Material")
+                {
+                    selectedObjects.ExportBSWX(Folders.MatPath, _projectData, _phaseNum, _issueNum, stageType);
+                    ModelModifiers.RemoveLog(Folders.MatPath);
+                    materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report1Pname);
+                    outputName = _output1Pname;
+                }
+                if (orderType == "Add Material")
+                {
+                    selectedObjects.ExportBSWX(Folders.MatPath, _projectData, _phaseNum, _issueNum, stageType);
+                    ModelModifiers.RemoveLog(Folders.MatPath);
+                    materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report1PAname);
+                    outputName = _output1PAname;
+                }
+                if (orderType == "Omit Material")
+                {
+                    materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report1POname);
+                    outputName = _output1POname;
+                }
+                if (orderType == "Order Special Fittings")
+                {
+                    selectedObjects.ExportBSWX(Folders.MatPath, _projectData, _phaseNum, _issueNum, stageType);
+                    ModelModifiers.RemoveLog(Folders.MatPath);
+                    materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report1PFname);
+                    outputName = _output1PFname;
+                }
+                if (orderType == "Add Special Fittings")
+                {
+                    selectedObjects.ExportBSWX(Folders.MatPath, _projectData, _phaseNum, _issueNum, stageType);
+                    ModelModifiers.RemoveLog(Folders.MatPath);
+                    materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report1PFAname);
+                    outputName = _output1PFAname;
+                }
+                if (orderType == "Omit Special Fittings")
+                {
+                    materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report1PFOname);
+                    outputName = _output1PFOname;
+                }
+                Operation.CreateReportFromSelected(materialReport, Path.Combine(Folders.MatPath, $"{MatReportPrefix}{outputName}"), _title1, _title2, _title3);
             }
-            if (orderType == "Add Material")
-            {
-                selectedObjects.ExportBSWX(Folders.MatPath, _projectData, _phaseNum, _issueNum, stageType);
-                materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report1PAname);
-                outputName = _output1PAname;
-            }
-            if (orderType == "Omit Material")
-            {
-                materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report1POname);
-                outputName = _output1POname;
-            }
-            if (orderType == "Order Heavy Fittings")
-            {
-                selectedObjects.ExportBSWX(Folders.MatPath, _projectData, _phaseNum, _issueNum, stageType);
-                materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report1Pname);
-                outputName = _output1PFname;
-            }
-            Operation.CreateReportFromSelected(materialReport, Path.Combine(Folders.MatPath, $"{MatReportPrefix}{outputName}"), _title1, _title2, _title3);
         }
 
-        public void CreateBoltList()
+        public void CreateBoltList(string reportPrefix, string orderType)
         {
-            _reportBolts = Path.Combine(FirmFolderLoc.ReportTemplates(), _reportBoltsName);
-            Operation.CreateReportFromSelected(_reportBolts, Path.Combine(Folders.BoltPath, $"{FabReportPrefix}{_outputBolts}"), _title1, _title2, _title3);
+            string boltReportName = _reportBoltsName;
+            string boltListOutputName = _outputBolts;
+
+            if (orderType.Contains("Omit")) { boltReportName = _report5OName; boltListOutputName = _output5OName; }
+
+            _reportBolts = Path.Combine(FirmFolderLoc.ReportTemplates(), boltReportName);
+            Operation.CreateReportFromSelected(_reportBolts, Path.Combine(Folders.BoltPath, $"{reportPrefix}{boltListOutputName}"), _title1, _title2, _title3);
         }
+
+        public void CreateSelectedBoltList(string reportPrefix, string orderType)
+        {
+            string boltReportName = _reportSelectedBoltsName;
+            string boltListOutputName = _outputSelectedBolts;
+
+            if (orderType.Contains("Omit")) { boltReportName = _report5ONameSelected; boltListOutputName = _output5ONameSelected; }
+
+            string reportBolts = Path.Combine(FirmFolderLoc.ReportTemplates(), boltReportName);
+            Operation.CreateReportFromSelected(reportBolts, Path.Combine(Folders.BoltPath, $"{reportPrefix}{boltListOutputName}"), _title1, _title2, _title3);
+        }
+
 
         public void CreateHDBoltList()
         {
@@ -165,6 +208,7 @@ namespace Prism
             string shopBoltReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report4Name);
             string siteBoltReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report5Name);
             string assemblyReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report6Name);
+            string drawingIDList = Path.Combine(FirmFolderLoc.ReportTemplates(), _drawingDpmReportRpt);
 
             _reportBolts = Path.Combine(FirmFolderLoc.ReportTemplates(), _reportBoltsName);
             string report9 = Path.Combine(FirmFolderLoc.ReportTemplates(), _report6Name);
@@ -185,7 +229,7 @@ namespace Prism
                 if (isFitting) create4Report = true;
             }
 
-            Operation.CreateReportFromSelected(DrawingDpmReportRpt, Path.Combine(Folders.DspPath, DrawingDpmReportXsr), "", "", "");
+            Operation.CreateReportFromSelected(drawingIDList, Path.Combine(Folders.DspPath, _drawingDpmReportXsr), "", "", "");
             Operation.CreateReportFromSelected(qsReport, Path.Combine(Folders.DspPath, $"{FabReportPrefix}{_outputQSname}"), _title1, _title2, _title3);
             Operation.CreateReportFromSelected(assemblyReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output6Name}"), _title1, _title2, _title3);
 

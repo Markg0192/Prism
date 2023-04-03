@@ -11,6 +11,7 @@ using System.Collections;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Tekla.Structures.Model.UI;
+using static Prism.Enums;
 
 namespace Prism
 {
@@ -70,10 +71,11 @@ namespace Prism
             }
         }
 
-        public static void ModifyAttributes(this List<Part> selectedObjects, int stageNumber, PrismProjectData projectData)
+        public static void ModifyAttributes(this List<Part> selectedObjects, int stageNumber, PrismProjectData projectData, bool isSpecialFittingOrder = false)
         {
             foreach (Part part in selectedObjects)
             {
+                if (isSpecialFittingOrder) part.SetUserProperty(ModelUDA.Pre_Ordered(), 1);
                 part.SetUserProperty(ModelUDA.CurrentStageName(stageNumber), projectData.Full);
                 part.SetUserProperty(ModelUDA.CurrentStageDate(stageNumber), projectData.Date);
                 if (stageNumber == 7)
@@ -91,7 +93,23 @@ namespace Prism
             {
                 bolts.SetUserProperty(ModelUDA.BoltOrderedBy(), name);
                 bolts.SetUserProperty(ModelUDA.BoltOrderedDate(), date);
+                bolts.SetUserProperty(ModelUDA.TimesBoltOrdered(), TimesBoltOrdered(bolts));
             }
+        }
+
+        private static string TimesBoltOrdered(BoltGroup bolts)
+        {
+            string timesOrdered = "";
+            bolts.GetUserProperty(ModelUDA.TimesBoltOrdered(), ref timesOrdered);
+
+            if (timesOrdered != "")
+            {
+                var nu = timesOrdered.Split('=');
+                int newOrderCount = Convert.ToInt32(nu[1]) + 1;
+                return $"Times ordered ={newOrderCount}";
+            }
+            return "Times ordered =1";
+
         }
 
         public static void StampPartFabUDA(List<Part> selectedModelParts, string phaseNumber, string issueNumber)
@@ -344,6 +362,43 @@ namespace Prism
             ModelObjectVisualization.SetTransparencyForAll(TemporaryTransparency.SEMITRANSPARENT);
             ModelObjectVisualization.SetTemporaryStateForAll(new Color(0.5, 0.5, 0.5));
             ModelObjectVisualization.SetTemporaryState(myParts, new Color(1, 0, 0));
+        }
+
+        public static void SetPartsBlue(List<ModelObject> myParts)
+        {
+            ModelObjectVisualization.SetTransparencyForAll(TemporaryTransparency.SEMITRANSPARENT);
+            ModelObjectVisualization.SetTemporaryStateForAll(new Color(0.5, 0.5, 0.5));
+            ModelObjectVisualization.SetTemporaryState(myParts, new Color(0, 0, 1));
+        }
+
+        public static int ChangeSpecialTag(string newTagString, out List<ModelObject> objects)
+        {
+            SelectedObjects selectedObjects = new SelectedObjects(StageTypes.Prelim3);
+            ModifySpecialTag(newTagString, selectedObjects.SelectedModelParts);
+            objects = new List<ModelObject>();
+            foreach (Part p in selectedObjects.SelectedModelParts)
+            {
+                objects.Add(p);
+            }
+            return 0;
+        }
+
+        public static void ModifySpecialTag(string modifyTo, List<Part> selectedModelParts)
+        {
+            foreach (Part part in selectedModelParts)
+            {
+                part.SetUserProperty(ModelUDA.SpecialFittingTag(), modifyTo);
+                part.Modify();
+            }
+        }
+
+        public static void ModifySpecialTag(string modifyTo, List<ModelObject> selectedModelParts)
+        {
+            foreach (Part part in selectedModelParts)
+            {
+                part.SetUserProperty(ModelUDA.SpecialFittingTag(), modifyTo);
+                part.Modify();
+            }
         }
     }
 }

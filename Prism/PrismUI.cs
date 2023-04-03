@@ -1,8 +1,13 @@
 ﻿using Prism.ButtonOperations;
+using Prism.CustomDialogs;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
 using Tekla.Structures.Model;
+using Tekla.Structures.RemotingHelper;
 using static Prism.Enums;
 using Task = System.Threading.Tasks.Task;
 
@@ -12,7 +17,7 @@ namespace Prism
     {
         private Model _model;
         private PrismProjectData _projectData;
-        private SelectedObjects _selectedObjects;
+        public static SelectedObjects _selectedObjects;
 
         public PrismUI()
         {
@@ -23,7 +28,7 @@ namespace Prism
             if (!_model.GetConnectionStatus())
             {
                 MessageBox.Show("Failed to connect to a correct version of Tekla Model");
-                Logging.DebugLog("Incorrect Connection to model", _model.GetProjectInfo().Name);
+                Logging.LoginFail();
                 Application.Exit();
             }
 
@@ -31,7 +36,7 @@ namespace Prism
             Logging.Login(_projectData.ProjName);
         }
 
-        private bool InitialSetup(StageTypes stageType, bool checkForPreviousSteps)
+        public bool InitialSetup(StageTypes stageType, bool checkForPreviousSteps)
         {
             SetStatusLabels("Gathering Parts");
             ModelChecker.ClearOldLists();
@@ -46,6 +51,13 @@ namespace Prism
             {
                 SetStatusLabels("No Parts Selected");
                 PrismWarnings.NoPartsSelected();
+                return false;
+            }
+            if (_selectedObjects.LockedParts.Count > 0)
+            {
+                SetStatusLabels("Locked Parts Selected");
+                PrismWarnings.LockedPartsSelected();
+                ModelModifiers.SetPartsRed(_selectedObjects.LockedParts);
                 return false;
             }
             SetStatusLabels("Running Operation");
@@ -82,15 +94,47 @@ namespace Prism
         {
             StartFunction();
 
-            if (!await Task.Run(() => InitialSetup(StageTypes.Prelim3, true))) { EndFunction(0); return; };
+            string orderType = $"{cmb_OrderCall.Text} {cmb_OrderMaterial.Text}";
 
-            string orderType = cmb_OrderMaterial.Text;
-            if (!await Task.Run(() => _selectedObjects.MaterialButton3op(_projectData, _model.GetProjectInfo(), txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text,
-                orderType, (int)StageTypes.Prelim3, StageTypes.Prelim3, _model))){ EndFunction(0); return; }
+            if (orderType.Contains("Special Fittings"))
+            {
+                if (!await Task.Run(() => ProcessSpecialFittings(orderType))) return ;
+            }
+            else
+            {
+                if (!await Task.Run(() => InitialSetup(StageTypes.Prelim3, true))) { EndFunction(0); return; };
 
-            _model.CommitChanges();
+                if (!await Task.Run(() => _selectedObjects.MaterialButton3op(_projectData, _model.GetProjectInfo(), txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text,
+                    orderType, (int)StageTypes.Prelim3, StageTypes.Prelim3, _model, txt_SiteDate.Text))) { EndFunction(0); return; }
+
+                _model.CommitChanges();
+            }
 
             EndFunction(1);
+        }
+
+        private async Task<bool> ProcessSpecialFittings(string orderType)
+        {
+            ReportManager myReportManager = new ReportManager(_projectData, txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text);
+            if (orderType.Contains("Omit"))
+            {
+                if (!await Task.Run(() => InitialSetup(StageTypes.Prelim3, true))) { EndFunction(0); return false; };
+                if (!myReportManager.Folders.CreateMatFolder(false)) { EndFunction(0); return false; };
+                myReportManager.CreateMaterialReports(_selectedObjects, orderType, StageTypes.Prelim3);
+                MaterialButton3.FinishOrder(_selectedObjects, (int)StageTypes.Prelim3, _projectData, myReportManager.MatReportPrefix,
+                    txt_MaterialIssueNumber.Text, txt_MaterialPhaseNumber.Text, orderType, myReportManager);
+            }
+            else
+            {
+                int orderAction = PrismWarnings.SpecialFittingOrder();
+                if (orderAction == 2 || orderAction == 3)
+                {
+                    if (!OrderSpecials(orderAction, orderType, StageTypes.Prelim3, false, myReportManager)) { EndFunction(0); return false; }
+                    MaterialButton3.FinishOrder(_selectedObjects, (int)StageTypes.Prelim3, _projectData, myReportManager.MatReportPrefix,
+                        txt_MaterialIssueNumber.Text, txt_MaterialPhaseNumber.Text, orderType, myReportManager, true);
+                }               
+            }
+            return true;
         }
 
         private async void btn_Detail1_Click_1(object sender, EventArgs e)
@@ -104,10 +148,39 @@ namespace Prism
             EndFunction(1);
         }
 
+        private bool OrderSpecials(int orderAction, string orderType, StageTypes stageType, bool fabsecsPresent, ReportManager myReportManager)
+        {
+            if (!InitialSetup(StageTypes.Prelim3, true)) { EndFunction(0); return false; }
+
+            if(!myReportManager.Folders.CreateMatFolder(fabsecsPresent)) return false;
+
+            if (orderAction == 2) //User wants to order using special fitting tags
+            {
+                List<Part> specialTaggedParts = new List<Part>();
+                foreach (Part part in _selectedObjects.SelectedModelParts)
+                {
+                    string specialTag = "";  //this is the number read from teklas UDA when no execution class is applied, we are defaulting to it not having one here
+                    part.GetUserProperty(ModelUDA.SpecialFittingTag(), ref specialTag);
+
+                    if (specialTag != "")
+                    {
+                        specialTaggedParts.Add(part);
+                    }
+                }
+
+                specialTaggedParts.SelectParts();
+                myReportManager.CreateMaterialReports(_selectedObjects, orderType, stageType);
+            }
+            if (orderAction == 3) //User wants to order all selected
+            {
+                myReportManager.CreateMaterialReports(_selectedObjects, orderType, stageType);
+            }
+            return true;
+        }
+
         private async void btn_Detail2_Click_1(object sender, EventArgs e)
         {
             StartFunction();
-
 
             ModelModifiers.ResetWorkPlane(_model);
             if (!await Task.Run(() => InitialSetup(StageTypes.Check2, true))) { EndFunction(0); return; }
@@ -123,7 +196,7 @@ namespace Prism
 
             if (!await Task.Run(() => InitialSetup(StageTypes.Check3, true))) { EndFunction(0); return; }
 
-            if(!_selectedObjects.DetailButton3op(_projectData, (int)StageTypes.Check3)) { EndFunction(0); return; }
+            if (!_selectedObjects.DetailButton3op(_projectData, (int)StageTypes.Check3)) { EndFunction(0); return; }
 
             EndFunction(1);
         }
@@ -149,8 +222,9 @@ namespace Prism
 
             SetStatusLabels("Creating Fab Package");
 
-            await Task.Run(() => _selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber.Text, issueNumber.Text, StageTypes.FAB, txt_SiteDate.Text));
 
+            if (!await Task.Run(() => _selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber.Text, issueNumber.Text, StageTypes.FAB, txt_SiteDate.Text))) { EndFunction(0); return; }
+            await Task.Run(() => FabMisc.FabMiscOp(phaseNumber.Text, issueNumber.Text, _projectData, txt_SiteDate.Text, _selectedObjects));
             EndFunction(1);
         }
 
@@ -459,6 +533,12 @@ namespace Prism
                 e.Handled = true;
                 return;
             }
+        }
+
+        private void projectUsersToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var form = new ProjectControllers(_model.GetProjectInfo());
+            form.ShowDialog();
         }
     }
 }

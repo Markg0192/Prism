@@ -15,6 +15,7 @@ namespace Prism
         {
             InitializeComponent();
             CenterToScreen();
+            TopMost = true;
 
             TreeView.SelectedImageIndex = 2;
 

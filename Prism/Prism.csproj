@@ -65,9 +65,14 @@
     <ApplicationIcon>ico.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Office.Interop.Outlook, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Office.Interop.Outlook.15.0.4797.1004\lib\net20\Microsoft.Office.Interop.Outlook.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -109,6 +114,24 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CustomDialogs\BoltOrderType.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CustomDialogs\BoltOrderType.Designer.cs">
+      <DependentUpon>BoltOrderType.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CustomDialogs\ProjectControllers.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CustomDialogs\ProjectControllers.Designer.cs">
+      <DependentUpon>ProjectControllers.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CustomDialogs\SpecialFittingOrders.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CustomDialogs\SpecialFittingOrders.Designer.cs">
+      <DependentUpon>SpecialFittingOrders.cs</DependentUpon>
+    </Compile>
     <Compile Include="Geometry\AnglesHelper.cs" />
     <Compile Include="AutoFix.cs" />
     <Compile Include="BswxExporter.cs" />
@@ -149,6 +172,7 @@
       <DependentUpon>IgnoreWarning.cs</DependentUpon>
     </Compile>
     <Compile Include="Geometry\Line1D.cs" />
+    <Compile Include="InitialiseProgram.cs" />
     <Compile Include="Logging.cs" />
     <Compile Include="Managers\ViewManager.cs" />
     <Compile Include="ModelPart.cs" />
@@ -156,7 +180,6 @@
     <Compile Include="Geometry\Plane2D.cs" />
     <Compile Include="Geometry\Point3D.cs" />
     <Compile Include="PrismDrawing.cs" />
-    <Compile Include="PrismPlugin.cs" />
     <Compile Include="Managers\DrawingManager.cs" />
     <Compile Include="Managers\FolderManager.cs" />
     <Compile Include="ModelModifiers.cs" />
@@ -199,6 +222,9 @@
     <Compile Include="UserProperty.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="CustomDialogs\BoltOrderType.resx">
+      <DependentUpon>BoltOrderType.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="CustomDialogs\ExecutionClass.resx">
       <DependentUpon>ExecutionClass.cs</DependentUpon>
     </EmbeddedResource>
@@ -207,6 +233,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="CustomDialogs\IgnoreWarning.resx">
       <DependentUpon>IgnoreWarning.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CustomDialogs\ProjectControllers.resx">
+      <DependentUpon>ProjectControllers.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CustomDialogs\SpecialFittingOrders.resx">
+      <DependentUpon>SpecialFittingOrders.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PrismUI.resx">
       <DependentUpon>PrismUI.cs</DependentUpon>

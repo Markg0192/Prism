@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Prism.CustomDialogs;
+using System.Collections.Generic;
 using System.Windows.Forms;
 using Tekla.Structures.Model;
 using Tekla.Structures.Model.UI;
@@ -31,6 +32,27 @@ namespace Prism
             return form.executionClass;
         }
 
+        public static int SpecialFittingOrder()
+        {
+            var form = new SpecialFittingOrders();
+            form.ShowDialog();
+            return form.orderAction;
+        }
+
+        public static int BoltOrderType()
+        {
+            var form = new BoltOrderType();
+            form.ShowDialog();
+            return form.OrderBoltsFrom;
+        }
+
+        public static void LockedPartsSelected()
+        {
+            const string notUpToDateMessage2 = "You have selected some parts that are locked, please de-select or unlock these to continue.";
+            const string notUpToDateTitle2 = "Locked parts selected";
+            MessageBox.Show(notUpToDateMessage2, notUpToDateTitle2, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
         public static void IgnoreFittingCheck()
         {
             const string notUpToDateMessage2 = "Without selecting a location Prism cannot filter abnormal fittings.";
@@ -50,6 +72,13 @@ namespace Prism
             string notUpToDateMessage = $"You have selected some abnormal fittings that should either be bought out items or changed to something standard.\r {Warning}";
             const string notUpToDateTitle = "Abnormal Fittings";
             MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
+        public static DialogResult TagAbnormalFittings()
+        {
+            string notUpToDateMessage = $"Would you like to tag these abnormal fittings for ordering later?.\r {Warning}";
+            const string notUpToDateTitle = "Abnormal Fittings Tag";
+            return MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
         }
 
         public static void IntumescentLoadingMissing()
@@ -137,23 +166,30 @@ namespace Prism
             MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
-       /* public static DialogResult FabFolderAlreadyExists()
+        /*public static DialogResult FabFolderAlreadyExists()
         {
             const string notUpToDateMessage = "The fab folder you are trying to create already exists in the model folder, can I replace it?";
             const string notUpToDateTitle = "Fab folder exists.";
             return MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
         }*/
 
-        public static void FabFolderAlreadyExists()
+        public static void FolderAlreadyExists(string existingFolder)
         {
-            const string notUpToDateMessage = "The fab folder you are trying to create already exists in the model folder, it must be removed from the model folder before continuing";
-            const string notUpToDateTitle = "Fab folder exists.";
+            string notUpToDateMessage = $"{existingFolder} already exists in the model folder, it must be removed from the model folder before continuing";
+            const string notUpToDateTitle = "Folder exists.";
+            MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
+        public static void ZipFolderAlreadyExists()
+        {
+            const string notUpToDateMessage = "The zip folder you are trying to create already exists in the model folder, it must be removed from the model folder before continuing";
+            const string notUpToDateTitle = "Zip folder exists.";
             MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
         public static void KeepExistingPackage()
         {
-            const string notUpToDateMessage = "You have decided to keep the existing package, Prism will now close, Goodbye.";
+            const string notUpToDateMessage = "You have decided to keep the existing package, action cancelled.";
             const string notUpToDateTitle = "Keep existing.";
             MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }

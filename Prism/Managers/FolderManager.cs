@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Office.Interop.Outlook;
+using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace Prism
@@ -11,7 +14,7 @@ namespace Prism
     /// </summary>
     public class FolderManager
     {
-        private const string _fabsecCarcasses = "Carcass Drawings";
+        private const string _fabsecCarcasses = "SHA";
         private const string _assFolder = "ASS";
         private const string _fitFolder = "FIT";
         private const string _prtFolder = "PRT";
@@ -23,6 +26,7 @@ namespace Prism
 
         public FolderManager(PrismProjectData projectData, string phaseNum, string issueNum)
         {
+            ProjectLocation = projectData.ProjPath;
             string fabFolder = $"{projectData.ProjNumber}-{phaseNum}-FAB-ISSUE{issueNum}";
             string matFolder = $"{projectData.ProjNumber}-{phaseNum}-PRELIM-ISSUE{issueNum}";
             string boltFolder = $"{projectData.ProjNumber}-{phaseNum}-BOLT-ISSUE{issueNum}";
@@ -48,24 +52,13 @@ namespace Prism
         public readonly string ReportPath;
         public readonly string DspPath;
         public readonly string FabsecCarcassPath;
+        private string ProjectLocation;
 
         public bool CreateFabFolders()
         {
-            if (Directory.Exists(FabPath))
-            {
-                PrismWarnings.FabFolderAlreadyExists();
-                return false;
-                /*
-                DialogResult keepExistingFolder = PrismWarnings.FabFolderAlreadyExists();
 
-                if (keepExistingFolder == DialogResult.No)
-                {
-                    PrismWarnings.KeepExistingPackage();
-                    return false;
-                }
-                ModelModifiers.RemoveFolders(FabPath);*/
+            if (!CheckForExistingFolder(FabPath)) return false;
 
-            }
             foreach (string folder in _folderNames)
             {
                 if (!Directory.Exists(folder))
@@ -76,18 +69,40 @@ namespace Prism
             return true;
         }
 
-        public void CreateMatFolder(bool fabsecsPresent)
+        public bool CreateMatFolder(bool fabsecsPresent)
         {
+            if (!CheckForExistingFolder(MatPath)) return false;
+
             Directory.CreateDirectory(MatPath);
             if (fabsecsPresent)
             {
                 Directory.CreateDirectory(FabsecCarcassPath);
             }
+            return true;
         }
 
-        public void CreateBoltFolder()
+        public bool CreateBoltFolder()
         {
+            if (!CheckForExistingFolder(BoltPath)) return false;
+
             Directory.CreateDirectory(BoltPath);
+            return true;
+        }
+
+        private bool CheckForExistingFolder(string folderPath)
+        {
+            if (Directory.Exists(folderPath))
+            {
+                PrismWarnings.FolderAlreadyExists(folderPath);
+                return false;
+            }
+            var zip = Directory.GetFiles(ProjectLocation, "*.zip");
+            if (zip.Contains($"{folderPath}.zip"))
+            {
+                PrismWarnings.FolderAlreadyExists($"{folderPath}.zip");
+                return false;
+            }
+            return true;
         }
 
         //This method is not used yet, it will be required when drawing printing is enabled.
@@ -114,6 +129,16 @@ namespace Prism
                 ModelModifiers.RemoveIDDessin(DspPath);
 
             }
+        }
+
+        public void ZipFolder(string folderPath)
+        {
+            if (Directory.Exists($"{folderPath}.zip"))
+            {
+                File.Delete($"{folderPath}.zip");
+            }
+            ZipFile.CreateFromDirectory(folderPath, $"{folderPath}.zip");
+
         }
     }
 }

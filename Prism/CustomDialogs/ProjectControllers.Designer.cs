@@ -1,0 +1,191 @@
+﻿namespace Prism.CustomDialogs
+{
+    partial class ProjectControllers
+    {
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ProjectControllers));
+            this.label1 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.txt_ProjectManagement = new System.Windows.Forms.TextBox();
+            this.txt_DOManager = new System.Windows.Forms.TextBox();
+            this.txt_DocumentControl = new System.Windows.Forms.TextBox();
+            this.txt_Others = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.btn_Apply = new System.Windows.Forms.Button();
+            this.btn_Close = new System.Windows.Forms.Button();
+            this.SuspendLayout();
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(16, 11);
+            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(467, 16);
+            this.label1.TabIndex = 0;
+            this.label1.Text = "Add your project users here, these people will be cc\'d into all correspondance";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(16, 57);
+            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(131, 16);
+            this.label2.TabIndex = 1;
+            this.label2.Text = "Project Management";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(16, 89);
+            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(175, 16);
+            this.label3.TabIndex = 1;
+            this.label3.Text = "Drawing Office Management";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(16, 150);
+            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(46, 16);
+            this.label4.TabIndex = 1;
+            this.label4.Text = "Others";
+            // 
+            // txt_ProjectManagement
+            // 
+            this.txt_ProjectManagement.Location = new System.Drawing.Point(249, 53);
+            this.txt_ProjectManagement.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txt_ProjectManagement.Name = "txt_ProjectManagement";
+            this.txt_ProjectManagement.Size = new System.Drawing.Size(260, 22);
+            this.txt_ProjectManagement.TabIndex = 2;
+            // 
+            // txt_DOManager
+            // 
+            this.txt_DOManager.Location = new System.Drawing.Point(249, 85);
+            this.txt_DOManager.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txt_DOManager.Name = "txt_DOManager";
+            this.txt_DOManager.Size = new System.Drawing.Size(260, 22);
+            this.txt_DOManager.TabIndex = 2;
+            // 
+            // txt_DocumentControl
+            // 
+            this.txt_DocumentControl.Location = new System.Drawing.Point(249, 117);
+            this.txt_DocumentControl.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txt_DocumentControl.Name = "txt_DocumentControl";
+            this.txt_DocumentControl.Size = new System.Drawing.Size(260, 22);
+            this.txt_DocumentControl.TabIndex = 2;
+            // 
+            // txt_Others
+            // 
+            this.txt_Others.Location = new System.Drawing.Point(249, 147);
+            this.txt_Others.Margin = new System.Windows.Forms.Padding(4);
+            this.txt_Others.Name = "txt_Others";
+            this.txt_Others.Size = new System.Drawing.Size(260, 22);
+            this.txt_Others.TabIndex = 2;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(16, 120);
+            this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(113, 16);
+            this.label5.TabIndex = 1;
+            this.label5.Text = "Document Control";
+            // 
+            // btn_Apply
+            // 
+            this.btn_Apply.Location = new System.Drawing.Point(307, 180);
+            this.btn_Apply.Name = "btn_Apply";
+            this.btn_Apply.Size = new System.Drawing.Size(98, 25);
+            this.btn_Apply.TabIndex = 3;
+            this.btn_Apply.Text = "Apply";
+            this.btn_Apply.UseVisualStyleBackColor = true;
+            this.btn_Apply.Click += new System.EventHandler(this.btn_Apply_Click);
+            // 
+            // btn_Close
+            // 
+            this.btn_Close.Location = new System.Drawing.Point(411, 180);
+            this.btn_Close.Name = "btn_Close";
+            this.btn_Close.Size = new System.Drawing.Size(98, 25);
+            this.btn_Close.TabIndex = 3;
+            this.btn_Close.Text = "Close";
+            this.btn_Close.UseVisualStyleBackColor = true;
+            this.btn_Close.Click += new System.EventHandler(this.btn_Close_Click);
+            // 
+            // ProjectControllers
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.Color.White;
+            this.BackgroundImage = global::Prism.Properties.Resources.watereddownlogo;
+            this.ClientSize = new System.Drawing.Size(519, 213);
+            this.Controls.Add(this.btn_Close);
+            this.Controls.Add(this.btn_Apply);
+            this.Controls.Add(this.txt_Others);
+            this.Controls.Add(this.txt_DocumentControl);
+            this.Controls.Add(this.txt_DOManager);
+            this.Controls.Add(this.txt_ProjectManagement);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.label1);
+            this.DoubleBuffered = true;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.MaximumSize = new System.Drawing.Size(535, 252);
+            this.MinimumSize = new System.Drawing.Size(535, 252);
+            this.Name = "ProjectControllers";
+            this.Text = "Project Controllers";
+            this.ResumeLayout(false);
+            this.PerformLayout();
+
+        }
+
+        #endregion
+
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.TextBox txt_ProjectManagement;
+        private System.Windows.Forms.TextBox txt_DOManager;
+        private System.Windows.Forms.TextBox txt_DocumentControl;
+        private System.Windows.Forms.TextBox txt_Others;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Button btn_Apply;
+        private System.Windows.Forms.Button btn_Close;
+    }
+}
