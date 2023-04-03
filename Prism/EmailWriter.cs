@@ -18,7 +18,7 @@ namespace Prism
             MailItem email = (MailItem)outlookApp.CreateItem(OlItemType.olMailItem);
             email.Subject = $"{fabPrefix} Fab Issue";
 
-            email.Body =    $"Hello,{_mailNewLine}" +
+            email.Body = $"Hello,{_mailNewLine}" +
                             $"{_mailNewLine}" +
                             $"This is the fab package Issue {issueNumber} for phase {phaseNumber} in {projData.ProjNumber}, {projData.ProjName}.{_mailNewLine}" +
                             $"Please issue this package to the works when possible.{_mailNewLine}" +
@@ -31,12 +31,11 @@ namespace Prism
                             $"{_mailNewLine}" +
                             $"Regards,{_mailNewLine}{_mailNewLine}" +
                             $"{projData.Full}";
-            
+
             string attachmentPath = $"{fabPath}.zip";
             Attachment attachment = email.Attachments.Add(attachmentPath);
 
             //email.To = "ni.fabissue@severfield.com";
-            email.To = marksEmail;
             email.CC = FormCCString(projData.pInfo);
             email.Display();
             //email.Send();
@@ -53,7 +52,7 @@ namespace Prism
             MailItem email = (MailItem)outlookApp.CreateItem(OlItemType.olMailItem);
             email.Subject = $"{fabPrefix} Bolt Order";
 
-            email.Body =    $"Hello,{_mailNewLine}" +
+            email.Body = $"Hello,{_mailNewLine}" +
                             $"{_mailNewLine}" +
                             $"This is the bolt order Issue {issueNumber} for phase {phaseNumber} in {projData.ProjNumber}, {projData.ProjName}.{_mailNewLine}" +
                             $"Please order these bolts when possible.{_mailNewLine}{_mailNewLine}" +
@@ -65,10 +64,8 @@ namespace Prism
             string attachmentPath = $"{boltPath}.zip";
             Attachment attachment = email.Attachments.Add(attachmentPath);
 
-            // email.To = _purchasingEmail;
-            email.To = marksEmail;
+            email.To = _purchasingEmail;
             email.CC = FormCCString(projData.pInfo);
-           // email.CC = projData.ProjectManager;
             email.Display();
             //email.Send();
 
@@ -99,10 +96,8 @@ namespace Prism
             string attachmentPath = $"{matPath}.zip";
             Attachment attachment = email.Attachments.Add(attachmentPath);
 
-            // email.To = _purchasingEmail;
-            email.To = marksEmail;
+            email.To = _purchasingEmail;
             email.CC = FormCCString(projData.pInfo);
-            //email.CC = projData.ProjectManager;
             email.Display();
             //email.Send();
 

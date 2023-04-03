@@ -53,9 +53,9 @@ namespace Prism
 
             using (StreamWriter log = new StreamWriter(@"\\sev-los-fs1\application data$\Prism\TotalUseLog.txt", false))
             {
-                log.WriteLine("---------------------------This log was started on 28/03/23-------");
+                log.WriteLine("---------------------------This log was started on 04/04/23-------");
                 log.WriteLine($"Times used: {newTimesUsed}");
-                log.WriteLine($"Parts used on: {newPartsUsed}");
+                log.WriteLine($"Parts processed: {newPartsUsed}");
                 log.WriteLine($"Auto-Fix count: {newAutoFixed}");
                 log.WriteLine($"Fabrication packages created: {newFabPack}");
             }
