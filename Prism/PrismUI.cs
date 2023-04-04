@@ -184,6 +184,7 @@ namespace Prism
 
             ModelModifiers.ResetWorkPlane(_model);
             if (!await Task.Run(() => InitialSetup(StageTypes.Check2, true))) { EndFunction(0); return; }
+
             string orientationType = cmb_ColumnOrientationType.Text; //we need this to avoid cross threading. (unsure why...)
             await Task.Run(() => _selectedObjects.DetailButton2op(_projectData, (int)StageTypes.Check2, orientationType, txt_PlateOnFlange.Text));
 

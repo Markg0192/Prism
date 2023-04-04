@@ -247,16 +247,16 @@ namespace Prism
             }
             if (shopBoltsPresent || siteBoltsPresent) //then create our strumis summary report
             {
-                Operation.CreateReportFromSelected(_reportBolts, Path.Combine(Folders.DspPath, $"{FabReportPrefix}{_outputBolts}"), _title1, _title3, _title2);
+                Operation.CreateReportFromSelected(_reportBolts, Path.Combine(Folders.DspPath, $"{FabReportPrefix}{_outputBolts}"), _title1, _title2, _title3);
                 // Operation.CreateReportFromSelected(_report8L, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output8L}"), _title1, _title2, _title3);
             }
             if (shopBoltsPresent) //Then create a shop bolts summary
             {
-                Operation.CreateReportFromSelected(shopBoltReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output4Name}"), _title1, _title3, _title2);
+                Operation.CreateReportFromSelected(shopBoltReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output4Name}"), _title1, _title2, _title3);
             }
             if (siteBoltsPresent) //Then create a site bolts summary
             {
-                Operation.CreateReportFromSelected(siteBoltReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output5Name}"), _title1, _title3, _title2);
+                Operation.CreateReportFromSelected(siteBoltReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output5Name}"), _title1, _title2, _title3);
             }
 
             Operation.CreateNCFilesFromSelected(_NCProfileSetting, Path.Combine(Folders.NcPath, " "));
