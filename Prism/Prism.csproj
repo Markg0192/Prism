@@ -23,7 +23,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>4</ApplicationRevision>
+    <ApplicationRevision>14</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -65,9 +65,14 @@
     <ApplicationIcon>ico.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Office.Interop.Outlook, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Office.Interop.Outlook.15.0.4797.1004\lib\net20\Microsoft.Office.Interop.Outlook.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -109,6 +114,25 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CustomDialogs\BoltOrderType.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CustomDialogs\BoltOrderType.Designer.cs">
+      <DependentUpon>BoltOrderType.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CustomDialogs\ProjectControllers.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CustomDialogs\ProjectControllers.Designer.cs">
+      <DependentUpon>ProjectControllers.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CustomDialogs\SpecialFittingOrders.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CustomDialogs\SpecialFittingOrders.Designer.cs">
+      <DependentUpon>SpecialFittingOrders.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Geometry\AnglesHelper.cs" />
     <Compile Include="AutoFix.cs" />
     <Compile Include="BswxExporter.cs" />
     <Compile Include="ButtonOperations\CreatePackageButton.cs" />
@@ -119,6 +143,8 @@
     <Compile Include="ButtonOperations\MaterialButton2.cs" />
     <Compile Include="ButtonOperations\MaterialButton3.cs" />
     <Compile Include="CheckFittings.cs" />
+    <Compile Include="ColumnOrientation.cs" />
+    <Compile Include="Geometry\Distances.cs" />
     <Compile Include="EmailWriter.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="CustomDialogs\ExecutionClass.cs">
@@ -145,12 +171,15 @@
     <Compile Include="CustomDialogs\IgnoreWarning.Designer.cs">
       <DependentUpon>IgnoreWarning.cs</DependentUpon>
     </Compile>
+    <Compile Include="Geometry\Line1D.cs" />
+    <Compile Include="InitialiseProgram.cs" />
     <Compile Include="Logging.cs" />
     <Compile Include="Managers\ViewManager.cs" />
     <Compile Include="ModelPart.cs" />
     <Compile Include="ModelUDA.cs" />
+    <Compile Include="Geometry\Plane2D.cs" />
+    <Compile Include="Geometry\Point3D.cs" />
     <Compile Include="PrismDrawing.cs" />
-    <Compile Include="PrismPlugin.cs" />
     <Compile Include="Managers\DrawingManager.cs" />
     <Compile Include="Managers\FolderManager.cs" />
     <Compile Include="ModelModifiers.cs" />
@@ -164,18 +193,14 @@
     <Compile Include="PrismWarnings.cs" />
     <Compile Include="Managers\ReportManager.cs" />
     <Compile Include="PrismProjectData.cs" />
-    <Compile Include="PrismForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="PrismForm.Designer.cs">
-      <DependentUpon>PrismForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="ReportProperties.cs" />
+    <Compile Include="ReportProperty.cs" />
     <Compile Include="SelectedObjects.cs" />
     <Compile Include="TeklaAppLibrary\MacroBuilder.cs" />
     <Compile Include="TeklaAppLibrary\ModelConnection.cs" />
@@ -192,8 +217,14 @@
     <Compile Include="CustomDialogs\FactoryLocation.Designer.cs">
       <DependentUpon>FactoryLocation.cs</DependentUpon>
     </Compile>
+    <Compile Include="Geometry\Vector.cs" />
+    <Compile Include="UserProperties.cs" />
+    <Compile Include="UserProperty.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="CustomDialogs\BoltOrderType.resx">
+      <DependentUpon>BoltOrderType.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="CustomDialogs\ExecutionClass.resx">
       <DependentUpon>ExecutionClass.cs</DependentUpon>
     </EmbeddedResource>
@@ -203,9 +234,11 @@
     <EmbeddedResource Include="CustomDialogs\IgnoreWarning.resx">
       <DependentUpon>IgnoreWarning.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="PrismForm.resx">
-      <DependentUpon>PrismForm.cs</DependentUpon>
-      <SubType>Designer</SubType>
+    <EmbeddedResource Include="CustomDialogs\ProjectControllers.resx">
+      <DependentUpon>ProjectControllers.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CustomDialogs\SpecialFittingOrders.resx">
+      <DependentUpon>SpecialFittingOrders.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PrismUI.resx">
       <DependentUpon>PrismUI.cs</DependentUpon>
@@ -302,6 +335,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="ico.ico" />
+    <None Include="Resources\ReportProperties.lst" />
     <None Include="Resources\Question.PNG" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

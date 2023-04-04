@@ -191,6 +191,21 @@ namespace Prism.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ADDED_TO_POUR_UNIT              INTEGER     LEFT     TRUE       1
+        ///ADDRESS                         CHARACTER   LEFT     TRUE      20
+        ///ACN                             INTEGER     LEFT     TRUE       5
+        ///ACTIVE_DESIGN_CODE              INTEGER     RIGHT    TRUE       3
+        ///ACTUAL_STARTDATE                INTEGER     LEFT     TRUE      12       0         Date       dd.mm.yyyy
+        ///ACTUAL_ENDDATE                  INTEGER     LEFT     TRUE      12       0         Date       dd.mm.yyyy
+        ///ALIAS_NAME1                     CH [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string ReportProperties {
+            get {
+                return ResourceManager.GetString("ReportProperties", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap Severfield_blue_RGB_PNG {

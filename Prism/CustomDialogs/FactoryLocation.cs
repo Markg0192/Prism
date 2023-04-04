@@ -12,6 +12,7 @@ namespace Prism
         {
             InitializeComponent();
             CenterToScreen();
+            TopMost = true;
         }
 
         private void txt_SNI_Click(object sender, EventArgs e)

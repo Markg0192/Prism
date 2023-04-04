@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms.VisualStyles;
 using Tekla.Structures.Drawing;
 using Tekla.Structures.Model;
 
@@ -15,12 +17,13 @@ namespace Prism
         private Model _model;
         private SelectedObjects _selectedObjects;
 
-        public PrismDrawing(Drawing currentDrawing, SelectedObjects selectedObjects, Model model)
+        public PrismDrawing(Drawing currentDrawing, SelectedObjects selectedObjects, Model model, List<List<string>> dpmList)
         {
             _model = model;
             _selectedObjects = selectedObjects;
             DrawingRequired = true;
             GetPrismDrawing(currentDrawing);
+            GetDPMFromDrawing(currentDrawing, model, dpmList);
         }
 
         public bool DrawingRequired { get; set; }
@@ -28,7 +31,26 @@ namespace Prism
         public string PdfName { get; set; }
         public string DrawingFolderName { get; set; }
         public Drawing TeklaDrawing { get; set; }
+        public string DpmPDFSaveName { get; set; }
+        public string DpmFileName { get; set; }
+        public string DpmPrinterSetting { get; set; }
 
+        private void GetDPMFromDrawing(Drawing teklaDrawing, Model model, List<List<string>> dpmList)
+        {
+            string modelPath = model.GetInfo().ModelPath;
+
+            string dpmName = GetDPMNameFromDrawing(dpmList, teklaDrawing.Mark);
+
+            DpmPrinterSetting = modelPath + @"\attributes\" + "standard.PdfPrintOptions.xml";
+            DpmPDFSaveName = $@"{DrawingFolderName}\" + $"{PdfName}";
+            DpmFileName = modelPath + $@"\drawings\snapshots\{dpmName}.DPM";
+        }
+
+        private static string GetDPMNameFromDrawing(List<List<string>> dpmList, string drawingName)
+        {
+            List<string> nww = dpmList.Find(x => x[0] == drawingName);
+            return nww[1];
+        }
 
         private string GetDrawingRevision(Drawing currentDrawing)
         {

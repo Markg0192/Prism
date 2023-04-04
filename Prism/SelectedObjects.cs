@@ -1,10 +1,15 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Windows.Forms;
+using Tekla.Structures.Drawing;
+using Tekla.Structures.Filtering;
 using Tekla.Structures.Model;
 using Tekla.Structures.Model.Operations;
 using static Prism.Enums;
+using ModelObject = Tekla.Structures.Model.ModelObject;
+using Part = Tekla.Structures.Model.Part;
 
 namespace Prism
 {
@@ -14,22 +19,24 @@ namespace Prism
     public class SelectedObjects
     {
         private ModelObjectEnumerator Moe;
-        // public DrawingHandler MyDrawingHandler; This will be needed when drawing functionaility is introduced
+        public DrawingHandler MyDrawingHandler;
 
         public SelectedObjects(StageTypes stageType)
         {
             List<BoltGroup> SiteBolts = new List<BoltGroup>();
             List<BoltGroup> ShopBolts = new List<BoltGroup>();
 
-            NumbersNotUpToDate = true;
+            NumbersUpToDate = true;
             AssembliesList = new List<Assembly>();
             SelectedModelParts = new List<Part>();
-            //MyDrawingHandler = new DrawingHandler();
+            LockedParts = new List<ModelObject>();
+            MyDrawingHandler = new DrawingHandler();
             Moe = new Tekla.Structures.Model.UI.ModelObjectSelector().GetSelectedObjects();
             MyMarks = new List<string>();
 
             foreach (object myObject in Moe) // This selects all items, if it is a part add to list, if it is a component get the objects within and add, do this twice to deal with components inside components.
             {
+                if (!NumbersUpToDate) return;
                 if (myObject is BaseComponent myComponent)
                 {
                     ModelObjectEnumerator children = myComponent.GetChildren();
@@ -49,6 +56,8 @@ namespace Prism
                 else ProcessObject(myObject, stageType);
             }
 
+            PartWeight = Math.Round(PartWeight / 1000, 3);
+
             if (AssembliesList != null)
             {
                 foreach (Assembly assembly in AssembliesList)
@@ -56,7 +65,7 @@ namespace Prism
                     List<BoltGroup> MyBolts = GetBoltsFromAssembly(assembly);
                     double weight = 0;
                     assembly.GetReportProperty(ModelUDA.Weight(), ref weight);
-                    TotalWeight = TotalWeight + weight;
+                    //TotalWeight = TotalWeight + weight;
                     if (MyBolts != null)
                     {
                         foreach (BoltGroup bolts in MyBolts)
@@ -66,16 +75,18 @@ namespace Prism
                                 if (bolts.BoltType == BoltGroup.BoltTypeEnum.BOLT_TYPE_WORKSHOP)
                                 {
                                     ShopBolts.Add(bolts);
-                                    return;
                                 }
-                                SiteBolts.Add(bolts);
+                                else
+                                {
+                                    SiteBolts.Add(bolts);
+                                }
                             }
                         }
                     }
                 }
-                TotalWeight = Math.Round(TotalWeight / 1000, 3);
+                //TotalWeight = Math.Round(TotalWeight / 1000, 3);
             }
-            GetCorrectModelSelection();
+            // GetCorrectModelSelection();
             AllBolts.Add(SiteBolts);
             AllBolts.Add(ShopBolts);
         }
@@ -87,12 +98,14 @@ namespace Prism
         public double BiggestY = -100000000;
         public double BiggestZ = -100000000;
 
-        public double TotalWeight { get; set; }
-        public bool NumbersNotUpToDate { get; set; }
+        //public double TotalWeight { get; set; }
+        public double PartWeight { get; set; }
+        public bool NumbersUpToDate { get; set; }
         public List<Assembly> AssembliesList { get; set; }
         public List<List<BoltGroup>> AllBolts = new List<List<BoltGroup>>();
         public List<Part> SelectedModelParts { get; set; }
         public List<string> MyMarks { get; set; }
+        public List<ModelObject> LockedParts { get; set; }
 
         private void CheckXYZSize(Part myPart)
         {
@@ -112,27 +125,72 @@ namespace Prism
         {
             if (myObject is Part myPart)
             {
-                CheckXYZSize(myPart);
-                if (!Operation.IsNumberingUpToDate(myPart) && stageType == StageTypes.FAB)
+                if (IsValidPart(myPart))
                 {
-                    PrismWarnings.NumberingIsNotUpToDate();
-                    NumbersNotUpToDate = false;
-                    return;
-                }
-                SelectedModelParts.Add(myPart);
-
-                MyMarks.Add(myPart.GetPartMark());
-
-                if (myPart.GetAssembly() is Assembly assembly)
-                {
-                    Assembly matchingAssembly = null;
-                    matchingAssembly = AssembliesList.Find(x => x.Identifier.ToString() == assembly.Identifier.ToString());
-                    if (matchingAssembly == null)
+                    if (stageType == StageTypes.FAB)
                     {
-                        AssembliesList.Add(assembly);
+                        CheckXYZSize(myPart);
+                        if (!Operation.IsNumberingUpToDate(myPart))
+                        {
+                            PrismWarnings.NumberingIsNotUpToDate();
+                            NumbersUpToDate = false;
+                            return;
+                        }
+                    }
+
+                    SelectedModelParts.Add(myPart);
+
+                    if (IsLocked(myPart)) LockedParts.Add(myPart);
+
+                    double weight = 0;
+                    myPart.GetReportProperty(ModelUDA.Weight(), ref weight);
+                    PartWeight = PartWeight + weight;
+
+                    MyMarks.Add(myPart.GetPartMark());
+
+                    if (myPart.GetAssembly() is Assembly assembly)
+                    {
+                        Assembly matchingAssembly = null;
+                        matchingAssembly = AssembliesList.Find(x => x.Identifier.ToString() == assembly.Identifier.ToString());
+                        if (matchingAssembly == null)
+                        {
+                            AssembliesList.Add(assembly);
+                        }
                     }
                 }
             }
+        }
+
+        private bool IsLocked(Part myPart)
+        {
+            string isLocked = "";
+            myPart.GetReportProperty("OBJECT_LOCKED", ref isLocked);
+            if (isLocked == "Yes")
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private bool IsValidPart(Part p)
+        {
+            if (p.Name == "GROUT")
+            {
+                return false;
+            }
+            if (p.Profile.ProfileString.StartsWith("HEX"))
+            {
+                return false;
+            }
+            if (p.Profile.ProfileString.StartsWith("ROD"))
+            {
+                return false;
+            }
+            if (p.Name.StartsWith("HD"))
+            {
+                return false;
+            }
+            return true;
         }
 
         public void GetCorrectModelSelection()
@@ -152,7 +210,7 @@ namespace Prism
             ArrayList secondaries = assembly.GetSecondaries();
             secondaries.Add(assembly.GetMainPart());
 
-            foreach (ModelObject item in secondaries)
+            foreach (Tekla.Structures.Model.ModelObject item in secondaries)
             {
                 if (item is Part part)
                 {
@@ -161,13 +219,16 @@ namespace Prism
                     foreach (var setOfBolts in bolts)
                     {
                         BoltGroup bolt = setOfBolts as BoltGroup;
-                        if (bolt.PartToBeBolted.Identifier.GUID == part.Identifier.GUID)
+                        if (bolt != null)
                         {
-                            BoltGroup matchingBolt = null;
-                            matchingBolt = myBoltsList.Find(x => x.Identifier.GUID == bolt.Identifier.GUID);
-                            if (matchingBolt == null)
+                            if (bolt.PartToBeBolted.Identifier.GUID == part.Identifier.GUID)
                             {
-                                myBoltsList.Add(bolt);
+                                BoltGroup matchingBolt = null;
+                                matchingBolt = myBoltsList.Find(x => x.Identifier.GUID == bolt.Identifier.GUID);
+                                if (matchingBolt == null)
+                                {
+                                    myBoltsList.Add(bolt);
+                                }
                             }
                         }
                     }

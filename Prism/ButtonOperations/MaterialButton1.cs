@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using Tekla.Structures.Model;
-using Tekla.Structures.Model.UI;
-using static Prism.Enums;
+﻿using static Prism.Enums;
 
 namespace Prism.ButtonOperations
 {
@@ -24,7 +21,7 @@ namespace Prism.ButtonOperations
         {
             ModelChecker.IncorrectNameAndClass.Clear();
             ModelChecker.NameAndClassAligned(myObjects);
-            IgnoreType ignore = DisplayOrderErrors(ModelChecker.IncorrectNameAndClass, "NameAndClass");
+            IgnoreType ignore = PrismWarnings.DisplayOrderErrors(ModelChecker.IncorrectNameAndClass, Error.NameAndClass);
 
             if (ignore == IgnoreType.AutoFix)
             {
@@ -41,7 +38,7 @@ namespace Prism.ButtonOperations
         {
             ModelChecker.MissingExecutionClass.Clear();
             ModelChecker.HasExecutionClass(myObjects);
-            IgnoreType ignore = DisplayOrderErrors(ModelChecker.MissingExecutionClass, "Exc");
+            IgnoreType ignore = PrismWarnings.DisplayOrderErrors(ModelChecker.MissingExecutionClass, Error.Execution);
 
             if (ignore == IgnoreType.AutoFix)
             {
@@ -52,27 +49,6 @@ namespace Prism.ButtonOperations
                 return false;
             }
             return true;
-        }
-
-        public static IgnoreType DisplayOrderErrors(List<ModelObject> errorList, string warning)
-        {
-            if (errorList.Count != 0)
-            {
-                if (warning == "NameAndClass")
-                {
-                    PrismWarnings.NameAndClassDontMatch();
-                }
-                else
-                {
-                    PrismWarnings.ExecutionClassMissing();
-                }
-                ModelObjectVisualization.SetTransparencyForAll(TemporaryTransparency.SEMITRANSPARENT);
-                ModelObjectVisualization.SetTemporaryStateForAll(new Color(0.5, 0.5, 0.5));
-
-                ModelObjectVisualization.SetTemporaryState(errorList, new Color(1, 0, 0));
-                return PrismWarnings.NewIgnoreWarning();
-            }
-            return IgnoreType.Unspecified;
-        }
+        }       
     }
 }

@@ -1,6 +1,9 @@
-﻿using System.Windows.Forms;
+﻿using Prism.CustomDialogs;
+using System.Collections.Generic;
+using System.Windows.Forms;
+using Tekla.Structures.Model;
+using Tekla.Structures.Model.UI;
 using static Prism.Enums;
-using static Prism.IgnoreWarning;
 
 namespace Prism
 {
@@ -29,6 +32,27 @@ namespace Prism
             return form.executionClass;
         }
 
+        public static int SpecialFittingOrder()
+        {
+            var form = new SpecialFittingOrders();
+            form.ShowDialog();
+            return form.orderAction;
+        }
+
+        public static int BoltOrderType()
+        {
+            var form = new BoltOrderType();
+            form.ShowDialog();
+            return form.OrderBoltsFrom;
+        }
+
+        public static void LockedPartsSelected()
+        {
+            const string notUpToDateMessage2 = "You have selected some parts that are locked, please de-select or unlock these to continue.";
+            const string notUpToDateTitle2 = "Locked parts selected";
+            MessageBox.Show(notUpToDateMessage2, notUpToDateTitle2, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
         public static void IgnoreFittingCheck()
         {
             const string notUpToDateMessage2 = "Without selecting a location Prism cannot filter abnormal fittings.";
@@ -36,11 +60,25 @@ namespace Prism
             MessageBox.Show(notUpToDateMessage2, notUpToDateTitle2, MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
+        public static void PrelimStartReset(string resetNo)
+        {
+            string notUpToDateMessage = $"Prelim number start point manually set to {resetNo}";
+            const string notUpToDateTitle = "Are you sure?";
+            MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
         public static void AbnormalFittings()
         {
             string notUpToDateMessage = $"You have selected some abnormal fittings that should either be bought out items or changed to something standard.\r {Warning}";
             const string notUpToDateTitle = "Abnormal Fittings";
             MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
+        public static DialogResult TagAbnormalFittings()
+        {
+            string notUpToDateMessage = $"Would you like to tag these abnormal fittings for ordering later?.\r {Warning}";
+            const string notUpToDateTitle = "Abnormal Fittings Tag";
+            return MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
         }
 
         public static void IntumescentLoadingMissing()
@@ -55,6 +93,30 @@ namespace Prism
             const string notUpToDateMessage2 = "Would you like to ignore this error and continue?";
             const string notUpToDateTitle2 = "Missing Intumescent Loadings";
             DialogResult result = MessageBox.Show(notUpToDateMessage2, notUpToDateTitle2, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (result == DialogResult.No)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        public static bool ResetPrelimMarking()
+        {
+            const string notUpToDateMessage = "WARNING! Selecting this button means your prelim marking will now start at the number given, Prism cannot undo this manual action. Are you sure you want to proceed?";
+            const string notUpToDateTitle = "Be careful";
+            DialogResult result = MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (result == DialogResult.No)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        public static bool IsVariation()
+        {
+            const string notUpToDateMessage = "Is this a variation?";
+            const string notUpToDateTitle = "Variation?";
+            DialogResult result = MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (result == DialogResult.No)
             {
                 return false;
@@ -83,6 +145,13 @@ namespace Prism
             MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
+        public static void MemberOrientationIsWrong()
+        {
+            const string notUpToDateMessage = "You have selected a member that has been input in the wrong orientation, please correct this to continue.";
+            const string notUpToDateTitle = "Incorrect member orientation";
+            MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
         public static void PreviousStepIncomplete()
         {
             const string notUpToDateMessage = "You have not completed all the required steps before this action, please correct this to continue.";
@@ -95,6 +164,41 @@ namespace Prism
             const string notUpToDateMessage = "You are trying to OMIT material that does not appear to have ever been ordered, please choose a different course of action.";
             const string notUpToDateTitle = "Can't Omit.";
             MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
+        /*public static DialogResult FabFolderAlreadyExists()
+        {
+            const string notUpToDateMessage = "The fab folder you are trying to create already exists in the model folder, can I replace it?";
+            const string notUpToDateTitle = "Fab folder exists.";
+            return MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+        }*/
+
+        public static void FolderAlreadyExists(string existingFolder)
+        {
+            string notUpToDateMessage = $"{existingFolder} already exists in the model folder, it must be removed from the model folder before continuing";
+            const string notUpToDateTitle = "Folder exists.";
+            MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
+        public static void ZipFolderAlreadyExists()
+        {
+            const string notUpToDateMessage = "The zip folder you are trying to create already exists in the model folder, it must be removed from the model folder before continuing";
+            const string notUpToDateTitle = "Zip folder exists.";
+            MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
+        public static void KeepExistingPackage()
+        {
+            const string notUpToDateMessage = "You have decided to keep the existing package, action cancelled.";
+            const string notUpToDateTitle = "Keep existing.";
+            MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
+        public static DialogResult AreYouHappyWithNumbering()
+        {
+            const string notUpToDateMessage = "Are you happy with your numbering?";
+            const string notUpToDateTitle = "Numbering";
+            return MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
         }
 
         public static void HasAlreadyBeenOrdered()
@@ -132,6 +236,13 @@ namespace Prism
             MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
+        public static void NoPartsSelected()
+        {
+            const string notUpToDateMessage = "You have not selected any members in the model, please make a selection and try again.";
+            const string notUpToDateTitle = "Nothing selected";
+            MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
         public static void HasNotBeenOrdered()
         {
             string notUpToDateMessage = $"Prism UDA 'Material Order Complete' (SEV-UDA-114) is empty on {Warning} selected parts, " +
@@ -140,6 +251,13 @@ namespace Prism
             MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
+        public static void DrawingsNotUpToDate()
+        {
+            string notUpToDateMessage = "There are drawings in your selection that are not up to date. These must be updated before continuing.";
+            const string notUpToDateTitle = "Update drawings";
+            MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+        }
         public static bool IgnoreWarning()
         {
             const string notUpToDateMessage2 = "Would you like to ignore this error and continue?";
@@ -160,21 +278,48 @@ namespace Prism
 
         public static DialogResult FabPackComplete(PrismProjectData projectData)
         {
-           return MessageBox.Show($"Thanks {projectData.First}, your fab package is now complete, please attach your fab package, located in your model folder, " +
-                       $"to the following email and send to the relevant team. PLEASE NOTE: This version of Prism does NOT print drawings, for now, you will have " +
-                       $"to do this bit yourself.", "Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            //return MessageBox.Show($"Thanks {projectData.First}, your fab package is now complete, please attach your fab package, located in your model folder, " +
+            //            $"to the following email and send to the relevant team. PLEASE NOTE: This version of Prism does NOT print drawings, for now, you will have " +
+            //            $"to do this bit yourself.", "Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+             return MessageBox.Show($"Thanks {projectData.First}, your fab package is now complete, please attach your fab package, located in your model folder, " +
+                        $"to the following email and send to the relevant team.", "Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         public static void ErrorsFixed(int numberOfErrors)
         {
             string messageEnd = "errors fixed.";
-            if(numberOfErrors == 1)
+            if (numberOfErrors == 1)
             {
                 messageEnd = "error fixed.";
             }
             string notUpToDateMessage = $"{numberOfErrors} {messageEnd}";
             const string notUpToDateTitle = "Errors Fixed";
             MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
+        public static IgnoreType DisplayOrderErrors(List<ModelObject> errorList, Error warning)
+        {
+            if (errorList.Count != 0)
+            {
+                if (warning == Error.NameAndClass)
+                {
+                    NameAndClassDontMatch();
+                }
+                if(warning == Error.Execution)
+                {
+                    ExecutionClassMissing();
+                }
+                if(warning == Error.Orientation)
+                {
+                    MemberOrientationIsWrong();
+                }
+
+                ModelObjectVisualization.SetTransparencyForAll(TemporaryTransparency.SEMITRANSPARENT);
+                ModelObjectVisualization.SetTemporaryStateForAll(new Color(0.5, 0.5, 0.5));
+                ModelObjectVisualization.SetTemporaryState(errorList, new Color(1, 0, 0));
+                return NewIgnoreWarning();
+            }
+            return IgnoreType.Unspecified;
         }
     }
 }

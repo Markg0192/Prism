@@ -1,47 +1,45 @@
-﻿using System.Windows.Forms;
+﻿using System.IO.Compression;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using Tekla.Structures.Model;
 using static Prism.Enums;
 
 namespace Prism.ButtonOperations
 {
     public static class CreatePackageButton
     {
-        public static string CreateFabPackage(this SelectedObjects myObjects, PrismProjectData projectData, string packageLocation, string phaseNumber, string issueNumber, StageTypes stageType, string siteDate)
+        public static async Task<bool> CreateFabPackage(this SelectedObjects myObjects, Model model, PrismProjectData projectData, string phaseNumber, string issueNumber, StageTypes stageType, string siteDate)
         {
             ReportManager myReportManager = new ReportManager(projectData, phaseNumber, issueNumber);
-            //MyDrawingManager = new DrawingManager(Model, phaseNumber.Text, issueNumber.Text, selectedObjects); Temporarily not in use
 
-            switch (packageLocation)
+            if (!myReportManager.Folders.CreateFabFolders()) return false;
+            if (!myReportManager.Folders.CreateBoltFolder()) return false;
+
+            myObjects.ExportBSWX(myReportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType);
+
+            ReportManager.SelectDrawingsInDocManager();
+            myReportManager.CreateFabReports(myObjects.SelectedModelParts, myObjects.AllBolts);
+            DrawingManager myDrawingManager = new DrawingManager(model, projectData, phaseNumber, issueNumber, myObjects, myReportManager.Folders.DspPath);
+
+            if (!myDrawingManager.DrawingsAreUpToDate) { PrismWarnings.DrawingsNotUpToDate(); return false; }
+
+            myDrawingManager.PrintDPM(myReportManager.Folders.FabPath);
+            myObjects.SelectedModelParts.ModifyAttributes((int)stageType, projectData);
+
+            myReportManager.Folders.RemoveUnusedFolders();
+
+            myReportManager.Folders.ZipFolder(myReportManager.Folders.FabPath);
+
+            DialogResult finishBox = PrismWarnings.FabPackComplete(projectData);
+
+            if (finishBox == DialogResult.OK)
             {
-                case "SNI":
-                    myObjects.ExportBSWX(myReportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType);
-                    myReportManager.Folders.CreateFabFolders();
-                    myReportManager.CreateFabReports(myObjects.SelectedModelParts, myObjects.AllBolts, packageLocation);
-                    // MyDrawingManager.PrintDrawings(StatusLabel); Temporarily not in use
-                    myObjects.SelectedModelParts.ModifyAttributes((int)stageType, projectData);
-                    //MyFolderManager.RemoveUnusedFolders(); Temporarily not in use
-                    myObjects.LockSelected();
-                    DialogResult finishBox = PrismWarnings.FabPackComplete(projectData);
-
-                    if (finishBox == DialogResult.OK)
-                    {
-                        EmailWriter.WriteFabEmail(projectData, myObjects, myReportManager.FabReportPrefix, issueNumber, phaseNumber, siteDate);
-                    }
-                    return "Complete";
-
-                //None of the below cases are reachable now due to button restrictions
-                case "SUK":
-                    return "Cancelled";
-
-                case "SDB":
-                    return "Cancelled";
-
-                case "Harry Peers":
-                    return "Cancelled";
-
-                case "DAM Structures":
-                    return "Cancelled";
+                EmailWriter.WriteFabEmail(projectData, myObjects, myReportManager.FabReportPrefix, issueNumber, phaseNumber, siteDate, myReportManager.Folders.FabPath);
             }
-            return "Cancelled";
+            Logging.LogProgress(projectData.ProjName, "Fab Package", 0, myObjects.AssembliesList.Count);
+            return true;
         }
+
+
     }
 }

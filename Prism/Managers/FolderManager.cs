@@ -1,5 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Office.Interop.Outlook;
+using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
+using System.Linq;
+using System.Windows.Forms;
 
 namespace Prism
 {
@@ -10,7 +14,7 @@ namespace Prism
     /// </summary>
     public class FolderManager
     {
-        private const string _fabsecCarcasses = "Carcass Drawings";
+        private const string _fabsecCarcasses = "SHA";
         private const string _assFolder = "ASS";
         private const string _fitFolder = "FIT";
         private const string _prtFolder = "PRT";
@@ -18,10 +22,11 @@ namespace Prism
         private const string _ncFolder = "NC";
         private const string _reportFolder = "Lists";
         private const string _ifcFolder = "IFC";
-        private List<string> _folderNames;    
+        private List<string> _folderNames;
 
         public FolderManager(PrismProjectData projectData, string phaseNum, string issueNum)
         {
+            ProjectLocation = projectData.ProjPath;
             string fabFolder = $"{projectData.ProjNumber}-{phaseNum}-FAB-ISSUE{issueNum}";
             string matFolder = $"{projectData.ProjNumber}-{phaseNum}-PRELIM-ISSUE{issueNum}";
             string boltFolder = $"{projectData.ProjNumber}-{phaseNum}-BOLT-ISSUE{issueNum}";
@@ -46,10 +51,14 @@ namespace Prism
         public readonly string NcPath;
         public readonly string ReportPath;
         public readonly string DspPath;
-        private readonly string FabsecCarcassPath;
+        public readonly string FabsecCarcassPath;
+        private string ProjectLocation;
 
-        public void CreateFabFolders()
-        {        
+        public bool CreateFabFolders()
+        {
+
+            if (!CheckForExistingFolder(FabPath)) return false;
+
             foreach (string folder in _folderNames)
             {
                 if (!Directory.Exists(folder))
@@ -57,20 +66,43 @@ namespace Prism
                     Directory.CreateDirectory(folder);
                 }
             }
-        }    
-        
-        public void CreateMatFolder(bool fabsecsPresent)
+            return true;
+        }
+
+        public bool CreateMatFolder(bool fabsecsPresent)
         {
+            if (!CheckForExistingFolder(MatPath)) return false;
+
             Directory.CreateDirectory(MatPath);
-            if(fabsecsPresent)
+            if (fabsecsPresent)
             {
                 Directory.CreateDirectory(FabsecCarcassPath);
             }
+            return true;
         }
 
-        public void CreateBoltFolder()
+        public bool CreateBoltFolder()
         {
+            if (!CheckForExistingFolder(BoltPath)) return false;
+
             Directory.CreateDirectory(BoltPath);
+            return true;
+        }
+
+        private bool CheckForExistingFolder(string folderPath)
+        {
+            if (Directory.Exists(folderPath))
+            {
+                PrismWarnings.FolderAlreadyExists(folderPath);
+                return false;
+            }
+            var zip = Directory.GetFiles(ProjectLocation, "*.zip");
+            if (zip.Contains($"{folderPath}.zip"))
+            {
+                PrismWarnings.FolderAlreadyExists($"{folderPath}.zip");
+                return false;
+            }
+            return true;
         }
 
         //This method is not used yet, it will be required when drawing printing is enabled.
@@ -90,10 +122,23 @@ namespace Prism
                 {
                     if (subFile.Substring(subFile.Length - 3) == "dpm")
                     {
-                           File.Delete(subFile);
+                        File.Delete(subFile);
                     }
                 }
+                ModelModifiers.RemoveLog(DspPath);
+                ModelModifiers.RemoveIDDessin(DspPath);
+
             }
-        }      
+        }
+
+        public void ZipFolder(string folderPath)
+        {
+            if (Directory.Exists($"{folderPath}.zip"))
+            {
+                File.Delete($"{folderPath}.zip");
+            }
+            ZipFile.CreateFromDirectory(folderPath, $"{folderPath}.zip");
+
+        }
     }
 }

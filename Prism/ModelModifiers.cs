@@ -11,7 +11,7 @@ using System.Collections;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Tekla.Structures.Model.UI;
-//using System.Threading;
+using static Prism.Enums;
 
 namespace Prism
 {
@@ -21,15 +21,67 @@ namespace Prism
     /// </summary>
     public static class ModelModifiers
     {
-        public static void ModifyAttributes(this List<Part> selectedObjects, int stageNumber, PrismProjectData projectData)
+        public static void VariationCheck(string phaseNumber, SelectedObjects myObjects, PrismProjectData projData)
+        {
+            if (phaseNumber.Contains("V") || phaseNumber.Contains("v"))
+            {
+                if (PrismWarnings.IsVariation())
+                {
+                    SetVariationAttribute(phaseNumber, myObjects);
+                    projData.IsVariation = true;
+                }
+            }
+            else { projData.IsVariation = false; }
+        }
+
+        public static void ResetWorkPlane(Model model)
+        {
+            model.GetWorkPlaneHandler().SetCurrentTransformationPlane(new TransformationPlane());
+            Point Origin = new Point(0, 0, 0);
+            Vector x = new Vector(1, 0, 0);
+            Vector y = new Vector(0, 1, 0);
+            TransformationPlane XZ_Plane = new TransformationPlane(Origin, x, y);
+            model.GetWorkPlaneHandler().SetCurrentTransformationPlane(XZ_Plane);
+            model.CommitChanges();
+        }
+
+        private static void SetVariationAttribute(string phaseNumber, SelectedObjects myObjects)
+        {
+            foreach (Part p in myObjects.SelectedModelParts)
+            {
+                string firstVNo = "";
+                string secondVNo = "";
+                p.GetUserProperty(ModelUDA.FirstVariationNumber(), ref firstVNo);
+                if (firstVNo == "")
+                {
+                    p.SetUserProperty(ModelUDA.FirstVariationNumber(), phaseNumber);
+                }
+                else
+                {
+                    p.GetUserProperty(ModelUDA.SecondVariationNumber(), ref secondVNo);
+                    if (secondVNo == "")
+                    {
+                        p.SetUserProperty(ModelUDA.SecondVariationNumber(), phaseNumber);
+                    }
+                    else
+                    {
+                        p.SetUserProperty(ModelUDA.FirstVariationNumber(), phaseNumber);
+                    }
+                }
+            }
+        }
+
+        public static void ModifyAttributes(this List<Part> selectedObjects, int stageNumber, PrismProjectData projectData, bool isSpecialFittingOrder = false)
         {
             foreach (Part part in selectedObjects)
             {
+                if (isSpecialFittingOrder) part.SetUserProperty(ModelUDA.Pre_Ordered(), 1);
                 part.SetUserProperty(ModelUDA.CurrentStageName(stageNumber), projectData.Full);
                 part.SetUserProperty(ModelUDA.CurrentStageDate(stageNumber), projectData.Date);
                 if (stageNumber == 7)
                 {
                     part.SetUserProperty(ModelUDA.PartMarkAtFab(), part.GetPartMark());
+                    part.LockPart();
                 }
                 part.Modify();
             }
@@ -37,11 +89,27 @@ namespace Prism
 
         public static void StampBoltUDA(List<BoltGroup> allBolts, string name, string date)
         {
-            foreach (BoltArray bolts in allBolts)
+            foreach (BoltGroup bolts in allBolts)
             {
                 bolts.SetUserProperty(ModelUDA.BoltOrderedBy(), name);
                 bolts.SetUserProperty(ModelUDA.BoltOrderedDate(), date);
+                bolts.SetUserProperty(ModelUDA.TimesBoltOrdered(), TimesBoltOrdered(bolts));
             }
+        }
+
+        private static string TimesBoltOrdered(BoltGroup bolts)
+        {
+            string timesOrdered = "";
+            bolts.GetUserProperty(ModelUDA.TimesBoltOrdered(), ref timesOrdered);
+
+            if (timesOrdered != "")
+            {
+                var nu = timesOrdered.Split('=');
+                int newOrderCount = Convert.ToInt32(nu[1]) + 1;
+                return $"Times ordered ={newOrderCount}";
+            }
+            return "Times ordered =1";
+
         }
 
         public static void StampPartFabUDA(List<Part> selectedModelParts, string phaseNumber, string issueNumber)
@@ -103,12 +171,12 @@ namespace Prism
             //This method adds prelim marks 'the old fashioned way' it rationalises members by profile, grade and length and adds numbers based on phase.
             //We have moved to numbering each piece individually but keeping this method incase we change our mind again.
             int currentLastNumber = 0;
+            pInfo.GetUserProperty(ModelUDA.LastUsedPrelim(), ref currentLastNumber);
 
             foreach (Part p in selectedObjects.SelectedModelParts)
             {
-                if (p.GetPrelimMark().Length < 1)
+                if (p.GetPrelimMark().Length == 0)
                 {
-                    pInfo.GetUserProperty(ModelUDA.LastUsedPrelim(), ref currentLastNumber);
                     if (currentLastNumber == 0)
                     {
                         Console.WriteLine("Failed to read last number");
@@ -120,10 +188,15 @@ namespace Prism
                         Console.WriteLine("Last number read" + currentLastNumber);
                     }
                     p.SetUserProperty(ModelUDA.PrelimMark(), currentLastNumber.ToString());
-                } 
+                }
                 currentLastNumber++;
-                pInfo.SetUserProperty(ModelUDA.LastUsedPrelim(), currentLastNumber);
-            }                
+            }
+            pInfo.SetUserProperty(ModelUDA.LastUsedPrelim(), currentLastNumber);
+        }
+
+        public static void ClearPrelimMarking(ProjectInfo pInfo, string resetNumber)
+        {
+            pInfo.SetUserProperty(ModelUDA.LastUsedPrelim(), Convert.ToInt32(resetNumber));
         }
 
         public static double GetPartLength(Part myPart)
@@ -135,12 +208,9 @@ namespace Prism
             return Length;
         }
 
-        public static void LockSelected(this SelectedObjects selectedObjects)
+        public static void LockPart(this Part part)
         {
-            foreach (Part part in selectedObjects.SelectedModelParts)
-            {
-                part.SetUserProperty(ModelUDA.ObjectLock(), 1);
-            }
+            part.SetUserProperty(ModelUDA.ObjectLock(), 1);
         }
 
         public static void MoveAndRenameOmittedMembers(this SelectedObjects selectedObjects)
@@ -191,7 +261,7 @@ namespace Prism
             }
             Tekla.Structures.Model.UI.ModelObjectSelector ms = new Tekla.Structures.Model.UI.ModelObjectSelector();
             ms.Select(selectList);
-            foreach (Part part in partsToBeSelected)
+            foreach (Part part in selectList)
             {
                 part.Modify();
             }
@@ -236,9 +306,33 @@ namespace Prism
                 }
                 else
                 {
-                   // Thread.Sleep(1000);
+                    // Thread.Sleep(1000);
                     RemoveLog(folderPath);
                 }
+            }
+        }
+
+        public static void RemoveIDDessin(string folderPath)
+        {
+            List<string> fileTypes = new List<string>();
+            if (Directory.Exists(folderPath))
+            {
+                foreach (string subFile in Directory.GetFiles(folderPath))
+                {
+                    fileTypes.Add(subFile.Substring(subFile.Length - 3));
+                    if (subFile.Contains("ID_dessins_KP1"))
+                    {
+                        File.Delete(subFile);
+                    }
+                }
+            }
+        }
+
+        public static void RemoveFolders(string folderPath)
+        {
+            if (Directory.Exists(folderPath))
+            {
+                File.Delete(folderPath);
             }
         }
 
@@ -268,6 +362,43 @@ namespace Prism
             ModelObjectVisualization.SetTransparencyForAll(TemporaryTransparency.SEMITRANSPARENT);
             ModelObjectVisualization.SetTemporaryStateForAll(new Color(0.5, 0.5, 0.5));
             ModelObjectVisualization.SetTemporaryState(myParts, new Color(1, 0, 0));
+        }
+
+        public static void SetPartsBlue(List<ModelObject> myParts)
+        {
+            ModelObjectVisualization.SetTransparencyForAll(TemporaryTransparency.SEMITRANSPARENT);
+            ModelObjectVisualization.SetTemporaryStateForAll(new Color(0.5, 0.5, 0.5));
+            ModelObjectVisualization.SetTemporaryState(myParts, new Color(0, 0, 1));
+        }
+
+        public static int ChangeSpecialTag(string newTagString, out List<ModelObject> objects)
+        {
+            SelectedObjects selectedObjects = new SelectedObjects(StageTypes.Prelim3);
+            ModifySpecialTag(newTagString, selectedObjects.SelectedModelParts);
+            objects = new List<ModelObject>();
+            foreach (Part p in selectedObjects.SelectedModelParts)
+            {
+                objects.Add(p);
+            }
+            return 0;
+        }
+
+        public static void ModifySpecialTag(string modifyTo, List<Part> selectedModelParts)
+        {
+            foreach (Part part in selectedModelParts)
+            {
+                part.SetUserProperty(ModelUDA.SpecialFittingTag(), modifyTo);
+                part.Modify();
+            }
+        }
+
+        public static void ModifySpecialTag(string modifyTo, List<ModelObject> selectedModelParts)
+        {
+            foreach (Part part in selectedModelParts)
+            {
+                part.SetUserProperty(ModelUDA.SpecialFittingTag(), modifyTo);
+                part.Modify();
+            }
         }
     }
 }

@@ -16,9 +16,10 @@
         public static void CreateBoltOrder(string phaseNumber, string issueNumber, PrismProjectData projectData, string siteDate)
         {
             ReportManager myReportManager = new ReportManager(projectData, phaseNumber, issueNumber);
-            myReportManager.Folders.CreateBoltFolder();
-            myReportManager.CreateBoltList();
-            EmailWriter.WriteBoltOrderEmail(projectData, myReportManager.FabReportPrefix, issueNumber, phaseNumber, siteDate);
+           
+            myReportManager.CreateBoltList(myReportManager.FabReportPrefix, "Order Bolts");
+            myReportManager.Folders.ZipFolder(myReportManager.Folders.BoltPath);
+            EmailWriter.WriteBoltOrderEmail(projectData, myReportManager.FabReportPrefix, issueNumber, phaseNumber, siteDate, myReportManager.Folders.BoltPath);
         }
     }
 }

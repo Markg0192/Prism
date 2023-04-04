@@ -1,8 +1,10 @@
-﻿using System.Collections;
+﻿using Prism.Geometry;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using Tekla.Structures.Geometry3d;
 using Tekla.Structures.Model;
 using static Prism.Enums;
-using static Prism.IgnoreWarning;
 
 namespace Prism
 {
@@ -22,15 +24,24 @@ namespace Prism
         public static List<ModelObject> NotOrderedParts = new List<ModelObject>();
         public static List<ModelObject> OrderedParts = new List<ModelObject>();
         public static List<ModelObject> PartsWithoutIntumescentLoading = new List<ModelObject>();
+        public static List<ModelObject> IncorrectOrientation = new List<ModelObject>();
+
+        public static void BoltThrough2Ply(SelectedObjects selectedObjects)
+        {
+            foreach (List<BoltGroup> ass in selectedObjects.AllBolts)
+            {
+                int executionClassData = 10;  //this is the number read from teklas UDA when no execution class is applied, we are defaulting to it not having one here
+                                              // p.GetUserProperty(ModelUDA.ExcecutionClass(), ref executionClassData);
+
+                if (executionClassData == 10)
+                {
+                    //MissingExecutionClass.Add(p);
+                }
+            }
+        }
 
         public static bool RunStage4Checks(this SelectedObjects selectedObjects)
         {
-            CheckFittings.IncorrectGrade.Clear();
-            CheckFittings.IncorrectLength.Clear();
-            CheckFittings.IncorrectThickness.Clear();
-            OrderedParts.Clear();
-            NotOrderedParts.Clear();
-
             Factory location = PrismWarnings.FactoryLocation();
             if (location == Factory.Unknown)
             {
@@ -55,6 +66,36 @@ namespace Prism
             return CheckForAndActionErrors();
         }
 
+        public static void ClearOldLists()
+        {
+            CheckFittings.IncorrectGrade.Clear();
+            CheckFittings.IncorrectLength.Clear();
+            CheckFittings.IncorrectThickness.Clear();
+            CheckFittings.AllIncorrectPlate.Clear();
+            HasNoFinish.Clear();
+            PartsWithoutIntumescentLoading.Clear();
+            OrderedParts.Clear();
+            NotOrderedParts.Clear();
+            StartNumbersDoNotMatch.Clear();
+            StartNumbersDoNotMatchParts.Clear();
+            PhasesDoNotMatch.Clear();
+            PhasesDoNotMatchParts.Clear();
+        }
+
+        public static bool MemberOrientationIsCorrect(SelectedObjects myObjects, out IgnoreType ignore)
+        {
+            IncorrectOrientation.Clear();
+            MemberOrientation(myObjects);
+            //ModelChecker.IncorrectOrientation.Clear(); //if this line is active all orientation functionallity is disabled
+            ignore = PrismWarnings.DisplayOrderErrors(IncorrectOrientation, Error.Orientation);
+
+            if (ignore == IgnoreType.Stop)
+            {
+                return false;
+            }
+            return true;
+        }
+
         public static void HasExecutionClass(SelectedObjects selectedObjects)
         {
             foreach (Assembly ass in selectedObjects.AssembliesList)
@@ -67,6 +108,147 @@ namespace Prism
                 {
                     MissingExecutionClass.Add(p);
                 }
+            }
+        }
+
+        public static void MemberOrientation(SelectedObjects selectedObjects)
+        {
+            int tolerance = 5;
+            foreach (Assembly ass in selectedObjects.AssembliesList)
+            {
+                Beam b = ass.GetMainPart() as Beam;
+                if (b != null && (b.Profile.ProfileString.StartsWith("UB") || b.Profile.ProfileString.StartsWith("UKB")|| b.Profile.ProfileString.StartsWith("UC")|| b.Profile.ProfileString.StartsWith("UKC")))
+                {
+                    if (b.Name == GdomValues.BeamName && Math.Abs(b.StartPoint.Z - b.EndPoint.Z) < tolerance)
+                    {
+                        CheckBeamOrientation(b);
+                    }
+
+                    if (b.Name == GdomValues.ColumnName)
+                    {
+                        CheckColumnOrientation(b);
+                    }
+
+                    if (b.Name.Contains(GdomValues.RafterName))
+                    {
+                        CheckRafterOrientation(b);
+                    }
+                    if (b.Name == GdomValues.BraceName)
+                    {
+                        // CheckBraceOrientation(b);
+                    }
+                }
+            }
+        }
+
+        private static void CheckBraceOrientation(Beam b)
+        {
+            bool check1 = false;
+            bool check2 = false;
+
+            bool isVertical = b.StartPoint.X == b.EndPoint.X && b.StartPoint.Y == b.EndPoint.Y ? true : false;
+
+            Point3D p1 = new Point3D(b.StartPoint.X, b.StartPoint.Y, b.StartPoint.Z + 100);
+            Point3D p2 = new Point3D(b.StartPoint);
+            Point3D p3 = new Point3D(b.EndPoint);
+
+            Geometry.Vector v = new Geometry.Vector(p2, p1);
+            Geometry.Vector v2 = new Geometry.Vector(p2, p3);
+            double radian = (double)v.AngleBetween(v2);
+            double degree = AnglesHelper.Degrees(radian);
+
+            Point startPoint = b.StartPoint;
+            Point endPoint = b.EndPoint;
+            if (isVertical)
+            {
+                if (b.StartPoint.Z > b.EndPoint.Z)
+                {
+                    IncorrectOrientation.Add(b);
+                }
+            }
+            else
+            {
+                double a = startPoint.X - endPoint.X;
+                double o = startPoint.Y - endPoint.Y;
+                double angle = Math.Atan2(o, a);
+                double myAngle = 180 * angle / Math.PI;
+
+                if (myAngle < 44.6 && myAngle > -135.4 || myAngle == 180)
+                {
+                    check1 = true;
+                }
+
+                if (myAngle == 90 || myAngle == -90)
+                {
+                    a = o;
+                }
+
+                double o1 = startPoint.Z - endPoint.Z;
+                double angle2 = Math.Atan2(o1, a);
+                double myAngle2 = 180 * angle2 / Math.PI;
+
+                if (check1)
+                {
+                    if (myAngle2 <= 44.6 && myAngle2 >= -135.4)
+                    {
+                        check2 = true;
+                    }
+                }
+                else
+                {
+                    if (myAngle2 < 44.6 && myAngle2 >= -135.4)
+                    {
+                        check2 = true;
+                    }
+                }
+
+                if (check2)
+                {
+                    IncorrectOrientation.Add(b);
+                }
+            }
+
+        }
+
+        private static void CheckRafterOrientation(Beam b)
+        {
+            //All rafters must be detailed with start point at the apex, so a simple check to make sure start point is higher than end point will do here
+            if (b.StartPoint.Z < b.EndPoint.Z)
+            {
+                IncorrectOrientation.Add(b);
+            }
+        }
+
+        private static void CheckColumnOrientation(Beam b)
+        {
+            //Column rotation must be "FRONT" or "BELOW", therefore "BACK" and "TOP" are wrong, start point must also be lower than end point.
+            if (b.Position.Rotation == Position.RotationEnum.BACK || b.Position.Rotation == Position.RotationEnum.TOP || b.StartPoint.Z > b.EndPoint.Z)
+            {
+                IncorrectOrientation.Add(b);
+            }
+        }
+
+        private static void CheckBeamOrientation(Beam b)
+        {
+            bool check1 = false;
+            bool check2 = false;
+
+            Point startPoint = b.StartPoint;
+            Point endPoint = b.EndPoint;
+
+            double a = startPoint.X - endPoint.X;
+            double o = startPoint.Y - endPoint.Y;
+            double angle = Math.Atan2(o, a);
+            double myAngle = 180 * angle / Math.PI;
+
+            if (myAngle > -44.6 && myAngle < 135.4)
+            {
+                check1 = true;
+            }
+
+            if (check1 || check2)
+            {
+                IncorrectOrientation.Add(b);
             }
         }
 

@@ -2,6 +2,21 @@
 {
     public static class ModelUDA
     {
+        public static string SpecialFittingTag()
+        {
+            return "SEV-UDA-129";
+        }
+
+        public static string FirstVariationNumber()
+        {
+            return "SEV-UDA-12";
+        }
+
+        public static string SecondVariationNumber()
+        {
+            return "SEV-UDA-13";
+        }
+
         public static string FireDFT()
         {
             return "FIRE_DFT";
@@ -36,6 +51,11 @@
             return $"SEV-UDA-{GetUDANoFromStageNumber(stageNumber) - 1}";
         }
 
+        public static string Pre_Ordered()
+        {
+            return $"SEV-UDA-40";
+        }
+
         public static string ExcecutionClass()
         {
             return "EN1090_EXC_PART";
@@ -48,7 +68,6 @@
 
         public static string CurrentStageName(int stageNumber)
         {
-
             return $"SEV-UDA-{GetUDANoFromStageNumber(stageNumber)}";
         }
 
@@ -82,7 +101,7 @@
                     break;
                 case 7:
                     udaNumber = 122;
-                    break;   
+                    break;
                 case 8:
                     udaNumber = 127;
                     break;
@@ -105,10 +124,15 @@
             return "BOLT_USERFIELD_8";
         }
 
+        public static string TimesBoltOrdered()
+        {
+            return "BOLT_USERFIELD_6";
+        }
+
         public static string FabsecUniqueNumber()
         {
-            //return "USER_PHASE";
-            return "SEV-UDA-125";
+            return "USER_PHASE";
+            //return "SEV-UDA-125";
         }
 
         public static string NextFabsecPrefixNumber() //Hidden UDA
@@ -119,6 +143,19 @@
         public static string LastUsedPrelim()
         {
             return "PRISM_LAST_USED_PRELIM";
+        }
+
+        public static string BSWXAttributeName(Enums.StageTypes stage)
+        {
+            if (stage == Enums.StageTypes.Prelim3)
+            {
+                return "-SEV_PRELIM";
+            }
+            if (stage == Enums.StageTypes.FAB)
+            {
+                return "-SEV_FAB";
+            }
+            return "";
         }
     }
 }
