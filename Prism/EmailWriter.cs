@@ -20,9 +20,10 @@ namespace Prism
 
             email.Body = $"Hello,{_mailNewLine}" +
                             $"{_mailNewLine}" +
-                            $"This is the fab package Issue {issueNumber} for phase {phaseNumber} in {projData.ProjNumber}, {projData.ProjName}.{_mailNewLine}" +
+                            $"This is the fab package for phase {phaseNumber}, issue {issueNumber}, in {projData.ProjNumber}, {projData.ProjName}.{_mailNewLine}" +
                             $"Please issue this package to the works when possible.{_mailNewLine}" +
-                            $"Site date is {SiteDateNote(siteDate)}" +
+                            $"{_mailNewLine}" +
+                            $"Site date is {SiteDateNote(siteDate)}{_mailNewLine}" +
                             $"{_mailNewLine}" +
                             $"This fab package contains the following;{_mailNewLine}" +
                             $"{objects.AssembliesList.Count} Assemblies.{_mailNewLine}" +
@@ -54,7 +55,7 @@ namespace Prism
 
             email.Body = $"Hello,{_mailNewLine}" +
                             $"{_mailNewLine}" +
-                            $"This is the bolt order Issue {issueNumber} for phase {phaseNumber} in {projData.ProjNumber}, {projData.ProjName}.{_mailNewLine}" +
+                            $"This is the bolt order for phase {phaseNumber}, issue {issueNumber}, in {projData.ProjNumber}, {projData.ProjName}.{_mailNewLine}" +
                             $"Please order these bolts when possible.{_mailNewLine}{_mailNewLine}" +
                             $"Site date is {SiteDateNote(siteDate)}" +
                             $"{_mailNewLine}{_mailNewLine}" +
@@ -83,7 +84,7 @@ namespace Prism
 
             email.Body = $"Hello,{_mailNewLine}" +
                             $"{_mailNewLine}" +
-                            $"{OrderTypeText(orderType)}, issue {issueNumber}, for {PhaseOrVariation(projData.IsVariation)} {phaseNumber} in {projData.ProjNumber}, {projData.ProjName}.{_mailNewLine}" +
+                            $"{OrderTypeText(orderType)} for {PhaseOrVariation(projData.IsVariation)} {phaseNumber}, issue {issueNumber}, in {projData.ProjNumber}, {projData.ProjName}.{_mailNewLine}" +
                             $"{RemoveOrAddText(orderType)} as soon as possible.{_mailNewLine}" +
                             $"{_mailNewLine}" +
                             $"This material order contains the following;{_mailNewLine}" +
