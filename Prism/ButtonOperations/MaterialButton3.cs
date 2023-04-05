@@ -100,7 +100,7 @@ namespace Prism.ButtonOperations
                 if (fabsecWarning == DialogResult.Yes)
                 {
                     ReportManager.SelectDrawingsInDocManager();
-                    Operation.CreateReportFromSelected(myReportManager._drawingDpmReportRpt, Path.Combine(myReportManager.Folders.FabsecCarcassPath, myReportManager._drawingDpmReportXsr), "", "", "");
+                    Operation.CreateReportFromSelected(ReportManager._drawingDpmReportRpt, Path.Combine(myReportManager.Folders.FabsecCarcassPath, ReportManager._drawingDpmReportXsr), "", "", "");
                     DrawingManager dm = new DrawingManager(model, projectData, phaseNumber, issueNumber, myObjects, myReportManager.Folders.FabsecCarcassPath);
                     dm.PrintDPM(myReportManager.Folders.FabsecCarcassPath);
                     originalFabsecs.ModifyAttributes(stageNumber, projectData);
