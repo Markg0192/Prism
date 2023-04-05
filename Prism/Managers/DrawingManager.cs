@@ -69,6 +69,7 @@ namespace Prism
                 UpdateDrawing(drawing, _selectedObjects.MyDrawingHandler);
                 drawingsBySelectedParts.Add(drawing);
             }
+
             List<List<string>> dpmList = new List<List<string>>();
 
             string drawingIDList = Path.Combine(FirmFolderLoc.ReportTemplates(), ReportManager._drawingDpmReportRpt);
@@ -93,10 +94,10 @@ namespace Prism
 
         private void UpdateDrawing(Drawing drawing, DrawingHandler drawingHandler)
         {
-            drawingHandler.SetActiveDrawing(drawing, false);
-            drawing.IsLocked = false;
-            drawingHandler.SaveActiveDrawing();
-            drawing.IsLocked = true;
+           drawingHandler.SetActiveDrawing(drawing, false);
+        //    drawing.IsLocked = false;
+           drawingHandler.SaveActiveDrawing();
+           // drawing.IsLocked = true;
         }
 
         private static List<List<string>> AddDpmNameToDrawings(string ID_dessinPath)
@@ -163,7 +164,7 @@ namespace Prism
                 _selectedObjects.MyDrawingHandler.SaveActiveDrawing();
                 myDrawing.TeklaDrawing.IsLocked = true;
 
-                _selectedObjects.MyDrawingHandler.IssueDrawing(myDrawing.TeklaDrawing);
+             //   _selectedObjects.MyDrawingHandler.IssueDrawing(myDrawing.TeklaDrawing);
                 DPMPrinterAttributes myPDF = new DPMPrinterAttributes();
                 myPDF.ColorMode = DotPrintColor.BlackAndWhite;
                 myPDF.OpenFileWhenFinished = false;
@@ -183,7 +184,7 @@ namespace Prism
 
             ParallelLoopResult result = Parallel.ForEach(PrismDrawingList, prismDrawing =>
             {
-                _selectedObjects.MyDrawingHandler.IssueDrawing(prismDrawing.TeklaDrawing);
+               // _selectedObjects.MyDrawingHandler.IssueDrawing(prismDrawing.TeklaDrawing);
                 ProcessStartInfo startInfo = new ProcessStartInfo();
                 startInfo.FileName = printerExeFile;
                 startInfo.Arguments = GetArguments(prismDrawing.DpmPrinterSetting, prismDrawing.DpmFileName, $@"{fabPath}\{prismDrawing.DpmPDFSaveName}");

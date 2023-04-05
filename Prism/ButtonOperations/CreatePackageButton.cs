@@ -20,7 +20,7 @@ namespace Prism.ButtonOperations
             ReportManager.SelectDrawingsInDocManager();
             myReportManager.CreateFabReports(myObjects.SelectedModelParts, myObjects.AllBolts);
             DrawingManager myDrawingManager = new DrawingManager(model, projectData, phaseNumber, issueNumber, myObjects, myReportManager.Folders.DspPath);
-
+            ReportManager.IssueDrawings();
             if (!myDrawingManager.DrawingsAreUpToDate) { PrismWarnings.DrawingsNotUpToDate(); return false; }
 
             myDrawingManager.PrintDPM(myReportManager.Folders.FabPath);

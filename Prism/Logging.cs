@@ -89,7 +89,7 @@ namespace Prism
 
         public static void DebugLog(string debugText, string modelName)
         {
-            if (Environment.UserName != "mark.gibson")
+           // if (Environment.UserName != "mark.gibson")
             {
                 using (StreamWriter log = new StreamWriter(@"\\sev-los-fs1\application data$\Prism\DebugLog.txt", true))
                 {
