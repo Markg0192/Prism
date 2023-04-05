@@ -9,6 +9,8 @@ using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 using Task = System.Threading.Tasks.Task;
+using Microsoft.Office.Interop.Outlook;
+using Tekla.Structures.Model.Operations;
 
 
 //This class is temporarily not in use
@@ -42,7 +44,7 @@ namespace Prism
         {
             // List<Drawing> drawingsBySelectedParts = new List<Drawing>();
             DrawingHandler dh = new DrawingHandler();
-            IEnumerable<int> drawingNos = Operation.GetDrawingsBySelectedParts(true, true);
+            IEnumerable<int> drawingNos = Tekla.Structures.DrawingInternal.Operation.GetDrawingsBySelectedParts(true, true);
             int counter = 0;
             foreach (var item in drawingNos) counter++;
 
@@ -51,23 +53,32 @@ namespace Prism
                 //manager must be opened at least once to initialise it, if this not done the GetDrawingsBySelectedParts method does not work
                 //RefreshDrawings quickly opens the document manager if it has not been opened before to do this initialisation 
                 RefreshDrawings();
-                drawingNos = Operation.GetDrawingsBySelectedParts(true, true);
+                drawingNos = Tekla.Structures.DrawingInternal.Operation.GetDrawingsBySelectedParts(true, true);
             }
 
             foreach (var no in drawingNos)
             {
                 var id = new Identifier(no);
-                var drawing = Operation.GetDrawing(id);
+                var drawing = Tekla.Structures.DrawingInternal.Operation.GetDrawing(id);
                 drawing.Select();
                 if (drawing.UpToDateStatus != DrawingUpToDateStatus.DrawingIsUpToDate)
                 {
                     return false;
                 }
+
+                UpdateDrawing(drawing, _selectedObjects.MyDrawingHandler);
                 drawingsBySelectedParts.Add(drawing);
             }
             List<List<string>> dpmList = new List<List<string>>();
 
-            if (drawingsBySelectedParts.Count != 0) { dpmList = AddDpmNameToDrawings(ID_DessinPath); }
+            string drawingIDList = Path.Combine(FirmFolderLoc.ReportTemplates(), ReportManager._drawingDpmReportRpt);
+
+            Tekla.Structures.Model.Operations.Operation.CreateReportFromSelected(drawingIDList, Path.Combine(ID_DessinPath, ReportManager._drawingDpmReportXsr), "", "", "");
+
+            if (drawingsBySelectedParts.Count != 0)
+            {
+                dpmList = AddDpmNameToDrawings(ID_DessinPath);
+            }
             foreach (Drawing drawing in drawingsBySelectedParts)
             {
                 PrismDrawing prismDrawing = new PrismDrawing(drawing, _selectedObjects, _model, dpmList);
@@ -78,6 +89,14 @@ namespace Prism
             }
 
             return true;
+        }
+
+        private void UpdateDrawing(Drawing drawing, DrawingHandler drawingHandler)
+        {
+            drawingHandler.SetActiveDrawing(drawing, false);
+            drawing.IsLocked = false;
+            drawingHandler.SaveActiveDrawing();
+            drawing.IsLocked = true;
         }
 
         private static List<List<string>> AddDpmNameToDrawings(string ID_dessinPath)
@@ -139,6 +158,11 @@ namespace Prism
             {
                 //PrintPdf(myDrawing.TeklaDrawing, true, $"{_folders.FabPath}/{myDrawing.DrawingFolderName}/", "MGTEST", myDrawing.PdfName);
                 //statusLabel.Text = "Starting to print";
+                _selectedObjects.MyDrawingHandler.SetActiveDrawing(myDrawing.TeklaDrawing, false);
+                myDrawing.TeklaDrawing.IsLocked = false;
+                _selectedObjects.MyDrawingHandler.SaveActiveDrawing();
+                myDrawing.TeklaDrawing.IsLocked = true;
+
                 _selectedObjects.MyDrawingHandler.IssueDrawing(myDrawing.TeklaDrawing);
                 DPMPrinterAttributes myPDF = new DPMPrinterAttributes();
                 myPDF.ColorMode = DotPrintColor.BlackAndWhite;

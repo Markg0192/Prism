@@ -88,8 +88,8 @@ namespace Prism
         private const string _reportQSname = "-QS-AssemblyBreakdownList.rpt";
         private const string _outputQSname = "-QS-AssemblyBreakdownList.xsr";
 
-        public string _drawingDpmReportRpt = "ID_dessins_KP1.rpt";
-        public string _drawingDpmReportXsr = "ID_dessins_KP1.xsr";
+        public static string _drawingDpmReportRpt = "ID_dessins_KP1.rpt";
+        public static string _drawingDpmReportXsr = "ID_dessins_KP1.xsr";
         #endregion
 
         private string _NCPlateSetting;
@@ -208,7 +208,6 @@ namespace Prism
             string shopBoltReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report4Name);
             string siteBoltReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report5Name);
             string assemblyReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report6Name);
-            string drawingIDList = Path.Combine(FirmFolderLoc.ReportTemplates(), _drawingDpmReportRpt);
 
             _reportBolts = Path.Combine(FirmFolderLoc.ReportTemplates(), _reportBoltsName);
             string report9 = Path.Combine(FirmFolderLoc.ReportTemplates(), _report6Name);
@@ -229,7 +228,6 @@ namespace Prism
                 if (isFitting) create4Report = true;
             }
 
-            Operation.CreateReportFromSelected(drawingIDList, Path.Combine(Folders.DspPath, _drawingDpmReportXsr), "", "", "");
             Operation.CreateReportFromSelected(qsReport, Path.Combine(Folders.DspPath, $"{FabReportPrefix}{_outputQSname}"), _title1, _title2, _title3);
             Operation.CreateReportFromSelected(assemblyReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output6Name}"), _title1, _title2, _title3);
 
@@ -237,10 +235,6 @@ namespace Prism
             {
                 Operation.CreateReportFromSelected(hrMemberReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output2Name}"), _title1, _title2, _title3);
             }
-            /* if (create3PGReport)
-             {
-                 Operation.CreateReportFromSelected(report3PG, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output3PG}"), _title1, _title2, _title3);
-             }*/
             if (create4Report)
             {
                 Operation.CreateReportFromSelected(hrFittingReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output3Name}"), _title1, _title2, _title3);

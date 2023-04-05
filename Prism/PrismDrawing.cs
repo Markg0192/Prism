@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms.VisualStyles;
 using Tekla.Structures.Drawing;
+using Tekla.Structures.DrawingInternal;
 using Tekla.Structures.Model;
 
 //This class is temporarily not in use.
@@ -39,7 +40,7 @@ namespace Prism
         {
             string modelPath = model.GetInfo().ModelPath;
 
-            string dpmName = GetDPMNameFromDrawing(dpmList, teklaDrawing.Mark);
+            string dpmName = GetDPMNameFromDrawing(dpmList, teklaDrawing.GetIdentifier().ToString());
 
             DpmPrinterSetting = modelPath + @"\attributes\" + "standard.PdfPrintOptions.xml";
             DpmPDFSaveName = $@"{DrawingFolderName}\" + $"{PdfName}";

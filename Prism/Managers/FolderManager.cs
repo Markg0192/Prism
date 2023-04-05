@@ -19,6 +19,7 @@ namespace Prism
         private const string _fitFolder = "FIT";
         private const string _prtFolder = "PRT";
         private const string _dspFolder = "DSP";
+        private const string _shaftFolder = "SHA";
         private const string _ncFolder = "NC";
         private const string _reportFolder = "Lists";
         private const string _ifcFolder = "IFC";
@@ -40,9 +41,10 @@ namespace Prism
             NcPath = Path.Combine(FabPath, _ncFolder);
             ReportPath = Path.Combine(FabPath, _reportFolder);
             DspPath = Path.Combine(FabPath, _dspFolder);
+            ShaftPath = Path.Combine(FabPath, _shaftFolder);
             string ifcPath = Path.Combine(FabPath, _ifcFolder);
             _folderNames = new List<string>
-                {assPath, fitPath, prtPath, DspPath, NcPath, ReportPath, ifcPath};
+                {assPath, fitPath, prtPath, DspPath, NcPath, ReportPath, ShaftPath, ifcPath};
         }
 
         public readonly string FabPath;
@@ -51,6 +53,7 @@ namespace Prism
         public readonly string NcPath;
         public readonly string ReportPath;
         public readonly string DspPath;
+        public readonly string ShaftPath;
         public readonly string FabsecCarcassPath;
         private string ProjectLocation;
 

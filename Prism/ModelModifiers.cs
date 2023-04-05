@@ -81,7 +81,7 @@ namespace Prism
                 if (stageNumber == 7)
                 {
                     part.SetUserProperty(ModelUDA.PartMarkAtFab(), part.GetPartMark());
-                    part.LockPart();
+                    if (projectData.Full != "Mark Gibson") { part.LockPart(); }
                 }
                 part.Modify();
             }
