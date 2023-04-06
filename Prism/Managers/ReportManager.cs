@@ -85,8 +85,8 @@ namespace Prism
         private string _report6Name = $"{_output6Name}.rpt";
 
         //Extras
-        private const string _reportQSname = "-QS-AssemblyBreakdownList.rpt";
-        private const string _outputQSname = "-QS-AssemblyBreakdownList.xsr";
+        private const string _reportQSname = "-QSreport.csv.rpt";
+        private const string _outputQSname = "-QSreport.csv";
 
         public static string _drawingDpmReportRpt = "ID_dessins_KP1.rpt";
         public static string _drawingDpmReportXsr = "ID_dessins_KP1.xsr";
