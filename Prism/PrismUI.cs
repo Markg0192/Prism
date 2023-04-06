@@ -2,6 +2,7 @@
 using Prism.CustomDialogs;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -223,10 +224,11 @@ namespace Prism
 
             SetStatusLabels("Creating Fab Package");
 
-
             if (!await Task.Run(() => _selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber.Text, issueNumber.Text, StageTypes.FAB, txt_SiteDate.Text))) { EndFunction(0); return; }
             await Task.Run(() => FabMisc.FabMiscOp(phaseNumber.Text, issueNumber.Text, _projectData, txt_SiteDate.Text, _selectedObjects));
+            
             EndFunction(1);
+
         }
 
         private void StartFunction()
