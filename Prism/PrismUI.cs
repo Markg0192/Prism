@@ -216,8 +216,6 @@ namespace Prism
 
         private async void btnCreatePackage1_Click_1(object sender, EventArgs e)
         {
-            Stopwatch clock = new Stopwatch();
-            clock.Start();
             StartFunction();
 
             if (!await Task.Run(() => InitialSetup(StageTypes.FAB, true))) { EndFunction(0); return; }
@@ -226,12 +224,9 @@ namespace Prism
 
             SetStatusLabels("Creating Fab Package");
 
-
             if (!await Task.Run(() => _selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber.Text, issueNumber.Text, StageTypes.FAB, txt_SiteDate.Text))) { EndFunction(0); return; }
             await Task.Run(() => FabMisc.FabMiscOp(phaseNumber.Text, issueNumber.Text, _projectData, txt_SiteDate.Text, _selectedObjects));
             
-            clock.Stop();
-            Logging.DebugLog(clock.Elapsed.ToString(), "");
             EndFunction(1);
 
         }
