@@ -45,6 +45,8 @@ namespace Prism
             string ifcPath = Path.Combine(FabPath, _ifcFolder);
             _folderNames = new List<string>
                 {assPath, fitPath, prtPath, DspPath, NcPath, ReportPath, ShaftPath, ifcPath};
+            DrawingVaultFolders = new List<string>
+            { _assFolder, _prtFolder, _fitFolder, _shaftFolder};
         }
 
         public readonly string FabPath;
@@ -56,10 +58,10 @@ namespace Prism
         public readonly string ShaftPath;
         public readonly string FabsecCarcassPath;
         private string ProjectLocation;
+        private List<string> DrawingVaultFolders = new List<string>();
 
         public bool CreateFabFolders()
         {
-
             if (!CheckForExistingFolder(FabPath)) return false;
 
             foreach (string folder in _folderNames)
@@ -72,6 +74,17 @@ namespace Prism
             return true;
         }
 
+        public bool CreateDrawingVaultFolders(string vaultFolder)
+        {
+            foreach (string folder in DrawingVaultFolders)
+            {
+                if (!Directory.Exists($"{vaultFolder}/{folder}"))
+                {
+                    Directory.CreateDirectory($"{vaultFolder}/{folder}");
+                }
+            }
+            return true;
+        }
         public bool CreateMatFolder(bool fabsecsPresent)
         {
             if (!CheckForExistingFolder(MatPath)) return false;

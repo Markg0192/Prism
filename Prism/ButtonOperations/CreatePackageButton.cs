@@ -1,4 +1,5 @@
-﻿using System.IO.Compression;
+﻿using System;
+using System.IO.Compression;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Tekla.Structures.Model;
@@ -10,36 +11,37 @@ namespace Prism.ButtonOperations
     {
         public static async Task<bool> CreateFabPackage(this SelectedObjects myObjects, Model model, PrismProjectData projectData, string phaseNumber, string issueNumber, StageTypes stageType, string siteDate)
         {
-            ReportManager myReportManager = new ReportManager(projectData, phaseNumber, issueNumber);
+            ReportManager reportManager = new ReportManager(projectData, phaseNumber, issueNumber);
 
-            if (!myReportManager.Folders.CreateFabFolders()) return false;
-            if (!myReportManager.Folders.CreateBoltFolder()) return false;
+            if (!reportManager.Folders.CreateFabFolders()) return false;
+            if (!reportManager.Folders.CreateBoltFolder()) return false;
 
-            myObjects.ExportBSWX(myReportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType);
+           // myObjects.ExportBSWX(reportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType);
 
             ReportManager.SelectDrawingsInDocManager();
-            myReportManager.CreateFabReports(myObjects.SelectedModelParts, myObjects.AllBolts);
-            DrawingManager myDrawingManager = new DrawingManager(model, projectData, phaseNumber, issueNumber, myObjects, myReportManager.Folders.DspPath);
+            reportManager.CreateFabReports(myObjects.SelectedModelParts, myObjects.AllBolts);
+            DrawingManager drawingManager = new DrawingManager(model, projectData, phaseNumber, issueNumber, myObjects, reportManager.Folders.DspPath);
             ReportManager.IssueDrawings();
-            if (!myDrawingManager.DrawingsAreUpToDate) { PrismWarnings.DrawingsNotUpToDate(); return false; }
+            if (!drawingManager.DrawingsAreUpToDate) { PrismWarnings.DrawingsNotUpToDate(); return false; }
 
-            myDrawingManager.PrintDPM(myReportManager.Folders.FabPath);
+            if (Environment.UserName == "mark.gibson") { drawingManager.PrintDrawingsToVault(reportManager, projectData.ProjNumber); }
+
+            else {  drawingManager.PrintDrawingToModelFolder(reportManager.Folders.FabPath); }          
+
             myObjects.SelectedModelParts.ModifyAttributes((int)stageType, projectData);
 
-            myReportManager.Folders.RemoveUnusedFolders();
+            reportManager.Folders.RemoveUnusedFolders();
 
-            myReportManager.Folders.ZipFolder(myReportManager.Folders.FabPath);
+            reportManager.Folders.ZipFolder(reportManager.Folders.FabPath);
 
             DialogResult finishBox = PrismWarnings.FabPackComplete(projectData);
 
             if (finishBox == DialogResult.OK)
             {
-                EmailWriter.WriteFabEmail(projectData, myObjects, myReportManager.FabReportPrefix, issueNumber, phaseNumber, siteDate, myReportManager.Folders.FabPath);
+                EmailWriter.WriteFabEmail(projectData, myObjects, reportManager.FabReportPrefix, issueNumber, phaseNumber, siteDate, reportManager.Folders.FabPath);
             }
             Logging.LogProgress(projectData.ProjName, "Fab Package", 0, myObjects.AssembliesList.Count);
             return true;
         }
-
-
     }
 }

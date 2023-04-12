@@ -12,6 +12,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Tekla.Structures.Model.UI;
 using static Prism.Enums;
+using Tekla.Structures.RemotingHelper;
 
 namespace Prism
 {
@@ -102,14 +103,18 @@ namespace Prism
             string timesOrdered = "";
             bolts.GetUserProperty(ModelUDA.TimesBoltOrdered(), ref timesOrdered);
 
+            Logging.DebugLog($"{bolts.BoltSize}", "");
+            Logging.DebugLog($"times ordered = {timesOrdered}", "");
+
             if (timesOrdered != "")
             {
                 var nu = timesOrdered.Split('=');
                 int newOrderCount = Convert.ToInt32(nu[1]) + 1;
                 return $"Times ordered ={newOrderCount}";
             }
-            return "Times ordered =1";
 
+            Logging.DebugLog($"return first", "");
+            return "Times ordered =1";
         }
 
         public static void StampPartFabUDA(List<Part> selectedModelParts, string phaseNumber, string issueNumber)

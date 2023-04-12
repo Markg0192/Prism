@@ -228,7 +228,6 @@ namespace Prism
             await Task.Run(() => FabMisc.FabMiscOp(phaseNumber.Text, issueNumber.Text, _projectData, txt_SiteDate.Text, _selectedObjects));
             
             EndFunction(1);
-
         }
 
         private void StartFunction()

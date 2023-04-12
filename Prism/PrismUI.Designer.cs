@@ -83,11 +83,11 @@ namespace Prism
             this.issueNumber = new System.Windows.Forms.TextBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.projectUsersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.userGuideToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.projectUsersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.flowLayoutPanel1.SuspendLayout();
             this.pnl_Home.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.info_Home)).BeginInit();
@@ -113,7 +113,7 @@ namespace Prism
             this.flowLayoutPanel1.Controls.Add(this.pnl_Package);
             this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 27);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(1014, 283);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(970, 283);
             this.flowLayoutPanel1.TabIndex = 2;
             // 
             // pnl_Home
@@ -199,6 +199,7 @@ namespace Prism
             // pnl_Material
             // 
             this.pnl_Material.BackColor = System.Drawing.Color.White;
+            this.pnl_Material.BackgroundImage = global::Prism.Properties.Resources.watereddownlogo;
             this.pnl_Material.Controls.Add(this.cmb_OrderCall);
             this.pnl_Material.Controls.Add(this.txt_ResetPrelimTo);
             this.pnl_Material.Controls.Add(this.btn_ResetPrelims);
@@ -267,6 +268,7 @@ namespace Prism
             // label4
             // 
             this.label4.AutoSize = true;
+            this.label4.BackColor = System.Drawing.Color.Transparent;
             this.label4.Location = new System.Drawing.Point(82, 160);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(72, 13);
@@ -276,6 +278,7 @@ namespace Prism
             // label1
             // 
             this.label1.AutoSize = true;
+            this.label1.BackColor = System.Drawing.Color.Transparent;
             this.label1.Location = new System.Drawing.Point(82, 89);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(69, 13);
@@ -339,6 +342,7 @@ namespace Prism
             // label3
             // 
             this.label3.AutoSize = true;
+            this.label3.BackColor = System.Drawing.Color.Transparent;
             this.label3.Location = new System.Drawing.Point(82, 134);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(77, 13);
@@ -411,6 +415,7 @@ namespace Prism
             // pnl_Detail
             // 
             this.pnl_Detail.BackColor = System.Drawing.Color.White;
+            this.pnl_Detail.BackgroundImage = global::Prism.Properties.Resources.watereddownlogo;
             this.pnl_Detail.Controls.Add(this.txt_PlateOnFlange);
             this.pnl_Detail.Controls.Add(this.lbl_PltOnFlange);
             this.pnl_Detail.Controls.Add(this.label2);
@@ -440,6 +445,7 @@ namespace Prism
             // lbl_PltOnFlange
             // 
             this.lbl_PltOnFlange.AutoSize = true;
+            this.lbl_PltOnFlange.BackColor = System.Drawing.Color.Transparent;
             this.lbl_PltOnFlange.Location = new System.Drawing.Point(88, 113);
             this.lbl_PltOnFlange.Name = "lbl_PltOnFlange";
             this.lbl_PltOnFlange.Size = new System.Drawing.Size(75, 13);
@@ -450,6 +456,7 @@ namespace Prism
             // label2
             // 
             this.label2.AutoSize = true;
+            this.label2.BackColor = System.Drawing.Color.Transparent;
             this.label2.Location = new System.Drawing.Point(88, 67);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(129, 13);
@@ -555,6 +562,7 @@ namespace Prism
             // pnl_Package
             // 
             this.pnl_Package.BackColor = System.Drawing.Color.White;
+            this.pnl_Package.BackgroundImage = global::Prism.Properties.Resources.watereddownlogo;
             this.pnl_Package.Controls.Add(this.info_Fab);
             this.pnl_Package.Controls.Add(this.btn_HomePackage);
             this.pnl_Package.Controls.Add(this.statusStrip6);
@@ -568,14 +576,14 @@ namespace Prism
             this.pnl_Package.Controls.Add(this.issueNumber);
             this.pnl_Package.Location = new System.Drawing.Point(753, 3);
             this.pnl_Package.Name = "pnl_Package";
-            this.pnl_Package.Size = new System.Drawing.Size(258, 227);
+            this.pnl_Package.Size = new System.Drawing.Size(214, 240);
             this.pnl_Package.TabIndex = 3;
             this.pnl_Package.Visible = false;
             // 
             // info_Fab
             // 
             this.info_Fab.Image = global::Prism.Properties.Resources.info;
-            this.info_Fab.Location = new System.Drawing.Point(189, 5);
+            this.info_Fab.Location = new System.Drawing.Point(142, 7);
             this.info_Fab.Name = "info_Fab";
             this.info_Fab.Size = new System.Drawing.Size(20, 20);
             this.info_Fab.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -589,7 +597,7 @@ namespace Prism
             this.btn_HomePackage.BackColor = System.Drawing.Color.White;
             this.btn_HomePackage.BackgroundImage = global::Prism.Properties.Resources.Home;
             this.btn_HomePackage.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.btn_HomePackage.Location = new System.Drawing.Point(215, 5);
+            this.btn_HomePackage.Location = new System.Drawing.Point(168, 5);
             this.btn_HomePackage.Name = "btn_HomePackage";
             this.btn_HomePackage.Size = new System.Drawing.Size(40, 40);
             this.btn_HomePackage.TabIndex = 37;
@@ -603,9 +611,9 @@ namespace Prism
             this.statusStrip6.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.statusStrip6.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.StatusLabel});
-            this.statusStrip6.Location = new System.Drawing.Point(0, 205);
+            this.statusStrip6.Location = new System.Drawing.Point(0, 218);
             this.statusStrip6.Name = "statusStrip6";
-            this.statusStrip6.Size = new System.Drawing.Size(258, 22);
+            this.statusStrip6.Size = new System.Drawing.Size(214, 22);
             this.statusStrip6.TabIndex = 36;
             this.statusStrip6.Text = "statusStrip6";
             // 
@@ -620,7 +628,7 @@ namespace Prism
             this.txt_SiteDate.BackColor = System.Drawing.Color.Moccasin;
             this.txt_SiteDate.Location = new System.Drawing.Point(15, 98);
             this.txt_SiteDate.Name = "txt_SiteDate";
-            this.txt_SiteDate.Size = new System.Drawing.Size(124, 20);
+            this.txt_SiteDate.Size = new System.Drawing.Size(100, 20);
             this.txt_SiteDate.TabIndex = 35;
             this.toolTip1.SetToolTip(this.txt_SiteDate, "dd/mm/yyyy preferred");
             this.txt_SiteDate.TextChanged += new System.EventHandler(this.txt_SiteDate_TextChanged);
@@ -633,7 +641,7 @@ namespace Prism
             this.btn_FabMisc.Enabled = false;
             this.btn_FabMisc.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_FabMisc.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btn_FabMisc.Location = new System.Drawing.Point(191, 69);
+            this.btn_FabMisc.Location = new System.Drawing.Point(110, 157);
             this.btn_FabMisc.Name = "btn_FabMisc";
             this.btn_FabMisc.Size = new System.Drawing.Size(52, 45);
             this.btn_FabMisc.TabIndex = 33;
@@ -649,7 +657,7 @@ namespace Prism
             this.btnCreatePackage1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.btnCreatePackage1.Enabled = false;
             this.btnCreatePackage1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnCreatePackage1.Location = new System.Drawing.Point(160, 127);
+            this.btnCreatePackage1.Location = new System.Drawing.Point(15, 133);
             this.btnCreatePackage1.Name = "btnCreatePackage1";
             this.btnCreatePackage1.Size = new System.Drawing.Size(83, 69);
             this.btnCreatePackage1.TabIndex = 34;
@@ -660,6 +668,7 @@ namespace Prism
             // label16
             // 
             this.label16.AutoSize = true;
+            this.label16.BackColor = System.Drawing.Color.Transparent;
             this.label16.Location = new System.Drawing.Point(12, 81);
             this.label16.Name = "label16";
             this.label16.Size = new System.Drawing.Size(99, 13);
@@ -689,7 +698,7 @@ namespace Prism
             this.phaseNumber.BackColor = System.Drawing.Color.LightCoral;
             this.phaseNumber.Location = new System.Drawing.Point(15, 22);
             this.phaseNumber.Name = "phaseNumber";
-            this.phaseNumber.Size = new System.Drawing.Size(124, 20);
+            this.phaseNumber.Size = new System.Drawing.Size(100, 20);
             this.phaseNumber.TabIndex = 26;
             this.toolTip1.SetToolTip(this.phaseNumber, "Or variation number");
             this.phaseNumber.TextChanged += new System.EventHandler(this.phaseNumber_TextChanged);
@@ -699,7 +708,7 @@ namespace Prism
             this.issueNumber.BackColor = System.Drawing.Color.LightCoral;
             this.issueNumber.Location = new System.Drawing.Point(15, 60);
             this.issueNumber.Name = "issueNumber";
-            this.issueNumber.Size = new System.Drawing.Size(124, 20);
+            this.issueNumber.Size = new System.Drawing.Size(100, 20);
             this.issueNumber.TabIndex = 27;
             this.toolTip1.SetToolTip(this.issueNumber, "Numbers only, Min 2 digits long");
             this.issueNumber.TextChanged += new System.EventHandler(this.issueNumber_TextChanged);
@@ -728,10 +737,17 @@ namespace Prism
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "File";
             // 
+            // projectUsersToolStripMenuItem
+            // 
+            this.projectUsersToolStripMenuItem.Name = "projectUsersToolStripMenuItem";
+            this.projectUsersToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
+            this.projectUsersToolStripMenuItem.Text = "Project Users";
+            this.projectUsersToolStripMenuItem.Click += new System.EventHandler(this.projectUsersToolStripMenuItem_Click);
+            // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -746,16 +762,9 @@ namespace Prism
             // userGuideToolStripMenuItem
             // 
             this.userGuideToolStripMenuItem.Name = "userGuideToolStripMenuItem";
-            this.userGuideToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.userGuideToolStripMenuItem.Size = new System.Drawing.Size(131, 22);
             this.userGuideToolStripMenuItem.Text = "User Guide";
             this.userGuideToolStripMenuItem.Click += new System.EventHandler(this.userGuideToolStripMenuItem_Click);
-            // 
-            // projectUsersToolStripMenuItem
-            // 
-            this.projectUsersToolStripMenuItem.Name = "projectUsersToolStripMenuItem";
-            this.projectUsersToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.projectUsersToolStripMenuItem.Text = "Project Users";
-            this.projectUsersToolStripMenuItem.Click += new System.EventHandler(this.projectUsersToolStripMenuItem_Click);
             // 
             // PrismUI
             // 
