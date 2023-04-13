@@ -38,15 +38,15 @@ namespace Prism
             string fitPath = Path.Combine(FabPath, _fitFolder);
             string prtPath = Path.Combine(FabPath, _prtFolder);
             FabsecCarcassPath = Path.Combine(MatPath, _fabsecCarcasses);
+            IfcPath = Path.Combine(FabPath, _ifcFolder);
             NcPath = Path.Combine(FabPath, _ncFolder);
             ReportPath = Path.Combine(FabPath, _reportFolder);
             DspPath = Path.Combine(FabPath, _dspFolder);
             ShaftPath = Path.Combine(FabPath, _shaftFolder);
-            string ifcPath = Path.Combine(FabPath, _ifcFolder);
             _folderNames = new List<string>
-                {assPath, fitPath, prtPath, DspPath, NcPath, ReportPath, ShaftPath, ifcPath};
+                {assPath, fitPath, prtPath, DspPath, NcPath, ReportPath, ShaftPath, IfcPath};
             DrawingVaultFolders = new List<string>
-            { _assFolder, _prtFolder, _fitFolder, _shaftFolder};
+            { _assFolder, _prtFolder, _fitFolder, _shaftFolder, _ifcFolder};
         }
 
         public readonly string FabPath;
@@ -57,6 +57,7 @@ namespace Prism
         public readonly string DspPath;
         public readonly string ShaftPath;
         public readonly string FabsecCarcassPath;
+        public readonly string IfcPath;
         private string ProjectLocation;
         private List<string> DrawingVaultFolders = new List<string>();
 

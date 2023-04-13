@@ -103,9 +103,6 @@ namespace Prism
             string timesOrdered = "";
             bolts.GetUserProperty(ModelUDA.TimesBoltOrdered(), ref timesOrdered);
 
-            Logging.DebugLog($"{bolts.BoltSize}", "");
-            Logging.DebugLog($"times ordered = {timesOrdered}", "");
-
             if (timesOrdered != "")
             {
                 var nu = timesOrdered.Split('=');
@@ -113,7 +110,6 @@ namespace Prism
                 return $"Times ordered ={newOrderCount}";
             }
 
-            Logging.DebugLog($"return first", "");
             return "Times ordered =1";
         }
 
@@ -270,6 +266,17 @@ namespace Prism
             {
                 part.Modify();
             }
+        }
+
+        public static void SelectAssembly(this Assembly assToBeSelected)
+        {
+            ArrayList selectList = new ArrayList { assToBeSelected };
+
+            Tekla.Structures.Model.UI.ModelObjectSelector ms = new Tekla.Structures.Model.UI.ModelObjectSelector();
+            ms.Select(selectList);
+
+            assToBeSelected.Modify();
+
         }
 
         public static string GetPrelimMark(this Part p)

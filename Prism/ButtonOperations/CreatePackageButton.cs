@@ -16,15 +16,15 @@ namespace Prism.ButtonOperations
             if (!reportManager.Folders.CreateFabFolders()) return false;
             if (!reportManager.Folders.CreateBoltFolder()) return false;
 
-           // myObjects.ExportBSWX(reportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType);
+            if (Environment.UserName != "mark.gibson") { myObjects.ExportBSWX(reportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType); }
 
-            ReportManager.SelectDrawingsInDocManager();
+            ReportManager.SelectDrawingsInDocManager(myObjects.SelectedModelParts);
             reportManager.CreateFabReports(myObjects.SelectedModelParts, myObjects.AllBolts);
             DrawingManager drawingManager = new DrawingManager(model, projectData, phaseNumber, issueNumber, myObjects, reportManager.Folders.DspPath);
             ReportManager.IssueDrawings();
             if (!drawingManager.DrawingsAreUpToDate) { PrismWarnings.DrawingsNotUpToDate(); return false; }
 
-            if (Environment.UserName == "mark.gibson") { drawingManager.PrintDrawingsToVault(reportManager, projectData.ProjNumber); }
+            if (Environment.UserName == "mark.gibson") { drawingManager.PrintDrawingsToVault(myObjects, reportManager, projectData.ProjNumber); }
 
             else {  drawingManager.PrintDrawingToModelFolder(reportManager.Folders.FabPath); }          
 

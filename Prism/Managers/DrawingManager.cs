@@ -63,7 +63,7 @@ namespace Prism
                     return false;
                 }
 
-                UpdateDrawing(drawing, _selectedObjects.MyDrawingHandler);
+                if(Environment.UserName != "mark.gibson") UpdateDrawing(drawing, _selectedObjects.MyDrawingHandler);
                 drawingsBySelectedParts.Add(drawing);
             }
 
@@ -189,28 +189,29 @@ namespace Prism
             });
         }
 
-        public void PrintDrawingsToVault(ReportManager rp, string contractNumber)
+        public void PrintDrawingsToVault(SelectedObjects myObjects, ReportManager rp, string contractNumber)
         {
             string printerExeFile = GetDPMPrinterExeFile();
             DrawingVaultInterface.Drawing dv = new DrawingVaultInterface.Drawing("cc89a98a-e0c4-480a-83f9-0b27ec66be2b");
             string serverFileLocation = dv.ServerFileLocation;
-
             contractNumber = ProcessContractNumber(contractNumber);
-         
+
+            IFCExporter.ExportIndividualIFC(myObjects, rp.Folders.IfcPath, contractNumber);
+
+            //contractNumber = "102"; 
+            rp.Folders.CreateDrawingVaultFolders($"{serverFileLocation}{contractNumber}");
+
+            List<string> drawings = new List<string>();
             ParallelLoopResult result = Parallel.ForEach(PrismDrawingList, prismDrawing =>
             {
                 string drawingNumber = prismDrawing.PdfName.Split('-')[0];
                 string revision = prismDrawing.RevMark == "0" ? "" : prismDrawing.RevMark; // if rev is 0 we need to return blank here for the vault
                 string drawingSize = GetDrawingSize(prismDrawing.TeklaDrawing);
                 string fileLocation = $@"{serverFileLocation}{contractNumber}\{prismDrawing.DrawingFolderName}\{prismDrawing.PdfName}";
-
-                rp.Folders.CreateDrawingVaultFolders($"{serverFileLocation}{contractNumber}");
-
                 DateTime fileModifiedDate = DateTime.Now;
 
-                bool success = dv.AddDrawing(contractNumber, drawingNumber, revision, drawingSize, fileLocation, fileModifiedDate);
-                if (success == false)
-                    MessageBox.Show(dv.ErrorMessage);
+                drawings.Add($"{contractNumber}, {drawingNumber}, {revision}, {drawingSize}, {fileLocation}, {fileModifiedDate.ToString()}");
+
                 ProcessStartInfo startInfo = new ProcessStartInfo();
                 startInfo.FileName = printerExeFile;
                 startInfo.Arguments = GetArguments(prismDrawing.DpmPrinterSetting, prismDrawing.DpmFileName, $@"{serverFileLocation}{contractNumber}\{prismDrawing.DpmPDFSaveName}");
@@ -218,19 +219,9 @@ namespace Prism
                 process.WaitForExit();
             });
 
-           // dv.ReviewLog();
-            dv.CommitChanges();
+            // dv.ReviewLog();
+            dv.CommitChanges(drawings);
             dv.Dispose();
-        }
-
-        private string ProcessContractNumber(string contractNumber)
-        {
-            if (contractNumber.StartsWith("C")) { contractNumber = contractNumber.Substring(1); } //Remove C from the start of a contract number
-            if (contractNumber.Contains("-")) contractNumber = contractNumber.Split('-')[0]; //If a dash is present then contract number looks 1234-01, we need to remove the "-01"
-            if (contractNumber.Length > 4) contractNumber = $"0{contractNumber}"; //contracts need to be 4 characters long, add 0 if its less
-            if (contractNumber.Length > 4) contractNumber = $"0{contractNumber}"; //go again to be sure
-
-            return contractNumber;
         }
 
         private string GetDrawingSize(Drawing drawing)
@@ -262,6 +253,16 @@ namespace Prism
             arg.Append(" out:" + "\"" + pdf + "\"");
 
             return arg.ToString();
+        }
+
+        private static string ProcessContractNumber(string contractNumber)
+        {
+            if (contractNumber.StartsWith("C")) { contractNumber = contractNumber.Substring(1); } //Remove C from the start of a contract number
+            if (contractNumber.Contains("-")) contractNumber = contractNumber.Split('-')[0]; //If a dash is present then contract number looks 1234-01, we need to remove the "-01"
+            if (contractNumber.Length > 4) contractNumber = $"0{contractNumber}"; //contracts need to be 4 characters long, add 0 if its less
+            if (contractNumber.Length > 4) contractNumber = $"0{contractNumber}"; //go again to be sure
+
+            return contractNumber;
         }
     }
 }

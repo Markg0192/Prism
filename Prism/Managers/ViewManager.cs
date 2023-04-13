@@ -10,34 +10,41 @@ namespace Prism
     {
         public static void CreateFabViewFilter(string phaseNum, string issueNum, PrismProjectData projectData)
         {
-           // Creates the filter expressions
-           PartFilterExpressions.CustomString PartName = new PartFilterExpressions.CustomString(ModelUDA.FabStampUDA());
-           StringConstantFilterExpression phaseInfo = new StringConstantFilterExpression(ModelUDA.FabStamp(phaseNum, issueNum));
+            // Creates the filter expressions
+            PartFilterExpressions.CustomString PartName = new PartFilterExpressions.CustomString(ModelUDA.FabStampUDA());
+            StringConstantFilterExpression phaseInfo = new StringConstantFilterExpression(ModelUDA.FabStamp(phaseNum, issueNum));
 
-           PartFilterExpressions.Name name = new PartFilterExpressions.Name();
-           StringConstantFilterExpression seversafeName = new StringConstantFilterExpression("SS*");
+            PartFilterExpressions.Name name = new PartFilterExpressions.Name();
+            StringConstantFilterExpression seversafeName = new StringConstantFilterExpression("SS*");
 
-           // Creates the binary filter expressions
-           BinaryFilterExpression Expression1 = new BinaryFilterExpression(PartName, StringOperatorType.IS_EQUAL, phaseInfo);
-           BinaryFilterExpression Seversafe = new BinaryFilterExpression(name, StringOperatorType.IS_NOT_EQUAL, seversafeName);
+            // Creates the binary filter expressions
+            BinaryFilterExpression Expression1 = new BinaryFilterExpression(PartName, StringOperatorType.IS_EQUAL, phaseInfo);
+            BinaryFilterExpression Seversafe = new BinaryFilterExpression(name, StringOperatorType.IS_NOT_EQUAL, seversafeName);
 
             // Creates the binary filter expression collection
             BinaryFilterExpressionCollection ExpressionCollection = new BinaryFilterExpressionCollection();
-           ExpressionCollection.Add(new BinaryFilterExpressionItem(Expression1, BinaryFilterOperatorType.BOOLEAN_AND));
-           ExpressionCollection.Add(new BinaryFilterExpressionItem(Seversafe, BinaryFilterOperatorType.BOOLEAN_AND));
+            ExpressionCollection.Add(new BinaryFilterExpressionItem(Expression1, BinaryFilterOperatorType.BOOLEAN_AND));
+            ExpressionCollection.Add(new BinaryFilterExpressionItem(Seversafe, BinaryFilterOperatorType.BOOLEAN_AND));
 
             string AttributesPath = Path.Combine(projectData.ProjPath, "attributes");
-           string FilterName = Path.Combine(AttributesPath, ModelUDA.FabStamp(phaseNum, issueNum));
+            string FilterName = Path.Combine(AttributesPath, ModelUDA.FabStamp(phaseNum, issueNum));
 
-           Filter Filter = new Filter(ExpressionCollection);
-           // Generates the filter file
-           Filter.CreateFile(FilterExpressionFileType.OBJECT_GROUP_VIEW, FilterName);      
+            Filter Filter = new Filter(ExpressionCollection);
+            // Generates the filter file
+            Filter.CreateFile(FilterExpressionFileType.OBJECT_GROUP_VIEW, FilterName);
         }
 
         public static void CreateFabView(string phaseNum, string issueNum, PrismProjectData projectData, SelectedObjects obj)
         {
             CreateFabViewFilter(phaseNum, issueNum, projectData);
             var view = new View();
+            view.ViewFilter = ModelUDA.FabStamp(phaseNum, issueNum);
+
+            view.DisplayCoordinateSystem.AxisX = new Vector(1, 0, 0);
+            view.DisplayCoordinateSystem.AxisY = new Vector(1, 0, 0);
+            view.DisplayCoordinateSystem.Origin = new Vector(0, 0, 0);
+            view.DisplayType = View.DisplayOrientationType.DISPLAY_3D;
+
             view.Name = ModelUDA.FabStamp(phaseNum, issueNum);
             view.ViewCoordinateSystem.AxisX = new Vector(1, 0, 0);
             view.ViewCoordinateSystem.AxisY = new Vector(0, 1, 0);
@@ -46,9 +53,9 @@ namespace Prism
             view.ViewDepthDown = 100000;
             view.WorkArea.MinPoint = new Point(obj.SmallestX - 1000, obj.SmallestY - 1000, obj.SmallestZ - 1000);
             view.WorkArea.MaxPoint = new Point(obj.BiggestX + 1000, obj.BiggestY + 1000, obj.BiggestZ + 1000);
-            view.DisplayType = View.DisplayOrientationType.DISPLAY_3D;
+
             view.SetVisibilitySettings();
-            view.ViewFilter = ModelUDA.FabStamp(phaseNum, issueNum);
+
             view.SharedView = true;
             view.Insert();
         }
@@ -56,7 +63,7 @@ namespace Prism
         private static void SetVisibilitySettings(this View view)
         {
             view.VisibilitySettings.PartsVisible = true;
-            view.VisibilitySettings.PartsVisibleInComponents = true;           
+            view.VisibilitySettings.PartsVisibleInComponents = true;
             view.VisibilitySettings.GridsVisible = true;
             view.VisibilitySettings.BoltHolesVisible = false;
             view.VisibilitySettings.BoltHolesVisibleInComponents = false;

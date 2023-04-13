@@ -99,7 +99,7 @@ namespace Prism.ButtonOperations
                 DialogResult fabsecWarning = PrismWarnings.FabsecsPresent();
                 if (fabsecWarning == DialogResult.Yes)
                 {
-                    ReportManager.SelectDrawingsInDocManager();
+                    ReportManager.SelectDrawingsInDocManager(null);
                     Operation.CreateReportFromSelected(ReportManager._drawingDpmReportRpt, Path.Combine(myReportManager.Folders.FabsecCarcassPath, ReportManager._drawingDpmReportXsr), "", "", "");
                     DrawingManager dm = new DrawingManager(model, projectData, phaseNumber, issueNumber, myObjects, myReportManager.Folders.FabsecCarcassPath);
                     dm.PrintDrawingToModelFolder(myReportManager.Folders.FabsecCarcassPath);

@@ -257,7 +257,7 @@ namespace Prism
             Operation.CreateNCFilesFromSelected(_NCPlateSetting, Path.Combine(Folders.NcPath, " "));
         }
 
-        public static async void SelectDrawingsInDocManager()
+        public static async void SelectDrawingsInDocManager(List<Part> selectedParts)
         {
             var macrodir = "";
             TeklaStructuresSettings.GetAdvancedOption("XS_MACRO_DIRECTORY", ref macrodir);
@@ -290,6 +290,7 @@ namespace Prism
                 writer.Write(macro);
                 writer.Close();
             }
+            if(selectedParts != null) selectedParts.SelectParts();
             Operation.RunMacro("PrismDrawingOperation.cs");
 
             while (Operation.IsMacroRunning()) // Wait until macro for selecting drawings in the document manager is complete before moving on
