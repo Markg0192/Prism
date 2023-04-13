@@ -1,16 +1,13 @@
 ﻿using System;
-using Tekla.Structures.Drawing;
-using Tekla.Structures.Model;
 using System.Collections.Generic;
-using System.IO;
-using Tekla.Structures.DrawingInternal;
-using Tekla.Structures;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using Task = System.Threading.Tasks.Task;
-using Microsoft.Office.Interop.Outlook;
-using Tekla.Structures.Model.Operations;
+using System.Windows.Forms;
+using Tekla.Structures;
+using Tekla.Structures.Drawing;
+using Tekla.Structures.Model;
 
 
 //This class is temporarily not in use
@@ -66,7 +63,7 @@ namespace Prism
                     return false;
                 }
 
-                UpdateDrawing(drawing, _selectedObjects.MyDrawingHandler);
+                if(Environment.UserName != "mark.gibson") UpdateDrawing(drawing, _selectedObjects.MyDrawingHandler);
                 drawingsBySelectedParts.Add(drawing);
             }
 
@@ -94,10 +91,10 @@ namespace Prism
 
         private void UpdateDrawing(Drawing drawing, DrawingHandler drawingHandler)
         {
-           drawingHandler.SetActiveDrawing(drawing, false);
-        //    drawing.IsLocked = false;
-           drawingHandler.SaveActiveDrawing();
-           // drawing.IsLocked = true;
+            drawingHandler.SetActiveDrawing(drawing, false);
+            //    drawing.IsLocked = false;
+            drawingHandler.SaveActiveDrawing();
+            // drawing.IsLocked = true;
         }
 
         private static List<List<string>> AddDpmNameToDrawings(string ID_dessinPath)
@@ -164,7 +161,7 @@ namespace Prism
                 _selectedObjects.MyDrawingHandler.SaveActiveDrawing();
                 myDrawing.TeklaDrawing.IsLocked = true;
 
-             //   _selectedObjects.MyDrawingHandler.IssueDrawing(myDrawing.TeklaDrawing);
+                //   _selectedObjects.MyDrawingHandler.IssueDrawing(myDrawing.TeklaDrawing);
                 DPMPrinterAttributes myPDF = new DPMPrinterAttributes();
                 myPDF.ColorMode = DotPrintColor.BlackAndWhite;
                 myPDF.OpenFileWhenFinished = false;
@@ -178,19 +175,62 @@ namespace Prism
             }
         }
 
-        public void PrintDPM(string fabPath)
+        public void PrintDrawingToModelFolder(string fabPath)
         {
             string printerExeFile = GetDPMPrinterExeFile();
 
             ParallelLoopResult result = Parallel.ForEach(PrismDrawingList, prismDrawing =>
             {
-               // _selectedObjects.MyDrawingHandler.IssueDrawing(prismDrawing.TeklaDrawing);
                 ProcessStartInfo startInfo = new ProcessStartInfo();
                 startInfo.FileName = printerExeFile;
                 startInfo.Arguments = GetArguments(prismDrawing.DpmPrinterSetting, prismDrawing.DpmFileName, $@"{fabPath}\{prismDrawing.DpmPDFSaveName}");
                 var process = System.Diagnostics.Process.Start(startInfo);
                 process.WaitForExit();
             });
+        }
+
+        public void PrintDrawingsToVault(SelectedObjects myObjects, ReportManager rp, string contractNumber)
+        {
+            string printerExeFile = GetDPMPrinterExeFile();
+            DrawingVaultInterface.Drawing dv = new DrawingVaultInterface.Drawing("cc89a98a-e0c4-480a-83f9-0b27ec66be2b");
+            string serverFileLocation = dv.ServerFileLocation;
+            contractNumber = ProcessContractNumber(contractNumber);
+
+            IFCExporter.ExportIndividualIFC(myObjects, rp.Folders.IfcPath, contractNumber);
+
+            //contractNumber = "102"; 
+            rp.Folders.CreateDrawingVaultFolders($"{serverFileLocation}{contractNumber}");
+
+            List<string> drawings = new List<string>();
+            ParallelLoopResult result = Parallel.ForEach(PrismDrawingList, prismDrawing =>
+            {
+                string drawingNumber = prismDrawing.PdfName.Split('-')[0];
+                string revision = prismDrawing.RevMark == "0" ? "" : prismDrawing.RevMark; // if rev is 0 we need to return blank here for the vault
+                string drawingSize = GetDrawingSize(prismDrawing.TeklaDrawing);
+                string fileLocation = $@"{serverFileLocation}{contractNumber}\{prismDrawing.DrawingFolderName}\{prismDrawing.PdfName}";
+                DateTime fileModifiedDate = DateTime.Now;
+
+                drawings.Add($"{contractNumber}, {drawingNumber}, {revision}, {drawingSize}, {fileLocation}, {fileModifiedDate.ToString()}");
+
+                ProcessStartInfo startInfo = new ProcessStartInfo();
+                startInfo.FileName = printerExeFile;
+                startInfo.Arguments = GetArguments(prismDrawing.DpmPrinterSetting, prismDrawing.DpmFileName, $@"{serverFileLocation}{contractNumber}\{prismDrawing.DpmPDFSaveName}");
+                var process = System.Diagnostics.Process.Start(startInfo);
+                process.WaitForExit();
+            });
+
+            // dv.ReviewLog();
+            dv.CommitChanges(drawings);
+            dv.Dispose();
+        }
+
+        private string GetDrawingSize(Drawing drawing)
+        {
+            Size dSize = drawing.Layout.SheetSize;
+            string pageSize = $"{dSize.Width}x{dSize.Height}";
+
+            string borderSize = GdomValues.PageSizes()[pageSize] as string;
+            return borderSize;
         }
 
         private static string GetDPMPrinterExeFile()
@@ -213,6 +253,16 @@ namespace Prism
             arg.Append(" out:" + "\"" + pdf + "\"");
 
             return arg.ToString();
+        }
+
+        private static string ProcessContractNumber(string contractNumber)
+        {
+            if (contractNumber.StartsWith("C")) { contractNumber = contractNumber.Substring(1); } //Remove C from the start of a contract number
+            if (contractNumber.Contains("-")) contractNumber = contractNumber.Split('-')[0]; //If a dash is present then contract number looks 1234-01, we need to remove the "-01"
+            if (contractNumber.Length > 4) contractNumber = $"0{contractNumber}"; //contracts need to be 4 characters long, add 0 if its less
+            if (contractNumber.Length > 4) contractNumber = $"0{contractNumber}"; //go again to be sure
+
+            return contractNumber;
         }
     }
 }

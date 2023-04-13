@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms.VisualStyles;
+﻿using System.Collections.Generic;
 using Tekla.Structures.Drawing;
 using Tekla.Structures.DrawingInternal;
 using Tekla.Structures.Model;
 
-//This class is temporarily not in use.
 namespace Prism
 {
     public class PrismDrawing
@@ -35,6 +28,7 @@ namespace Prism
         public string DpmPDFSaveName { get; set; }
         public string DpmFileName { get; set; }
         public string DpmPrinterSetting { get; set; }
+        public string DrawingSize { get; set; }
 
         private void GetDPMFromDrawing(Drawing teklaDrawing, Model model, List<List<string>> dpmList)
         {

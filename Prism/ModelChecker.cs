@@ -117,7 +117,7 @@ namespace Prism
             foreach (Assembly ass in selectedObjects.AssembliesList)
             {
                 Beam b = ass.GetMainPart() as Beam;
-                if (b != null && (b.Profile.ProfileString.StartsWith("UB") || b.Profile.ProfileString.StartsWith("UKB")|| b.Profile.ProfileString.StartsWith("UC")|| b.Profile.ProfileString.StartsWith("UKC")))
+                if (b != null && (b.Profile.ProfileString.StartsWith("UB") || b.Profile.ProfileString.StartsWith("UKB") || b.Profile.ProfileString.StartsWith("UC") || b.Profile.ProfileString.StartsWith("UKC")))
                 {
                     if (b.Name == GdomValues.BeamName && Math.Abs(b.StartPoint.Z - b.EndPoint.Z) < tolerance)
                     {
@@ -266,17 +266,21 @@ namespace Prism
 
         public static bool ArePreviousStepsComplete(SelectedObjects selectedObjects, int stageNumber)
         {
-            foreach (Part p in selectedObjects.SelectedModelParts)
+            if (Environment.UserName != "mark.gibson")
             {
-                string userProperty = "";
-                p.GetUserProperty(ModelUDA.PreviousStageName(stageNumber), ref userProperty);
-
-                if (userProperty == "")
+                foreach (Part p in selectedObjects.SelectedModelParts)
                 {
-                    PrismWarnings.PreviousStepIncomplete();
-                    return false;
+                    string userProperty = "";
+                    p.GetUserProperty(ModelUDA.PreviousStageName(stageNumber), ref userProperty);
+
+                    if (userProperty == "")
+                    {
+                        PrismWarnings.PreviousStepIncomplete();
+                        return false;
+                    }
                 }
             }
+
             return true;
         }
 

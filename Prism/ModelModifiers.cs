@@ -12,6 +12,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Tekla.Structures.Model.UI;
 using static Prism.Enums;
+using Tekla.Structures.RemotingHelper;
 
 namespace Prism
 {
@@ -108,8 +109,8 @@ namespace Prism
                 int newOrderCount = Convert.ToInt32(nu[1]) + 1;
                 return $"Times ordered ={newOrderCount}";
             }
-            return "Times ordered =1";
 
+            return "Times ordered =1";
         }
 
         public static void StampPartFabUDA(List<Part> selectedModelParts, string phaseNumber, string issueNumber)
@@ -265,6 +266,17 @@ namespace Prism
             {
                 part.Modify();
             }
+        }
+
+        public static void SelectAssembly(this Assembly assToBeSelected)
+        {
+            ArrayList selectList = new ArrayList { assToBeSelected };
+
+            Tekla.Structures.Model.UI.ModelObjectSelector ms = new Tekla.Structures.Model.UI.ModelObjectSelector();
+            ms.Select(selectList);
+
+            assToBeSelected.Modify();
+
         }
 
         public static string GetPrelimMark(this Part p)

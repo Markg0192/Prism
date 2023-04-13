@@ -19,7 +19,7 @@ namespace Prism
 
         public static int MaxFittingLength(Factory factory, double plateThickness, bool isFlat)
         {
-            if(factory == Factory.SUK)
+            if (factory == Factory.SUK)
             {
                 return 1900;
             }
@@ -53,7 +53,7 @@ namespace Prism
 
         public static List<string> ApprovedFittingGrades(bool isFlat)
         {
-            if(isFlat)
+            if (isFlat)
             {
                 return new List<string>() { "S275JR" };
             }
@@ -158,6 +158,22 @@ namespace Prism
             };
 
             return flatBarList;
+        }
+
+        public static Hashtable PageSizes() // The standard page length and widths and their page size
+        {
+            Hashtable pageSizeTable = new Hashtable
+            {
+                { "1152x821", "A0" },
+                { "1500x821", "A0" },
+                { "1800x821", "A0" },
+                { "2100x821", "A0" },
+                { "2500x821", "A0" },
+                { "804x557", "A1" },
+                { "584x410", "A2" },
+                { "410x287", "A3" } };
+
+            return pageSizeTable;
         }
     }
 }

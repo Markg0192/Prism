@@ -46,26 +46,6 @@ namespace Prism
             bimRevExp.SetComponentInput(myInputs);
             bimRevExp.LoadAttributesFromFile(ModelUDA.BSWXAttributeName(stageType));
             bimRevExp.SetAttribute("output_file_path", $@"{myFolder}\{modelData.ProjNumber}-{phaseNumber}-{typeString}-ISSUE{issueNumber}.bswx");
-            /*bimRevExp.SetAttribute("export_cam_files", 0);
-            bimRevExp.SetAttribute("cam_file_folder", "");
-            bimRevExp.SetAttribute("export_gantt_charts", 0);
-            bimRevExp.SetAttribute("selected_parts_only", 1);
-            bimRevExp.SetAttribute("obj_in_assem", 0);
-            bimRevExp.SetAttribute("complete_assemblies", 1);
-            bimRevExp.SetAttribute("exclude_bolts", 0);
-            bimRevExp.SetAttribute("exclude_holes", 0);
-            bimRevExp.SetAttribute("exclude_welds", 0);
-            bimRevExp.SetAttribute("exclude_cuts", 0);
-            bimRevExp.SetAttribute("plate_prefixes", "");
-            bimRevExp.SetAttribute(" ValidateOnExport", 0);
-            bimRevExp.SetAttribute("split_bolts", 1);
-            bimRevExp.SetAttribute("merge_girder", 0);
-            bimRevExp.SetAttribute("modified_weight", 0);
-            bimRevExp.SetAttribute("export_drawings", 0);
-            bimRevExp.SetAttribute("drawing_file_folder", "");
-            bimRevExp.SetAttribute("include_gas", 0);
-            bimRevExp.SetAttribute("include_multi", 0);
-            bimRevExp.SetAttribute("drawing_extension", 0);*/
             bimRevExp.Insert();
             ModelModifiers.HideOrRestoreTekla(9);
             return true;

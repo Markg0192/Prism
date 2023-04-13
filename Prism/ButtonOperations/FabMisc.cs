@@ -7,7 +7,9 @@
            // ReportManager rep = new ReportManager(projectData, "1", "1");
            // HDBolts.OrderHDBoltTopNutAndWasher(selectedObjects, rep);
             CreateBoltOrder(phaseNumber, issueNumber, projectData, siteDate);
+
             ModelModifiers.StampBoltUDA(selectedObjects.AllBolts[0], projectData.Full, projectData.Date);
+            ModelModifiers.StampBoltUDA(selectedObjects.AllBolts[1], projectData.Full, projectData.Date);
 
             ModelModifiers.StampPartFabUDA(selectedObjects.SelectedModelParts, phaseNumber, issueNumber);
             ViewManager.CreateFabView(phaseNumber, issueNumber, projectData, selectedObjects);
