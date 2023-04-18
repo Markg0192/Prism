@@ -43,11 +43,11 @@ namespace Prism
             ModelChecker.ClearOldLists();
             _selectedObjects = new SelectedObjects(stageType);
 
-            if (checkForPreviousSteps && !ModelChecker.ArePreviousStepsComplete(_selectedObjects, (int)stageType))
+           /* if (checkForPreviousSteps && !ModelChecker.ArePreviousStepsComplete(_selectedObjects, (int)stageType))
             {
                 SetStatusLabels("Previous Steps Incomplete");
                 return false;
-            }
+            }*/
             if (_selectedObjects.NumbersUpToDate && _selectedObjects.AssembliesList.Count == 0)
             {
                 SetStatusLabels("No Parts Selected");
@@ -214,7 +214,13 @@ namespace Prism
             EndFunction(1);
         }
 
-        private async void btnCreatePackage1_Click_1(object sender, EventArgs e)
+        private void btnCreatePackage1_Click_1(object sender, EventArgs e)
+        {
+         //   CreatePackageAsync();
+            CreatePackageNotAsync();
+        }
+
+        private async void CreatePackageAsync()
         {
             StartFunction();
 
@@ -226,6 +232,22 @@ namespace Prism
 
             if (!await Task.Run(() => _selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber.Text, issueNumber.Text, StageTypes.FAB, txt_SiteDate.Text))) { EndFunction(0); return; }
             await Task.Run(() => FabMisc.FabMiscOp(phaseNumber.Text, issueNumber.Text, _projectData, txt_SiteDate.Text, _selectedObjects));
+            
+            EndFunction(1);
+        }
+
+        private void CreatePackageNotAsync()
+        {
+            StartFunction();
+
+            InitialSetup(StageTypes.FAB, true);
+
+            if (!_selectedObjects.NumbersUpToDate) { SetStatusLabels("Numbers not up to date"); EndFunction(0); return; }
+
+            SetStatusLabels("Creating Fab Package");
+
+            if (!_selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber.Text, issueNumber.Text, StageTypes.FAB, txt_SiteDate.Text)) { EndFunction(0); return; }
+           FabMisc.FabMiscOp(phaseNumber.Text, issueNumber.Text, _projectData, txt_SiteDate.Text, _selectedObjects);
             
             EndFunction(1);
         }

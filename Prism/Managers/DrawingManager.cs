@@ -63,7 +63,7 @@ namespace Prism
                     return false;
                 }
 
-                if(Environment.UserName != "mark.gibson") UpdateDrawing(drawing, _selectedObjects.MyDrawingHandler);
+                if(!Constants.IsSpecialPerson()) UpdateDrawing(drawing, _selectedObjects.MyDrawingHandler);
                 drawingsBySelectedParts.Add(drawing);
             }
 
@@ -92,9 +92,7 @@ namespace Prism
         private void UpdateDrawing(Drawing drawing, DrawingHandler drawingHandler)
         {
             drawingHandler.SetActiveDrawing(drawing, false);
-            //    drawing.IsLocked = false;
             drawingHandler.SaveActiveDrawing();
-            // drawing.IsLocked = true;
         }
 
         private static List<List<string>> AddDpmNameToDrawings(string ID_dessinPath)
@@ -121,58 +119,8 @@ namespace Prism
 
         private static bool RefreshDrawings()
         {
-            var macrodir = "";
-            TeklaStructuresSettings.GetAdvancedOption("XS_MACRO_DIRECTORY", ref macrodir);
-            var dir = macrodir.Split(';')[0];
-            if (!File.Exists(dir + @"\modeling\OpenAndCloseDocumentManager.cs"))
-            {
-                var writer = new StreamWriter(dir + @"\modeling\OpenAndCloseDocumentManager.cs");
-                var macro = "#pragma warning disable 1633 // Unrecognized #pragma directive" + Environment.NewLine +
-                "#pragma warning disable 1633 // Unrecognized #pragma directive" + Environment.NewLine +
-                "#pragma reference \"Tekla.Macros.Wpf.Runtime\"" + Environment.NewLine +
-                "#pragma reference \"Tekla.Macros.Runtime\"" + Environment.NewLine +
-                "#pragma warning restore 1633 // Unrecognized #pragma directive" + Environment.NewLine +
-                "namespace UserMacros {" + Environment.NewLine +
-                "public sealed class Macro {" + Environment.NewLine +
-                "[Tekla.Macros.Runtime.MacroEntryPointAttribute()]" + Environment.NewLine +
-                "public static void Run(Tekla.Macros.Runtime.IMacroRuntime runtime) {" +
-                Environment.NewLine +
-                "Tekla.Macros.Wpf.Runtime.IWpfMacroHost wpf = runtime.Get<Tekla.Macros.Wpf.Runtime.IWpfMacroHost>();" +
-                Environment.NewLine +
-                "wpf.InvokeCommand(\"CommandRepository\", \"Drawing.DrawingList\");" + Environment.NewLine +
-                "wpf.View(\"DocumentManager.MainWindow\").As.Window.Close();}}}";
-                writer.Write(macro);
-                writer.Close();
-            }
-
-            return Tekla.Structures.Model.Operations.Operation.RunMacro("OpenAndCloseDocumentManager.cs");
-        }
-
-        public void PrintDrawings()
-        {
-            int drawingProcessCounter = 1;
-
-            foreach (PrismDrawing myDrawing in PrismDrawingList)
-            {
-                //PrintPdf(myDrawing.TeklaDrawing, true, $"{_folders.FabPath}/{myDrawing.DrawingFolderName}/", "MGTEST", myDrawing.PdfName);
-                //statusLabel.Text = "Starting to print";
-                _selectedObjects.MyDrawingHandler.SetActiveDrawing(myDrawing.TeklaDrawing, false);
-                myDrawing.TeklaDrawing.IsLocked = false;
-                _selectedObjects.MyDrawingHandler.SaveActiveDrawing();
-                myDrawing.TeklaDrawing.IsLocked = true;
-
-                //   _selectedObjects.MyDrawingHandler.IssueDrawing(myDrawing.TeklaDrawing);
-                DPMPrinterAttributes myPDF = new DPMPrinterAttributes();
-                myPDF.ColorMode = DotPrintColor.BlackAndWhite;
-                myPDF.OpenFileWhenFinished = false;
-                myPDF.Orientation = DotPrintOrientationType.Landscape;
-                myPDF.OutputFileName = $"{_folders.FabPath}/{myDrawing.DrawingFolderName}/{myDrawing.PdfName}";
-                myPDF.OutputType = DotPrintOutputType.PDF;
-                myPDF.PaperSize = DotPrintPaperSize.Auto;
-                //statusLabel.Text = $"Printing drawing number {drawingProcessCounter} of {PrismDrawingList.Count}";
-                _selectedObjects.MyDrawingHandler.PrintDrawing(myDrawing.TeklaDrawing, myPDF);
-                drawingProcessCounter++;
-            }
+            PrismMacroBuilder.RefreshDrawings(); //checks if the macro exists, if it doesnt it creates one to do the job.
+            return Tekla.Structures.Model.Operations.Operation.RunMacro(Constants.RefreshDrawingsMacro);
         }
 
         public void PrintDrawingToModelFolder(string fabPath)
@@ -206,14 +154,14 @@ namespace Prism
             {
                 string drawingNumber = prismDrawing.PdfName.Split('-')[0];
                 string revision = prismDrawing.RevMark == "0" ? "" : prismDrawing.RevMark; // if rev is 0 we need to return blank here for the vault
-                string drawingSize = GetDrawingSize(prismDrawing.TeklaDrawing);
                 string fileLocation = $@"{serverFileLocation}{contractNumber}\{prismDrawing.DrawingFolderName}\{prismDrawing.PdfName}";
                 DateTime fileModifiedDate = DateTime.Now;
 
-                drawings.Add($"{contractNumber}, {drawingNumber}, {revision}, {drawingSize}, {fileLocation}, {fileModifiedDate.ToString()}");
+                drawings.Add($"{contractNumber}, {drawingNumber}, {revision}, {prismDrawing.DrawingSize}, {fileLocation}, {fileModifiedDate.ToString()}");
 
                 ProcessStartInfo startInfo = new ProcessStartInfo();
                 startInfo.FileName = printerExeFile;
+             
                 startInfo.Arguments = GetArguments(prismDrawing.DpmPrinterSetting, prismDrawing.DpmFileName, $@"{serverFileLocation}{contractNumber}\{prismDrawing.DpmPDFSaveName}");
                 var process = System.Diagnostics.Process.Start(startInfo);
                 process.WaitForExit();
@@ -224,20 +172,10 @@ namespace Prism
             dv.Dispose();
         }
 
-        private string GetDrawingSize(Drawing drawing)
-        {
-            Size dSize = drawing.Layout.SheetSize;
-            string pageSize = $"{dSize.Width}x{dSize.Height}";
-
-            string borderSize = GdomValues.PageSizes()[pageSize] as string;
-            return borderSize;
-        }
-
         private static string GetDPMPrinterExeFile()
         {
             string binString = null;
             TeklaStructuresSettings.GetAdvancedOption("XSBIN", ref binString);
-            // binString example....  C:\TeklaStructures\2021.0\nt\bin\
 
             string exeFile = @"applications\Tekla\Model\DPMPrinter\DPMPrinterCommand.exe";
             return Path.Combine(binString, exeFile);

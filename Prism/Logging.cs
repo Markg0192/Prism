@@ -9,7 +9,7 @@ namespace Prism
     {
         public static void LogProgress(string modelName, string buttonPress, int autoFixCount, int totalObjects)
         {
-            if (Environment.UserName != "mark.gibson")
+            if (!Constants.IsSpecialPerson())
             {
                 using (StreamWriter log = new StreamWriter(@"\\sev-los-fs1\application data$\Prism\Log.txt", true))
                 {
@@ -63,7 +63,7 @@ namespace Prism
 
         public static void Login(string modelName)
         {
-            if (Environment.UserName != "mark.gibson")
+            if (!Constants.IsSpecialPerson())
             {
                 using (StreamWriter log = new StreamWriter(@"\\sev-los-fs1\application data$\Prism\LoginLog.txt", true))
                 {
@@ -76,7 +76,7 @@ namespace Prism
 
         public static void LoginFail()
         {
-            if (Environment.UserName != "mark.gibson")
+            if (!Constants.IsSpecialPerson())
             {
                 using (StreamWriter log = new StreamWriter(@"\\sev-los-fs1\application data$\Prism\LoginLog.txt", true))
                 {
@@ -89,7 +89,7 @@ namespace Prism
 
         public static void DebugLog(string debugText, string modelName)
         {
-           // if (Environment.UserName != "mark.gibson")
+            if (!Constants.IsSpecialPerson())
             {
                 using (StreamWriter log = new StreamWriter(@"\\sev-los-fs1\application data$\Prism\DebugLog.txt", true))
                 {

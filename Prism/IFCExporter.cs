@@ -24,7 +24,7 @@ namespace Prism
             selectedObjects.SelectedModelParts.SelectParts();
         }
 
-        private static async void RunIFCExport(List<Assembly> assemblyList, string localFolder, string vaultContractNumber)
+        private static void RunIFCExport(List<Assembly> assemblyList, string localFolder, string vaultContractNumber)
         {
            // string myFolder = $@"\\sfrplc.local\\public\\DrawingVault\\TestContracts\\{vaultContractNumber}\\IFC";
             string myFolder = localFolder;

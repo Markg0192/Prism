@@ -13,7 +13,7 @@ namespace Prism.ButtonOperations
             //HDBolts.StampConnectionCodeOnMainMember(myObjects);
             if (ModelChecker.MemberOrientationIsCorrect(myObjects, out IgnoreType ignore))
             {
-                //if (Environment.UserName != "mark.gibson")
+                if (!Constants.IsSpecialPerson())
                 {
                     myObjects.ProcessFabsecs(model, projectData);
                 }

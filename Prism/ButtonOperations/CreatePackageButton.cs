@@ -9,7 +9,7 @@ namespace Prism.ButtonOperations
 {
     public static class CreatePackageButton
     {
-        public static async Task<bool> CreateFabPackage(this SelectedObjects myObjects, Model model, PrismProjectData projectData, string phaseNumber, string issueNumber, StageTypes stageType, string siteDate)
+        public static bool CreateFabPackage(this SelectedObjects myObjects, Model model, PrismProjectData projectData, string phaseNumber, string issueNumber, StageTypes stageType, string siteDate)
         {
             ReportManager reportManager = new ReportManager(projectData, phaseNumber, issueNumber);
 
