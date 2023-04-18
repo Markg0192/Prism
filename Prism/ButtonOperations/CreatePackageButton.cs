@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO.Compression;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 using Tekla.Structures.Model;
 using static Prism.Enums;
 
@@ -16,15 +13,16 @@ namespace Prism.ButtonOperations
             if (!reportManager.Folders.CreateFabFolders()) return false;
             if (!reportManager.Folders.CreateBoltFolder()) return false;
 
-            if (Environment.UserName != "mark.gibson") { myObjects.ExportBSWX(reportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType); }
+            if (!Constants.IsSpecialPerson()) { myObjects.ExportBSWX(reportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType); }
 
             ReportManager.SelectDrawingsInDocManager(myObjects.SelectedModelParts);
             reportManager.CreateFabReports(myObjects.SelectedModelParts, myObjects.AllBolts);
             DrawingManager drawingManager = new DrawingManager(model, projectData, phaseNumber, issueNumber, myObjects, reportManager.Folders.DspPath);
             ReportManager.IssueDrawings();
+
             if (!drawingManager.DrawingsAreUpToDate) { PrismWarnings.DrawingsNotUpToDate(); return false; }
 
-            if (Environment.UserName == "mark.gibson") { drawingManager.PrintDrawingsToVault(myObjects, reportManager, projectData.ProjNumber); }
+            if (Constants.IsSpecialPerson()) { drawingManager.PrintDrawingsToVault(myObjects, reportManager, projectData.ProjNumber); }
 
             else {  drawingManager.PrintDrawingToModelFolder(reportManager.Folders.FabPath); }          
 

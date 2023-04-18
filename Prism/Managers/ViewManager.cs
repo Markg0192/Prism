@@ -58,6 +58,7 @@ namespace Prism
 
             view.SharedView = true;
             view.Insert();
+            view.Modify();
         }
 
         private static void SetVisibilitySettings(this View view)
