@@ -16,8 +16,10 @@ namespace Prism
             _model = model;
             _selectedObjects = selectedObjects;
             DrawingRequired = true;
-            GetPrismDrawing(currentDrawing);
+            GetPrismDrawing(currentDrawing);           
+            SetDrawingFolderName(currentDrawing); 
             GetDPMFromDrawing(currentDrawing, model, dpmList);
+            DrawingSize = GetDrawingSize(currentDrawing);
         }
 
         public bool DrawingRequired { get; set; }
@@ -36,7 +38,7 @@ namespace Prism
 
             string dpmName = GetDPMNameFromDrawing(dpmList, teklaDrawing.GetIdentifier().ToString());
 
-            DpmPrinterSetting = modelPath + @"\attributes\" + "standard.PdfPrintOptions.xml";
+            DpmPrinterSetting = modelPath + @"\attributes\" + "PdfPrintOptions.xml";
             DpmPDFSaveName = $@"{DrawingFolderName}\" + $"{PdfName}";
             DpmFileName = modelPath + $@"\drawings\snapshots\{dpmName}.DPM";
         }
@@ -79,10 +81,8 @@ namespace Prism
                 DrawingRequired = false;
                 currentDrawing.Delete();
                 return;
-            }
+            }            
 
-            string[] drawingTitle1 = currentDrawing.Title1.Split(new char[] { ' ' });
-            DrawingFolderName = drawingTitle1[0];
             string[] mark = currentDrawing.Mark.Split(new char[] { '[', '.', ']' });
             string drawingName = "";
             foreach (string s in mark)
@@ -102,6 +102,33 @@ namespace Prism
                     DrawingRequired = false;
                 }
             }
+        }
+
+        private void SetDrawingFolderName(Drawing currentDrawing)
+        {
+            string[] drawingTitle1 = currentDrawing.Title1.Split(new char[] { ' ' });
+            DrawingFolderName = drawingTitle1[0];
+
+            if (drawingTitle1[0] == "")
+            {
+                if (currentDrawing is AssemblyDrawing || currentDrawing is MultiDrawing)
+                {
+                    DrawingFolderName = "ASS";
+                }
+                if (currentDrawing is SinglePartDrawing)
+                {
+                    DrawingFolderName = "FIT";
+                }
+            }
+        }
+
+        private string GetDrawingSize(Drawing drawing)
+        {
+            Size dSize = drawing.Layout.SheetSize;
+            string pageSize = $"{dSize.Width}x{dSize.Height}";
+
+            string borderSize = GdomValues.PageSizes()[pageSize] as string;
+            return borderSize;
         }
     }
 }

@@ -86,9 +86,8 @@ namespace Prism
                 }
                 //TotalWeight = Math.Round(TotalWeight / 1000, 3);
             }
-            // GetCorrectModelSelection();
-            Logging.DebugLog($"Shop bolts = {ShopBolts.Count}", "");
-            Logging.DebugLog($"Site bolts = {SiteBolts.Count}", "");
+           // GetCorrectModelSelection();
+
             AllBolts.Add(SiteBolts);
             AllBolts.Add(ShopBolts);
         }

@@ -266,7 +266,7 @@ namespace Prism
 
         public static bool ArePreviousStepsComplete(SelectedObjects selectedObjects, int stageNumber)
         {
-            if (Environment.UserName != "mark.gibson")
+            if (!Constants.IsSpecialPerson())
             {
                 foreach (Part p in selectedObjects.SelectedModelParts)
                 {

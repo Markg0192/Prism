@@ -49,10 +49,7 @@ namespace Prism
         {
             List<Part> fabsecList = new List<Part>();
             string pgString = "PG";
-            /*if(Environment.UserName == "mark.gibson")
-            {
-                pgString = "XXX";
-            }*/
+
             foreach (Part part in selectedObjects.SelectedModelParts)
             {
                 if (part.Profile.ProfileString.StartsWith(pgString))
