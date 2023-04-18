@@ -34,7 +34,7 @@ namespace Prism
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.pnl_Home = new System.Windows.Forms.Panel();
             this.info_Home = new System.Windows.Forms.PictureBox();
-            this.button7 = new System.Windows.Forms.Button();
+            this.btn_SpecialOperations = new System.Windows.Forms.Button();
             this.btn_MainPackageCreation = new System.Windows.Forms.Button();
             this.btn_MainDetailCheck = new System.Windows.Forms.Button();
             this.btn_MainMaterialCheck = new System.Windows.Forms.Button();
@@ -122,7 +122,7 @@ namespace Prism
             this.pnl_Home.BackgroundImage = global::Prism.Properties.Resources.watereddownlogo;
             this.pnl_Home.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.pnl_Home.Controls.Add(this.info_Home);
-            this.pnl_Home.Controls.Add(this.button7);
+            this.pnl_Home.Controls.Add(this.btn_SpecialOperations);
             this.pnl_Home.Controls.Add(this.btn_MainPackageCreation);
             this.pnl_Home.Controls.Add(this.btn_MainDetailCheck);
             this.pnl_Home.Controls.Add(this.btn_MainMaterialCheck);
@@ -143,16 +143,17 @@ namespace Prism
             this.toolTip1.SetToolTip(this.info_Home, "Help");
             this.info_Home.Click += new System.EventHandler(this.info_Home_Click);
             // 
-            // button7
+            // btn_SpecialOperations
             // 
-            this.button7.BackColor = System.Drawing.Color.Transparent;
-            this.button7.Enabled = false;
-            this.button7.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.button7.Location = new System.Drawing.Point(126, 126);
-            this.button7.Name = "button7";
-            this.button7.Size = new System.Drawing.Size(120, 120);
-            this.button7.TabIndex = 0;
-            this.button7.UseVisualStyleBackColor = false;
+            this.btn_SpecialOperations.BackColor = System.Drawing.Color.Transparent;
+            this.btn_SpecialOperations.Enabled = false;
+            this.btn_SpecialOperations.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btn_SpecialOperations.Location = new System.Drawing.Point(126, 126);
+            this.btn_SpecialOperations.Name = "btn_SpecialOperations";
+            this.btn_SpecialOperations.Size = new System.Drawing.Size(120, 120);
+            this.btn_SpecialOperations.TabIndex = 0;
+            this.btn_SpecialOperations.UseVisualStyleBackColor = false;
+            this.btn_SpecialOperations.Click += new System.EventHandler(this.btn_SpecialOperations_Click);
             // 
             // btn_MainPackageCreation
             // 
@@ -810,7 +811,7 @@ namespace Prism
 
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
         private System.Windows.Forms.Panel pnl_Home;
-        private System.Windows.Forms.Button button7;
+        private System.Windows.Forms.Button btn_SpecialOperations;
         private System.Windows.Forms.Button btn_MainPackageCreation;
         private System.Windows.Forms.Button btn_MainDetailCheck;
         private System.Windows.Forms.Button btn_MainMaterialCheck;

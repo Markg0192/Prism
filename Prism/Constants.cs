@@ -12,7 +12,7 @@ namespace Prism
 
         public static bool IsSpecialPerson()
         { 
-            if(Environment.UserName == "mar.gibson")
+            if(Environment.UserName == "mark.gibson")
             {
                 return true;
             }

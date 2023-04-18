@@ -216,8 +216,8 @@ namespace Prism
 
         private void btnCreatePackage1_Click_1(object sender, EventArgs e)
         {
-         //   CreatePackageAsync();
-            CreatePackageNotAsync();
+            CreatePackageAsync();
+           // CreatePackageNotAsync();
         }
 
         private async void CreatePackageAsync()
@@ -246,7 +246,7 @@ namespace Prism
 
             SetStatusLabels("Creating Fab Package");
 
-            if (!_selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber.Text, issueNumber.Text, StageTypes.FAB, txt_SiteDate.Text)) { EndFunction(0); return; }
+           if (!_selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber.Text, issueNumber.Text, StageTypes.FAB, txt_SiteDate.Text)) { EndFunction(0); return; }
            FabMisc.FabMiscOp(phaseNumber.Text, issueNumber.Text, _projectData, txt_SiteDate.Text, _selectedObjects);
             
             EndFunction(1);
