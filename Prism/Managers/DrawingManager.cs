@@ -5,10 +5,10 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
 using Tekla.Structures;
 using Tekla.Structures.Drawing;
 using Tekla.Structures.Model;
-
 
 //This class is temporarily not in use
 namespace Prism
@@ -32,10 +32,19 @@ namespace Prism
 
             this._model = model;
             DrawingsAreUpToDate = CreateDrawingList(ID_DessinPath);
+            CreatePrintSettingXML(projectData.ProjPath);
         }
 
-        public List<PrismDrawing> PrismDrawingList = new List<PrismDrawing>();
+        public static List<PrismDrawing> PrismDrawingList = new List<PrismDrawing>();
         public bool DrawingsAreUpToDate { get; set; }
+
+        private void CreatePrintSettingXML(string modelPath)
+        {
+            if (!File.Exists(modelPath + "\\attributes\\" + "PrismPDFOption.xml"))
+            {
+                XMLWriter.PDFPrintSettings(modelPath);
+            }
+        }
 
         public bool CreateDrawingList(string ID_DessinPath)
         {
@@ -63,7 +72,7 @@ namespace Prism
                     return false;
                 }
 
-                if(!Constants.IsSpecialPerson()) UpdateDrawing(drawing, _selectedObjects.MyDrawingHandler);
+                if (!Constants.IsSpecialPerson()) UpdateDrawing(drawing, _selectedObjects.MyDrawingHandler);
                 drawingsBySelectedParts.Add(drawing);
             }
 
@@ -132,7 +141,7 @@ namespace Prism
                 ProcessStartInfo startInfo = new ProcessStartInfo();
                 startInfo.FileName = printerExeFile;
                 startInfo.Arguments = GetArguments(prismDrawing.DpmPrinterSetting, prismDrawing.DpmFileName, $@"{fabPath}\{prismDrawing.DpmPDFSaveName}");
-                var process = System.Diagnostics.Process.Start(startInfo);
+                var process = Process.Start(startInfo);
                 process.WaitForExit();
             });
         }
@@ -161,7 +170,7 @@ namespace Prism
 
                 ProcessStartInfo startInfo = new ProcessStartInfo();
                 startInfo.FileName = printerExeFile;
-             
+
                 startInfo.Arguments = GetArguments(prismDrawing.DpmPrinterSetting, prismDrawing.DpmFileName, $@"{serverFileLocation}{contractNumber}\{prismDrawing.DpmPDFSaveName}");
                 var process = System.Diagnostics.Process.Start(startInfo);
                 process.WaitForExit();
@@ -184,7 +193,7 @@ namespace Prism
         private static string GetArguments(string printerSettings, string dpm, string pdf)
         {
             StringBuilder arg = new StringBuilder();
-            arg.Append("settingsFile:" + printerSettings);
+            arg.Append(" settingsFile:" + "\"" + printerSettings + "\"");
             arg.Append(" dpm:" + "\"" + dpm + "\"");
             arg.Append(" printActive:false ");
             arg.Append(" printer:pdf ");
