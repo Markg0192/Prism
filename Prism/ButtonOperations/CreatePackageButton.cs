@@ -1,6 +1,6 @@
 ﻿using System.Windows.Forms;
-using Tekla.Structures.Model;
 using static Prism.Enums;
+using Model = Tekla.Structures.Model.Model;
 
 namespace Prism.ButtonOperations
 {
@@ -8,6 +8,7 @@ namespace Prism.ButtonOperations
     {
         public static bool CreateFabPackage(this SelectedObjects myObjects, Model model, PrismProjectData projectData, string phaseNumber, string issueNumber, StageTypes stageType, string siteDate)
         {
+            CpuCounter cpuCounter = new CpuCounter();
             ReportManager reportManager = new ReportManager(projectData, phaseNumber, issueNumber);
 
             if (!reportManager.Folders.CreateFabFolders()) return false;
@@ -15,16 +16,21 @@ namespace Prism.ButtonOperations
 
             if (!Constants.IsSpecialPerson()) { myObjects.ExportBSWX(reportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType); }
 
+            CpuSpeedCheck(cpuCounter);
             ReportManager.SelectDrawingsInDocManager(myObjects.SelectedModelParts);
             reportManager.CreateFabReports(myObjects.SelectedModelParts, myObjects.AllBolts);
+
+            CpuSpeedCheck(cpuCounter);
             DrawingManager drawingManager = new DrawingManager(model, projectData, phaseNumber, issueNumber, myObjects, reportManager.Folders.DspPath);
-            ReportManager.IssueDrawings();
+
+            CpuSpeedCheck(cpuCounter);
+            PrismMacroBuilder.IssueDrawings();
 
             if (!drawingManager.DrawingsAreUpToDate) { PrismWarnings.DrawingsNotUpToDate(); return false; }
 
             if (Constants.IsSpecialPerson()) { drawingManager.PrintDrawingsToVault(myObjects, reportManager, projectData.ProjNumber); }
 
-            else {  drawingManager.PrintDrawingToModelFolder(reportManager.Folders.FabPath); }          
+            else { drawingManager.PrintDrawingToModelFolder(reportManager.Folders.FabPath); }
 
             myObjects.SelectedModelParts.ModifyAttributes((int)stageType, projectData);
 
@@ -40,6 +46,14 @@ namespace Prism.ButtonOperations
             }
             Logging.LogProgress(projectData.ProjName, "Fab Package", 0, myObjects.AssembliesList.Count);
             return true;
+        }
+
+        public static void CpuSpeedCheck(CpuCounter cpuCounter)
+        {
+            while (cpuCounter.CheckCPU() > 10)
+            {
+                System.Threading.Thread.Sleep(500);
+            }
         }
     }
 }

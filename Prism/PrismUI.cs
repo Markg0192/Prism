@@ -1,9 +1,11 @@
 ﻿using Prism.ButtonOperations;
 using Prism.CustomDialogs;
+using Prism.Properties;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
@@ -33,6 +35,12 @@ namespace Prism
                 Application.Exit();
             }
 
+            if (Constants.SpecialOperationUser())
+            {
+                btn_SpecialOperations.BackgroundImage = Resources.Gears;
+                btn_SpecialOperations.Enabled = true;
+            }
+
             _projectData = new PrismProjectData(_model.GetProjectInfo(), _model.GetInfo().ModelPath);
             Logging.Login(_projectData.ProjName);
         }
@@ -43,11 +51,11 @@ namespace Prism
             ModelChecker.ClearOldLists();
             _selectedObjects = new SelectedObjects(stageType);
 
-           /* if (checkForPreviousSteps && !ModelChecker.ArePreviousStepsComplete(_selectedObjects, (int)stageType))
+            if (checkForPreviousSteps && !ModelChecker.ArePreviousStepsComplete(_selectedObjects, (int)stageType))
             {
                 SetStatusLabels("Previous Steps Incomplete");
                 return false;
-            }*/
+            }
             if (_selectedObjects.NumbersUpToDate && _selectedObjects.AssembliesList.Count == 0)
             {
                 SetStatusLabels("No Parts Selected");
@@ -99,7 +107,7 @@ namespace Prism
 
             if (orderType.Contains("Special Fittings"))
             {
-                if (!await Task.Run(() => ProcessSpecialFittings(orderType))) return ;
+                if (!await Task.Run(() => ProcessSpecialFittings(orderType))) return;
             }
             else
             {
@@ -133,7 +141,7 @@ namespace Prism
                     if (!OrderSpecials(orderAction, orderType, StageTypes.Prelim3, false, myReportManager)) { EndFunction(0); return false; }
                     MaterialButton3.FinishOrder(_selectedObjects, (int)StageTypes.Prelim3, _projectData, myReportManager.MatReportPrefix,
                         txt_MaterialIssueNumber.Text, txt_MaterialPhaseNumber.Text, orderType, myReportManager, true);
-                }               
+                }
             }
             return true;
         }
@@ -153,7 +161,7 @@ namespace Prism
         {
             if (!InitialSetup(StageTypes.Prelim3, true)) { EndFunction(0); return false; }
 
-            if(!myReportManager.Folders.CreateMatFolder(fabsecsPresent)) return false;
+            if (!myReportManager.Folders.CreateMatFolder(fabsecsPresent)) return false;
 
             if (orderAction == 2) //User wants to order using special fitting tags
             {
@@ -217,7 +225,12 @@ namespace Prism
         private void btnCreatePackage1_Click_1(object sender, EventArgs e)
         {
             CreatePackageAsync();
-           // CreatePackageNotAsync();
+            // CreatePackageNotAsync();
+        }
+
+        private async void btn_SpecialOperations_Click(object sender, EventArgs e)
+        {
+
         }
 
         private async void CreatePackageAsync()
@@ -231,8 +244,9 @@ namespace Prism
             SetStatusLabels("Creating Fab Package");
 
             if (!await Task.Run(() => _selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber.Text, issueNumber.Text, StageTypes.FAB, txt_SiteDate.Text))) { EndFunction(0); return; }
+
             await Task.Run(() => FabMisc.FabMiscOp(phaseNumber.Text, issueNumber.Text, _projectData, txt_SiteDate.Text, _selectedObjects));
-            
+
             EndFunction(1);
         }
 
@@ -246,9 +260,9 @@ namespace Prism
 
             SetStatusLabels("Creating Fab Package");
 
-           if (!_selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber.Text, issueNumber.Text, StageTypes.FAB, txt_SiteDate.Text)) { EndFunction(0); return; }
-           FabMisc.FabMiscOp(phaseNumber.Text, issueNumber.Text, _projectData, txt_SiteDate.Text, _selectedObjects);
-            
+            if (!_selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber.Text, issueNumber.Text, StageTypes.FAB, txt_SiteDate.Text)) { EndFunction(0); return; }
+            FabMisc.FabMiscOp(phaseNumber.Text, issueNumber.Text, _projectData, txt_SiteDate.Text, _selectedObjects);
+
             EndFunction(1);
         }
 
@@ -349,20 +363,6 @@ namespace Prism
         private void issueNumber_KeyPress(object sender, KeyPressEventArgs e)
         {
             AllowNumbersAndDeleteOnly(e);
-        }
-
-        private void cmbPackageLocation_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            //The logic below will be needed when fab packages are a vaiable option so just commented out for now
-            /*if (cmbPackageLocation.Text == "SNI")
-            {
-                cmbPackageLocation.BackColor = Color.White;
-            }
-            else
-            {
-                cmbPackageLocation.BackColor = Color.LightCoral;
-            }
-            CheckForFabButton();*/
         }
 
         private void txt_SiteDate_TextChanged(object sender, EventArgs e)

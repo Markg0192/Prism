@@ -259,86 +259,22 @@ namespace Prism
 
         public static async void SelectDrawingsInDocManager(List<Part> selectedParts)
         {
-            var macrodir = "";
-            TeklaStructuresSettings.GetAdvancedOption("XS_MACRO_DIRECTORY", ref macrodir);
-            var dir = macrodir.Split(';')[0];
-            if (!File.Exists(dir + @"\modeling\PrismDrawingOperation.cs"))
+            if (PrismMacroBuilder.DrawingOperations())
             {
-                var writer = new StreamWriter(dir + @"\modeling\PrismDrawingOperation.cs");
-                var macro =
-                            "#pragma warning disable 1633 // Unrecognized #pragma directive" + Environment.NewLine +
-                            "#pragma reference \"Tekla.Macros.Wpf.Runtime\"" + Environment.NewLine +
-                            "#pragma reference \"Tekla.Macros.Runtime\"" + Environment.NewLine +
-                            "#pragma warning restore 1633 // Unrecognized #pragma directive" + Environment.NewLine +
-                             "" + Environment.NewLine +
-                            "namespace UserMacros" + Environment.NewLine +
-                                "{" + Environment.NewLine +
-                                    "public sealed class Macro" + Environment.NewLine +
-                                   "{" + Environment.NewLine +
-                                        "[Tekla.Macros.Runtime.MacroEntryPointAttribute()]" + Environment.NewLine +
-                                       "public static void Run(Tekla.Macros.Runtime.IMacroRuntime runtime)" + Environment.NewLine +
-                                       "{" + Environment.NewLine +
-                                           " Tekla.Macros.Wpf.Runtime.IWpfMacroHost wpf = runtime.Get<Tekla.Macros.Wpf.Runtime.IWpfMacroHost>();" + Environment.NewLine +
-                                           " wpf.InvokeCommand(\"CommandRepository\", \"Drawing.DrawingList\");" + Environment.NewLine +
-                                           " wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_CategoryList\").As.Selector.DoSelection.With(\"albl_All_documents\").Invoke();" + Environment.NewLine +
-                                           " wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_ShowAllDocuments\").As.Button.Invoke();" + Environment.NewLine +
-                                           " wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_ButtonSelectDrawings\").As.Button.Invoke();" + Environment.NewLine +
-                                        "}" + Environment.NewLine +
-                                   "}" + Environment.NewLine +
-                               "}";
-
-                writer.Write(macro);
-                writer.Close();
+                Logging.DebugLog("Macro Built", "");
             }
-            if(selectedParts != null) selectedParts.SelectParts();
-            Operation.RunMacro("PrismDrawingOperation.cs");
+            else { Logging.DebugLog("Macro not built", ""); }
+
+            if (selectedParts != null) selectedParts.SelectParts();
+            Logging.DebugLog("Selected parts", "");
+
+            Operation.RunMacro(Constants.DrawingOperation);
+            Logging.DebugLog("Drawing operation complete", "");
 
             while (Operation.IsMacroRunning()) // Wait until macro for selecting drawings in the document manager is complete before moving on
             {
                 await System.Threading.Tasks.Task.Delay(10);
-            }
-        }
-
-        public static async void IssueDrawings()
-        {
-            var macrodir = "";
-            TeklaStructuresSettings.GetAdvancedOption("XS_MACRO_DIRECTORY", ref macrodir);
-            var dir = macrodir.Split(';')[0];
-            if (!File.Exists(dir + @"\modeling\IssueStampDrawings.cs"))
-            {
-                var writer = new StreamWriter(dir + @"\modeling\IssueStampDrawings.cs");
-                var macro =
-                            "#pragma warning disable 1633 // Unrecognized #pragma directive" + Environment.NewLine +
-                            "#pragma reference \"Tekla.Macros.Wpf.Runtime\"" + Environment.NewLine +
-                            "#pragma reference \"Tekla.Macros.Runtime\"" + Environment.NewLine +
-                            "#pragma warning restore 1633 // Unrecognized #pragma directive" + Environment.NewLine +
-                             "" + Environment.NewLine +
-                            "namespace UserMacros" + Environment.NewLine +
-                                "{" + Environment.NewLine +
-                                    "public sealed class Macro" + Environment.NewLine +
-                                   "{" + Environment.NewLine +
-                                        "[Tekla.Macros.Runtime.MacroEntryPointAttribute()]" + Environment.NewLine +
-                                       "public static void Run(Tekla.Macros.Runtime.IMacroRuntime runtime)" + Environment.NewLine +
-                                       "{" + Environment.NewLine +
-                                           " Tekla.Macros.Wpf.Runtime.IWpfMacroHost wpf = runtime.Get<Tekla.Macros.Wpf.Runtime.IWpfMacroHost>();" + Environment.NewLine +
-                                           " wpf.InvokeCommand(\"CommandRepository\", \"Drawing.DrawingList\");" + Environment.NewLine +
-                                           " wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_CategoryList\").As.Selector.DoSelection.With(\"albl_All_documents\").Invoke();" + Environment.NewLine +
-                                           " wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_ShowAllDocuments\").As.Button.Invoke();" + Environment.NewLine +
-                                           " wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_ButtonSelectDrawings\").As.Button.Invoke();" + Environment.NewLine +
-                                           " wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_ButtonUnissue\").As.Button.Invoke();" + Environment.NewLine +
-                                           " wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_ButtonIssue\").As.Button.Invoke();" + Environment.NewLine +
-                                        "}" + Environment.NewLine +
-                                   "}" + Environment.NewLine +
-                               "}";
-
-                writer.Write(macro);
-                writer.Close();
-            }
-            Operation.RunMacro("IssueStampDrawings.cs");
-
-            while (Operation.IsMacroRunning()) // Wait until macro for selecting drawings in the document manager is complete before moving on
-            {
-                await System.Threading.Tasks.Task.Delay(10);
+                Logging.DebugLog("Drawing operation wait", "");
             }
         }
     }

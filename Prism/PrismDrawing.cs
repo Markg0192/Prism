@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using Tekla.Structures.Drawing;
 using Tekla.Structures.DrawingInternal;
 using Tekla.Structures.Model;
@@ -38,7 +40,7 @@ namespace Prism
 
             string dpmName = GetDPMNameFromDrawing(dpmList, teklaDrawing.GetIdentifier().ToString());
 
-            DpmPrinterSetting = modelPath + @"\attributes\" + "PdfPrintOptions.xml";
+            DpmPrinterSetting = model.GetInfo().ModelPath + "\\attributes\\" + "PrismPDFOption.xml";
             DpmPDFSaveName = $@"{DrawingFolderName}\" + $"{PdfName}";
             DpmFileName = modelPath + $@"\drawings\snapshots\{dpmName}.DPM";
         }
