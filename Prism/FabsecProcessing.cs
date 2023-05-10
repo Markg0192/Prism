@@ -17,7 +17,7 @@ namespace Prism
         private static double moveDistance = 100000;
         private static double carcassGreen = 100;
 
-        public static void ProcessFabsecs(this SelectedObjects selectedObjects, Model model, PrismProjectData projectData)
+        public static bool ProcessFabsecs(this SelectedObjects selectedObjects, Model model, PrismProjectData projectData)
         {
             List<Part> myFabsecCarcasses = GetMyFabsecs(selectedObjects); //Run through the selection and single out Fabsecs
             if (myFabsecCarcasses.Count() != 0) //Keep going if there are fabsecs present
@@ -33,8 +33,9 @@ namespace Prism
                 myFabsecs.RemoveGreenFromFabsecs(); // remove green from model space fabsecs
                 myFabsecs.ReMarkModelFabsecs(); // remove unique prefixing from model members and return to local phase numbering
                 myFabsecCarcasses.CreateCarcassDrawings(selectedObjects, model); //Create carcass drawings from the members in the material grave
-                myFabsecCarcasses.ModifyAttributes(2, projectData);
+                if (!myFabsecCarcasses.ModifyAttributes(2, projectData)) { return false; }
             }
+            return true;
         }
 
         private static void SavePrelimNumbers(this List<Part> fabsecCarcassList)

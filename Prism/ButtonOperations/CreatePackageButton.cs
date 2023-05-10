@@ -32,8 +32,8 @@ namespace Prism.ButtonOperations
 
             else { drawingManager.PrintDrawingToModelFolder(reportManager.Folders.FabPath); }
 
-            myObjects.SelectedModelParts.ModifyAttributes((int)stageType, projectData);
-
+            if(!myObjects.SelectedModelParts.ModifyAttributes((int)stageType, projectData)) { return false; }
+  
             reportManager.Folders.RemoveUnusedFolders();
 
             reportManager.Folders.ZipFolder(reportManager.Folders.FabPath);

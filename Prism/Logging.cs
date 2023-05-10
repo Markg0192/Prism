@@ -87,6 +87,41 @@ namespace Prism
             }
         }
 
+        public static void PartsModifiedAfterRun()
+        {
+            if (!Constants.IsSpecialPerson())
+            {
+                int newPartsUpdated = 0;
+                string timesUsedLine = "";
+                string partsUsedLine = "";
+                string autoFixLine = "";
+                string fabPacksMade = "";
+
+                using (StreamReader read = new StreamReader(@"\\sev-los-fs1\application data$\Prism\TotalUseLog.txt"))
+                {
+                    string line1 = read.ReadLine();
+                    timesUsedLine = read.ReadLine();
+                    partsUsedLine = read.ReadLine();
+                    autoFixLine = read.ReadLine();
+                    fabPacksMade = read.ReadLine();
+                    string partUpdated = read.ReadLine();
+
+                    string partsUpdated = partUpdated.Split(':')[1].Trim();
+                    newPartsUpdated = Convert.ToInt32(partsUpdated) + 1;
+                }
+
+                using (StreamWriter log = new StreamWriter(@"\\sev-los-fs1\application data$\Prism\TotalUseLog.txt", false))
+                {
+                    log.WriteLine("---------------------------This log was started on 04/04/23-------");
+                    log.WriteLine(timesUsedLine);
+                    log.WriteLine(partsUsedLine);
+                    log.WriteLine(autoFixLine);
+                    log.WriteLine(fabPacksMade);
+                    log.WriteLine($"Parts updated after Prism: {newPartsUpdated}");
+                }
+            }
+        }
+
         public static void DebugLog(string debugText, string modelName)
         {
             if (!Constants.IsSpecialPerson())

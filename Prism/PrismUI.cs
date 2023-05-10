@@ -1,16 +1,15 @@
-﻿using Prism.ButtonOperations;
+﻿using Microsoft.Office.Interop.Outlook;
+using Prism.ButtonOperations;
 using Prism.CustomDialogs;
 using Prism.Properties;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
-using System.Net.Sockets;
+using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Windows.Forms.VisualStyles;
 using Tekla.Structures.Model;
-using Tekla.Structures.RemotingHelper;
+using Tekla.Structures.Model.Operations;
 using static Prism.Enums;
 using Task = System.Threading.Tasks.Task;
 
@@ -32,7 +31,7 @@ namespace Prism
             {
                 MessageBox.Show("Failed to connect to a correct version of Tekla Model");
                 Logging.LoginFail();
-                Application.Exit();
+                System.Windows.Forms.Application.Exit();
             }
 
             if (Constants.SpecialOperationUser())
@@ -130,8 +129,8 @@ namespace Prism
                 if (!await Task.Run(() => InitialSetup(StageTypes.Prelim3, true))) { EndFunction(0); return false; };
                 if (!myReportManager.Folders.CreateMatFolder(false)) { EndFunction(0); return false; };
                 myReportManager.CreateMaterialReports(_selectedObjects, orderType, StageTypes.Prelim3);
-                MaterialButton3.FinishOrder(_selectedObjects, (int)StageTypes.Prelim3, _projectData, myReportManager.MatReportPrefix,
-                    txt_MaterialIssueNumber.Text, txt_MaterialPhaseNumber.Text, orderType, myReportManager);
+                if(!MaterialButton3.FinishOrder(_selectedObjects, (int)StageTypes.Prelim3, _projectData, myReportManager.MatReportPrefix,
+                    txt_MaterialIssueNumber.Text, txt_MaterialPhaseNumber.Text, orderType, myReportManager)) { return false; }
             }
             else
             {
@@ -139,8 +138,8 @@ namespace Prism
                 if (orderAction == 2 || orderAction == 3)
                 {
                     if (!OrderSpecials(orderAction, orderType, StageTypes.Prelim3, false, myReportManager)) { EndFunction(0); return false; }
-                    MaterialButton3.FinishOrder(_selectedObjects, (int)StageTypes.Prelim3, _projectData, myReportManager.MatReportPrefix,
-                        txt_MaterialIssueNumber.Text, txt_MaterialPhaseNumber.Text, orderType, myReportManager, true);
+                    if(!MaterialButton3.FinishOrder(_selectedObjects, (int)StageTypes.Prelim3, _projectData, myReportManager.MatReportPrefix,
+                        txt_MaterialIssueNumber.Text, txt_MaterialPhaseNumber.Text, orderType, myReportManager, true)) { return false; }
                 }
             }
             return true;
@@ -152,7 +151,7 @@ namespace Prism
 
             if (!await Task.Run(() => InitialSetup(StageTypes.Check1, false))) { EndFunction(0); return; }
 
-            await Task.Run(() => _selectedObjects.DetailButton1op(_projectData, (int)StageTypes.Check1));
+            if (!await Task.Run(() => _selectedObjects.DetailButton1op(_projectData, (int)StageTypes.Check1))) { EndFunction(0); return; }
 
             EndFunction(1);
         }
@@ -195,7 +194,7 @@ namespace Prism
             if (!await Task.Run(() => InitialSetup(StageTypes.Check2, true))) { EndFunction(0); return; }
 
             string orientationType = cmb_ColumnOrientationType.Text; //we need this to avoid cross threading. (unsure why...)
-            await Task.Run(() => _selectedObjects.DetailButton2op(_projectData, (int)StageTypes.Check2, orientationType, txt_PlateOnFlange.Text));
+            if (!await Task.Run(() => _selectedObjects.DetailButton2op(_projectData, (int)StageTypes.Check2, orientationType, txt_PlateOnFlange.Text))) { return; }
 
             EndFunction(1);
         }
@@ -228,9 +227,18 @@ namespace Prism
             // CreatePackageNotAsync();
         }
 
-        private async void btn_SpecialOperations_Click(object sender, EventArgs e)
+        private void btn_SpecialOperations_Click(object sender, EventArgs e)
         {
+            Model model = new Model();
 
+            string assemblyReport = $"C:\\Users\\{Environment.UserName}\\OneDrive - Severfield plc\\Sev_Firm_2021\\Roles\\SNI\\Reports\\-3-SNI-HotRolledMemList.rpt";
+
+            string myPath = model.GetInfo().ModelPath + "\\Reports\\";
+            Operation.CreateReportFromSelected(assemblyReport, $"{myPath}PageSizeTest.xsr", "", "", "");
+
+            SpecialOperations.VirtualPrinter($"{myPath}PageSizeTest.xsr");
+            // SpecialOperations.TextToPDF(myPath);
+            // SpecialOperations.ConvertTextToPdf($"{myPath}.xsr", $"{myPath}.pdf");
         }
 
         private async void CreatePackageAsync()

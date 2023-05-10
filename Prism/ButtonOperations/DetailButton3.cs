@@ -21,7 +21,7 @@ namespace Prism.ButtonOperations
                 return false ;
             }
 
-            myObjects.SelectedModelParts.ModifyAttributes(stageNumber, projectData);
+            if(!myObjects.SelectedModelParts.ModifyAttributes(stageNumber, projectData)) { return false; }
             ModelModifiers.RedrawViews();            
             int autoFixCount = ModelChecker.PhasesDoNotMatch.Count + ModelChecker.StartNumbersDoNotMatch.Count;
             Logging.LogProgress(projectData.ProjName, "Detail 3", autoFixCount, myObjects.AssembliesList.Count);

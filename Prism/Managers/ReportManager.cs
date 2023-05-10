@@ -2,11 +2,11 @@
 using Tekla.Structures.Model;
 using Tekla.Structures.Model.Operations;
 using System.Collections.Generic;
-using System.Threading;
-using System.Linq;
 using static Prism.Enums;
+using System.Drawing.Printing;
+using System.Drawing;
 using System;
-using Tekla.Structures;
+using System.Linq;
 
 namespace Prism
 {
@@ -23,19 +23,19 @@ namespace Prism
 
         #region group accepted reports
         //Material Procurement
-        private const string _output1Pname = "-1-PrelimHotRolledMemList.pdf";
-        private string _report1Pname = $"{_output1Pname}.rpt";
-        private const string _output1PAname = "-1a-PrelimHotRolledMemList-ADD.pdf";
-        private string _report1PAname = $"{_output1PAname}.rpt";
-        private const string _output1POname = "-1o-PrelimHotRolledMemList-OMIT.pdf";
-        private string _report1POname = $"{_output1POname}.rpt";
+        private const string _output1Pname = "-1-PrelimHotRolledMemList.xsr";
+        private string _report1Pname = $"{_output1Pname.Replace("xsr", "rpt")}";
+        private const string _output1PAname = "-1a-PrelimHotRolledMemList-ADD.xsr";
+        private string _report1PAname = $"{_output1PAname.Replace("xsr", "rpt")}";
+        private const string _output1POname = "-1o-PrelimHotRolledMemList-OMIT.xsr";
+        private string _report1POname = $"{_output1POname.Replace("xsr", "rpt")}";
 
-        private const string _output1PFname = "-1F-PrelimSpecialFitList.pdf";
-        private string _report1PFname = $"{_output1PFname}.rpt";
-        private const string _output1PFAname = "-1Fa-PrelimSpecialFitList-ADD.pdf";
-        private string _report1PFAname = $"{_output1PFAname}.rpt";
-        private const string _output1PFOname = "-1Fo-PrelimSpecialFitList-OMIT.pdf";
-        private string _report1PFOname = $"{_output1PFOname}.rpt";
+        private const string _output1PFname = "-1F-PrelimSpecialFitList.xsr";
+        private string _report1PFname = $"{_output1PFname.Replace("xsr", "rpt")}";
+        private const string _output1PFAname = "-1Fa-PrelimSpecialFitList-ADD.xsr";
+        private string _report1PFAname = $"{_output1PFAname.Replace("xsr", "rpt")}";
+        private const string _output1PFOname = "-1Fo-PrelimSpecialFitList-OMIT.xsr";
+        private string _report1PFOname = $"{_output1PFOname.Replace("xsr", "rpt")}";
 
         //Bolt ordering
         private const string _outputBolts = "-SEV-BOLTS-STRUMIS-SUMMARY_v3.xsr";
@@ -44,45 +44,45 @@ namespace Prism
         private const string _outputSelectedBolts = "-SEV-BOLTS-STRUMIS-ONLY-SELECTED_v1.xsr";
         private const string _reportSelectedBoltsName = "-SEV-BOLTS-STRUMIS-ONLY-SELECTED_v1.rpt";
 
-        private const string _output5OName = "-5o-Bolt-OMIT.pdf";
-        private string _report5OName = $"{_output5OName}.rpt";
-        private const string _output5ONameSelected = "-5o-Bolt-OMIT-SelectedOnly.pdf";
-        private string _report5ONameSelected = $"{_output5ONameSelected}.rpt";
+        private const string _output5OName = "-5o-Bolt-OMIT.xsr";
+        private string _report5OName = $"{_output5OName.Replace("xsr", "rpt")}";
+        private const string _output5ONameSelected = "-5o-Bolt-OMIT-SelectedOnly.xsr";
+        private string _report5ONameSelected = $"{_output5ONameSelected.Replace("xsr", "rpt")}";
 
         //Fab Packages
-        private const string _output2Name = "-2-HotRolledMemList.pdf";
-        private string _report2Name = $"{_output2Name}.rpt";
-        private const string _output2AName = "-2a-HotRolledMemList-ADD.pdf";
-        private string _report2AName = $"{_output2AName}.rpt";
-        private const string _output2OName = "-2o-HotRolledMemList-OMIT.pdf";
-        private string _report2OName = $"{_output2OName}.rpt";
+        private const string _output2Name = "-2-HotRolledMemList.xsr";
+        private string _report2Name = $"{_output2Name.Replace("xsr", "rpt")}";
+        private const string _output2AName = "-2a-HotRolledMemList-ADD.xsr";
+        private string _report2AName = $"{_output2AName.Replace("xsr", "rpt")}";
+        private const string _output2OName = "-2o-HotRolledMemList-OMIT.xsr";
+        private string _report2OName = $"{_output2OName.Replace("xsr", "rpt")}";
 
-        private const string _output3Name = "-3-HotRolledFitList.pdf";
-        private string _report3Name = $"{_output3Name}.rpt";
-        private const string _output3AName = "-3a-HotRolledFitList-ADD.pdf";
-        private string _report3AName = $"{_output3AName}.rpt";
-        private const string _output3OName = "-3o-HotRolledFitList-OMIT.pdf";
-        private string _report3OName = $"{_output3OName}.rpt";
+        private const string _output3Name = "-3-HotRolledFitList.xsr";
+        private string _report3Name = $"{_output3Name.Replace("xsr", "rpt")}";
+        private const string _output3AName = "-3a-HotRolledFitList-ADD.xsr";
+        private string _report3AName = $"{_output3AName.Replace("xsr", "rpt")}";
+        private const string _output3OName = "-3o-HotRolledFitList-OMIT.xsr";
+        private string _report3OName = $"{_output3OName.Replace("xsr", "rpt")}";
 
-        private const string _output4Name = "-4-ShopBoltList.pdf";
-        private string _report4Name = $"{_output4Name}.rpt";
-        private const string _output4AName = "-4a-ShopBoltList-ADD.pdf";
-        private string _report4AName = $"{_output4AName}.rpt";
-        private const string _output4OName = "-4o-ShopBoltList-OMIT.pdf";
-        private string _report4OName = $"{_output4OName}.rpt";
-        private const string _output4LName = "-4l-ShopBoltLocationList.pdf";
-        private string _report4LName = $"{_output4LName}.rpt";
+        private const string _output4Name = "-4-ShopBoltList.xrs";
+        private string _report4Name = $"{_output4Name.Replace("xsr", "rpt")}";
+        private const string _output4AName = "-4a-ShopBoltList-ADD.xsr";
+        private string _report4AName = $"{_output4AName.Replace("xsr", "rpt")}";
+        private const string _output4OName = "-4o-ShopBoltList-OMIT.xsr";
+        private string _report4OName = $"{_output4OName.Replace("xsr", "rpt")}";
+        private const string _output4LName = "-4l-ShopBoltLocationList.xsr";
+        private string _report4LName = $"{_output4LName.Replace("xsr", "rpt")}";
 
-        private const string _output5Name = "-5-SiteBoltList.pdf";
-        private string _report5Name = $"{_output5Name}.rpt";
-        private const string _output5AName = "-5a-SiteBoltList-ADD.pdf";
-        private string _report5AName = $"{_output5AName}.rpt";
+        private const string _output5Name = "-5-SiteBoltList.xsr";
+        private string _report5Name = $"{_output5Name.Replace("xsr", "rpt")}";
+        private const string _output5AName = "-5a-SiteBoltList-ADD.xsr";
+        private string _report5AName = $"{_output5AName.Replace("xsr", "rpt")}";
 
-        private const string _output5LName = "-5l-SiteBoltLocationList.pdf";
-        private string _report5LName = $"{_output5LName}.rpt";
+        private const string _output5LName = "-5l-SiteBoltLocationList.xsr";
+        private string _report5LName = $"{_output5LName.Replace("xsr", "rpt")}";
 
-        private const string _output6Name = "-6-AssemblyList.pdf";
-        private string _report6Name = $"{_output6Name}.rpt";
+        private const string _output6Name = "-6-AssemblyList.xsr";
+        private string _report6Name = $"{_output6Name.Replace("xsr", "rpt")}";
 
         //Extras
         private const string _reportQSname = "-QSreport.csv.rpt";
@@ -163,6 +163,7 @@ namespace Prism
                     outputName = _output1PFOname;
                 }
                 Operation.CreateReportFromSelected(materialReport, Path.Combine(Folders.MatPath, $"{MatReportPrefix}{outputName}"), _title1, _title2, _title3);
+                TextToPDF(Folders.MatPath);
             }
         }
 
@@ -175,6 +176,7 @@ namespace Prism
 
             _reportBolts = Path.Combine(FirmFolderLoc.ReportTemplates(), boltReportName);
             Operation.CreateReportFromSelected(_reportBolts, Path.Combine(Folders.BoltPath, $"{reportPrefix}{boltListOutputName}"), _title1, _title2, _title3);
+            TextToPDF(Folders.BoltPath);
         }
 
         public void CreateSelectedBoltList(string reportPrefix, string orderType)
@@ -186,6 +188,7 @@ namespace Prism
 
             string reportBolts = Path.Combine(FirmFolderLoc.ReportTemplates(), boltReportName);
             Operation.CreateReportFromSelected(reportBolts, Path.Combine(Folders.BoltPath, $"{reportPrefix}{boltListOutputName}"), _title1, _title2, _title3);
+            TextToPDF(Folders.BoltPath);
         }
 
 
@@ -209,6 +212,8 @@ namespace Prism
             string siteBoltReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report5Name);
             string assemblyReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report6Name);
 
+            string path = "C:\\Sev_Firm_2021\\Roles\\SNI\\Reports\\";
+
             _reportBolts = Path.Combine(FirmFolderLoc.ReportTemplates(), _reportBoltsName);
             string report9 = Path.Combine(FirmFolderLoc.ReportTemplates(), _report6Name);
             bool create3Report = false;
@@ -229,15 +234,15 @@ namespace Prism
             }
 
             Operation.CreateReportFromSelected(qsReport, Path.Combine(Folders.DspPath, $"{FabReportPrefix}{_outputQSname}"), _title1, _title2, _title3);
-            Operation.CreateReportFromSelected(assemblyReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output6Name}"), _title1, _title2, _title3);
+            Operation.CreateReportFromSelected(assemblyReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}-9-SNI-SiteDeliveryBatchList..xsr"), _title1, _title2, _title3);
 
             if (create3Report)
             {
-                Operation.CreateReportFromSelected(hrMemberReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output2Name}"), _title1, _title2, _title3);
+                Operation.CreateReportFromSelected(hrMemberReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}-3-SNI-HotRolledMemList.xsr"), _title1, _title2, _title3);
             }
             if (create4Report)
             {
-                Operation.CreateReportFromSelected(hrFittingReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output3Name}"), _title1, _title2, _title3);
+                Operation.CreateReportFromSelected(hrFittingReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}-4-SNI-HotRolledFitList.xsr"), _title1, _title2, _title3);
             }
             if (shopBoltsPresent || siteBoltsPresent) //then create our strumis summary report
             {
@@ -246,15 +251,17 @@ namespace Prism
             }
             if (shopBoltsPresent) //Then create a shop bolts summary
             {
-                Operation.CreateReportFromSelected(shopBoltReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output4Name}"), _title1, _title2, _title3);
+                Operation.CreateReportFromSelected(shopBoltReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}-7-SNI-ShopBoltList.xsr"), _title1, _title2, _title3);
             }
             if (siteBoltsPresent) //Then create a site bolts summary
             {
-                Operation.CreateReportFromSelected(siteBoltReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output5Name}"), _title1, _title2, _title3);
+                Operation.CreateReportFromSelected(siteBoltReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}-8-SNI-SiteBoltList.xsr"), _title1, _title2, _title3);
             }
 
             Operation.CreateNCFilesFromSelected(_NCProfileSetting, Path.Combine(Folders.NcPath, " "));
             Operation.CreateNCFilesFromSelected(_NCPlateSetting, Path.Combine(Folders.NcPath, " "));
+
+            TextToPDF(Folders.ReportPath);
         }
 
         public static async void SelectDrawingsInDocManager(List<Part> selectedParts)
@@ -276,6 +283,69 @@ namespace Prism
                 await System.Threading.Tasks.Task.Delay(10);
                 Logging.DebugLog("Drawing operation wait", "");
             }
+        }
+
+        private static void TextToPDF(string folderPath)
+        {
+            foreach (string subFile in Directory.GetFiles(folderPath))
+            {
+                if (subFile.EndsWith(".xsr"))
+                {
+                    VirtualPrinter(subFile);
+                    File.Delete(subFile);
+                }
+            }
+        }
+
+        private static void VirtualPrinter(string filePath)
+        {
+            Font font = new Font("Lucida Console", 10, FontStyle.Regular);
+
+            string printerName = "Microsoft Print to PDF"; // name of the printer
+
+            PrintDocument printDocument = new PrintDocument();
+            printDocument.PrinterSettings.PrinterName = printerName;
+
+            printDocument.PrinterSettings.PrintToFile = true;
+            printDocument.PrinterSettings.PrintFileName = Path.ChangeExtension(filePath, "pdf");
+            printDocument.DefaultPageSettings.PaperSize = new PaperSize("A4", 2100, 2970);
+            printDocument.DefaultPageSettings.Margins = new Margins(40, 40, 40, 40); // 0.5 inch margins
+            printDocument.DefaultPageSettings.Landscape = false; // portrait ori0entation
+            printDocument.DefaultPageSettings.Color = false; // black and white output
+
+            printDocument.DocumentName = Path.GetFileNameWithoutExtension(filePath);
+
+            // Variables to keep track of current position in file and number of lines printed
+            int linesPerPage = 74;
+            int lineNumber = 0;
+            int position = 0;
+
+            printDocument.PrintPage += (sender, e) =>
+            {
+                // Read a portion of the file starting from the current position
+                using (StreamReader reader = new StreamReader(filePath))
+                {
+                    string text = reader.ReadToEnd();
+                    string[] lines = text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+                    int linesToPrint = Math.Min(linesPerPage, lines.Length - lineNumber);
+                    string portion = string.Join(Environment.NewLine, lines.Skip(lineNumber).Take(linesToPrint));
+                    e.Graphics.DrawString(portion, font, Brushes.Black, e.MarginBounds);
+
+                    // Update variables for next page
+                    lineNumber += linesToPrint;
+                    position += portion.Length;
+                    if (lineNumber >= lines.Length)
+                    {
+                        e.HasMorePages = false;
+                    }
+                    else
+                    {
+                        e.HasMorePages = true;
+                    }
+                }
+            };
+
+            printDocument.Print();
         }
     }
 }
