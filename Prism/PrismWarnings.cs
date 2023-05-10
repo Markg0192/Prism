@@ -258,6 +258,15 @@ namespace Prism
             MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
 
         }
+
+        public static void NumbersNoLongerUpToDate()
+        {
+            string notUpToDateMessage = "Numbers that were up to date before running Prism are now modified, please review.";
+            const string notUpToDateTitle = "Error";
+            MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+        }
+
         public static bool IgnoreWarning()
         {
             const string notUpToDateMessage2 = "Would you like to ignore this error and continue?";

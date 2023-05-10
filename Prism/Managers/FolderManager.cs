@@ -1,9 +1,7 @@
-﻿using Microsoft.Office.Interop.Outlook;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Windows.Forms;
 
 namespace Prism
 {
@@ -131,8 +129,9 @@ namespace Prism
                 {
                     string[] file = Directory.GetFiles(subdirectory, "*.*");
                     if (file.Length == 0)
-
+                    {
                         Directory.Delete(subdirectory);
+                    }
                 }
 
                 foreach (string subFile in Directory.GetFiles(ReportPath))
@@ -144,7 +143,6 @@ namespace Prism
                 }
                 ModelModifiers.RemoveLog(DspPath);
                 ModelModifiers.RemoveIDDessin(DspPath);
-
             }
         }
 
@@ -155,7 +153,6 @@ namespace Prism
                 File.Delete($"{folderPath}.zip");
             }
             ZipFile.CreateFromDirectory(folderPath, $"{folderPath}.zip");
-
         }
     }
 }

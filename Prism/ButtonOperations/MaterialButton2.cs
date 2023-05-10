@@ -15,10 +15,10 @@ namespace Prism.ButtonOperations
             {
                 if (!Constants.IsSpecialPerson())
                 {
-                    myObjects.ProcessFabsecs(model, projectData);
+                    if (!myObjects.ProcessFabsecs(model, projectData)) { return false; }
                 }
                 myObjects.AddStartNumbers(startNumber);
-                myObjects.SelectedModelParts.ModifyAttributes(stageNumber, projectData);
+                if (!myObjects.SelectedModelParts.ModifyAttributes(stageNumber, projectData)) { return false; }
 
                 if (ignore == IgnoreType.AutoFix)
                 {

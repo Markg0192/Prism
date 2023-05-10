@@ -98,6 +98,18 @@ namespace Prism
             return true;
         }
 
+        public bool CheckDrawingsAgain()
+        {
+            foreach(var drawing in drawingsBySelectedParts)
+            {
+                if(drawing.UpToDateStatus != DrawingUpToDateStatus.DrawingIsUpToDate)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         private void UpdateDrawing(Drawing drawing, DrawingHandler drawingHandler)
         {
             drawingHandler.SetActiveDrawing(drawing, false);

@@ -31,7 +31,7 @@ namespace Prism.ButtonOperations
 
             if (!ShouldPartsBeOrdered(orderType)) { return false; }
 
-            if(!myReportManager.Folders.CreateMatFolder(fabsecsPresent)) return false;
+            if (!myReportManager.Folders.CreateMatFolder(fabsecsPresent)) return false;
 
             if (!OrderFabsecs(fabsecsPresent, myReportManager, model, projectData, phaseNumber, issueNumber, myObjects, stageNumber, originalFabsecs)) { return false; }
 
@@ -42,7 +42,7 @@ namespace Prism.ButtonOperations
 
             MoveOmitMaterial(orderType, stageNumber, myObjects);
 
-            FinishOrder(myObjects, stageNumber, projectData, myReportManager.MatReportPrefix, issueNumber, phaseNumber, orderType, myReportManager);
+            if (!FinishOrder(myObjects, stageNumber, projectData, myReportManager.MatReportPrefix, issueNumber, phaseNumber, orderType, myReportManager)) { return false; }
 
             return true;
         }
@@ -103,7 +103,7 @@ namespace Prism.ButtonOperations
                     Operation.CreateReportFromSelected(ReportManager._drawingDpmReportRpt, Path.Combine(myReportManager.Folders.FabsecCarcassPath, ReportManager._drawingDpmReportXsr), "", "", "");
                     DrawingManager dm = new DrawingManager(model, projectData, phaseNumber, issueNumber, myObjects, myReportManager.Folders.FabsecCarcassPath);
                     dm.PrintDrawingToModelFolder(myReportManager.Folders.FabsecCarcassPath);
-                    originalFabsecs.ModifyAttributes(stageNumber, projectData);
+                    if (!originalFabsecs.ModifyAttributes(stageNumber, projectData)) { return false; }
                     ModelModifiers.RemoveIDDessin(myReportManager.Folders.FabsecCarcassPath);
                 }
                 else { return false; }
@@ -120,10 +120,10 @@ namespace Prism.ButtonOperations
             }
         }
 
-        public static void FinishOrder(SelectedObjects myObjects, int stageNumber, PrismProjectData projectData, string matReportPrefix,
+        public static bool FinishOrder(SelectedObjects myObjects, int stageNumber, PrismProjectData projectData, string matReportPrefix,
             string issueNumber, string phaseNumber, string orderType, ReportManager reportManager, bool isSpecialFittingOrder = false)
         {
-            myObjects.SelectedModelParts.ModifyAttributes(stageNumber, projectData, isSpecialFittingOrder);
+            if(!myObjects.SelectedModelParts.ModifyAttributes(stageNumber, projectData, isSpecialFittingOrder)) { return false; }
 
             DialogResult finishBox = PrismWarnings.MaterialOrderComplete(projectData);
             if (finishBox == DialogResult.OK)
@@ -132,6 +132,7 @@ namespace Prism.ButtonOperations
                 EmailWriter.WriteMatEmail(projectData, myObjects, matReportPrefix, issueNumber, phaseNumber, orderType, reportManager.Folders.MatPath);
             }
             Logging.LogProgress(projectData.ProjName, "Material 3", 0, myObjects.AssembliesList.Count);
+            return true;
         }
     }
 }

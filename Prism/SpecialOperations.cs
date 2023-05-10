@@ -1,26 +1,10 @@
 ﻿using Microsoft.Office.Interop.Excel;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using static Prism.Enums;
-using Model = Tekla.Structures.Model.Model;
-using System.Windows.Forms;
 using Application = Microsoft.Office.Interop.Excel.Application;
 using System.IO;
-using System.Diagnostics;
-using Task = System.Threading.Tasks.Task;
-using Tekla.Structures.Drawing;
-using Tekla.Structures.Model.Operations;
-using Tekla.Structures;
-
-using iTextSharp;
-using iTextSharp.text;
-using iTextSharp.text.pdf;
-using Rectangle = iTextSharp.text.Rectangle;
-using Font = iTextSharp.text.Font;
-using Microsoft.Office.Interop.Outlook;
-using System.Security.AccessControl;
+using System.Drawing.Printing;
+using System.Drawing;
 
 namespace Prism
 {
@@ -34,101 +18,62 @@ namespace Prism
             {
                 if (subFile.EndsWith(".xsr"))
                 {
-                    File.Copy(subFile, subFile + "copy", false);
+                    VirtualPrinter(subFile);
+                    File.Delete(subFile);
                 }
             }
-
-            foreach (string subFile in Directory.GetFiles(folderPath))
-            {
-                if (subFile.EndsWith("copy"))
-                {
-                    string directoryPath = Path.GetDirectoryName(subFile);
-                    string newFilePath = Path.Combine(directoryPath, subFile.Replace("copy", ""));
-                    if (File.Exists(newFilePath))
-                    {
-                        File.Delete(newFilePath);
-                    }
-                    File.Move(subFile, newFilePath);
-                    File.Open(subFile, FileMode.Create);
-
-                }
-            }
-
-            foreach (string subFile in Directory.GetFiles(folderPath))
-            {
-                if (subFile.EndsWith(".xsr"))
-                {
-                    // Create the output PDF file
-
-                    string input = subFile;
-                    string output = subFile.Replace("xsr", "pdf");
-
-                    //Read the Data from Input File
-
-                    StreamReader rdr = new StreamReader(input);
-
-                    //Create a New instance on Document Class
-
-                    //Rectangle A4Page = new Rectangle(425, 610);
-                    double factor = 1.25;
-                    double pageWidth = 425 * factor;
-                    double pageLength = 610 * factor;
-                    Rectangle A4Page = new Rectangle((int)pageWidth, (int)pageLength);
-                    Document doc = new Document(A4Page, 5, 5, 5, 5);
-
-                    //Create a New instance of PDFWriter Class for Output File
-
-                    FileStream fs = new FileStream(subFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-
-                    PdfWriter.GetInstance(doc, fs);
-                    //new FileStream(output, FileMode.Create)
-                    //Open the Document
-
-                    doc.Open();
-
-                    //Add the content of Text File to PDF File
-                    BaseFont bf = BaseFont.CreateFont("c:\\windows\\fonts\\lucon.ttf", BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
-                    Font font = new Font(bf, (float)10, 0);
-                    Paragraph para = new Paragraph(rdr.ReadToEnd(), font);
-                    para.SetLeading((float)0.92, (float)0.92);
-
-                    doc.Add(para);
-
-                    //Close the Document
-
-                    doc.Close();
-
-                    //Open the Converted PDF File
-
-                    System.Diagnostics.Process.Start(output);
-                }
-            }
-        
         }
 
-        public static void ConvertTextToPdf(string textFilePath, string pdfFilePath)
+        public static void VirtualPrinter(string filePath)
         {
-            // Create a new PDF document
-            Document document = new Document();
 
-            // Create a PDF writer that writes to the specified file path
-            PdfWriter.GetInstance(document, new FileStream(pdfFilePath, FileMode.Create));
+            System.Drawing.Font font = new System.Drawing.Font("Lucida Console", 10, FontStyle.Regular);
 
-            // Open the document
-            document.Open();
+            string printerName = "Microsoft Print to PDF"; // name of the printer
 
-            // Read the text file and add its content to the document
-            using (StreamReader reader = new StreamReader(textFilePath))
+            PrintDocument printDocument = new PrintDocument();
+            printDocument.PrinterSettings.PrinterName = printerName;
+
+            printDocument.PrinterSettings.PrintToFile = true;
+            printDocument.PrinterSettings.PrintFileName = Path.ChangeExtension(filePath, "pdf");
+            printDocument.DefaultPageSettings.PaperSize = new PaperSize("A4", 2100, 2970);
+            printDocument.DefaultPageSettings.Margins = new Margins(40,40,40,40); // 0.5 inch margins
+            printDocument.DefaultPageSettings.Landscape = false; // portrait ori0entation
+            printDocument.DefaultPageSettings.Color = false; // black and white output
+
+            printDocument.DocumentName = Path.GetFileNameWithoutExtension(filePath);
+
+            // Variables to keep track of current position in file and number of lines printed
+            int linesPerPage = 74;
+            int lineNumber = 0;
+            int position = 0;
+
+            printDocument.PrintPage += (sender, e) =>
             {
-                string line;
-                while ((line = reader.ReadLine()) != null)
+                // Read a portion of the file starting from the current position
+                using (StreamReader reader = new StreamReader(filePath))
                 {
-                    document.Add(new Paragraph(line));
-                }
-            }
+                    string text = reader.ReadToEnd();
+                    string[] lines = text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+                    int linesToPrint = Math.Min(linesPerPage, lines.Length - lineNumber);
+                    string portion = string.Join(Environment.NewLine, lines.Skip(lineNumber).Take(linesToPrint));
+                    e.Graphics.DrawString(portion, font, Brushes.Black, e.MarginBounds);
 
-            // Close the document
-            document.Close();
+                    // Update variables for next page
+                    lineNumber += linesToPrint;
+                    position += portion.Length;
+                    if (lineNumber >= lines.Length)
+                    {
+                        e.HasMorePages = false;
+                    }
+                    else
+                    {
+                        e.HasMorePages = true;
+                    }
+                }
+            };        
+
+            printDocument.Print();
         }
 
         public static void WriteToExcel(string cpuSpeed)

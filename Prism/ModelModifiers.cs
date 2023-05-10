@@ -13,6 +13,9 @@ using System.Runtime.InteropServices;
 using Tekla.Structures.Model.UI;
 using static Prism.Enums;
 using Tekla.Structures.RemotingHelper;
+using Tekla.Structures.Drawing;
+using Part = Tekla.Structures.Model.Part;
+using ModelObject = Tekla.Structures.Model.ModelObject;
 
 namespace Prism
 {
@@ -72,7 +75,7 @@ namespace Prism
             }
         }
 
-        public static void ModifyAttributes(this List<Part> selectedObjects, int stageNumber, PrismProjectData projectData, bool isSpecialFittingOrder = false)
+        public static bool ModifyAttributes(this List<Part> selectedObjects, int stageNumber, PrismProjectData projectData, bool isSpecialFittingOrder = false)
         {
             foreach (Part part in selectedObjects)
             {
@@ -85,7 +88,14 @@ namespace Prism
                     if (projectData.Full != "Mark Gibson") { part.LockPart(); }
                 }
                 part.Modify();
+                if (!Operation.IsNumberingUpToDate(part) && stageNumber == 7)
+                { Logging.PartsModifiedAfterRun();
+                    PrismWarnings.NumbersNoLongerUpToDate();
+                   
+                    return false;
+                }
             }
+            return true;
         }
 
         public static void StampBoltUDA(List<BoltGroup> allBolts, string name, string date)

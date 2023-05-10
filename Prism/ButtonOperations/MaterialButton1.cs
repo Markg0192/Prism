@@ -10,7 +10,7 @@ namespace Prism.ButtonOperations
             if (PartsHaveExecutionClass(myObjects))
             {
                 ModelModifiers.SelectParts(myObjects.SelectedModelParts);
-                myObjects.SelectedModelParts.ModifyAttributes(stageNumber, projectData);
+                if(!myObjects.SelectedModelParts.ModifyAttributes(stageNumber, projectData)) { return false; }
                 Logging.LogProgress(projectData.ProjName, "Material 1", ModelChecker.IncorrectNameAndClass.Count + ModelChecker.MissingExecutionClass.Count, myObjects.AssembliesList.Count);
                 return true;
             }
