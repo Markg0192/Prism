@@ -9,7 +9,7 @@ namespace Prism.ButtonOperations
 {
     public static class MaterialButton3
     {
-        public static bool MaterialButton3op(this SelectedObjects myObjects, PrismProjectData projectData, 
+        public static bool MaterialButton3op(this SelectedObjects myObjects, PrismProjectData projectData,
             string phaseNumber, string issueNumber, string orderType, int stageNumber, StageTypes stageType, Model model, string siteDate)
         {
             ReportManager myReportManager = new ReportManager(projectData, phaseNumber, issueNumber);
@@ -96,8 +96,8 @@ namespace Prism.ButtonOperations
         {
             if (fabsecsPresent)
             {
-                DialogResult fabsecWarning = PrismWarnings.FabsecsPresent();
-                if (fabsecWarning == DialogResult.Yes)
+                bool fabsecWarning = PrismWarnings.FabsecsPresent();
+                if (fabsecWarning)
                 {
                     ReportManager.SelectDrawingsInDocManager(null);
                     Operation.CreateReportFromSelected(ReportManager._drawingDpmReportRpt, Path.Combine(myReportManager.Folders.FabsecCarcassPath, ReportManager._drawingDpmReportXsr), "", "", "");
@@ -123,14 +123,13 @@ namespace Prism.ButtonOperations
         public static bool FinishOrder(SelectedObjects myObjects, int stageNumber, PrismProjectData projectData, string matReportPrefix,
             string issueNumber, string phaseNumber, string orderType, ReportManager reportManager, bool isSpecialFittingOrder = false)
         {
-            if(!myObjects.SelectedModelParts.ModifyAttributes(stageNumber, projectData, isSpecialFittingOrder)) { return false; }
+            if (!myObjects.SelectedModelParts.ModifyAttributes(stageNumber, projectData, isSpecialFittingOrder)) { return false; }
 
-            DialogResult finishBox = PrismWarnings.MaterialOrderComplete(projectData);
-            if (finishBox == DialogResult.OK)
-            {
-                reportManager.Folders.ZipFolder(reportManager.Folders.MatPath);
-                EmailWriter.WriteMatEmail(projectData, myObjects, matReportPrefix, issueNumber, phaseNumber, orderType, reportManager.Folders.MatPath);
-            }
+            PrismWarnings.MaterialOrderComplete(projectData);
+
+            reportManager.Folders.ZipFolder(reportManager.Folders.MatPath);
+            EmailWriter.WriteMatEmail(projectData, myObjects, matReportPrefix, issueNumber, phaseNumber, orderType, reportManager.Folders.MatPath);
+
             Logging.LogProgress(projectData.ProjName, "Material 3", 0, myObjects.AssembliesList.Count);
             return true;
         }

@@ -10,9 +10,9 @@ namespace Prism.ButtonOperations
             myObjects.SelectedModelParts.SelectParts();
             ModelModifiers.PerformNumbering();
 
-            DialogResult result = PrismWarnings.AreYouHappyWithNumbering();
+            bool result = PrismWarnings.AreYouHappyWithNumbering();
 
-            if (result == DialogResult.Yes)
+            if (result)
             {
                 myObjects.CreateDrawings();        
             }
