@@ -119,8 +119,8 @@ namespace Prism
                 $"There are {IncorrectThickness.Count()} parts selected with a non-standard thickness (See blue in the model).";
 
                 PrismWarnings.AbnormalFittings();
-                DialogResult tagFittings = PrismWarnings.TagAbnormalFittings();
-                if(tagFittings == DialogResult.Yes)
+                bool tagFittings = PrismWarnings.TagAbnormalFittings();
+                if(tagFittings)
                 {
                     ModelModifiers.ModifySpecialTag("Special", IncorrectLength);
                     ModelModifiers.ModifySpecialTag("Special", IncorrectThickness);

@@ -233,6 +233,12 @@ namespace Prism
 
         private void btn_SpecialOperations_Click(object sender, EventArgs e)
         {
+            string message = "this is a really long test message with lots of text in it to try get it to reach more than one line";
+            string title = "text";
+            OkForm okForm = new OkForm(message, title);
+            okForm.TopMost = true;
+            okForm.ShowDialog();
+
             Model model = new Model();
             Logging.CreateModelLog(_projectData);
         }

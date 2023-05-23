@@ -32,18 +32,16 @@ namespace Prism.ButtonOperations
 
             else { drawingManager.PrintDrawingToModelFolder(reportManager.Folders.FabPath); }
 
-            if(!myObjects.SelectedModelParts.ModifyAttributes((int)stageType, projectData)) { return false; }
-  
+            if (!myObjects.SelectedModelParts.ModifyAttributes((int)stageType, projectData)) { return false; }
+
             reportManager.Folders.RemoveUnusedFolders();
 
             reportManager.Folders.ZipFolder(reportManager.Folders.FabPath);
 
-            DialogResult finishBox = PrismWarnings.FabPackComplete(projectData);
+            PrismWarnings.FabPackComplete(projectData);
 
-            if (finishBox == DialogResult.OK)
-            {
-                EmailWriter.WriteFabEmail(projectData, myObjects, reportManager.FabReportPrefix, issueNumber, phaseNumber, siteDate, reportManager.Folders.FabPath);
-            }
+            EmailWriter.WriteFabEmail(projectData, myObjects, reportManager.FabReportPrefix, issueNumber, phaseNumber, siteDate, reportManager.Folders.FabPath);
+
             Logging.LogProgress(projectData.ProjName, "Fab Package", 0, myObjects.AssembliesList.Count);
             return true;
         }

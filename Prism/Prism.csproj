@@ -23,7 +23,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>46</ApplicationRevision>
+    <ApplicationRevision>48</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -223,6 +223,12 @@
     <Compile Include="CustomDialogs\BoltOrderType.Designer.cs">
       <DependentUpon>BoltOrderType.cs</DependentUpon>
     </Compile>
+    <Compile Include="CustomDialogs\OkForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CustomDialogs\OkForm.Designer.cs">
+      <DependentUpon>OkForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="CustomDialogs\ProjectControllers.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -234,6 +240,12 @@
     </Compile>
     <Compile Include="CustomDialogs\SpecialFittingOrders.Designer.cs">
       <DependentUpon>SpecialFittingOrders.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CustomDialogs\YesNoForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CustomDialogs\YesNoForm.Designer.cs">
+      <DependentUpon>YesNoForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Geometry\AnglesHelper.cs" />
     <Compile Include="AutoFix.cs" />
@@ -341,11 +353,17 @@
     <EmbeddedResource Include="CustomDialogs\IgnoreWarning.resx">
       <DependentUpon>IgnoreWarning.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="CustomDialogs\OkForm.resx">
+      <DependentUpon>OkForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="CustomDialogs\ProjectControllers.resx">
       <DependentUpon>ProjectControllers.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="CustomDialogs\SpecialFittingOrders.resx">
       <DependentUpon>SpecialFittingOrders.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CustomDialogs\YesNoForm.resx">
+      <DependentUpon>YesNoForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PrismUI.resx">
       <DependentUpon>PrismUI.cs</DependentUpon>
