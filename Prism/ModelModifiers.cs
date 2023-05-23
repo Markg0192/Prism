@@ -177,12 +177,9 @@ namespace Prism
             }
         }
 
-        public static void AddPrelimMarks(this SelectedObjects selectedObjects, ProjectInfo pInfo)
-        {
-            //This method adds prelim marks 'the old fashioned way' it rationalises members by profile, grade and length and adds numbers based on phase.
-            //We have moved to numbering each piece individually but keeping this method incase we change our mind again.
-            int currentLastNumber = 0;
-            pInfo.GetUserProperty(ModelUDA.LastUsedPrelim(), ref currentLastNumber);
+        public static void AddPrelimMarks(this SelectedObjects selectedObjects, PrismProjectData pData)
+        {          
+            int currentLastNumber = Logging.GetLastUsedPrelim(pData.ProjNumberAndName);
 
             foreach (Part p in selectedObjects.SelectedModelParts)
             {
@@ -192,7 +189,7 @@ namespace Prism
                     {
                         Console.WriteLine("Failed to read last number");
                         currentLastNumber = 1;
-                        pInfo.SetUserProperty(ModelUDA.LastUsedPrelim(), currentLastNumber);
+                        Logging.SetLastUsedPrelim(pData.ProjNumberAndName, currentLastNumber);
                     }
                     else
                     {
@@ -202,7 +199,8 @@ namespace Prism
                 }
                 currentLastNumber++;
             }
-            pInfo.SetUserProperty(ModelUDA.LastUsedPrelim(), currentLastNumber);
+
+            Logging.SetLastUsedPrelim(pData.ProjNumberAndName, currentLastNumber);
         }
 
         public static void ClearPrelimMarking(ProjectInfo pInfo, string resetNumber)

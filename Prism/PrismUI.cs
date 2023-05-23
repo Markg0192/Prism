@@ -42,6 +42,9 @@ namespace Prism
 
             _projectData = new PrismProjectData(_model.GetProjectInfo(), _model.GetInfo().ModelPath);
             Logging.Login(_projectData.ProjName);
+            
+            Logging.CreateModelLog(_projectData);
+            SetNextPrelimToUseLabel();            
         }
 
         public bool InitialSetup(StageTypes stageType, bool checkForPreviousSteps)
@@ -112,12 +115,13 @@ namespace Prism
             {
                 if (!await Task.Run(() => InitialSetup(StageTypes.Prelim3, true))) { EndFunction(0); return; };
 
-                if (!await Task.Run(() => _selectedObjects.MaterialButton3op(_projectData, _model.GetProjectInfo(), txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text,
+                if (!await Task.Run(() => _selectedObjects.MaterialButton3op(_projectData, txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text,
                     orderType, (int)StageTypes.Prelim3, StageTypes.Prelim3, _model, txt_SiteDate.Text))) { EndFunction(0); return; }
 
                 _model.CommitChanges();
             }
 
+            SetNextPrelimToUseLabel();
             EndFunction(1);
         }
 
@@ -230,15 +234,7 @@ namespace Prism
         private void btn_SpecialOperations_Click(object sender, EventArgs e)
         {
             Model model = new Model();
-
-            string assemblyReport = $"C:\\Users\\{Environment.UserName}\\OneDrive - Severfield plc\\Sev_Firm_2021\\Roles\\SNI\\Reports\\-3-SNI-HotRolledMemList.rpt";
-
-            string myPath = model.GetInfo().ModelPath + "\\Reports\\";
-            Operation.CreateReportFromSelected(assemblyReport, $"{myPath}PageSizeTest.xsr", "", "", "");
-
-            SpecialOperations.VirtualPrinter($"{myPath}PageSizeTest.xsr");
-            // SpecialOperations.TextToPDF(myPath);
-            // SpecialOperations.ConvertTextToPdf($"{myPath}.xsr", $"{myPath}.pdf");
+            Logging.CreateModelLog(_projectData);
         }
 
         private async void CreatePackageAsync()
@@ -431,8 +427,10 @@ namespace Prism
             bool performReset = PrismWarnings.ResetPrelimMarking();
             if (performReset)
             {
-                ModelModifiers.ClearPrelimMarking(_model.GetProjectInfo(), txt_ResetPrelimTo.Text);
-                PrismWarnings.PrelimStartReset(txt_ResetPrelimTo.Text);
+                Logging.SetLastUsedPrelim(_projectData.ProjNumberAndName, Convert.ToInt32(txt_ResetPrelimTo.Text));
+                SetNextPrelimToUseLabel();
+                //ModelModifiers.ClearPrelimMarking(_model.GetProjectInfo(), txt_ResetPrelimTo.Text);
+                //PrismWarnings.PrelimStartReset(txt_ResetPrelimTo.Text);
             }
         }
 
@@ -571,6 +569,16 @@ namespace Prism
         {
             var form = new ProjectControllers(_model.GetProjectInfo());
             form.ShowDialog();
+        }
+
+        private void SetNextPrelimToUseLabel()
+        {
+            lbl_NextPrelim.Text = Logging.GetLastUsedPrelim(_projectData.ProjNumberAndName).ToString();
+        }
+
+        private void btn_PrelimLabelRefresh_Click(object sender, EventArgs e)
+        {
+            SetNextPrelimToUseLabel();
         }
     }
 }
