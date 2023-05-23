@@ -8,6 +8,12 @@ namespace Prism
         public static string RefreshDrawingsMacro = "PrismRefreshDrawings.cs";
         public static string DrawingOperation = "PrismDrawingOperation.cs";
         public static string IssueDrawings = "IssueStampDrawings.cs";
+        public static string PrismDataLogLocation = @"\\sev-los-fs1\application data$\Prism\Model Data";
+
+        public static string ModelDataLogLocation(string jobName)
+        {
+           return $@"\\sev-los-fs1\application data$\Prism\Model Data\{jobName}";
+        }
 
         public static bool IsSpecialPerson()
         {
@@ -22,11 +28,9 @@ namespace Prism
         {
             List<string> specialOperationUsers = new List<string>
             {
-                "conan.mulholland",
-                "Ian.Partridge",
-                "Matthew.Poots",
+
                 "mark.gibson"
-            }; 
+            };
 
             foreach (string user in specialOperationUsers)
             {

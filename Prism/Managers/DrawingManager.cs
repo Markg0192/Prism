@@ -29,7 +29,7 @@ namespace Prism
         {
             _selectedObjects = selectedObjects;
             _folders = new FolderManager(projectData, phaseNum, issueNum);
-
+            
             this._model = model;
             DrawingsAreUpToDate = CreateDrawingList(ID_DessinPath);
             CreatePrintSettingXML(projectData.ProjPath);

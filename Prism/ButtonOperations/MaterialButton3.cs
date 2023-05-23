@@ -9,7 +9,7 @@ namespace Prism.ButtonOperations
 {
     public static class MaterialButton3
     {
-        public static bool MaterialButton3op(this SelectedObjects myObjects, PrismProjectData projectData, ProjectInfo projectInfo,
+        public static bool MaterialButton3op(this SelectedObjects myObjects, PrismProjectData projectData, 
             string phaseNumber, string issueNumber, string orderType, int stageNumber, StageTypes stageType, Model model, string siteDate)
         {
             ReportManager myReportManager = new ReportManager(projectData, phaseNumber, issueNumber);
@@ -36,7 +36,7 @@ namespace Prism.ButtonOperations
             if (!OrderFabsecs(fabsecsPresent, myReportManager, model, projectData, phaseNumber, issueNumber, myObjects, stageNumber, originalFabsecs)) { return false; }
 
             ModelModifiers.VariationCheck(phaseNumber, myObjects, projectData);
-            myObjects.AddPrelimMarks(projectInfo);
+            myObjects.AddPrelimMarks(projectData);
 
             myReportManager.CreateMaterialReports(myObjects, orderType, stageType);
 

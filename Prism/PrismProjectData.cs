@@ -13,6 +13,7 @@ namespace Prism
             pInfo = projectInfo;
             ProjName = projectInfo.Name;
             ProjNumber = projectInfo.ProjectNumber;
+            ProjNumberAndName = ProjNumber + "-" + ProjName;
             Date = DateTime.Now.ToString("dd/MM/yyyy");
             string[] NameArray = Environment.UserName.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
             First = Capitalise(NameArray[0]);
@@ -22,6 +23,7 @@ namespace Prism
             ProjPath = modelPath;
         }
 
+        public readonly string ProjNumberAndName;
         public readonly string ProjPath;
         public readonly string ProjName;
         public readonly string ProjNumber;

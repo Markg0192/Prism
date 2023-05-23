@@ -1,12 +1,83 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
+using System.Security.AccessControl;
+using System.Security.Principal;
+using Tekla.Structures.Model;
 
 namespace Prism
 {
     public static class Logging
     {
+        public static void CreateModelLog(PrismProjectData pData)
+        {
+            //this method checks the model data folder on our server for a folder named after the users current model, if it does not exist we create it
+            bool logExists = false;
+            foreach (string folder in Directory.GetDirectories(Constants.PrismDataLogLocation))
+            {
+                string check = Constants.ModelDataLogLocation(pData.ProjNumberAndName);
+                if (folder == Constants.ModelDataLogLocation(pData.ProjNumberAndName))
+                { logExists = true; }
+            }
+            if (!logExists)
+            {
+                Directory.CreateDirectory(Constants.ModelDataLogLocation(pData.ProjNumberAndName));
+                // Set full control permissions on the folder
+                DirectorySecurity directorySecurity = Directory.GetAccessControl(Constants.ModelDataLogLocation(pData.ProjNumberAndName));
+                SecurityIdentifier everyone = new SecurityIdentifier(WellKnownSidType.WorldSid, null);
+                directorySecurity.AddAccessRule(new FileSystemAccessRule(everyone, FileSystemRights.FullControl, InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit, PropagationFlags.None, AccessControlType.Allow));
+                Directory.SetAccessControl(Constants.ModelDataLogLocation(pData.ProjNumberAndName), directorySecurity);
+
+                WriteToFile(Constants.ModelDataLogLocation(pData.ProjNumberAndName) + "\\Project Info.txt", pData.pInfo);
+            }
+        }
+
+        public static void WriteToFile(string filePath, ProjectInfo pInfo)
+        {
+            int currentLastNumber = 0;
+            pInfo.GetUserProperty(ModelUDA.LastUsedPrelim(), ref currentLastNumber);
+
+            using (StreamWriter writer = new StreamWriter(filePath))
+            {
+                writer.WriteLine($"Next prelim to use: {currentLastNumber}");
+                writer.WriteLine("Material orders processed: 0");
+                writer.WriteLine("Fab packages created: 0");
+                writer.Close();
+            }
+        }
+
+        public static int GetLastUsedPrelim(string jobName)
+        {            
+            using (StreamReader read = new StreamReader(Constants.ModelDataLogLocation(jobName) + "\\Project Info.txt"))
+            {
+                string lastUsedPrelimLine = read.ReadLine();              
+
+                string lastusedPrelim = lastUsedPrelimLine.Split(':')[1].Trim();
+                return Convert.ToInt32(lastusedPrelim);
+            }
+        }
+
+        public static void SetLastUsedPrelim(string jobName, int lastUsedPrelim)
+        {
+            string fileLocation = Constants.ModelDataLogLocation(jobName) + "\\Project Info.txt";
+            using (StreamReader read = new StreamReader(fileLocation))
+            {
+                string lastUsedPrelimLine = read.ReadLine();
+                string materialOrderProcessedLine = read.ReadLine();
+                string fabPackagesMadeLine = read.ReadLine();
+
+                string lastusedPrelim = lastUsedPrelimLine.Split(':')[0].Trim();
+                read.Close();
+
+                using (StreamWriter writer = new StreamWriter(fileLocation))
+                {
+                    writer.WriteLine($"Next prelim to use: {lastUsedPrelim}");
+                    writer.WriteLine(materialOrderProcessedLine);
+                    writer.WriteLine(fabPackagesMadeLine);
+                    writer.Close();
+                }
+            }
+        }
+
         public static void LogProgress(string modelName, string buttonPress, int autoFixCount, int totalObjects)
         {
             if (!Constants.IsSpecialPerson())
