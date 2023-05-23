@@ -30,10 +30,10 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(YesNoForm));
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.lbl_WarningText = new System.Windows.Forms.Label();
-            this.btn_Yes = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
             this.btn_No = new System.Windows.Forms.Button();
+            this.btn_Yes = new System.Windows.Forms.Button();
+            this.lbl_WarningText = new System.Windows.Forms.Label();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -57,25 +57,6 @@
             this.tableLayoutPanel1.TabIndex = 0;
             this.tableLayoutPanel1.Paint += new System.Windows.Forms.PaintEventHandler(this.tableLayoutPanel1_Paint);
             // 
-            // lbl_WarningText
-            // 
-            this.lbl_WarningText.AutoSize = true;
-            this.lbl_WarningText.Location = new System.Drawing.Point(13, 20);
-            this.lbl_WarningText.Name = "lbl_WarningText";
-            this.lbl_WarningText.Size = new System.Drawing.Size(35, 13);
-            this.lbl_WarningText.TabIndex = 0;
-            this.lbl_WarningText.Text = "label1";
-            // 
-            // btn_Yes
-            // 
-            this.btn_Yes.Location = new System.Drawing.Point(3, 3);
-            this.btn_Yes.Name = "btn_Yes";
-            this.btn_Yes.Size = new System.Drawing.Size(75, 23);
-            this.btn_Yes.TabIndex = 1;
-            this.btn_Yes.Text = "Yes";
-            this.btn_Yes.UseVisualStyleBackColor = true;
-            this.btn_Yes.Click += new System.EventHandler(this.btn_Yes_Click);
-            // 
             // panel1
             // 
             this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
@@ -96,6 +77,25 @@
             this.btn_No.UseVisualStyleBackColor = true;
             this.btn_No.Click += new System.EventHandler(this.btn_No_Click);
             // 
+            // btn_Yes
+            // 
+            this.btn_Yes.Location = new System.Drawing.Point(3, 3);
+            this.btn_Yes.Name = "btn_Yes";
+            this.btn_Yes.Size = new System.Drawing.Size(75, 23);
+            this.btn_Yes.TabIndex = 1;
+            this.btn_Yes.Text = "Yes";
+            this.btn_Yes.UseVisualStyleBackColor = true;
+            this.btn_Yes.Click += new System.EventHandler(this.btn_Yes_Click);
+            // 
+            // lbl_WarningText
+            // 
+            this.lbl_WarningText.AutoSize = true;
+            this.lbl_WarningText.Location = new System.Drawing.Point(13, 20);
+            this.lbl_WarningText.Name = "lbl_WarningText";
+            this.lbl_WarningText.Size = new System.Drawing.Size(35, 13);
+            this.lbl_WarningText.TabIndex = 0;
+            this.lbl_WarningText.Text = "label1";
+            // 
             // YesNoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -106,6 +106,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "YesNoForm";
             this.Text = "YesNoForm";
+            this.TopMost = true;
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
             this.panel1.ResumeLayout(false);
