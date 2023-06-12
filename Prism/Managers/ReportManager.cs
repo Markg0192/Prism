@@ -64,7 +64,7 @@ namespace Prism
         private const string _output3OName = "-3o-HotRolledFitList-OMIT.xsr";
         private string _report3OName = $"{_output3OName.Replace("xsr", "rpt")}";
 
-        private const string _output4Name = "-4-ShopBoltList.xrs";
+        private const string _output4Name = "-4-ShopBoltList.xsr";
         private string _report4Name = $"{_output4Name.Replace("xsr", "rpt")}";
         private const string _output4AName = "-4a-ShopBoltList-ADD.xsr";
         private string _report4AName = $"{_output4AName.Replace("xsr", "rpt")}";
@@ -87,9 +87,8 @@ namespace Prism
         //Extras
         private const string _reportQSname = "-QSreport.csv.rpt";
         private const string _outputQSname = "-QSreport.csv";
-
-        public static string _drawingDpmReportRpt = "ID_dessins_KP1.rpt";
-        public static string _drawingDpmReportXsr = "ID_dessins_KP1.xsr";
+        private const string _report7Name = "-7-FusionMap.csv.rpt";
+        private const string _output7Name = "-FusionMap.csv";
         #endregion
 
         private string _NCPlateSetting;
@@ -176,7 +175,7 @@ namespace Prism
 
             _reportBolts = Path.Combine(FirmFolderLoc.ReportTemplates(), boltReportName);
             Operation.CreateReportFromSelected(_reportBolts, Path.Combine(Folders.BoltPath, $"{reportPrefix}{boltListOutputName}"), _title1, _title2, _title3);
-            TextToPDF(Folders.BoltPath);
+          //  TextToPDF(Folders.BoltPath);
         }
 
         public void CreateSelectedBoltList(string reportPrefix, string orderType)
@@ -211,8 +210,7 @@ namespace Prism
             string shopBoltReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report4Name);
             string siteBoltReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report5Name);
             string assemblyReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report6Name);
-
-            string path = "C:\\Sev_Firm_2021\\Roles\\SNI\\Reports\\";
+            string fusionMapReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report7Name);
 
             _reportBolts = Path.Combine(FirmFolderLoc.ReportTemplates(), _reportBoltsName);
             string report9 = Path.Combine(FirmFolderLoc.ReportTemplates(), _report6Name);
@@ -234,28 +232,28 @@ namespace Prism
             }
 
             Operation.CreateReportFromSelected(qsReport, Path.Combine(Folders.DspPath, $"{FabReportPrefix}{_outputQSname}"), _title1, _title2, _title3);
-            Operation.CreateReportFromSelected(assemblyReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}-9-SNI-SiteDeliveryBatchList..xsr"), _title1, _title2, _title3);
+            Operation.CreateReportFromSelected(assemblyReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output6Name}"), _title1, _title2, _title3);
+            Operation.CreateReportFromSelected(fusionMapReport, Path.Combine(Folders.DspPath, $"{FabReportPrefix}{_output7Name}"), _title1, _title2, _title3);
 
             if (create3Report)
             {
-                Operation.CreateReportFromSelected(hrMemberReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}-3-SNI-HotRolledMemList.xsr"), _title1, _title2, _title3);
+                Operation.CreateReportFromSelected(hrMemberReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output2Name}"), _title1, _title2, _title3);
             }
             if (create4Report)
             {
-                Operation.CreateReportFromSelected(hrFittingReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}-4-SNI-HotRolledFitList.xsr"), _title1, _title2, _title3);
+                Operation.CreateReportFromSelected(hrFittingReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output3Name}"), _title1, _title2, _title3);
             }
             if (shopBoltsPresent || siteBoltsPresent) //then create our strumis summary report
             {
                 Operation.CreateReportFromSelected(_reportBolts, Path.Combine(Folders.DspPath, $"{FabReportPrefix}{_outputBolts}"), _title1, _title2, _title3);
-                // Operation.CreateReportFromSelected(_report8L, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output8L}"), _title1, _title2, _title3);
             }
             if (shopBoltsPresent) //Then create a shop bolts summary
             {
-                Operation.CreateReportFromSelected(shopBoltReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}-7-SNI-ShopBoltList.xsr"), _title1, _title2, _title3);
+                Operation.CreateReportFromSelected(shopBoltReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output4Name}"), _title1, _title2, _title3);
             }
             if (siteBoltsPresent) //Then create a site bolts summary
             {
-                Operation.CreateReportFromSelected(siteBoltReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}-8-SNI-SiteBoltList.xsr"), _title1, _title2, _title3);
+                Operation.CreateReportFromSelected(siteBoltReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output5Name}"), _title1, _title2, _title3);
             }
 
             Operation.CreateNCFilesFromSelected(_NCProfileSetting, Path.Combine(Folders.NcPath, " "));

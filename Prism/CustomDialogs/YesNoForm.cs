@@ -12,7 +12,7 @@ namespace Prism.CustomDialogs
             InitializeComponent();
             CenterToScreen();
             lbl_WarningText.AutoSize = true;
-            lbl_WarningText.MaximumSize = new System.Drawing.Size(300, 100);
+            lbl_WarningText.MaximumSize = new System.Drawing.Size(300, 1000);
             this.AutoSize = true;
             lbl_WarningText.Text = message;
             Text = title;

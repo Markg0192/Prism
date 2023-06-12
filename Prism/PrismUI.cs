@@ -44,7 +44,8 @@ namespace Prism
             Logging.Login(_projectData.ProjName);
             
             Logging.CreateModelLog(_projectData);
-            SetNextPrelimToUseLabel();            
+            SetNextPrelimToUseLabel();
+            SetStatusLabels($"Connected to: {_projectData.ProjNumber}-{_projectData.ProjName}");
         }
 
         public bool InitialSetup(StageTypes stageType, bool checkForPreviousSteps)
@@ -227,20 +228,17 @@ namespace Prism
 
         private void btnCreatePackage1_Click_1(object sender, EventArgs e)
         {
+            Logging.DebugLog("create package start", "");
             CreatePackageAsync();
             // CreatePackageNotAsync();
         }
 
         private void btn_SpecialOperations_Click(object sender, EventArgs e)
         {
-            string message = "this is a really long test message with lots of text in it to try get it to reach more than one line";
-            string title = "text";
-            OkForm okForm = new OkForm(message, title);
-            okForm.TopMost = true;
-            okForm.ShowDialog();
 
-            Model model = new Model();
-            Logging.CreateModelLog(_projectData);
+            PrismMacroBuilder.DrawingOperations();
+            Operation.RunMacro(Constants.DrawingOperation);
+           // PrismMacroBuilder.PrintSelectedFITDrawings(".\\\\myTestFiles");
         }
 
         private async void CreatePackageAsync()
@@ -252,6 +250,8 @@ namespace Prism
             if (!_selectedObjects.NumbersUpToDate) { SetStatusLabels("Numbers not up to date"); EndFunction(0); return; }
 
             SetStatusLabels("Creating Fab Package");
+
+            Logging.DebugLog("setup complete", "");
 
             if (!await Task.Run(() => _selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber.Text, issueNumber.Text, StageTypes.FAB, txt_SiteDate.Text))) { EndFunction(0); return; }
 
@@ -394,7 +394,6 @@ namespace Prism
 
         private void PrismUI_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
         {
-
             Cursor = Cursors.Help;
         }
 
@@ -496,7 +495,7 @@ namespace Prism
         private void btn_MainMaterialCheck_Click_1(object sender, EventArgs e)
         {
             pnl_Material.Visible = true;
-            pnl_Home.Visible = false;
+            pnl_Home.Visible = false; 
         }
 
         private void btn_MainPackageCreation_Click_1(object sender, EventArgs e)

@@ -71,6 +71,13 @@ namespace Prism
             // MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
+        public static void AreFittingsDone(string type)
+        {
+            string notUpToDateMessage = $"When {type} are done printing hit OK to continue";
+            string notUpToDateTitle = "Check folder";
+            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+        }
+
         public static void AbnormalFittings()
         {
             string notUpToDateMessage = $"You have selected some abnormal fittings that should either be bought out items or changed to something standard.\r {Warning}";
@@ -284,7 +291,14 @@ namespace Prism
             const string notUpToDateTitle = "Update drawings";
             CreateOKForm(notUpToDateMessage, notUpToDateTitle);
             //MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
 
+        public static void IncorrectlyAssignedDrawings()
+        {
+            string notUpToDateMessage = "You have drawings that are not assigned to correctly, in the Title 1 field of each drawing the folder to print to must be asssigned. Title 1 must contain one of the following: \r\"ASS\", \"FIT\", \"PRT\", \"SHA\", \"PGC\", \"Not Required\" \r\rIf this issue persists seek help from the development team.";
+            const string notUpToDateTitle = "Update drawings";
+            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+            //MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
         public static void NumbersNoLongerUpToDate()

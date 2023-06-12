@@ -18,10 +18,17 @@ namespace Prism
             _model = model;
             _selectedObjects = selectedObjects;
             DrawingRequired = true;
-            GetPrismDrawing(currentDrawing);           
-            SetDrawingFolderName(currentDrawing); 
-            GetDPMFromDrawing(currentDrawing, model, dpmList);
+            GetPrismDrawing(currentDrawing);
+            Logging.DebugLog("Got PrismDrawing", "");
+
+            SetDrawingFolderName(currentDrawing);
+            Logging.DebugLog("Set drawing folder name", "");
+
+           // GetDPMFromDrawing(currentDrawing, model, dpmList);
+            Logging.DebugLog("Got dpm from drawing", "");
+
             DrawingSize = GetDrawingSize(currentDrawing);
+            Logging.DebugLog("Got drawing size", "");
         }
 
         public bool DrawingRequired { get; set; }
@@ -39,14 +46,21 @@ namespace Prism
             string modelPath = model.GetInfo().ModelPath;
 
             string dpmName = GetDPMNameFromDrawing(dpmList, teklaDrawing.GetIdentifier().ToString());
+            Logging.DebugLog(dpmName, "");
 
             DpmPrinterSetting = model.GetInfo().ModelPath + "\\attributes\\" + "PrismPDFOption.xml";
+            Logging.DebugLog(DpmPrinterSetting, "");
+
             DpmPDFSaveName = $@"{DrawingFolderName}\" + $"{PdfName}";
+            Logging.DebugLog(DpmPDFSaveName, "");
+
             DpmFileName = modelPath + $@"\drawings\snapshots\{dpmName}.DPM";
+            Logging.DebugLog(DpmFileName, "");
         }
 
         private static string GetDPMNameFromDrawing(List<List<string>> dpmList, string drawingName)
         {
+
             List<string> nww = dpmList.Find(x => x[0] == drawingName);
             return nww[1];
         }
