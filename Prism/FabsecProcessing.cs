@@ -196,6 +196,7 @@ namespace Prism
                 Vector myVector = new Vector(0, 0, moveDistance);
                 Part copiedFabsec = Operation.CopyObject(fabsec, myVector) as Part;
                 fabsecCarcassList.Add(copiedFabsec);
+                copiedFabsec.SetUserProperty(ModelUDA.FabsecUniqueNumber(), fabsec.StageString(ModelUDA.FabsecUniqueNumber()));
                 copiedFabsec.SetUserProperty(ModelUDA.CurrentStageName(1), fabsec.StageString(ModelUDA.CurrentStageName(1))); //Set prism values and prelim on the new copied fabsec
                 copiedFabsec.SetUserProperty(ModelUDA.CurrentStageDate(1), fabsec.StageString(ModelUDA.CurrentStageDate(1))); //All these values are unique in the model settings
                 copiedFabsec.SetUserProperty(ModelUDA.CurrentStageName(2), fabsec.StageString(ModelUDA.CurrentStageName(2))); //This means they won't copy with the member naturally.

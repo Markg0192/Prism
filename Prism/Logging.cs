@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Security.AccessControl;
 using System.Security.Principal;
+using Tekla.Structures.Drawing;
+using Tekla.Structures.DrawingInternal;
 using Tekla.Structures.Model;
 
 namespace Prism
@@ -46,10 +49,10 @@ namespace Prism
         }
 
         public static int GetLastUsedPrelim(string jobName)
-        {            
+        {
             using (StreamReader read = new StreamReader(Constants.ModelDataLogLocation(jobName) + "\\Project Info.txt"))
             {
-                string lastUsedPrelimLine = read.ReadLine();              
+                string lastUsedPrelimLine = read.ReadLine();
 
                 string lastusedPrelim = lastUsedPrelimLine.Split(':')[1].Trim();
                 return Convert.ToInt32(lastusedPrelim);
@@ -80,7 +83,7 @@ namespace Prism
 
         public static void LogProgress(string modelName, string buttonPress, int autoFixCount, int totalObjects)
         {
-            if (!Constants.IsSpecialPerson())
+            if (Environment.UserName != "mark.gibson")
             {
                 using (StreamWriter log = new StreamWriter(@"\\sev-los-fs1\application data$\Prism\Log.txt", true))
                 {
@@ -134,7 +137,7 @@ namespace Prism
 
         public static void Login(string modelName)
         {
-            if (!Constants.IsSpecialPerson())
+            if (Environment.UserName != "mark.gibson")
             {
                 using (StreamWriter log = new StreamWriter(@"\\sev-los-fs1\application data$\Prism\LoginLog.txt", true))
                 {
@@ -195,13 +198,26 @@ namespace Prism
 
         public static void DebugLog(string debugText, string modelName)
         {
-            if (!Constants.IsSpecialPerson())
+            if (Environment.UserName == "jonathan.gregg" || Environment.UserName == "Allister.Jackson" || Environment.UserName == "mark.gibson")
             {
-                using (StreamWriter log = new StreamWriter(@"\\sev-los-fs1\application data$\Prism\DebugLog.txt", true))
+                using (StreamWriter log = new StreamWriter(@"\\sev-los-fs1\application data$\Prism\DebugLogs\StandardDebug.txt", true))
                 {
                     log.WriteLine("--------------------------------------------------------------------------------------------------");
                     log.WriteLine($"{DateTime.Now} - User: {Environment.UserName} - Model: {modelName}");
                     log.WriteLine($"{debugText}");
+                }
+            }
+        }
+
+        public static void UnAssignedDrawings(string modelName, List<Drawing> drawingsList)
+        {
+            using (StreamWriter log = new StreamWriter(@"\\sev-los-fs1\application data$\Prism\DebugLogs\UnassignedDrawings.txt", true))
+            {
+                log.WriteLine("--------------------------------------------------------------------------------------------------");
+                log.WriteLine($"{DateTime.Now} - User: {Environment.UserName} - Model: {modelName}");
+                foreach (Drawing drawing in drawingsList)
+                {
+                    log.WriteLine($"Drawing ID No: {drawing.GetIdentifier()}");
                 }
             }
         }

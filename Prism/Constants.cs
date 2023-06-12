@@ -6,6 +6,7 @@ namespace Prism
     public static class Constants
     {
         public static string RefreshDrawingsMacro = "PrismRefreshDrawings.cs";
+        public static string DrawingPrinterMacro = "PrismDrawingPrintss.cs";
         public static string DrawingOperation = "PrismDrawingOperation.cs";
         public static string IssueDrawings = "IssueStampDrawings.cs";
         public static string PrismDataLogLocation = @"\\sev-los-fs1\application data$\Prism\Model Data";
@@ -17,7 +18,7 @@ namespace Prism
 
         public static bool IsSpecialPerson()
         {
-            if (Environment.UserName == "mrk.gibson")
+            if (Environment.UserName == "mark.gibson")
             {
                 return true;
             }
@@ -29,7 +30,8 @@ namespace Prism
             List<string> specialOperationUsers = new List<string>
             {
 
-                "mark.gibson"
+                "mark.gibson",
+                "Allister.Jackson"
             };
 
             foreach (string user in specialOperationUsers)

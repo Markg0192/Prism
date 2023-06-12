@@ -1,11 +1,13 @@
-﻿using System;
+﻿using Microsoft.Office.Interop.Outlook;
+using Org.BouncyCastle.Asn1.X509.Qualified;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Xml.Linq;
 using Tekla.Structures;
 using Tekla.Structures.Drawing;
 using Tekla.Structures.Model;
@@ -23,16 +25,30 @@ namespace Prism
         private FolderManager _folders;
         private Model _model;
 
-        List<Drawing> drawingsBySelectedParts = new List<Drawing>();
+        public List<Drawing> drawingsBySelectedParts = new List<Drawing>();
+        public List<Drawing> AssDrawings = new List<Drawing>();
+        public List<Drawing> FitDrawings = new List<Drawing>();
+        public List<Drawing> ShaDrawings = new List<Drawing>();
+        public List<Drawing> PrtDrawings = new List<Drawing>();
+        public List<Drawing> PgcDrawings = new List<Drawing>();
+        public List<Drawing> NotRequiredDrawings = new List<Drawing>();
+        public List<Drawing> NotReqAssDrawings = new List<Drawing>();
+        public List<Drawing> NotLabelledDrawings = new List<Drawing>();
+        public List<Drawing> GADrawings = new List<Drawing>();
+        public List<Drawing> AllFittings = new List<Drawing>();
 
-        public DrawingManager(Model model, PrismProjectData projectData, string phaseNum, string issueNum, SelectedObjects selectedObjects, string ID_DessinPath)
+        public DrawingManager(Model model, PrismProjectData projectData, string phaseNum, string issueNum, SelectedObjects selectedObjects)
         {
             _selectedObjects = selectedObjects;
+
             _folders = new FolderManager(projectData, phaseNum, issueNum);
-            
+            Logging.DebugLog("folder manaager made", "");
             this._model = model;
-            DrawingsAreUpToDate = CreateDrawingList(ID_DessinPath);
-            CreatePrintSettingXML(projectData.ProjPath);
+
+            DrawingsAreUpToDate = CreateDrawingList();
+            Logging.DebugLog("drawingList made", "");
+
+            //   CreatePrintSettingXML(projectData.ProjPath);
         }
 
         public static List<PrismDrawing> PrismDrawingList = new List<PrismDrawing>();
@@ -45,13 +61,63 @@ namespace Prism
                 XMLWriter.PDFPrintSettings(modelPath);
             }
         }
-
-        public bool CreateDrawingList(string ID_DessinPath)
+        public static void PrintDrawings(ReportManager reportManager, DrawingManager drawingManager, List<int> drawingCount)
         {
-            // List<Drawing> drawingsBySelectedParts = new List<Drawing>();
-            DrawingHandler dh = new DrawingHandler();
+            if (drawingManager.FitDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, drawingCount, "\\FIT", 0, 1, reportManager);
+            if (drawingManager.PgcDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, drawingCount, "\\PGC", 4, 5, reportManager);
+            if (drawingManager.PrtDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, drawingCount, "\\PRT", 6, 7, reportManager);
+            if (drawingManager.ShaDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, drawingCount, "\\SHA", 8, 9, reportManager);
+
+            if (drawingManager.AssDrawings.Count != 0)
+            {
+                Thread.Sleep(2000);
+                PrismMacroBuilder.PrintSelectedASSDrawings(reportManager.Folders.FabFolder, drawingManager.AssDrawings.Count);
+                WaitForPrinting(reportManager.Folders.FabPath + "\\ASS", drawingManager.AssDrawings.Count);
+                PrismMacroBuilder.IssueAndLockStampOn();
+            }
+        }
+
+        public static void PrintAndIssueDrawings(string fabFolder, List<int> drawingCount, string folderPath, int countIndex1, int countIndex2, ReportManager reportManager)
+        {
+            Thread.Sleep(2000);
+            PrismMacroBuilder.PrintSelectedDrawings(fabFolder, folderPath, drawingCount[countIndex1], drawingCount[countIndex2]);
+            WaitForPrinting(reportManager.Folders.FabPath + folderPath, drawingCount[countIndex2]);
+            PrismMacroBuilder.IssueAndLockStampOn();
+        }
+
+        private static void WaitForPrinting(string printFolder, int drawingCount)
+        {
+            string folderPath = printFolder; // Replace with the actual folder path
+            int desiredFileCount = drawingCount; // Replace with the desired file count
+
+            FileSystemWatcher watcher = new FileSystemWatcher(folderPath);
+            watcher.EnableRaisingEvents = true;
+            watcher.IncludeSubdirectories = false;
+
+            int currentFileCount = 0;
+
+            watcher.Created += (sender, e) =>
+            {
+                currentFileCount++;
+                Console.WriteLine("New file created. Current count: " + currentFileCount);
+
+                if (currentFileCount >= desiredFileCount)
+                {
+                    watcher.EnableRaisingEvents = false; // Stop watching the folder
+                }
+            };
+
+            while (currentFileCount < desiredFileCount)
+            {
+                Thread.Sleep(1000); // Delay for 1 second before checking again
+            }
+        }
+
+        public bool CreateDrawingList()
+        {
             IEnumerable<int> drawingNos = Tekla.Structures.DrawingInternal.Operation.GetDrawingsBySelectedParts(true, true);
             int counter = 0;
+
             foreach (var item in drawingNos) counter++;
 
             if (counter == 0)
@@ -66,43 +132,95 @@ namespace Prism
             {
                 var id = new Identifier(no);
                 var drawing = Tekla.Structures.DrawingInternal.Operation.GetDrawing(id);
-                drawing.Select();
-                if (drawing.UpToDateStatus != DrawingUpToDateStatus.DrawingIsUpToDate)
+
+                if (!(drawing is GADrawing))
                 {
-                    return false;
+                    drawing.Select();
+                    string title1 = drawing.Title1;
+                    if (drawing.UpToDateStatus != DrawingUpToDateStatus.DrawingIsUpToDate)
+                    {
+                        return false;
+                    }
+
+                    switch (title1)
+                    {
+                        case string t when t != "aGAdrawing" && drawing is GADrawing:
+                            GADrawings.Add(drawing);
+                            break;
+                        case string t when t.Contains("ASS"):
+                            AssDrawings.Add(drawing);
+                            break;
+                        case string t when t.Contains("FIT"):
+                            AllFittings.Add(drawing);
+                            FitDrawings.Add(drawing);
+                            break;
+                        case string t when t.Contains("SHA"):
+                            AllFittings.Add(drawing);
+                            ShaDrawings.Add(drawing);
+                            break;
+                        case string t when t.Contains("PRT"):
+                            AllFittings.Add(drawing);
+                            PrtDrawings.Add(drawing);
+                            break;
+                        case string t when t.Contains("PGC"):
+                            AllFittings.Add(drawing);
+                            PgcDrawings.Add(drawing);
+                            break;
+                        case string t when t.Contains("Not Required") && drawing is SinglePartDrawing:
+                            AllFittings.Add(drawing);
+                            NotRequiredDrawings.Add(drawing);
+                            break;
+                        case string t when t.Contains("Not Required") && drawing is AssemblyDrawing:
+                            NotReqAssDrawings.Add(drawing);
+                            break;
+                        default:
+                            NotLabelledDrawings.Add(drawing);
+                            break;
+                    }
                 }
 
-                if (!Constants.IsSpecialPerson()) UpdateDrawing(drawing, _selectedObjects.MyDrawingHandler);
+
+                // if (!Constants.IsSpecialPerson()) UpdateDrawing(drawing, _selectedObjects.MyDrawingHandler);
                 drawingsBySelectedParts.Add(drawing);
             }
 
-            List<List<string>> dpmList = new List<List<string>>();
 
-            string drawingIDList = Path.Combine(FirmFolderLoc.ReportTemplates(), ReportManager._drawingDpmReportRpt);
+            /* Logging.DebugLog(drawingsBySelectedParts.Count().ToString(), "");
 
-            Tekla.Structures.Model.Operations.Operation.CreateReportFromSelected(drawingIDList, Path.Combine(ID_DessinPath, ReportManager._drawingDpmReportXsr), "", "", "");
+             List<List<string>> dpmList = new List<List<string>>();
 
-            if (drawingsBySelectedParts.Count != 0)
-            {
-                dpmList = AddDpmNameToDrawings(ID_DessinPath);
-            }
-            foreach (Drawing drawing in drawingsBySelectedParts)
-            {
-                PrismDrawing prismDrawing = new PrismDrawing(drawing, _selectedObjects, _model, dpmList);
-                if (prismDrawing.DrawingRequired)
-                {
-                    PrismDrawingList.Add(prismDrawing);
-                }
-            }
+             string drawingIDList = Path.Combine(FirmFolderLoc.ReportTemplates(), ReportManager._drawingDpmReportRpt);
 
+             Logging.DebugLog(drawingIDList, "");
+             Logging.DebugLog(ID_DessinPath, "");
+             Logging.DebugLog(Path.Combine(ID_DessinPath, ReportManager._drawingDpmReportXsr), "");
+             Tekla.Structures.Model.Operations.Operation.CreateReportFromSelected(drawingIDList, Path.Combine(ID_DessinPath, ReportManager._drawingDpmReportXsr), "", "", "");
+
+             if (drawingsBySelectedParts.Count != 0)
+             {
+                 dpmList = AddDpmNameToDrawings(ID_DessinPath);
+             }
+
+             Logging.DebugLog("DPM added to drawings", dpmList.Count().ToString());
+
+
+             foreach (Drawing drawing in drawingsBySelectedParts)
+             {
+                 PrismDrawing prismDrawing = new PrismDrawing(drawing, _selectedObjects, _model, dpmList);
+                 if (prismDrawing.DrawingRequired)
+                 {
+                     PrismDrawingList.Add(prismDrawing);
+                 }
+             }
+             Logging.DebugLog("Prism Drawing list filled", "");*/
             return true;
         }
 
         public bool CheckDrawingsAgain()
         {
-            foreach(var drawing in drawingsBySelectedParts)
+            foreach (var drawing in drawingsBySelectedParts)
             {
-                if(drawing.UpToDateStatus != DrawingUpToDateStatus.DrawingIsUpToDate)
+                if (drawing.UpToDateStatus != DrawingUpToDateStatus.DrawingIsUpToDate)
                 {
                     return false;
                 }
@@ -113,24 +231,35 @@ namespace Prism
         private void UpdateDrawing(Drawing drawing, DrawingHandler drawingHandler)
         {
             drawingHandler.SetActiveDrawing(drawing, false);
+            //drawingHandler.UpdateDrawing(drawing);
             drawingHandler.SaveActiveDrawing();
+
         }
 
         private static List<List<string>> AddDpmNameToDrawings(string ID_dessinPath)
         {
             List<List<string>> dpmList = new List<List<string>>();
-            using (StreamReader sr = new StreamReader($"{ID_dessinPath}/ID_dessins_KP1.xsr"))
+            string idPath = $"{ID_dessinPath}/ID_dessins_KP1";
+            if (!File.Exists(idPath))
             {
+                idPath = idPath + ".xsr";
+            }
+            using (StreamReader sr = new StreamReader(idPath))
+            {
+                Logging.DebugLog("Found idDessin", "");
+
                 string line;
                 while ((line = sr.ReadLine()) != null)
                 {
                     var list = line.Split(',');
                     List<string> newStringList = new List<string>();
+                    Logging.DebugLog(list[0] + "-" + list[1], "");
 
                     foreach (var item in list)
                     {
                         string trimmedString = item.Trim();
                         newStringList.Add(trimmedString);
+
                     }
                     dpmList.Add(newStringList);
                 }
@@ -147,6 +276,7 @@ namespace Prism
         public void PrintDrawingToModelFolder(string fabPath)
         {
             string printerExeFile = GetDPMPrinterExeFile();
+            Logging.DebugLog("Got dpm printer exe" + printerExeFile, "");
 
             ParallelLoopResult result = Parallel.ForEach(PrismDrawingList, prismDrawing =>
             {
@@ -156,6 +286,8 @@ namespace Prism
                 var process = Process.Start(startInfo);
                 process.WaitForExit();
             });
+
+            Logging.DebugLog("Drawing loop complete", "");
         }
 
         public void PrintDrawingsToVault(SelectedObjects myObjects, ReportManager rp, string contractNumber)
@@ -166,6 +298,7 @@ namespace Prism
             contractNumber = ProcessContractNumber(contractNumber);
 
             IFCExporter.ExportIndividualIFC(myObjects, rp.Folders.IfcPath, contractNumber);
+            Logging.DebugLog("IFC exports complete", contractNumber);
 
             //contractNumber = "102"; 
             rp.Folders.CreateDrawingVaultFolders($"{serverFileLocation}{contractNumber}");
@@ -198,7 +331,11 @@ namespace Prism
             string binString = null;
             TeklaStructuresSettings.GetAdvancedOption("XSBIN", ref binString);
 
+            Logging.DebugLog($"bin string = {binString}", "");
+
             string exeFile = @"applications\Tekla\Model\DPMPrinter\DPMPrinterCommand.exe";
+            Logging.DebugLog(Path.Combine(binString, exeFile), "");
+
             return Path.Combine(binString, exeFile);
         }
 

@@ -100,11 +100,14 @@ namespace Prism.ButtonOperations
                 if (fabsecWarning)
                 {
                     ReportManager.SelectDrawingsInDocManager(null);
-                    Operation.CreateReportFromSelected(ReportManager._drawingDpmReportRpt, Path.Combine(myReportManager.Folders.FabsecCarcassPath, ReportManager._drawingDpmReportXsr), "", "", "");
-                    DrawingManager dm = new DrawingManager(model, projectData, phaseNumber, issueNumber, myObjects, myReportManager.Folders.FabsecCarcassPath);
-                    dm.PrintDrawingToModelFolder(myReportManager.Folders.FabsecCarcassPath);
-                    if (!originalFabsecs.ModifyAttributes(stageNumber, projectData)) { return false; }
-                    ModelModifiers.RemoveIDDessin(myReportManager.Folders.FabsecCarcassPath);
+                    DrawingManager dm = new DrawingManager(model, projectData, phaseNumber, issueNumber, myObjects);
+                    if(dm.NotLabelledDrawings.Count != 0) { PrismWarnings.IncorrectlyAssignedDrawings(); return false; }
+
+                    List<int> drawingCount = new List<int> { 0, dm.PgcDrawings.Count };
+                    DrawingManager.PrintAndIssueDrawings(myReportManager.Folders.MatFolder, drawingCount, "\\PGC", 0, 1, myReportManager);
+                    PrismWarnings.AreFittingsDone("PGC");
+                  
+                    if (!originalFabsecs.ModifyAttributes(stageNumber, projectData)) { return false; }                  
                 }
                 else { return false; }
             }

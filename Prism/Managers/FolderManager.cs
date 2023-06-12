@@ -12,7 +12,7 @@ namespace Prism
     /// </summary>
     public class FolderManager
     {
-        private const string _fabsecCarcasses = "SHA";
+        private const string _fabsecCarcasses = "PGC";
         private const string _assFolder = "ASS";
         private const string _fitFolder = "FIT";
         private const string _prtFolder = "PRT";
@@ -26,11 +26,11 @@ namespace Prism
         public FolderManager(PrismProjectData projectData, string phaseNum, string issueNum)
         {
             ProjectLocation = projectData.ProjPath;
-            string fabFolder = $"{projectData.ProjNumber}-{phaseNum}-FAB-ISSUE{issueNum}";
-            string matFolder = $"{projectData.ProjNumber}-{phaseNum}-PRELIM-ISSUE{issueNum}";
+            FabFolder = $"{projectData.ProjNumber}-{phaseNum}-FAB-ISSUE{issueNum}";
+            MatFolder = $"{projectData.ProjNumber}-{phaseNum}-PRELIM-ISSUE{issueNum}";
             string boltFolder = $"{projectData.ProjNumber}-{phaseNum}-BOLT-ISSUE{issueNum}";
-            FabPath = Path.Combine(projectData.ProjPath, fabFolder);
-            MatPath = Path.Combine(projectData.ProjPath, matFolder);
+            FabPath = Path.Combine(projectData.ProjPath, FabFolder);
+            MatPath = Path.Combine(projectData.ProjPath, MatFolder);
             BoltPath = Path.Combine(projectData.ProjPath, boltFolder);
             string assPath = Path.Combine(FabPath, _assFolder);
             string fitPath = Path.Combine(FabPath, _fitFolder);
@@ -47,6 +47,8 @@ namespace Prism
             { _assFolder, _prtFolder, _fitFolder, _shaftFolder, _ifcFolder};
         }
 
+        public readonly string FabFolder;
+        public readonly string MatFolder;
         public readonly string FabPath;
         public readonly string MatPath;
         public readonly string BoltPath;
@@ -142,7 +144,6 @@ namespace Prism
                     }
                 }
                 ModelModifiers.RemoveLog(DspPath);
-                ModelModifiers.RemoveIDDessin(DspPath);
             }
         }
 

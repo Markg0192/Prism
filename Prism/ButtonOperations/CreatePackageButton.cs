@@ -1,4 +1,11 @@
-﻿using System.Windows.Forms;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading;
+using System.Windows.Forms;
+using Tekla.Structures.Drawing;
 using static Prism.Enums;
 using Model = Tekla.Structures.Model.Model;
 
@@ -18,19 +25,25 @@ namespace Prism.ButtonOperations
 
             CpuSpeedCheck(cpuCounter);
             ReportManager.SelectDrawingsInDocManager(myObjects.SelectedModelParts);
+
             reportManager.CreateFabReports(myObjects.SelectedModelParts, myObjects.AllBolts);
 
             CpuSpeedCheck(cpuCounter);
-            DrawingManager drawingManager = new DrawingManager(model, projectData, phaseNumber, issueNumber, myObjects, reportManager.Folders.DspPath);
+            DrawingManager drawingManager = new DrawingManager(model, projectData, phaseNumber, issueNumber, myObjects);
 
             CpuSpeedCheck(cpuCounter);
-            PrismMacroBuilder.IssueDrawings();
+            PrismMacroBuilder.IssueAndLockStampOff();
 
             if (!drawingManager.DrawingsAreUpToDate) { PrismWarnings.DrawingsNotUpToDate(); return false; }
+            if (drawingManager.NotLabelledDrawings.Count != 0)
+            {
+                PrismWarnings.IncorrectlyAssignedDrawings();
+                Logging.UnAssignedDrawings(projectData.ProjNumber, drawingManager.NotLabelledDrawings);
+                return false;
+            }
 
-            if (Constants.IsSpecialPerson()) { drawingManager.PrintDrawingsToVault(myObjects, reportManager, projectData.ProjNumber); }
-
-            else { drawingManager.PrintDrawingToModelFolder(reportManager.Folders.FabPath); }
+            List<int> drawingCount = CountDrawings(drawingManager);
+            DrawingManager.PrintDrawings(reportManager, drawingManager, drawingCount);
 
             if (!myObjects.SelectedModelParts.ModifyAttributes((int)stageType, projectData)) { return false; }
 
@@ -46,12 +59,32 @@ namespace Prism.ButtonOperations
             return true;
         }
 
+
+
         public static void CpuSpeedCheck(CpuCounter cpuCounter)
         {
             while (cpuCounter.CheckCPU() > 10)
             {
                 System.Threading.Thread.Sleep(500);
             }
+        }
+
+        private static List<int> CountDrawings(DrawingManager dm)
+        {
+            int fitStartPoint = 0;
+            int fitEndPoint = dm.NotLabelledDrawings.Count + dm.FitDrawings.Count;
+            int notRequiredStartPoint = fitEndPoint;
+            int notRequiredEndPoint = dm.NotRequiredDrawings.Count;
+
+            int pgcStartPoint = fitEndPoint + notRequiredEndPoint;
+            int pgcEndPoint = dm.PgcDrawings.Count;
+
+            int prtStartPoint = pgcStartPoint + pgcEndPoint;
+            int prtEndPoint = dm.PrtDrawings.Count;
+            int shaStartPoint = prtStartPoint + prtEndPoint;
+            int shaEndPoint = dm.ShaDrawings.Count;
+
+            return new List<int>() { fitStartPoint, fitEndPoint, notRequiredStartPoint, notRequiredEndPoint, pgcStartPoint, pgcEndPoint, prtStartPoint, prtEndPoint, shaStartPoint, shaEndPoint };
         }
     }
 }
