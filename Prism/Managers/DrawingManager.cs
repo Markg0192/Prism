@@ -36,6 +36,8 @@ namespace Prism
         public List<Drawing> NotLabelledDrawings = new List<Drawing>();
         public List<Drawing> GADrawings = new List<Drawing>();
         public List<Drawing> AllFittings = new List<Drawing>();
+        public List<Drawing> FrozenDrawings = new List<Drawing>();
+        public List<Drawing> UnFrozenDrawings = new List<Drawing>();
 
         public DrawingManager(Model model, PrismProjectData projectData, string phaseNum, string issueNum, SelectedObjects selectedObjects)
         {
@@ -47,8 +49,6 @@ namespace Prism
 
             DrawingsAreUpToDate = CreateDrawingList();
             Logging.DebugLog("drawingList made", "");
-
-            //   CreatePrintSettingXML(projectData.ProjPath);
         }
 
         public static List<PrismDrawing> PrismDrawingList = new List<PrismDrawing>();
@@ -134,8 +134,12 @@ namespace Prism
                 var drawing = Tekla.Structures.DrawingInternal.Operation.GetDrawing(id);
 
                 if (!(drawing is GADrawing))
-                {
+                { 
                     drawing.Select();
+
+                    if (drawing.IsFrozen) { FrozenDrawings.Add(drawing); }
+                    else { UnFrozenDrawings.Add(drawing); }
+                  
                     string title1 = drawing.Title1;
                     if (drawing.UpToDateStatus != DrawingUpToDateStatus.DrawingIsUpToDate)
                     {
@@ -144,7 +148,7 @@ namespace Prism
 
                     switch (title1)
                     {
-                        case string t when t != "aGAdrawing" && drawing is GADrawing:
+                        case string t when t != "aGAdrawing" && drawing is GADrawing: // This will hopefully never be the case, we use this to ignore GA drawings in the selection
                             GADrawings.Add(drawing);
                             break;
                         case string t when t.Contains("ASS"):
@@ -178,41 +182,8 @@ namespace Prism
                             break;
                     }
                 }
-
-
-                // if (!Constants.IsSpecialPerson()) UpdateDrawing(drawing, _selectedObjects.MyDrawingHandler);
                 drawingsBySelectedParts.Add(drawing);
             }
-
-
-            /* Logging.DebugLog(drawingsBySelectedParts.Count().ToString(), "");
-
-             List<List<string>> dpmList = new List<List<string>>();
-
-             string drawingIDList = Path.Combine(FirmFolderLoc.ReportTemplates(), ReportManager._drawingDpmReportRpt);
-
-             Logging.DebugLog(drawingIDList, "");
-             Logging.DebugLog(ID_DessinPath, "");
-             Logging.DebugLog(Path.Combine(ID_DessinPath, ReportManager._drawingDpmReportXsr), "");
-             Tekla.Structures.Model.Operations.Operation.CreateReportFromSelected(drawingIDList, Path.Combine(ID_DessinPath, ReportManager._drawingDpmReportXsr), "", "", "");
-
-             if (drawingsBySelectedParts.Count != 0)
-             {
-                 dpmList = AddDpmNameToDrawings(ID_DessinPath);
-             }
-
-             Logging.DebugLog("DPM added to drawings", dpmList.Count().ToString());
-
-
-             foreach (Drawing drawing in drawingsBySelectedParts)
-             {
-                 PrismDrawing prismDrawing = new PrismDrawing(drawing, _selectedObjects, _model, dpmList);
-                 if (prismDrawing.DrawingRequired)
-                 {
-                     PrismDrawingList.Add(prismDrawing);
-                 }
-             }
-             Logging.DebugLog("Prism Drawing list filled", "");*/
             return true;
         }
 

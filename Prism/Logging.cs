@@ -67,6 +67,7 @@ namespace Prism
                 string lastUsedPrelimLine = read.ReadLine();
                 string materialOrderProcessedLine = read.ReadLine();
                 string fabPackagesMadeLine = read.ReadLine();
+                string frozenDrawingCount = read.ReadLine();
 
                 string lastusedPrelim = lastUsedPrelimLine.Split(':')[0].Trim();
                 read.Close();
@@ -76,6 +77,35 @@ namespace Prism
                     writer.WriteLine($"Next prelim to use: {lastUsedPrelim}");
                     writer.WriteLine(materialOrderProcessedLine);
                     writer.WriteLine(fabPackagesMadeLine);
+                    writer.WriteLine(frozenDrawingCount);
+                    writer.Close();
+                }
+            }
+        }
+
+        public static void UpdateFrozenDrawingCount(string jobName, int frozenDrawings, int unFrozenDrawings)
+        {
+            string fileLocation = Constants.ModelDataLogLocation(jobName) + "\\Project Info.txt";
+            using (StreamReader read = new StreamReader(fileLocation))
+            {
+                string lastUsedPrelimLine = read.ReadLine();
+                string materialOrderProcessedLine = read.ReadLine();
+                string fabPackagesMadeLine = read.ReadLine();
+                string frozenDrawingLine = read.ReadLine();
+
+                string frozenDrawingCount1 = frozenDrawingLine.Split('=')[1].Trim();
+                string frozenDrawingCount2 = (Convert.ToInt32(frozenDrawingCount1.Split(',')[0].Trim()) + frozenDrawings).ToString();
+
+                string unFrozenDrawingCount = (Convert.ToInt32(frozenDrawingLine.Split('=')[2].Trim()) + unFrozenDrawings).ToString();
+
+                read.Close();
+
+                using (StreamWriter writer = new StreamWriter(fileLocation))
+                {
+                    writer.WriteLine(lastUsedPrelimLine);
+                    writer.WriteLine(materialOrderProcessedLine);
+                    writer.WriteLine(fabPackagesMadeLine);
+                    writer.WriteLine($"Frozen drawing count: Frozen = {frozenDrawingCount2}, Un-Frozen = {unFrozenDrawingCount}");
                     writer.Close();
                 }
             }

@@ -235,10 +235,30 @@ namespace Prism
 
         private void btn_SpecialOperations_Click(object sender, EventArgs e)
         {
+            string fileLocation = Constants.ModelDataLogLocation("C1234-01-Big Shed") + "\\Project Info.txt";
+            using (StreamReader read = new StreamReader(fileLocation))
+            {
+                string lastUsedPrelimLine = read.ReadLine();
+                string materialOrderProcessedLine = read.ReadLine();
+                string fabPackagesMadeLine = read.ReadLine();
+                string frozenDrawingLine = read.ReadLine();
 
-            PrismMacroBuilder.DrawingOperations();
-            Operation.RunMacro(Constants.DrawingOperation);
-           // PrismMacroBuilder.PrintSelectedFITDrawings(".\\\\myTestFiles");
+                string frozenDrawingCount1 = frozenDrawingLine.Split('=')[1].Trim();
+                string frozenDrawingCount2 = (Convert.ToInt32(frozenDrawingCount1.Split(',')[0].Trim()) + 8).ToString();
+
+                string unFrozenDrawingCount = (Convert.ToInt32(frozenDrawingLine.Split('=')[2].Trim()) + 3).ToString();
+
+                read.Close();
+
+                using (StreamWriter writer = new StreamWriter(fileLocation))
+                {
+                    writer.WriteLine(lastUsedPrelimLine);
+                    writer.WriteLine(materialOrderProcessedLine);
+                    writer.WriteLine(fabPackagesMadeLine);
+                    writer.WriteLine($"Frozen drawing count: Frozen = {frozenDrawingCount2}, Un-Frozen = {unFrozenDrawingCount}");
+                    writer.Close();
+                }
+            }
         }
 
         private async void CreatePackageAsync()
