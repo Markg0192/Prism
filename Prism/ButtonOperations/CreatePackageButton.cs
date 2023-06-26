@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading;
-using System.Windows.Forms;
-using Tekla.Structures.Drawing;
+﻿using System.Collections.Generic;
 using static Prism.Enums;
 using Model = Tekla.Structures.Model.Model;
 
@@ -55,11 +48,10 @@ namespace Prism.ButtonOperations
 
             EmailWriter.WriteFabEmail(projectData, myObjects, reportManager.FabReportPrefix, issueNumber, phaseNumber, siteDate, reportManager.Folders.FabPath);
 
+            Logging.UpdateFrozenDrawingCount(projectData.ProjNumberAndName, drawingManager.FrozenDrawings.Count, drawingManager.UnFrozenDrawings.Count);
             Logging.LogProgress(projectData.ProjName, "Fab Package", 0, myObjects.AssembliesList.Count);
             return true;
         }
-
-
 
         public static void CpuSpeedCheck(CpuCounter cpuCounter)
         {
