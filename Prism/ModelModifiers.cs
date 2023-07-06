@@ -82,6 +82,15 @@ namespace Prism
                 if (isSpecialFittingOrder) part.SetUserProperty(ModelUDA.Pre_Ordered(), 1);
                 part.SetUserProperty(ModelUDA.CurrentStageName(stageNumber), projectData.Full);
                 part.SetUserProperty(ModelUDA.CurrentStageDate(stageNumber), projectData.Date);
+            /*    if(stageNumber == 3)
+                {
+                    TableRow row = UniClassCodes.GetUniClassDetailForPart(projectData.ProjNumberAndName, part);
+                    if(row != null)
+                    {
+                        ModifyUDA(part, "SEV-UDA-130", row.Code);
+                        ModifyUDA(part, "SEV-UDA-131", row.Title);
+                    }
+                }*/
                 if (stageNumber == 7)
                 {
                     part.SetUserProperty(ModelUDA.PartMarkAtFab(), part.GetPartMark());
@@ -89,7 +98,8 @@ namespace Prism
                 }
                 part.Modify();
                 if (!Operation.IsNumberingUpToDate(part) && stageNumber == 7)
-                { Logging.PartsModifiedAfterRun();
+                { 
+                    Logging.PartsModifiedAfterRun();
                     PrismWarnings.NumbersNoLongerUpToDate();
                    
                     return false;
@@ -222,10 +232,9 @@ namespace Prism
             part.SetUserProperty(ModelUDA.ObjectLock(), 1);
         }
 
-        public static void MoveAndRenameOmittedMembers(this SelectedObjects selectedObjects)
+        public static void MoveAndRenameOmittedMembers(List<Part> partsToBeMoved, double distanceToMoveInZ)
         {
-            double distanceToMovePartsInZ = -100000;
-            foreach (Part p in selectedObjects.SelectedModelParts)
+            foreach (Part p in partsToBeMoved)
             {
                 p.Name = "OMIT";
                 p.AssemblyNumber.Prefix = "OMIT";
@@ -237,7 +246,7 @@ namespace Prism
                 myPhase.Insert();
                 p.SetPhase(myPhase);
                 p.Modify();
-                Vector myVector = new Vector(0, 0, distanceToMovePartsInZ);
+                Vector myVector = new Vector(0, 0, distanceToMoveInZ);
                 Operation.MoveObject(p, myVector);
                 p.Select();
             }
@@ -419,6 +428,12 @@ namespace Prism
                 part.SetUserProperty(ModelUDA.SpecialFittingTag(), modifyTo);
                 part.Modify();
             }
+        }
+
+        public static void ModifyUDA(Part part, string Uda, string changeTo)
+        {
+            part.SetUserProperty(Uda, changeTo);
+            part.Modify();
         }
     }
 }

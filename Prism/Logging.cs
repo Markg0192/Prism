@@ -30,11 +30,11 @@ namespace Prism
                 directorySecurity.AddAccessRule(new FileSystemAccessRule(everyone, FileSystemRights.FullControl, InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit, PropagationFlags.None, AccessControlType.Allow));
                 Directory.SetAccessControl(Constants.ModelDataLogLocation(pData.ProjNumberAndName), directorySecurity);
 
-                WriteToFile(Constants.ModelDataLogLocation(pData.ProjNumberAndName) + "\\Project Info.txt", pData.pInfo);
+                WriteFirstDataLog(Constants.ModelDataLogLocation(pData.ProjNumberAndName) + "\\Project Info.txt", pData.pInfo);
             }
         }
 
-        public static void WriteToFile(string filePath, ProjectInfo pInfo)
+        public static void WriteFirstDataLog(string filePath, ProjectInfo pInfo)
         {
             int currentLastNumber = 0;
             pInfo.GetUserProperty(ModelUDA.LastUsedPrelim(), ref currentLastNumber);
@@ -44,6 +44,18 @@ namespace Prism
                 writer.WriteLine($"Next prelim to use: {currentLastNumber}");
                 writer.WriteLine("Material orders processed: 0");
                 writer.WriteLine("Fab packages created: 0");
+                writer.WriteLine("Frozen drawing count: Frozen = 0, Un - Frozen = 0");
+                writer.WriteLine("");
+                writer.WriteLine("------------Uniclass Codes----------------");
+                writer.WriteLine("---Filter------------Code----------------Title");
+                writer.WriteLine("UniClass-Beam*****Ss_20_20_75_80*****Steel beam systems");
+                writer.WriteLine("UniClass-Column****Ss_20_30_75_80*****Steel column systems");
+                writer.WriteLine("UniClass-Heavy*****Ss_20_10_75_35*****Heavy steel framing systems");
+                writer.WriteLine("UniClass-Light******Ss_20_10_75_45*****Light steel framing systems");
+                writer.WriteLine("********");
+                writer.WriteLine("********");
+                writer.WriteLine("********");
+                writer.WriteLine("********");
                 writer.Close();
             }
         }
@@ -62,24 +74,27 @@ namespace Prism
         public static void SetLastUsedPrelim(string jobName, int lastUsedPrelim)
         {
             string fileLocation = Constants.ModelDataLogLocation(jobName) + "\\Project Info.txt";
+
+            List<string> lines = new List<string>();
+
             using (StreamReader read = new StreamReader(fileLocation))
             {
-                string lastUsedPrelimLine = read.ReadLine();
-                string materialOrderProcessedLine = read.ReadLine();
-                string fabPackagesMadeLine = read.ReadLine();
-                string frozenDrawingCount = read.ReadLine();
-
-                string lastusedPrelim = lastUsedPrelimLine.Split(':')[0].Trim();
-                read.Close();
-
-                using (StreamWriter writer = new StreamWriter(fileLocation))
+                for (int i = 0; i < 15; i++)
                 {
-                    writer.WriteLine($"Next prelim to use: {lastUsedPrelim}");
-                    writer.WriteLine(materialOrderProcessedLine);
-                    writer.WriteLine(fabPackagesMadeLine);
-                    writer.WriteLine(frozenDrawingCount);
-                    writer.Close();
+                    string line = read.ReadLine();
+                    lines.Add(line);
                 }
+                read.Close();
+            }
+
+            using (StreamWriter writer = new StreamWriter(fileLocation))
+            {
+                writer.WriteLine($"Next prelim to use: {lastUsedPrelim}");
+                for (int i = 1; i < lines.Count; i++)
+                {
+                    writer.WriteLine(lines[i]);
+                }
+                writer.Close();
             }
         }
 
@@ -228,7 +243,7 @@ namespace Prism
 
         public static void DebugLog(string debugText, string modelName)
         {
-            if (Environment.UserName == "jonathan.gregg" || Environment.UserName == "Allister.Jackson" || Environment.UserName == "mark.gibson")
+            if (Environment.UserName == "ark.gibson")
             {
                 using (StreamWriter log = new StreamWriter(@"\\sev-los-fs1\application data$\Prism\DebugLogs\StandardDebug.txt", true))
                 {

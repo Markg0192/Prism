@@ -86,6 +86,7 @@ namespace Prism
             this.issueNumber = new System.Windows.Forms.TextBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.uniClassCodesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.projectUsersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -236,7 +237,7 @@ namespace Prism
             this.btn_PrelimLabelRefresh.BackgroundImage = global::Prism.Properties.Resources.NewRefresh;
             this.btn_PrelimLabelRefresh.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.btn_PrelimLabelRefresh.Location = new System.Drawing.Point(15, 236);
-            this.btn_PrelimLabelRefresh.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btn_PrelimLabelRefresh.Margin = new System.Windows.Forms.Padding(2);
             this.btn_PrelimLabelRefresh.Name = "btn_PrelimLabelRefresh";
             this.btn_PrelimLabelRefresh.Size = new System.Drawing.Size(26, 27);
             this.btn_PrelimLabelRefresh.TabIndex = 48;
@@ -358,7 +359,7 @@ namespace Prism
             // MaterialStatusLabel
             // 
             this.MaterialStatusLabel.Name = "MaterialStatusLabel";
-            this.MaterialStatusLabel.Size = new System.Drawing.Size(209, 17);
+            this.MaterialStatusLabel.Size = new System.Drawing.Size(240, 17);
             this.MaterialStatusLabel.Spring = true;
             this.MaterialStatusLabel.Text = "Status";
             this.MaterialStatusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -784,23 +785,31 @@ namespace Prism
             // fileToolStripMenuItem
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.uniClassCodesToolStripMenuItem,
             this.projectUsersToolStripMenuItem,
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "File";
             // 
+            // uniClassCodesToolStripMenuItem
+            // 
+            this.uniClassCodesToolStripMenuItem.Name = "uniClassCodesToolStripMenuItem";
+            this.uniClassCodesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.uniClassCodesToolStripMenuItem.Text = "Classification Codes";
+            this.uniClassCodesToolStripMenuItem.Click += new System.EventHandler(this.uniClassCodesToolStripMenuItem_Click);
+            // 
             // projectUsersToolStripMenuItem
             // 
             this.projectUsersToolStripMenuItem.Name = "projectUsersToolStripMenuItem";
-            this.projectUsersToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
+            this.projectUsersToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.projectUsersToolStripMenuItem.Text = "Project Users";
             this.projectUsersToolStripMenuItem.Click += new System.EventHandler(this.projectUsersToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -921,5 +930,6 @@ namespace Prism
         private System.Windows.Forms.Label lbl_NextPrelim;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Button btn_PrelimLabelRefresh;
+        private System.Windows.Forms.ToolStripMenuItem uniClassCodesToolStripMenuItem;
     }
 }

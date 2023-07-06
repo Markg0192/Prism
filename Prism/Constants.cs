@@ -18,7 +18,7 @@ namespace Prism
 
         public static bool IsSpecialPerson()
         {
-            if (Environment.UserName == "mark.gibson")
+            if (Environment.UserName == "mar k.gibson")
             {
                 return true;
             }
@@ -29,9 +29,9 @@ namespace Prism
         {
             List<string> specialOperationUsers = new List<string>
             {
-
                 "mark.gibson",
-                "Allister.Jackson"
+                "Robert.McCormick",
+                "Matthew.Poots"
             };
 
             foreach (string user in specialOperationUsers)

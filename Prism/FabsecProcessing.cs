@@ -91,14 +91,15 @@ namespace Prism
             return false;
         }
 
-        public static bool AddCarcassToSelection(Model model, SelectedObjects selectedObjects, out List<Part> originalFabsecs)
+        public static bool AddCarcassToSelection(Model model, SelectedObjects selectedObjects, out List<Part> originalFabsecs, out List<Part> fabsecCarcasses)
         {
             if (PGsArePresent(selectedObjects.SelectedModelParts))
             {
-                GetCarcassesFromSelected(model, selectedObjects, out originalFabsecs);
+                fabsecCarcasses = GetCarcassesFromSelected(model, selectedObjects, out originalFabsecs);
                 selectedObjects.SelectedModelParts.SelectParts();
                 return true;
             }
+            fabsecCarcasses = null;
             originalFabsecs = null;
             return false;
         }

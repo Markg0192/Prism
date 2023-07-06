@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Office.Interop.Outlook;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 using Tekla.Structures.Model;
 using Tekla.Structures.Model.Operations;
@@ -14,7 +16,7 @@ namespace Prism.ButtonOperations
         {
             ReportManager myReportManager = new ReportManager(projectData, phaseNumber, issueNumber);
             // HDBolts.StampConnectionCodeOnMainMember(myObjects);
-            bool fabsecsPresent = FabsecProcessing.AddCarcassToSelection(model, myObjects, out List<Part> originalFabsecs);
+            bool fabsecsPresent = FabsecProcessing.AddCarcassToSelection(model, myObjects, out List<Part> originalFabsecs, out List<Part> fabsecCarcasses);
 
             if (orderType.Contains("Bolts"))
             {
@@ -33,16 +35,16 @@ namespace Prism.ButtonOperations
 
             if (!myReportManager.Folders.CreateMatFolder(fabsecsPresent)) return false;
 
-            if (!OrderFabsecs(fabsecsPresent, myReportManager, model, projectData, phaseNumber, issueNumber, myObjects, stageNumber, originalFabsecs)) { return false; }
+            if (!OrderFabsecs(fabsecsPresent, myReportManager, model, projectData, phaseNumber, issueNumber, myObjects, stageNumber, originalFabsecs, fabsecCarcasses)) { return false; }
 
             ModelModifiers.VariationCheck(phaseNumber, myObjects, projectData);
             myObjects.AddPrelimMarks(projectData);
 
             myReportManager.CreateMaterialReports(myObjects, orderType, stageType);
 
-            MoveOmitMaterial(orderType, stageNumber, myObjects);
+            MoveOmitMaterial(orderType, myObjects, originalFabsecs);
 
-            if (!FinishOrder(myObjects, stageNumber, projectData, myReportManager.MatReportPrefix, issueNumber, phaseNumber, orderType, myReportManager)) { return false; }
+            if (!FinishOrder(myObjects, stageNumber, projectData, myReportManager.MatReportPrefix, issueNumber, phaseNumber, orderType, myReportManager, false, fabsecsPresent)) { return false; }
 
             return true;
         }
@@ -92,7 +94,7 @@ namespace Prism.ButtonOperations
         }
 
         private static bool OrderFabsecs(bool fabsecsPresent, ReportManager myReportManager, Model model, PrismProjectData projectData, string phaseNumber,
-            string issueNumber, SelectedObjects myObjects, int stageNumber, List<Part> originalFabsecs)
+            string issueNumber, SelectedObjects myObjects, int stageNumber, List<Part> originalFabsecs, List<Part> fabsecCarcasses)
         {
             if (fabsecsPresent)
             {
@@ -104,9 +106,11 @@ namespace Prism.ButtonOperations
                     if(dm.NotLabelledDrawings.Count != 0) { PrismWarnings.IncorrectlyAssignedDrawings(); return false; }
 
                     List<int> drawingCount = new List<int> { 0, dm.PgcDrawings.Count };
-                    DrawingManager.PrintAndIssueDrawings(myReportManager.Folders.MatFolder, drawingCount, "\\PGC", 0, 1, myReportManager);
-                    PrismWarnings.AreFittingsDone("PGC");
-                  
+                    DrawingManager.PrintAndIssueDrawings(myReportManager.Folders.MatFolder, myReportManager.Folders.MatPath, drawingCount, "\\PGC", 0, 1, myReportManager);
+                    fabsecCarcasses.SelectParts();
+                    myReportManager.CreateG2Assy();
+                    myObjects.SelectedModelParts.SelectParts();                   
+
                     if (!originalFabsecs.ModifyAttributes(stageNumber, projectData)) { return false; }                  
                 }
                 else { return false; }
@@ -114,24 +118,27 @@ namespace Prism.ButtonOperations
             return true;
         }
 
-        private static void MoveOmitMaterial(string orderType, int stageNumber, SelectedObjects myObjects)
+        private static void MoveOmitMaterial(string orderType, SelectedObjects myObjects, List<Part> originalFabsecs)
         {
             if (orderType == "Omit Material")
             {
-                stageNumber = 8;
-                myObjects.MoveAndRenameOmittedMembers();
+                ModelModifiers.MoveAndRenameOmittedMembers(myObjects.SelectedModelParts, -100000);
+                if(originalFabsecs != null)
+                {
+                    ModelModifiers.MoveAndRenameOmittedMembers(originalFabsecs, -100000);
+                }
             }
         }
 
         public static bool FinishOrder(SelectedObjects myObjects, int stageNumber, PrismProjectData projectData, string matReportPrefix,
-            string issueNumber, string phaseNumber, string orderType, ReportManager reportManager, bool isSpecialFittingOrder = false)
+            string issueNumber, string phaseNumber, string orderType, ReportManager reportManager, bool isSpecialFittingOrder = false, bool fabsecsPresent = false)
         {
             if (!myObjects.SelectedModelParts.ModifyAttributes(stageNumber, projectData, isSpecialFittingOrder)) { return false; }
 
             PrismWarnings.MaterialOrderComplete(projectData);
 
             reportManager.Folders.ZipFolder(reportManager.Folders.MatPath);
-            EmailWriter.WriteMatEmail(projectData, myObjects, matReportPrefix, issueNumber, phaseNumber, orderType, reportManager.Folders.MatPath);
+            EmailWriter.WriteMatEmail(projectData, myObjects, matReportPrefix, issueNumber, phaseNumber, orderType, reportManager.Folders.MatPath, fabsecsPresent);
 
             Logging.LogProgress(projectData.ProjName, "Material 3", 0, myObjects.AssembliesList.Count);
             return true;
