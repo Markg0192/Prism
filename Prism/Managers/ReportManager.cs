@@ -36,6 +36,8 @@ namespace Prism
         private string _report1PFAname = $"{_output1PFAname.Replace("xsr", "rpt")}";
         private const string _output1PFOname = "-1Fo-PrelimSpecialFitList-OMIT.xsr";
         private string _report1PFOname = $"{_output1PFOname.Replace("xsr", "rpt")}";
+        public const string _g2ReportOutput = "-G2_Assy7.xsr";
+        public string _g2ReportName = $"{_g2ReportOutput.Replace("xsr", "rpt")}";
 
         //Bolt ordering
         private const string _outputBolts = "-SEV-BOLTS-STRUMIS-SUMMARY_v3.xsr";
@@ -117,24 +119,25 @@ namespace Prism
         public readonly string MatReportPrefix;
         public readonly string BoltReportPrefix;
 
-        public void CreateMaterialReports(SelectedObjects selectedObjects, string orderType, StageTypes stageType)
+        public void CreateMaterialReports(SelectedObjects selectedObjects, string orderType, StageTypes stageType, bool fabsecsPresent = false)
         {
             if (!orderType.Contains("Order Bolts"))
             {
                 string materialReport = "";
                 string outputName = "";
+                string fabsecReport = "";
                 if (orderType == "Order Material")
                 {
                     selectedObjects.ExportBSWX(Folders.MatPath, _projectData, _phaseNum, _issueNum, stageType);
                     ModelModifiers.RemoveLog(Folders.MatPath);
-                    materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report1Pname);
+                    materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report1Pname);                   
                     outputName = _output1Pname;
                 }
                 if (orderType == "Add Material")
                 {
                     selectedObjects.ExportBSWX(Folders.MatPath, _projectData, _phaseNum, _issueNum, stageType);
                     ModelModifiers.RemoveLog(Folders.MatPath);
-                    materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report1PAname);
+                    materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report1PAname);                   
                     outputName = _output1PAname;
                 }
                 if (orderType == "Omit Material")
@@ -162,8 +165,15 @@ namespace Prism
                     outputName = _output1PFOname;
                 }
                 Operation.CreateReportFromSelected(materialReport, Path.Combine(Folders.MatPath, $"{MatReportPrefix}{outputName}"), _title1, _title2, _title3);
+                
                 TextToPDF(Folders.MatPath);
             }
+        }
+
+        public void CreateG2Assy()
+        {
+            string g2ReportName = Path.Combine(FirmFolderLoc.ReportTemplates(), _g2ReportName);
+            Operation.CreateReportFromSelected(g2ReportName, Path.Combine(Folders.MatPath, $"{MatReportPrefix}{_g2ReportOutput}"), _title1, _title2, _title3);
         }
 
         public void CreateBoltList(string reportPrefix, string orderType)
@@ -188,6 +198,7 @@ namespace Prism
             string reportBolts = Path.Combine(FirmFolderLoc.ReportTemplates(), boltReportName);
             Operation.CreateReportFromSelected(reportBolts, Path.Combine(Folders.BoltPath, $"{reportPrefix}{boltListOutputName}"), _title1, _title2, _title3);
             TextToPDF(Folders.BoltPath);
+
         }
 
 
@@ -287,7 +298,7 @@ namespace Prism
         {
             foreach (string subFile in Directory.GetFiles(folderPath))
             {
-                if (subFile.EndsWith(".xsr"))
+                if (subFile.EndsWith(".xsr") && !subFile.Contains("G2"))
                 {
                     VirtualPrinter(subFile);
                     File.Delete(subFile);

@@ -1,4 +1,5 @@
-﻿using Microsoft.Office.Interop.Outlook;
+﻿using Aspose.Words.Drawing;
+using Microsoft.Office.Interop.Outlook;
 using Prism.ButtonOperations;
 using Prism.CustomDialogs;
 using Prism.Properties;
@@ -42,7 +43,7 @@ namespace Prism
 
             _projectData = new PrismProjectData(_model.GetProjectInfo(), _model.GetInfo().ModelPath);
             Logging.Login(_projectData.ProjName);
-            
+
             Logging.CreateModelLog(_projectData);
             SetNextPrelimToUseLabel();
             SetStatusLabels($"Connected to: {_projectData.ProjNumber}-{_projectData.ProjName}");
@@ -134,7 +135,7 @@ namespace Prism
                 if (!await Task.Run(() => InitialSetup(StageTypes.Prelim3, true))) { EndFunction(0); return false; };
                 if (!myReportManager.Folders.CreateMatFolder(false)) { EndFunction(0); return false; };
                 myReportManager.CreateMaterialReports(_selectedObjects, orderType, StageTypes.Prelim3);
-                if(!MaterialButton3.FinishOrder(_selectedObjects, (int)StageTypes.Prelim3, _projectData, myReportManager.MatReportPrefix,
+                if (!MaterialButton3.FinishOrder(_selectedObjects, (int)StageTypes.Prelim3, _projectData, myReportManager.MatReportPrefix,
                     txt_MaterialIssueNumber.Text, txt_MaterialPhaseNumber.Text, orderType, myReportManager)) { return false; }
             }
             else
@@ -143,7 +144,7 @@ namespace Prism
                 if (orderAction == 2 || orderAction == 3)
                 {
                     if (!OrderSpecials(orderAction, orderType, StageTypes.Prelim3, false, myReportManager)) { EndFunction(0); return false; }
-                    if(!MaterialButton3.FinishOrder(_selectedObjects, (int)StageTypes.Prelim3, _projectData, myReportManager.MatReportPrefix,
+                    if (!MaterialButton3.FinishOrder(_selectedObjects, (int)StageTypes.Prelim3, _projectData, myReportManager.MatReportPrefix,
                         txt_MaterialIssueNumber.Text, txt_MaterialPhaseNumber.Text, orderType, myReportManager, true)) { return false; }
                 }
             }
@@ -235,28 +236,16 @@ namespace Prism
 
         private void btn_SpecialOperations_Click(object sender, EventArgs e)
         {
-            string fileLocation = Constants.ModelDataLogLocation("C1234-01-Big Shed") + "\\Project Info.txt";
-            using (StreamReader read = new StreamReader(fileLocation))
+            _selectedObjects = new SelectedObjects(StageTypes.Prelim3);
+
+            string name = _model.GetProjectInfo().ProjectNumber + "-" + _model.GetProjectInfo().Name;
+            foreach (Part part in _selectedObjects.SelectedModelParts)
             {
-                string lastUsedPrelimLine = read.ReadLine();
-                string materialOrderProcessedLine = read.ReadLine();
-                string fabPackagesMadeLine = read.ReadLine();
-                string frozenDrawingLine = read.ReadLine();
-
-                string frozenDrawingCount1 = frozenDrawingLine.Split('=')[1].Trim();
-                string frozenDrawingCount2 = (Convert.ToInt32(frozenDrawingCount1.Split(',')[0].Trim()) + 8).ToString();
-
-                string unFrozenDrawingCount = (Convert.ToInt32(frozenDrawingLine.Split('=')[2].Trim()) + 3).ToString();
-
-                read.Close();
-
-                using (StreamWriter writer = new StreamWriter(fileLocation))
+                TableRow row = UniClassCodes.GetUniClassDetailForPart(name, part);
+                if (row != null)
                 {
-                    writer.WriteLine(lastUsedPrelimLine);
-                    writer.WriteLine(materialOrderProcessedLine);
-                    writer.WriteLine(fabPackagesMadeLine);
-                    writer.WriteLine($"Frozen drawing count: Frozen = {frozenDrawingCount2}, Un-Frozen = {unFrozenDrawingCount}");
-                    writer.Close();
+                    ModelModifiers.ModifyUDA(part, "SEV-UDA-49", row.Code);
+                    ModelModifiers.ModifyUDA(part, "SEV-UDA-50", row.Title);
                 }
             }
         }
@@ -515,7 +504,7 @@ namespace Prism
         private void btn_MainMaterialCheck_Click_1(object sender, EventArgs e)
         {
             pnl_Material.Visible = true;
-            pnl_Home.Visible = false; 
+            pnl_Home.Visible = false;
         }
 
         private void btn_MainPackageCreation_Click_1(object sender, EventArgs e)
@@ -604,6 +593,12 @@ namespace Prism
         private void btn_PrelimLabelRefresh_Click(object sender, EventArgs e)
         {
             SetNextPrelimToUseLabel();
+        }
+
+        private void uniClassCodesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var form = new UniClass_Codes(_projectData.ProjNumberAndName.ToString());
+            form.ShowDialog();
         }
     }
 }

@@ -63,10 +63,10 @@ namespace Prism
         }
         public static void PrintDrawings(ReportManager reportManager, DrawingManager drawingManager, List<int> drawingCount)
         {
-            if (drawingManager.FitDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, drawingCount, "\\FIT", 0, 1, reportManager);
-            if (drawingManager.PgcDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, drawingCount, "\\PGC", 4, 5, reportManager);
-            if (drawingManager.PrtDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, drawingCount, "\\PRT", 6, 7, reportManager);
-            if (drawingManager.ShaDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, drawingCount, "\\SHA", 8, 9, reportManager);
+            if (drawingManager.FitDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\FIT", 0, 1, reportManager);
+            if (drawingManager.PgcDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\PGC", 4, 5, reportManager);
+            if (drawingManager.PrtDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\PRT", 6, 7, reportManager);
+            if (drawingManager.ShaDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\SHA", 8, 9, reportManager);
 
             if (drawingManager.AssDrawings.Count != 0)
             {
@@ -77,11 +77,11 @@ namespace Prism
             }
         }
 
-        public static void PrintAndIssueDrawings(string fabFolder, List<int> drawingCount, string folderPath, int countIndex1, int countIndex2, ReportManager reportManager)
+        public static void PrintAndIssueDrawings(string issueFolder, string issuePath, List<int> drawingCount, string folderPath, int countIndex1, int countIndex2, ReportManager reportManager)
         {
             Thread.Sleep(2000);
-            PrismMacroBuilder.PrintSelectedDrawings(fabFolder, folderPath, drawingCount[countIndex1], drawingCount[countIndex2]);
-            WaitForPrinting(reportManager.Folders.FabPath + folderPath, drawingCount[countIndex2]);
+            PrismMacroBuilder.PrintSelectedDrawings(issueFolder, folderPath, drawingCount[countIndex1], drawingCount[countIndex2]);
+            WaitForPrinting(issuePath + folderPath, drawingCount[countIndex2]);
             PrismMacroBuilder.IssueAndLockStampOn();
         }
 

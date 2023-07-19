@@ -14,12 +14,13 @@ namespace Prism.CustomDialogs
     public partial class ProjectControllers : Form
     {
         private ProjectInfo _pInfo;
+
         public ProjectControllers(ProjectInfo pInfo)
         {
             InitializeComponent();
-            TopMost= true;
+            TopMost = true;
             CenterToScreen();
-            _pInfo= pInfo;
+            _pInfo = pInfo;
             ReadExistingControllers(pInfo);
         }
 
@@ -72,12 +73,12 @@ namespace Prism.CustomDialogs
         {
             foreach (string st in input)
             {
-                if(st != "")
+                if (st != "")
                 {
                     ccString = ccString + st + "; ";
                 }
 
-             }
+            }
             newCCstring = ccString;
         }
 

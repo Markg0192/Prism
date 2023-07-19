@@ -23,7 +23,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>69</ApplicationRevision>
+    <ApplicationRevision>75</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -241,6 +241,12 @@
     <Compile Include="CustomDialogs\SpecialFittingOrders.Designer.cs">
       <DependentUpon>SpecialFittingOrders.cs</DependentUpon>
     </Compile>
+    <Compile Include="CustomDialogs\UniClass Codes.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CustomDialogs\UniClass Codes.Designer.cs">
+      <DependentUpon>UniClass Codes.cs</DependentUpon>
+    </Compile>
     <Compile Include="CustomDialogs\YesNoForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -336,6 +342,7 @@
       <DependentUpon>FactoryLocation.cs</DependentUpon>
     </Compile>
     <Compile Include="Geometry\Vector.cs" />
+    <Compile Include="UniClassCodes.cs" />
     <Compile Include="UserProperties.cs" />
     <Compile Include="UserProperty.cs" />
     <Compile Include="XMLWriter.cs" />
@@ -361,6 +368,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="CustomDialogs\SpecialFittingOrders.resx">
       <DependentUpon>SpecialFittingOrders.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CustomDialogs\UniClass Codes.resx">
+      <DependentUpon>UniClass Codes.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="CustomDialogs\YesNoForm.resx">
       <DependentUpon>YesNoForm.cs</DependentUpon>

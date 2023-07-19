@@ -9,6 +9,8 @@ namespace Prism
     {
         private const string _mailNewLine = "\r";
         private const string _purchasingEmail = "Purchasing@severfield.com";
+        private const string _fabsecTeamEmail = "FabsecOffice.Dalton@severfield.com";
+        private static string[] _fabsecEmail = new string[] { _fabsecTeamEmail };
         private const string marksEmail = "mark.gibson@severfield.com";
 
         public static void WriteFabEmail(PrismProjectData projData, SelectedObjects objects, string fabPrefix, string issueNumber, string phaseNumber, string siteDate, string fabPath)
@@ -39,7 +41,7 @@ namespace Prism
                 Attachment attachment = email.Attachments.Add(attachmentPath);
 
                 //email.To = "ni.fabissue@severfield.com";
-                email.CC = FormCCString(projData.pInfo);
+                email.CC = FormCCString(projData.pInfo, false);
                 email.Display();
                 //email.Send();
 
@@ -71,7 +73,7 @@ namespace Prism
                 Attachment attachment = email.Attachments.Add(attachmentPath);
 
                 email.To = _purchasingEmail;
-                email.CC = FormCCString(projData.pInfo);
+                email.CC = FormCCString(projData.pInfo, false);
                 email.Display();
                 //email.Send();
 
@@ -81,9 +83,9 @@ namespace Prism
             }
         }
 
-        public static void WriteMatEmail(PrismProjectData projData, SelectedObjects objects, string fabPrefix, string issueNumber, string phaseNumber, string orderType, string matPath)
+        public static void WriteMatEmail(PrismProjectData projData, SelectedObjects objects, string fabPrefix, string issueNumber, string phaseNumber, string orderType, string matPath, bool fabsecPresent)
         {
-            if (!Constants.IsSpecialPerson())
+          //  if (!Constants.IsSpecialPerson())
             {
                 Application outlookApp = new Application();
 
@@ -106,7 +108,7 @@ namespace Prism
                 Attachment attachment = email.Attachments.Add(attachmentPath);
 
                 email.To = _purchasingEmail;
-                email.CC = FormCCString(projData.pInfo);
+                email.CC = FormCCString(projData.pInfo, fabsecPresent);
                 email.Display();
                 //email.Send();
 
@@ -205,7 +207,7 @@ namespace Prism
             return "";
         }
 
-        private static string FormCCString(ProjectInfo pInfo)
+        private static string FormCCString(ProjectInfo pInfo, bool fabsecPresent)
         {
             string projectManager = "";
             pInfo.GetUserProperty("PrismPM", ref projectManager);
@@ -224,7 +226,9 @@ namespace Prism
             AppendString(pString, "", out string first);
             AppendString(doManagerString, first, out string second);
             AppendString(docControlString, second, out string third);
-            AppendString(othersString, third, out string ccString);
+            AppendString(othersString, third, out string fourth);
+            string ccString = fourth;
+            if(fabsecPresent) { AppendString(_fabsecEmail, fourth, out ccString); }
 
             return ccString;
         }
@@ -241,6 +245,5 @@ namespace Prism
             }
             newCCstring = ccString;
         }
-
     }
 }
