@@ -82,7 +82,7 @@ namespace Prism
                 if (isSpecialFittingOrder) part.SetUserProperty(ModelUDA.Pre_Ordered(), 1);
                 part.SetUserProperty(ModelUDA.CurrentStageName(stageNumber), projectData.Full);
                 part.SetUserProperty(ModelUDA.CurrentStageDate(stageNumber), projectData.Date);
-            /*    if(stageNumber == 3)
+                if(stageNumber == 3)
                 {
                     TableRow row = UniClassCodes.GetUniClassDetailForPart(projectData.ProjNumberAndName, part);
                     if(row != null)
@@ -90,7 +90,7 @@ namespace Prism
                         ModifyUDA(part, "SEV-UDA-130", row.Code);
                         ModifyUDA(part, "SEV-UDA-131", row.Title);
                     }
-                }*/
+                }
                 if (stageNumber == 7)
                 {
                     part.SetUserProperty(ModelUDA.PartMarkAtFab(), part.GetPartMark());

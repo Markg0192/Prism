@@ -48,8 +48,8 @@ namespace Prism
                 writer.WriteLine("");
                 writer.WriteLine("------------Uniclass Codes----------------");
                 writer.WriteLine("---Filter------------Code----------------Title");
-                writer.WriteLine("UniClass-Beam*****Ss_20_20_75_80*****Steel beam systems");
-                writer.WriteLine("UniClass-Column****Ss_20_30_75_80*****Steel column systems");
+                writer.WriteLine("UniClass-Beam*****Ss_20_20_75_35*****Steel beam systems");
+                writer.WriteLine("UniClass-Column****Ss_20_30_75_35*****Steel column systems");
                 writer.WriteLine("UniClass-Heavy*****Ss_20_10_75_35*****Heavy steel framing systems");
                 writer.WriteLine("UniClass-Light******Ss_20_10_75_45*****Light steel framing systems");
                 writer.WriteLine("********");
