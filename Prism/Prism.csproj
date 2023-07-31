@@ -23,7 +23,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>75</ApplicationRevision>
+    <ApplicationRevision>78</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -217,6 +217,12 @@
   <ItemGroup>
     <Compile Include="Constants.cs" />
     <Compile Include="CpuCounter.cs" />
+    <Compile Include="CustomDialogs\About.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CustomDialogs\About.Designer.cs">
+      <DependentUpon>About.cs</DependentUpon>
+    </Compile>
     <Compile Include="CustomDialogs\BoltOrderType.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -348,6 +354,9 @@
     <Compile Include="XMLWriter.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="CustomDialogs\About.resx">
+      <DependentUpon>About.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="CustomDialogs\BoltOrderType.resx">
       <DependentUpon>BoltOrderType.cs</DependentUpon>
     </EmbeddedResource>
@@ -471,6 +480,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="ico.ico" />
+    <None Include="Resources\Severfield.PNG" />
     <None Include="Resources\NewRefresh.png" />
     <None Include="Resources\Gears1.png" />
     <None Include="Resources\Gears.png" />

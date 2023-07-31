@@ -236,18 +236,7 @@ namespace Prism
 
         private void btn_SpecialOperations_Click(object sender, EventArgs e)
         {
-            _selectedObjects = new SelectedObjects(StageTypes.Prelim3);
 
-            string name = _model.GetProjectInfo().ProjectNumber + "-" + _model.GetProjectInfo().Name;
-            foreach (Part part in _selectedObjects.SelectedModelParts)
-            {
-                TableRow row = UniClassCodes.GetUniClassDetailForPart(name, part);
-                if (row != null)
-                {
-                    ModelModifiers.ModifyUDA(part, "SEV-UDA-49", row.Code);
-                    ModelModifiers.ModifyUDA(part, "SEV-UDA-50", row.Title);
-                }
-            }
         }
 
         private async void CreatePackageAsync()
@@ -598,6 +587,12 @@ namespace Prism
         private void uniClassCodesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var form = new UniClass_Codes(_projectData.ProjNumberAndName.ToString());
+            form.ShowDialog();
+        }
+
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var form = new About();
             form.ShowDialog();
         }
     }
