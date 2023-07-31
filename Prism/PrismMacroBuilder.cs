@@ -151,7 +151,7 @@ namespace Prism
                         "         {" + Environment.NewLine +
                         "              Tekla.Macros.Wpf.Runtime.IWpfMacroHost wpf = runtime.Get<Tekla.Macros.Wpf.Runtime.IWpfMacroHost>();" + Environment.NewLine +
                         "              wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_ButtonIssue\").As.Button.Invoke();" + Environment.NewLine +
-                        "              wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_ButtonLockOn\").As.Button.Invoke();" + Environment.NewLine +
+                   //   "              wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_ButtonLockOn\").As.Button.Invoke();" + Environment.NewLine +
                         "          }" + Environment.NewLine +
                         "     }" + Environment.NewLine +
                         " }";

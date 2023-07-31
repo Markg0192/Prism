@@ -12,6 +12,8 @@ namespace Prism
         private const string _fabsecTeamEmail = "FabsecOffice.Dalton@severfield.com";
         private static string[] _fabsecEmail = new string[] { _fabsecTeamEmail };
         private const string marksEmail = "mark.gibson@severfield.com";
+        private const string dansEmail = "dan.thompson@severfield.com";
+        private const string johnsEmail = "john.gradwell@severfield.com";
 
         public static void WriteFabEmail(PrismProjectData projData, SelectedObjects objects, string fabPrefix, string issueNumber, string phaseNumber, string siteDate, string fabPath)
         {
@@ -117,6 +119,34 @@ namespace Prism
                 outlookApp = null;
             }
         }
+
+        public static void WriteHelpEmail()
+        {
+            //  if (!Constants.IsSpecialPerson())
+            {
+                Application outlookApp = new Application();
+
+                MailItem email = (MailItem)outlookApp.CreateItem(OlItemType.olMailItem);
+                email.Subject = $"Request for Prism help.";
+
+                email.Body = $"Hello,{_mailNewLine}" +
+                                $"{_mailNewLine}" +
+                                $"Please enter your Prism request here, we will endevour to get back to you as soon as possible.{_mailNewLine}" +
+                                $"{_mailNewLine}" +
+                                $"Kind Regards,{_mailNewLine}" +
+                                $"Prism development team.";
+
+                email.To = marksEmail;
+                email.CC = $"{johnsEmail}; {dansEmail}";
+                email.Display();
+                //email.Send();
+
+                // Release the Outlook application object
+                System.Runtime.InteropServices.Marshal.ReleaseComObject(outlookApp);
+                outlookApp = null;
+            }
+        }
+
 
         private static void FormIssueEmail(string emailAddress, string subject, string body)
         {
