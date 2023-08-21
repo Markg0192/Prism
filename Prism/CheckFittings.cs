@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using Tekla.Structures.Model;
 using Tekla.Structures.Model.UI;
@@ -12,6 +13,7 @@ namespace Prism
         public static List<ModelObject> IncorrectGrade = new List<ModelObject>();
         public static List<ModelObject> IncorrectThickness = new List<ModelObject>();
         public static List<ModelObject> IncorrectLength = new List<ModelObject>();
+        public static List<ModelObject> UnOrderedObjects = new List<ModelObject>();
         public static List<Part> AllIncorrectPlate = new List<Part>();
 
         public static void GetIncorrectFittings(this Part part, Factory factory)
@@ -20,6 +22,24 @@ namespace Prism
             {
                 GetIncorrectPlate(part, factory);
             }
+            if (IsAPartThatShouldBeOrdered(part) && !part.HasBeenOrdered(true))
+            {
+                UnOrderedObjects.Add(part);
+            }
+        }
+
+        private static bool IsAPartThatShouldBeOrdered(Part part)
+        { 
+            if (ModelModifiers.GetPartLength(part) >= GdomValues.MinimumFittingLength)
+            {
+                string partProf = part.Profile.ProfileString;
+                // Define a regular expression pattern to match the required prefixes.
+                string pattern = "^(UB|UC|PFC|RSA|PG|WESTOK|UKC|UKB|JUMBO|SHS|CHS|RHS|CF-RHS|CF-CHS|CF-SHS)";
+
+                // Perform the regex match on the partProf string.
+                return Regex.IsMatch(partProf, pattern);
+            }
+            return false;
         }
 
         private static void GetIncorrectPlate(Part myPart, Factory factory)
@@ -112,29 +132,71 @@ namespace Prism
 
         public static bool DisplayFittingErrors()
         {
-            if (IncorrectThickness.Count() != 0 || IncorrectLength.Count() != 0 || IncorrectGrade.Count() != 0)
+            if (IncorrectThickness.Count() != 0 || IncorrectLength.Count() != 0 || IncorrectGrade.Count() != 0 || UnOrderedObjects.Count() != 0)
             {
-                PrismWarnings.Warning = $"\rThere are {IncorrectGrade.Count()} parts selected with a non-standard grade (See red in the model).\r" +
-                $"There are {IncorrectLength.Count()} parts selected with a non-standard length (See green in the model).\r" +
-                $"There are {IncorrectThickness.Count()} parts selected with a non-standard thickness (See blue in the model).";
+                PrismWarnings.Warning = FormErrorMessage();
+
+                ModelModifiers.SetPartsRed(IncorrectGrade);
+                ModelModifiers.SetPartsGreen(IncorrectLength, false);
+                ModelModifiers.SetPartsBlue(IncorrectThickness, false);
+                ModelModifiers.SetPartsYellow(UnOrderedObjects, false);
 
                 PrismWarnings.AbnormalFittings();
                 bool tagFittings = PrismWarnings.TagAbnormalFittings();
-                if(tagFittings)
+                if (tagFittings)
                 {
                     ModelModifiers.ModifySpecialTag("Special", IncorrectLength);
                     ModelModifiers.ModifySpecialTag("Special", IncorrectThickness);
                     ModelModifiers.ModifySpecialTag("Special", IncorrectGrade);
+                    ModelModifiers.ModifySpecialTag("Special", UnOrderedObjects);
                 }
-                ModelObjectVisualization.SetTransparencyForAll(TemporaryTransparency.SEMITRANSPARENT);
-                ModelObjectVisualization.SetTemporaryStateForAll(new Color(0.5, 0.5, 0.5));
-
-                ModelObjectVisualization.SetTemporaryState(IncorrectThickness, new Color(0, 0, 1));
-                ModelObjectVisualization.SetTemporaryState(IncorrectLength, new Color(0, 1, 0));
-                ModelObjectVisualization.SetTemporaryState(IncorrectGrade, new Color(1, 0, 0));
                 return PrismWarnings.IgnoreWarning();
             }
             return true;
+        }
+
+        private static string FormErrorMessage()
+        {
+            string myMessage = "";
+            if (IncorrectGrade.Count() != 0)
+            {
+                myMessage = myMessage + $"-There {AreSoManyParts(IncorrectGrade.Count())} selected with a non-standard grade (See red in the model).\r";
+            }
+            if (IncorrectLength.Count() != 0)
+            {
+                myMessage = myMessage + $"-There {AreSoManyParts(IncorrectLength.Count())} selected with a non-standard length (See green in the model).\r";
+            }
+            if (IncorrectThickness.Count() != 0)
+            {
+                myMessage = myMessage + $"-There {AreSoManyParts(IncorrectThickness.Count())} selected with a non-standard thickness (See blue in the model).\r";
+            }
+            if (UnOrderedObjects.Count() != 0)
+            {
+                myMessage = myMessage + $"-There {AreSoManyParts(UnOrderedObjects.Count())} selected with a heavy section size that should be ordered (See yellow in model).";
+            }
+            return myMessage;
+        }
+
+        private static string AreSoManyParts(int count)
+        {
+            return $"{AreIs(count)} {count} {PartParts(count)}";
+
+        }
+        private static string AreIs(int count)
+        {
+            if (count == 1)
+            {
+                return "is";
+            }
+            return "are";
+        }
+        private static string PartParts(int count)
+        {
+            if (count == 1)
+            {
+                return "part";
+            }
+            return "parts";
         }
     }
 }

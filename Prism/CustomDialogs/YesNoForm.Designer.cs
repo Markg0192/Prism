@@ -30,10 +30,10 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(YesNoForm));
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.lbl_WarningText = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
             this.btn_No = new System.Windows.Forms.Button();
             this.btn_Yes = new System.Windows.Forms.Button();
-            this.lbl_WarningText = new System.Windows.Forms.Label();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -54,16 +54,25 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 60F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(543, 382);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(542, 382);
             this.tableLayoutPanel1.TabIndex = 0;
             this.tableLayoutPanel1.Paint += new System.Windows.Forms.PaintEventHandler(this.tableLayoutPanel1_Paint);
+            // 
+            // lbl_WarningText
+            // 
+            this.lbl_WarningText.AutoSize = true;
+            this.lbl_WarningText.Location = new System.Drawing.Point(13, 20);
+            this.lbl_WarningText.Name = "lbl_WarningText";
+            this.lbl_WarningText.Size = new System.Drawing.Size(35, 13);
+            this.lbl_WarningText.TabIndex = 0;
+            this.lbl_WarningText.Text = "label1";
             // 
             // panel1
             // 
             this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.panel1.Controls.Add(this.btn_No);
             this.panel1.Controls.Add(this.btn_Yes);
-            this.panel1.Location = new System.Drawing.Point(312, 308);
+            this.panel1.Location = new System.Drawing.Point(370, 345);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(159, 34);
             this.panel1.TabIndex = 1;
@@ -88,15 +97,6 @@
             this.btn_Yes.UseVisualStyleBackColor = true;
             this.btn_Yes.Click += new System.EventHandler(this.btn_Yes_Click);
             // 
-            // lbl_WarningText
-            // 
-            this.lbl_WarningText.AutoSize = true;
-            this.lbl_WarningText.Location = new System.Drawing.Point(13, 20);
-            this.lbl_WarningText.Name = "lbl_WarningText";
-            this.lbl_WarningText.Size = new System.Drawing.Size(35, 13);
-            this.lbl_WarningText.TabIndex = 0;
-            this.lbl_WarningText.Text = "label1";
-            // 
             // YesNoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -104,7 +104,7 @@
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(543, 382);
+            this.ClientSize = new System.Drawing.Size(678, 477);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "YesNoForm";

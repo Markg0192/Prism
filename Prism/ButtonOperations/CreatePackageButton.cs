@@ -6,20 +6,22 @@ namespace Prism.ButtonOperations
 {
     public static class CreatePackageButton
     {
-        public static bool CreateFabPackage(this SelectedObjects myObjects, Model model, PrismProjectData projectData, string phaseNumber, string issueNumber, StageTypes stageType, string siteDate)
+        public static bool CreateFabPackage(this SelectedObjects myObjects, Model model, PrismProjectData projectData, string phaseNumber, string issueNumber, StageTypes stageType, string siteDate, bool runSeversafe)
         {
             CpuCounter cpuCounter = new CpuCounter();
             ReportManager reportManager = new ReportManager(projectData, phaseNumber, issueNumber);
 
             if (!reportManager.Folders.CreateFabFolders()) return false;
             if (!reportManager.Folders.CreateBoltFolder()) return false;
+            if (runSeversafe) { if (!reportManager.Folders.CreateEpoFolder()) return false; }
 
+            if (myObjects.SeversafePresent) { myObjects.NonSeversafeParts.SelectParts(); }
             if (!Constants.IsSpecialPerson()) { myObjects.ExportBSWX(reportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType); }
 
             CpuSpeedCheck(cpuCounter);
-            ReportManager.SelectDrawingsInDocManager(myObjects.SelectedModelParts);
-
-            reportManager.CreateFabReports(myObjects.SelectedModelParts, myObjects.AllBolts);
+            ReportManager.SelectDrawingsInDocManager(myObjects.NonSeversafeParts);
+            
+            reportManager.CreateFabReports(myObjects.NonSeversafeParts, myObjects.AllBolts);
 
             CpuSpeedCheck(cpuCounter);
             DrawingManager drawingManager = new DrawingManager(model, projectData, phaseNumber, issueNumber, myObjects);
@@ -38,7 +40,7 @@ namespace Prism.ButtonOperations
             List<int> drawingCount = CountDrawings(drawingManager);
             DrawingManager.PrintDrawings(reportManager, drawingManager, drawingCount);
 
-            if (!myObjects.SelectedModelParts.ModifyAttributes((int)stageType, projectData)) { return false; }
+            if (!myObjects.NonSeversafeParts.ModifyAttributes((int)stageType, projectData)) { return false; }
 
             reportManager.Folders.RemoveUnusedFolders();
 

@@ -10,143 +10,188 @@ namespace Prism
         private const string _mailNewLine = "\r";
         private const string _purchasingEmail = "Purchasing@severfield.com";
         private const string _fabsecTeamEmail = "FabsecOffice.Dalton@severfield.com";
+        private const string _seversafeTeamEmail = "seversafe.orders@severfield.com";
         private static string[] _fabsecEmail = new string[] { _fabsecTeamEmail };
         private const string marksEmail = "mark.gibson@severfield.com";
         private const string dansEmail = "dan.thompson@severfield.com";
         private const string johnsEmail = "john.gradwell@severfield.com";
 
+        public static void WriteEpoEmail(PrismProjectData projData, string fabPrefix, string issueNumber, string phaseNumber, string siteDate, string fabPath)
+        {
+            Application outlookApp = new Application();
+
+            MailItem email = (MailItem)outlookApp.CreateItem(OlItemType.olMailItem);
+            email.Subject = $"{fabPrefix} E.P.O. Order";
+
+            email.Body = $"Hello,{_mailNewLine}" +
+                            $"{_mailNewLine}" +
+                            $"This is the edge protection order for phase {phaseNumber}, issue {issueNumber}, in {projData.ProjNumber}, {projData.ProjName}.{_mailNewLine}" +
+                            $"Please make this order available.{_mailNewLine}" +
+                            $"{_mailNewLine}" +
+                            $"Site date is {SiteDateNote(siteDate)}{_mailNewLine}" +
+                            $"{_mailNewLine}" +
+                            $"This order consists of: {_mailNewLine}" +
+                            $"{WriteEpoLengths()}{_mailNewLine}" +
+                            $"Note, all length values have been rounded to nearest 0.5m.{_mailNewLine}" +
+                            $"{_mailNewLine}" +
+                            $"Regards,{_mailNewLine}{_mailNewLine}" +
+                            $"{projData.Full}";
+
+            string attachmentPath = $"{fabPath}.zip";
+            Attachment attachment = email.Attachments.Add(attachmentPath);
+
+            email.To = _seversafeTeamEmail;
+            email.CC = FormCCString(projData.pInfo, false);
+            email.Display();
+            //email.Send();
+
+            // Release the Outlook application object
+            System.Runtime.InteropServices.Marshal.ReleaseComObject(outlookApp);
+            outlookApp = null;
+        }
+
         public static void WriteFabEmail(PrismProjectData projData, SelectedObjects objects, string fabPrefix, string issueNumber, string phaseNumber, string siteDate, string fabPath)
         {
-            if (!Constants.IsSpecialPerson())
-            {
-                Application outlookApp = new Application();
+            Application outlookApp = new Application();
 
-                MailItem email = (MailItem)outlookApp.CreateItem(OlItemType.olMailItem);
-                email.Subject = $"{fabPrefix} Fab Issue";
+            MailItem email = (MailItem)outlookApp.CreateItem(OlItemType.olMailItem);
+            email.Subject = $"{fabPrefix} Fab Issue";
 
-                email.Body = $"Hello,{_mailNewLine}" +
-                                $"{_mailNewLine}" +
-                                $"This is the fab package for phase {phaseNumber}, issue {issueNumber}, in {projData.ProjNumber}, {projData.ProjName}.{_mailNewLine}" +
-                                $"Please issue this package to the works when possible.{_mailNewLine}" +
-                                $"{_mailNewLine}" +
-                                $"Site date is {SiteDateNote(siteDate)}{_mailNewLine}" +
-                                $"{_mailNewLine}" +
-                                $"This fab package contains the following;{_mailNewLine}" +
-                                $"{objects.AssembliesList.Count} Assemblies.{_mailNewLine}" +
-                                $"{objects.SelectedModelParts.Count} Parts.{_mailNewLine}" +
-                                $"{objects.PartWeight} T. {_mailNewLine}" +
-                                $"{_mailNewLine}" +
-                                $"Regards,{_mailNewLine}{_mailNewLine}" +
-                                $"{projData.Full}";
+            email.Body = $"Hello,{_mailNewLine}" +
+                            $"{_mailNewLine}" +
+                            $"This is the fab package for phase {phaseNumber}, issue {issueNumber}, in {projData.ProjNumber}, {projData.ProjName}.{_mailNewLine}" +
+                            $"Please issue this package to the works when possible.{_mailNewLine}" +
+                            $"{_mailNewLine}" +
+                            $"Site date is {SiteDateNote(siteDate)}{_mailNewLine}" +
+                            $"{_mailNewLine}" +
+                            $"This fab package contains the following;{_mailNewLine}" +
+                            $"{objects.AssembliesList.Count} Assemblies.{_mailNewLine}" +
+                            $"{objects.SelectedModelParts.Count} Parts.{_mailNewLine}" +
+                            $"{objects.PartWeight} T. {_mailNewLine}" +
+                            $"{_mailNewLine}" +
+                            $"Regards,{_mailNewLine}{_mailNewLine}" +
+                            $"{projData.Full}";
 
-                string attachmentPath = $"{fabPath}.zip";
-                Attachment attachment = email.Attachments.Add(attachmentPath);
+            string attachmentPath = $"{fabPath}.zip";
+            Attachment attachment = email.Attachments.Add(attachmentPath);
 
-                //email.To = "ni.fabissue@severfield.com";
-                email.CC = FormCCString(projData.pInfo, false);
-                email.Display();
-                //email.Send();
+            //email.To = "ni.fabissue@severfield.com";
+            email.CC = FormCCString(projData.pInfo, false);
+            email.Display();
+            //email.Send();
 
-                // Release the Outlook application object
-                System.Runtime.InteropServices.Marshal.ReleaseComObject(outlookApp);
-                outlookApp = null;
-            }
+            // Release the Outlook application object
+            System.Runtime.InteropServices.Marshal.ReleaseComObject(outlookApp);
+            outlookApp = null;
         }
 
         public static void WriteBoltOrderEmail(PrismProjectData projData, string fabPrefix, string issueNumber, string phaseNumber, string siteDate, string boltPath)
         {
-            if (!Constants.IsSpecialPerson())
-            {
-                Application outlookApp = new Application();
+            Application outlookApp = new Application();
 
-                MailItem email = (MailItem)outlookApp.CreateItem(OlItemType.olMailItem);
-                email.Subject = $"{fabPrefix} Bolt Order";
+            MailItem email = (MailItem)outlookApp.CreateItem(OlItemType.olMailItem);
+            email.Subject = $"{fabPrefix} Bolt Order";
 
-                email.Body = $"Hello,{_mailNewLine}" +
-                                $"{_mailNewLine}" +
-                                $"This is the bolt order for phase {phaseNumber}, issue {issueNumber}, in {projData.ProjNumber}, {projData.ProjName}.{_mailNewLine}" +
-                                $"Please order these bolts when possible.{_mailNewLine}{_mailNewLine}" +
-                                $"Site date is {SiteDateNote(siteDate)}" +
-                                $"{_mailNewLine}{_mailNewLine}" +
-                                $"Regards,{_mailNewLine}{_mailNewLine}" +
-                                $"{projData.Full}";
+            email.Body = $"Hello,{_mailNewLine}" +
+                            $"{_mailNewLine}" +
+                            $"This is the bolt order for phase {phaseNumber}, issue {issueNumber}, in {projData.ProjNumber}, {projData.ProjName}.{_mailNewLine}" +
+                            $"Please order these bolts when possible.{_mailNewLine}{_mailNewLine}" +
+                            $"Site date is {SiteDateNote(siteDate)}" +
+                            $"{_mailNewLine}{_mailNewLine}" +
+                            $"Regards,{_mailNewLine}{_mailNewLine}" +
+                            $"{projData.Full}";
 
-                string attachmentPath = $"{boltPath}.zip";
-                Attachment attachment = email.Attachments.Add(attachmentPath);
+            string attachmentPath = $"{boltPath}.zip";
+            Attachment attachment = email.Attachments.Add(attachmentPath);
 
-                email.To = _purchasingEmail;
-                email.CC = FormCCString(projData.pInfo, false);
-                email.Display();
-                //email.Send();
+            email.To = _purchasingEmail;
+            email.CC = FormCCString(projData.pInfo, false);
+            email.Display();
+            //email.Send();
 
-                // Release the Outlook application object
-                System.Runtime.InteropServices.Marshal.ReleaseComObject(outlookApp);
-                outlookApp = null;
-            }
+            // Release the Outlook application object
+            System.Runtime.InteropServices.Marshal.ReleaseComObject(outlookApp);
+            outlookApp = null;
         }
 
-        public static void WriteMatEmail(PrismProjectData projData, SelectedObjects objects, string fabPrefix, string issueNumber, string phaseNumber, string orderType, string matPath, bool fabsecPresent)
+        public static void WriteMatEmail(PrismProjectData projData, SelectedObjects objects, string fabPrefix, string issueNumber, string phaseNumber, string orderType, string matPath, bool fabsecPresent, string siteDate)
         {
-          //  if (!Constants.IsSpecialPerson())
-            {
-                Application outlookApp = new Application();
+            Application outlookApp = new Application();
 
-                MailItem email = (MailItem)outlookApp.CreateItem(OlItemType.olMailItem);
-                email.Subject = $"{fabPrefix} {IssueType(orderType)}";
+            MailItem email = (MailItem)outlookApp.CreateItem(OlItemType.olMailItem);
+            email.Subject = $"{fabPrefix} {IssueType(orderType)}";
 
-                email.Body = $"Hello,{_mailNewLine}" +
-                                $"{_mailNewLine}" +
-                                $"{OrderTypeText(orderType)} for {PhaseOrVariation(projData.IsVariation)} {phaseNumber}, issue {issueNumber}, in {projData.ProjNumber}, {projData.ProjName}.{_mailNewLine}" +
-                                $"{RemoveOrAddText(orderType)} as soon as possible.{_mailNewLine}" +
-                                $"{_mailNewLine}" +
-                                $"This material order contains the following;{_mailNewLine}" +
-                                $"{objects.SelectedModelParts.Count} Parts.{_mailNewLine}" +
-                                $"{objects.PartWeight} T. {_mailNewLine}" +
-                                $"{_mailNewLine}" +
-                                $"Regards,{_mailNewLine}{_mailNewLine}" +
-                                $"{projData.Full}";
+            email.Body = $"Hello,{_mailNewLine}" +
+                            $"{_mailNewLine}" +
+                            $"{OrderTypeText(orderType)} for {PhaseOrVariation(projData.IsVariation)} {phaseNumber}, issue {issueNumber}, in {projData.ProjNumber}, {projData.ProjName}.{_mailNewLine}" +
+                            $"{RemoveOrAddText(orderType)} as soon as possible.{_mailNewLine}" +
+                            $"{_mailNewLine}" +
+                            $"This material order contains the following;{_mailNewLine}" +
+                            $"{objects.SelectedModelParts.Count} Parts.{_mailNewLine}" +
+                            $"{objects.PartWeight} T. {_mailNewLine}" +
+                            $"{_mailNewLine}" +
+                            $"Date material required is {SiteDateNote(siteDate)}{_mailNewLine}" +
+                            $"{_mailNewLine}" +
+                            $"Regards,{_mailNewLine}{_mailNewLine}" +
+                            $"{projData.Full}";
 
-                string attachmentPath = $"{matPath}.zip";
-                Attachment attachment = email.Attachments.Add(attachmentPath);
+            string attachmentPath = $"{matPath}.zip";
+            Attachment attachment = email.Attachments.Add(attachmentPath);
 
-                email.To = _purchasingEmail;
-                email.CC = FormCCString(projData.pInfo, fabsecPresent);
-                email.Display();
-                //email.Send();
+            email.To = _purchasingEmail;
+            email.CC = FormCCString(projData.pInfo, fabsecPresent);
+            email.Display();
+            //email.Send();
 
-                // Release the Outlook application object
-                System.Runtime.InteropServices.Marshal.ReleaseComObject(outlookApp);
-                outlookApp = null;
-            }
+            // Release the Outlook application object
+            System.Runtime.InteropServices.Marshal.ReleaseComObject(outlookApp);
+            outlookApp = null;
         }
 
-        public static void WriteHelpEmail()
+        public static void WriteHelpEmail(string version)
         {
-            //  if (!Constants.IsSpecialPerson())
-            {
-                Application outlookApp = new Application();
+            Application outlookApp = new Application();
 
-                MailItem email = (MailItem)outlookApp.CreateItem(OlItemType.olMailItem);
-                email.Subject = $"Request for Prism help.";
+            MailItem email = (MailItem)outlookApp.CreateItem(OlItemType.olMailItem);
+            email.Subject = $"Request for Prism help - Version No. {version}";
 
-                email.Body = $"Hello,{_mailNewLine}" +
-                                $"{_mailNewLine}" +
-                                $"Please enter your Prism request here, we will endevour to get back to you as soon as possible.{_mailNewLine}" +
-                                $"{_mailNewLine}" +
-                                $"Kind Regards,{_mailNewLine}" +
-                                $"Prism development team.";
+            email.Body = $"Please enter your Prism request here, we will get back to you as soon as possible.{_mailNewLine}" +
+                            $"{_mailNewLine}" +
+                            $"Regards,{_mailNewLine}" +
+                            $"Prism development team.";
 
-                email.To = marksEmail;
-                email.CC = $"{johnsEmail}; {dansEmail}";
-                email.Display();
-                //email.Send();
+            email.To = marksEmail;
+            email.CC = $"{johnsEmail}; {dansEmail}";
+            email.Display();
+            //email.Send();
 
-                // Release the Outlook application object
-                System.Runtime.InteropServices.Marshal.ReleaseComObject(outlookApp);
-                outlookApp = null;
-            }
+            // Release the Outlook application object
+            System.Runtime.InteropServices.Marshal.ReleaseComObject(outlookApp);
+            outlookApp = null;
         }
 
+        private static string WriteEpoLengths()
+        {
+            string textToReturn = "";
+            if (SeversafeOrder.LinMeterRun1mSystem != 0)
+            {
+                textToReturn = textToReturn + "1m Edge - " + SeversafeOrder.LinMeterRun1mSystem + "m.";
+            }
+            if (SeversafeOrder.LinMeterRun1_8mSystem != 0)
+            {
+                textToReturn = textToReturn + _mailNewLine + "1.8m edge - " + SeversafeOrder.LinMeterRun1_8mSystem + "m.";
+            }
+            if (SeversafeOrder.LinMeterRun1mPhaseBreak != 0)
+            {
+                textToReturn = textToReturn + _mailNewLine + "1m phase break - " + SeversafeOrder.LinMeterRun1mPhaseBreak + "m.";
+            }
+            if (SeversafeOrder.LinMeterRun1_8mPhaseBreak != 0)
+            {
+                textToReturn = textToReturn + _mailNewLine + "1m phase break - " + SeversafeOrder.LinMeterRun1_8mPhaseBreak + "m.";
+            }
+
+            return textToReturn;
+        }
 
         private static void FormIssueEmail(string emailAddress, string subject, string body)
         {
@@ -258,7 +303,7 @@ namespace Prism
             AppendString(docControlString, second, out string third);
             AppendString(othersString, third, out string fourth);
             string ccString = fourth;
-            if(fabsecPresent) { AppendString(_fabsecEmail, fourth, out ccString); }
+            if (fabsecPresent) { AppendString(_fabsecEmail, fourth, out ccString); }
 
             return ccString;
         }

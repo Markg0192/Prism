@@ -28,9 +28,11 @@ namespace Prism
             ProjectLocation = projectData.ProjPath;
             FabFolder = $"{projectData.ProjNumber}-{phaseNum}-FAB-ISSUE{issueNum}";
             MatFolder = $"{projectData.ProjNumber}-{phaseNum}-PRELIM-ISSUE{issueNum}";
+            EpoFolder = $"{projectData.ProjNumber}-{phaseNum}-EPO-ISSUE{issueNum}";
             string boltFolder = $"{projectData.ProjNumber}-{phaseNum}-BOLT-ISSUE{issueNum}";
             FabPath = Path.Combine(projectData.ProjPath, FabFolder);
             MatPath = Path.Combine(projectData.ProjPath, MatFolder);
+            EpoPath = Path.Combine(projectData.ProjPath, EpoFolder);
             BoltPath = Path.Combine(projectData.ProjPath, boltFolder);
             string assPath = Path.Combine(FabPath, _assFolder);
             string fitPath = Path.Combine(FabPath, _fitFolder);
@@ -49,8 +51,10 @@ namespace Prism
 
         public readonly string FabFolder;
         public readonly string MatFolder;
+        public readonly string EpoFolder;
         public readonly string FabPath;
         public readonly string MatPath;
+        public readonly string EpoPath;
         public readonly string BoltPath;
         public readonly string NcPath;
         public readonly string ReportPath;
@@ -103,6 +107,14 @@ namespace Prism
             if (!CheckForExistingFolder(BoltPath)) return false;
 
             Directory.CreateDirectory(BoltPath);
+            return true;
+        }
+
+        public bool CreateEpoFolder()
+        {
+            if (!CheckForExistingFolder(EpoPath)) return false;
+
+            Directory.CreateDirectory(EpoPath);
             return true;
         }
 

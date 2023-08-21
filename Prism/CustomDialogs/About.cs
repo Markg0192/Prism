@@ -6,16 +6,18 @@ namespace Prism.CustomDialogs
 {
     public partial class About : Form
     {
+        string version = "";
+
         public About()
         {
             InitializeComponent();
             CenterToScreen();
             TopMost = true;
             // Get the build version of the application.
-            Version version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
             // Set the label text to display the build version.
-            lbl_AboutVersionNo.Text = "Version: " + version.ToString();
+            lbl_AboutVersionNo.Text = "Version: " + version;
         }
 
         private void btn_Close_Click(object sender, EventArgs e)
@@ -25,7 +27,7 @@ namespace Prism.CustomDialogs
 
         private void btn_Contact_Click(object sender, EventArgs e)
         {
-            EmailWriter.WriteHelpEmail();
+            EmailWriter.WriteHelpEmail(version);
         }
 
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)

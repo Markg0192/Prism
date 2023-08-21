@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Tekla.Structures.Drawing;
 using Tekla.Structures.Filtering;
@@ -23,73 +25,72 @@ namespace Prism
 
         public SelectedObjects(StageTypes stageType)
         {
-            List<BoltGroup> SiteBolts = new List<BoltGroup>();
-            List<BoltGroup> ShopBolts = new List<BoltGroup>();
-
             NumbersUpToDate = true;
             AssembliesList = new List<Assembly>();
             SelectedModelParts = new List<Part>();
             LockedParts = new List<ModelObject>();
+            SeversafeParts = new List<Part>();
+            NonSeversafeParts = new List<Part>();
             MyDrawingHandler = new DrawingHandler();
             Moe = new Tekla.Structures.Model.UI.ModelObjectSelector().GetSelectedObjects();
             MyMarks = new List<string>();
 
-            foreach (object myObject in Moe) // This selects all items, if it is a part add to list, if it is a component get the objects within and add, do this twice to deal with components inside components.
-            {
-                if (!NumbersUpToDate) return;
-                if (myObject is BaseComponent myComponent)
-                {
-                    ModelObjectEnumerator children = myComponent.GetChildren();
-                    foreach (object child in children)
-                    {
-                        if (child is BaseComponent componentChild)
-                        {
-                            ModelObjectEnumerator grandChildren = componentChild.GetChildren();
-                            foreach (object grandChild in grandChildren)
-                            {
-                                ProcessObject(grandChild, stageType);
-                            }
-                        }
-                        else ProcessObject(child, stageType);
-                    }
-                }
-                else ProcessObject(myObject, stageType);
-            }
+            ProcessModelObjects(stageType);
 
             PartWeight = Math.Round(PartWeight / 1000, 3);
 
             if (AssembliesList != null)
             {
+                List<BoltGroup> SiteBolts = new List<BoltGroup>();
+                List<BoltGroup> ShopBolts = new List<BoltGroup>();
+
                 foreach (Assembly assembly in AssembliesList)
                 {
-                    List<BoltGroup> MyBolts = GetBoltsFromAssembly(assembly);
-                    double weight = 0;
-                    assembly.GetReportProperty(ModelUDA.Weight(), ref weight);
-                    //TotalWeight = TotalWeight + weight;
-                    if (MyBolts != null)
+                    List<BoltGroup> myBolts = GetBoltsFromAssembly(assembly);
+                    if (myBolts != null)
                     {
-                        foreach (BoltGroup bolts in MyBolts)
-                        {
-                            if (bolts.Bolt)
-                            {
-                                if (bolts.BoltType == BoltGroup.BoltTypeEnum.BOLT_TYPE_WORKSHOP)
-                                {
-                                    ShopBolts.Add(bolts);
-                                }
-                                else
-                                {
-                                    SiteBolts.Add(bolts);
-                                }
-                            }
-                        }
+                        SiteBolts.AddRange(myBolts.Where(b => b.Bolt && b.BoltType != BoltGroup.BoltTypeEnum.BOLT_TYPE_WORKSHOP));
+                        ShopBolts.AddRange(myBolts.Where(b => b.Bolt && b.BoltType == BoltGroup.BoltTypeEnum.BOLT_TYPE_WORKSHOP));
                     }
                 }
-                //TotalWeight = Math.Round(TotalWeight / 1000, 3);
-            }
-           // GetCorrectModelSelection();
 
-            AllBolts.Add(SiteBolts);
-            AllBolts.Add(ShopBolts);
+                AllBolts.Add(SiteBolts);
+                AllBolts.Add(ShopBolts);
+            }
+        }
+
+        private void ProcessModelObjects(StageTypes stageType)
+        {
+            foreach (object myObject in Moe)
+            {
+                if (!NumbersUpToDate) return;
+                if (myObject is BaseComponent myComponent)
+                {
+                    ProcessChildren(myComponent, stageType);
+                }
+                else
+                {
+                    ProcessObject(myObject, stageType);
+                }
+            }
+        }
+
+        private void ProcessChildren(BaseComponent component, StageTypes stageType)
+        {
+            foreach (object child in component.GetChildren())
+            {
+                if (child is BaseComponent componentChild)
+                {
+                    foreach (object grandChild in componentChild.GetChildren())
+                    {
+                        ProcessObject(grandChild, stageType);
+                    }
+                }
+                else
+                {
+                    ProcessObject(child, stageType);
+                }
+            }
         }
 
         public double SmallestX = 100000000;
@@ -102,11 +103,15 @@ namespace Prism
         //public double TotalWeight { get; set; }
         public double PartWeight { get; set; }
         public bool NumbersUpToDate { get; set; }
+        public bool SeversafePresent = false;
         public List<Assembly> AssembliesList { get; set; }
         public List<List<BoltGroup>> AllBolts = new List<List<BoltGroup>>();
         public List<Part> SelectedModelParts { get; set; }
         public List<string> MyMarks { get; set; }
         public List<ModelObject> LockedParts { get; set; }
+        public List<Part> SeversafeParts { get; set; }
+        public List<Part> NonSeversafeParts { get; set; }
+        public List<Part> OmittedParts = new List<Part>();
 
         private void CheckXYZSize(Part myPart)
         {
@@ -128,10 +133,11 @@ namespace Prism
             {
                 if (IsValidPart(myPart))
                 {
+                    bool isSeversafe = IsSeversafePart(myPart);
                     if (stageType == StageTypes.FAB)
                     {
                         CheckXYZSize(myPart);
-                        if (!Operation.IsNumberingUpToDate(myPart))
+                        if (!isSeversafe && !Operation.IsNumberingUpToDate(myPart))
                         {
                             PrismWarnings.NumberingIsNotUpToDate();
                             NumbersUpToDate = false;
@@ -141,7 +147,15 @@ namespace Prism
 
                     SelectedModelParts.Add(myPart);
 
-                    if (IsLocked(myPart)) LockedParts.Add(myPart);
+                    if (!isSeversafe && IsLocked(myPart)) LockedParts.Add(myPart);
+                    if (isSeversafe)
+                    {
+                        SeversafeParts.Add(myPart); SeversafePresent = true;
+                    }
+                    else
+                    {
+                        NonSeversafeParts.Add(myPart);
+                    }
 
                     double weight = 0;
                     myPart.GetReportProperty(ModelUDA.Weight(), ref weight);
@@ -151,15 +165,22 @@ namespace Prism
 
                     if (myPart.GetAssembly() is Assembly assembly)
                     {
-                        Assembly matchingAssembly = null;
-                        matchingAssembly = AssembliesList.Find(x => x.Identifier.ToString() == assembly.Identifier.ToString());
-                        if (matchingAssembly == null)
+                        if (!AssembliesList.Any(x => x.Identifier.ToString() == assembly.Identifier.ToString()))
                         {
                             AssembliesList.Add(assembly);
                         }
                     }
                 }
             }
+        }
+
+        private bool IsSeversafePart(Part myPart)
+        {
+            if (myPart.Name.Contains("SS-"))
+            {
+                return true;
+            }
+            return false;
         }
 
         private bool IsLocked(Part myPart)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Security.AccessControl;
 using System.Security.Principal;
+using System.Windows.Forms;
 using Tekla.Structures.Drawing;
 using Tekla.Structures.DrawingInternal;
 using Tekla.Structures.Model;
@@ -11,6 +12,48 @@ namespace Prism
 {
     public static class Logging
     {
+        public static void UpdateUserUseCount(string userName)
+        {
+            Dictionary<string, int> userCounts = new Dictionary<string, int>();
+            string logFile = @"\\sev-los-fs1\application data$\Prism\UserUseCount.txt";
+
+            // Read existing log
+            if (File.Exists(logFile))
+            {
+                foreach (string line in File.ReadAllLines(logFile))
+                {
+                    if (!line.StartsWith("------log started"))
+                    {
+                        string[] parts = line.Split('-');
+                        if (parts.Length == 2 && int.TryParse(parts[1], out int count))
+                        {
+                            userCounts[parts[0]] = count;
+                        }
+                    }
+                }
+            }
+
+            // Update user count
+            if (userCounts.ContainsKey(userName))
+            {
+                userCounts[userName]++;
+            }
+            else
+            {
+                userCounts[userName] = 1;
+            }
+
+            // Write updated log
+            using (StreamWriter sw = new StreamWriter(logFile))
+            {
+                sw.WriteLine("---------------------------This log was started on 21/08/23-------");
+                foreach (var entry in userCounts)
+                {
+                    sw.WriteLine($"{entry.Key}-{entry.Value}");
+                }
+            }
+        }
+
         public static void CreateModelLog(PrismProjectData pData)
         {
             //this method checks the model data folder on our server for a folder named after the users current model, if it does not exist we create it
@@ -137,6 +180,7 @@ namespace Prism
                     log.WriteLine($"Button press: {buttonPress} - Assemblies processed: {totalObjects} - Auto-Fix count: {autoFixCount}");
                 }
                 CountTimesUsed(autoFixCount, totalObjects, buttonPress);
+                UpdateUserUseCount(Environment.UserName);
             }
         }
 
@@ -177,6 +221,11 @@ namespace Prism
                 log.WriteLine($"Parts processed: {newPartsUsed}");
                 log.WriteLine($"Auto-Fix count: {newAutoFixed}");
                 log.WriteLine($"Fabrication packages created: {newFabPack}");
+            }
+
+            if (newTimesUsed % 1000 == 0)
+            {
+                PrismWarnings.BigTimeUsage(newTimesUsed);
             }
         }
 

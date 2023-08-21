@@ -6,6 +6,7 @@ namespace Prism
 {
     public static class GdomValues
     {
+        public static double MinimumFittingLength = 200; //the minimum length a UB/UC etc. fitting needs to be to be considered for ordered
         public static string IntumescentCode = "IP";
         public static string AssemblyPartPrefix = "A";
         public static string AssemblyPrefix = "";

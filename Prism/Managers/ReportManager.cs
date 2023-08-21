@@ -96,18 +96,19 @@ namespace Prism
         private string _NCPlateSetting;
         private string _NCProfileSetting;
         private bool create3PGReport = false;
-        private PrismProjectData _projectData;
-        private string _phaseNum;
-        private string _issueNum;
+        public PrismProjectData ProjectData;
+        public string PhaseNum;
+        public string IssueNum;
 
         public ReportManager(PrismProjectData projectData, string phaseNum, string issueNum)
         {
-            _projectData = projectData;
-            _phaseNum = phaseNum;
-            _issueNum = issueNum;
+            ProjectData = projectData;
+            PhaseNum = phaseNum;
+            IssueNum = issueNum;
             Folders = new FolderManager(projectData, phaseNum, issueNum);
             FabReportPrefix = ($"{projectData.ProjNumber}-{phaseNum}-FAB-ISSUE{issueNum}");
             MatReportPrefix = ($"{projectData.ProjNumber}-{phaseNum}-PRELIM-ISSUE{issueNum}");
+            EpoReportPrefix = ($"{projectData.ProjNumber}-{phaseNum}-EPO-ISSUE{issueNum}");
             BoltReportPrefix = $"{projectData.ProjNumber}-{phaseNum}-BOLT-ISSUE{issueNum}";
             _title1 = phaseNum;
             _title2 = projectData.Initials;
@@ -117,6 +118,7 @@ namespace Prism
         public FolderManager Folders;
         public readonly string FabReportPrefix;
         public readonly string MatReportPrefix;
+        public readonly string EpoReportPrefix;
         public readonly string BoltReportPrefix;
 
         public void CreateMaterialReports(SelectedObjects selectedObjects, string orderType, StageTypes stageType, bool fabsecsPresent = false)
@@ -128,14 +130,14 @@ namespace Prism
                 string fabsecReport = "";
                 if (orderType == "Order Material")
                 {
-                    selectedObjects.ExportBSWX(Folders.MatPath, _projectData, _phaseNum, _issueNum, stageType);
+                    selectedObjects.ExportBSWX(Folders.MatPath, ProjectData, PhaseNum, IssueNum, stageType);
                     ModelModifiers.RemoveLog(Folders.MatPath);
                     materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report1Pname);                   
                     outputName = _output1Pname;
                 }
                 if (orderType == "Add Material")
                 {
-                    selectedObjects.ExportBSWX(Folders.MatPath, _projectData, _phaseNum, _issueNum, stageType);
+                    selectedObjects.ExportBSWX(Folders.MatPath, ProjectData, PhaseNum, IssueNum, stageType);
                     ModelModifiers.RemoveLog(Folders.MatPath);
                     materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report1PAname);                   
                     outputName = _output1PAname;
@@ -147,14 +149,14 @@ namespace Prism
                 }
                 if (orderType == "Order Special Fittings")
                 {
-                    selectedObjects.ExportBSWX(Folders.MatPath, _projectData, _phaseNum, _issueNum, stageType);
+                    selectedObjects.ExportBSWX(Folders.MatPath, ProjectData, PhaseNum, IssueNum, stageType);
                     ModelModifiers.RemoveLog(Folders.MatPath);
                     materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report1PFname);
                     outputName = _output1PFname;
                 }
                 if (orderType == "Add Special Fittings")
                 {
-                    selectedObjects.ExportBSWX(Folders.MatPath, _projectData, _phaseNum, _issueNum, stageType);
+                    selectedObjects.ExportBSWX(Folders.MatPath, ProjectData, PhaseNum, IssueNum, stageType);
                     ModelModifiers.RemoveLog(Folders.MatPath);
                     materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report1PFAname);
                     outputName = _output1PFAname;
