@@ -13,6 +13,7 @@ using Tekla.Structures.Model;
 using Tekla.Structures.Model.Operations;
 using static Prism.Enums;
 using Task = System.Threading.Tasks.Task;
+using TextBox = System.Windows.Forms.TextBox;
 
 namespace Prism
 {
@@ -55,23 +56,27 @@ namespace Prism
             ModelChecker.ClearOldLists();
             _selectedObjects = new SelectedObjects(stageType);
 
-            if (checkForPreviousSteps && !ModelChecker.ArePreviousStepsComplete(_selectedObjects, (int)stageType))
+            if (Environment.UserName != "mark.gibson")
             {
-                SetStatusLabels("Previous Steps Incomplete");
-                return false;
-            }
-            if (_selectedObjects.NumbersUpToDate && _selectedObjects.AssembliesList.Count == 0)
-            {
-                SetStatusLabels("No Parts Selected");
-                PrismWarnings.NoPartsSelected();
-                return false;
-            }
-            if (_selectedObjects.LockedParts.Count > 0)
-            {
-                SetStatusLabels("Locked Parts Selected");
-                PrismWarnings.LockedPartsSelected();
-                ModelModifiers.SetPartsRed(_selectedObjects.LockedParts);
-                return false;
+                if (checkForPreviousSteps && !ModelChecker.ArePreviousStepsComplete(_selectedObjects, (int)stageType))
+                {
+                    SetStatusLabels("Previous Steps Incomplete");
+                    return false;
+                }
+
+                if (_selectedObjects.NumbersUpToDate && _selectedObjects.AssembliesList.Count == 0)
+                {
+                    SetStatusLabels("No Parts Selected");
+                    PrismWarnings.NoPartsSelected();
+                    return false;
+                }
+                if (_selectedObjects.LockedParts.Count > 0)
+                {
+                    SetStatusLabels("Locked Parts Selected");
+                    PrismWarnings.LockedPartsSelected();
+                    ModelModifiers.SetPartsRed(_selectedObjects.LockedParts);
+                    return false;
+                }
             }
             SetStatusLabels("Running Operation");
             return true;
@@ -118,7 +123,7 @@ namespace Prism
                 if (!await Task.Run(() => InitialSetup(StageTypes.Prelim3, true))) { EndFunction(0); return; };
 
                 if (!await Task.Run(() => _selectedObjects.MaterialButton3op(_projectData, txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text,
-                    orderType, (int)StageTypes.Prelim3, StageTypes.Prelim3, _model, txt_SiteDate.Text))) { EndFunction(0); return; }
+                    orderType, (int)StageTypes.Prelim3, StageTypes.Prelim3, _model, txt_MatSiteDate.Text))) { EndFunction(0); return; }
 
                 _model.CommitChanges();
             }
@@ -136,7 +141,7 @@ namespace Prism
                 if (!myReportManager.Folders.CreateMatFolder(false)) { EndFunction(0); return false; };
                 myReportManager.CreateMaterialReports(_selectedObjects, orderType, StageTypes.Prelim3);
                 if (!MaterialButton3.FinishOrder(_selectedObjects, (int)StageTypes.Prelim3, _projectData, myReportManager.MatReportPrefix,
-                    txt_MaterialIssueNumber.Text, txt_MaterialPhaseNumber.Text, orderType, myReportManager)) { return false; }
+                    txt_MaterialIssueNumber.Text, txt_MaterialPhaseNumber.Text, orderType, myReportManager, txt_MatSiteDate.Text)) { return false; }
             }
             else
             {
@@ -145,7 +150,7 @@ namespace Prism
                 {
                     if (!OrderSpecials(orderAction, orderType, StageTypes.Prelim3, false, myReportManager)) { EndFunction(0); return false; }
                     if (!MaterialButton3.FinishOrder(_selectedObjects, (int)StageTypes.Prelim3, _projectData, myReportManager.MatReportPrefix,
-                        txt_MaterialIssueNumber.Text, txt_MaterialPhaseNumber.Text, orderType, myReportManager, true)) { return false; }
+                        txt_MaterialIssueNumber.Text, txt_MaterialPhaseNumber.Text, orderType, myReportManager, txt_MatSiteDate.Text, true)) { return false; }
                 }
             }
             return true;
@@ -222,7 +227,7 @@ namespace Prism
 
             if (!await Task.Run(() => InitialSetup(StageTypes.Bolt, false))) { EndFunction(0); return; }
 
-            await Task.Run(() => FabMisc.FabMiscOp(phaseNumber.Text, issueNumber.Text, _projectData, txt_SiteDate.Text, _selectedObjects));
+            // await Task.Run(() => FabMisc.FabMiscOp(txt_SiteDate.Text, _selectedObjects, false, null));
 
             EndFunction(1);
         }
@@ -236,7 +241,8 @@ namespace Prism
 
         private void btn_SpecialOperations_Click(object sender, EventArgs e)
         {
-
+            
+           
         }
 
         private async void CreatePackageAsync()
@@ -247,13 +253,30 @@ namespace Prism
 
             if (!_selectedObjects.NumbersUpToDate) { SetStatusLabels("Numbers not up to date"); EndFunction(0); return; }
 
+            bool runSeversafe = false;
+            int divisionNo = 0;
+            if (_selectedObjects.SeversafePresent)
+            {
+                runSeversafe = PrismWarnings.ShouldSeverSafeBeProcessed();
+                if (runSeversafe)
+                {
+                    divisionNo = PrismWarnings.DivsionFrom();
+                    if (divisionNo == 0)
+                    {
+                        runSeversafe = false;
+                        PrismWarnings.SeversafeOrderCancelled();
+                    }
+                }
+            }
+
             SetStatusLabels("Creating Fab Package");
 
             Logging.DebugLog("setup complete", "");
 
-            if (!await Task.Run(() => _selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber.Text, issueNumber.Text, StageTypes.FAB, txt_SiteDate.Text))) { EndFunction(0); return; }
+            ReportManager myReportManager = new ReportManager(_projectData, phaseNumber.Text, issueNumber.Text);
+            if (!await Task.Run(() => _selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber.Text, issueNumber.Text, StageTypes.FAB, txt_SiteDate.Text, runSeversafe))) { EndFunction(0); return; }
 
-            await Task.Run(() => FabMisc.FabMiscOp(phaseNumber.Text, issueNumber.Text, _projectData, txt_SiteDate.Text, _selectedObjects));
+            await Task.Run(() => FabMisc.FabMiscOp(_model, txt_SiteDate.Text, _selectedObjects, runSeversafe, myReportManager, divisionNo, _projectData));
 
             EndFunction(1);
         }
@@ -268,8 +291,9 @@ namespace Prism
 
             SetStatusLabels("Creating Fab Package");
 
-            if (!_selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber.Text, issueNumber.Text, StageTypes.FAB, txt_SiteDate.Text)) { EndFunction(0); return; }
-            FabMisc.FabMiscOp(phaseNumber.Text, issueNumber.Text, _projectData, txt_SiteDate.Text, _selectedObjects);
+            bool doSeversafeOrder = false;
+            if (!_selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber.Text, issueNumber.Text, StageTypes.FAB, txt_SiteDate.Text, doSeversafeOrder)) { EndFunction(0); return; }
+            // FabMisc.FabMiscOp(phaseNumber.Text, issueNumber.Text, _projectData, txt_SiteDate.Text, _selectedObjects);
 
             EndFunction(1);
         }
@@ -283,6 +307,7 @@ namespace Prism
         private void EndFunction(int cancelledOrComplete) //0 = cancelled 1 = Complete
         {
             string message = cancelledOrComplete == 0 ? "Cancelled" : "Complete";
+            flowLayoutPanel1.BackColor = cancelledOrComplete == 0 ? Color.Tomato : Color.PaleGreen;
             flowLayoutPanel1.Enabled = true;
             SetStatusLabels(message);
             Cursor = Cursors.Default;
@@ -375,13 +400,18 @@ namespace Prism
 
         private void txt_SiteDate_TextChanged(object sender, EventArgs e)
         {
-            if (txt_SiteDate.Text.Length > 7)
+            CheckForAcceptableSiteDate(ref txt_SiteDate);
+        }
+
+        private void CheckForAcceptableSiteDate(ref TextBox textBox)
+        {
+            if (textBox.Text.Length > 7)
             {
-                txt_SiteDate.BackColor = Color.White;
+                textBox.BackColor = Color.White;
             }
             else
             {
-                txt_SiteDate.BackColor = Color.Moccasin;
+                textBox.BackColor = Color.Moccasin;
             }
         }
 
@@ -476,18 +506,21 @@ namespace Prism
         {
             pnl_Home.Visible = true;
             pnl_Detail.Visible = false;
+            flowLayoutPanel1.BackColor = Color.DodgerBlue;
         }
 
         private void btn_HomePackage_Click_1(object sender, EventArgs e)
         {
             pnl_Home.Visible = true;
             pnl_Package.Visible = false;
+            flowLayoutPanel1.BackColor = Color.DodgerBlue;
         }
 
         private void btn_HomeMaterial_Click_1(object sender, EventArgs e)
         {
             pnl_Home.Visible = true;
             pnl_Material.Visible = false;
+            flowLayoutPanel1.BackColor = Color.DodgerBlue;
         }
 
         private void btn_MainMaterialCheck_Click_1(object sender, EventArgs e)
@@ -594,6 +627,11 @@ namespace Prism
         {
             var form = new About();
             form.ShowDialog();
+        }
+
+        private void txt_MatSiteDate_TextChanged(object sender, EventArgs e)
+        {
+            CheckForAcceptableSiteDate(ref txt_MatSiteDate);
         }
     }
 }

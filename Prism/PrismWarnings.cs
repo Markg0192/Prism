@@ -39,6 +39,13 @@ namespace Prism
             return form.orderAction;
         }
 
+        public static int DivsionFrom()
+        {
+            var form = new Division();
+            form.ShowDialog();
+            return form.DivisionOut;
+        }
+
         public static int BoltOrderType()
         {
             var form = new BoltOrderType();
@@ -53,6 +60,13 @@ namespace Prism
             CreateOKForm(notUpToDateMessage, notUpToDateTitle);
 
             //MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
+        public static void BigTimeUsage(int timesUsed)
+        {
+            string notUpToDateMessage = $"Congratulations, your latest run of Prism was the {timesUsed}th time it's been used. I hope you are happy with yourself, goodbye.";
+            const string notUpToDateTitle = "Prism is great";
+            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
         }
 
         public static void IgnoreFittingCheck()
@@ -80,7 +94,7 @@ namespace Prism
 
         public static void AbnormalFittings()
         {
-            string notUpToDateMessage = $"You have selected some abnormal fittings that should either be bought out items or changed to something standard.\r {Warning}";
+            string notUpToDateMessage = $"You have selected some abnormal fittings that should either be bought out items or changed to something standard.\r\r{Warning}";
             const string notUpToDateTitle = "Abnormal Fittings";
             CreateOKForm(notUpToDateMessage, notUpToDateTitle);
             //MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -88,7 +102,7 @@ namespace Prism
 
         public static bool TagAbnormalFittings()
         {
-            string notUpToDateMessage = $"Would you like to tag these abnormal fittings for ordering later?.\r {Warning}";
+            string notUpToDateMessage = $"Would you like to tag these abnormal fittings for ordering later?.\r\r {Warning}";
             const string notUpToDateTitle = "Abnormal Fittings Tag";
             return CreateYesNoForm(notUpToDateMessage, notUpToDateTitle);
            // return MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
@@ -126,6 +140,19 @@ namespace Prism
                 return false;
             }
             return true;*/
+        }
+
+        public static bool KeepPartInModel()
+        {
+            const string notUpToDateMessage = "Would you like to keep the selected steel where it is?\r\rIf you say yes Prism will create a copy of each omitted member outside the model space and reset the attributes on the selected. \r\rIf you say no it will move the selected out of the model space and tag it as omitted.";
+            const string notUpToDateTitle = "Keep selected in model";
+            return CreateYesNoForm(notUpToDateMessage, notUpToDateTitle);
+            /* DialogResult result = MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+             if (result == DialogResult.No)
+             {
+                 return false;
+             }
+             return true;*/
         }
 
         public static bool IsVariation()
@@ -228,6 +255,13 @@ namespace Prism
             //return MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
         }
 
+        public static bool ShouldSeverSafeBeProcessed()
+        {
+            const string notUpToDateMessage = "You have Seversafe in your selection, would you like to create an order for this?";
+            const string notUpToDateTitle = "Seversafe found";
+            return CreateYesNoForm(notUpToDateMessage, notUpToDateTitle);
+        }
+
         public static void HasAlreadyBeenOrdered()
         {
             const string notUpToDateMessage = "You are trying to order material that appears to have already been ordered.";
@@ -305,6 +339,22 @@ namespace Prism
         {
             string notUpToDateMessage = "Numbers that were up to date before running Prism are now modified, please review.";
             const string notUpToDateTitle = "Error";
+            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+            //MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
+        public static void SeversafeOrderCancelled()
+        {
+            string notUpToDateMessage = "No seversafe order will be created with this package.";
+            const string notUpToDateTitle = "Cancelled";
+            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+            //MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
+        public static void Cancelled()
+        {
+            string notUpToDateMessage = "Cancelled.";
+            const string notUpToDateTitle = "Cancelled";
             CreateOKForm(notUpToDateMessage, notUpToDateTitle);
             //MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }

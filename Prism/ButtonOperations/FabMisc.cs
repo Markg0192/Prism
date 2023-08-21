@@ -1,27 +1,35 @@
-﻿namespace Prism
+﻿using System.Drawing.Text;
+using Tekla.Structures.Model;
+
+namespace Prism
 {
     public static class FabMisc
     {
-        public static void FabMiscOp(string phaseNumber, string issueNumber, PrismProjectData projectData, string siteDate, SelectedObjects selectedObjects)
-        {
-           // ReportManager rep = new ReportManager(projectData, "1", "1");
-           // HDBolts.OrderHDBoltTopNutAndWasher(selectedObjects, rep);
-            CreateBoltOrder(phaseNumber, issueNumber, projectData, siteDate);
+        public static void FabMiscOp(Model model, string siteDate, SelectedObjects selectedObjects, bool runSeversafe, ReportManager reportManager, int divisionNo, PrismProjectData projData)
+        { 
+            CreateBoltOrder(reportManager, siteDate);
+            if (runSeversafe) { SeversafeOrder.CreateSeversafeOrder(model, selectedObjects.SeversafeParts, siteDate, reportManager, divisionNo, reportManager.EpoReportPrefix, projData); }
 
-            ModelModifiers.StampBoltUDA(selectedObjects.AllBolts[0], projectData.Full, projectData.Date);
-            ModelModifiers.StampBoltUDA(selectedObjects.AllBolts[1], projectData.Full, projectData.Date);
+            ModelModifiers.StampBoltUDA(selectedObjects.AllBolts[0], reportManager.ProjectData.Full, reportManager.ProjectData.Date);
+            ModelModifiers.StampBoltUDA(selectedObjects.AllBolts[1], reportManager.ProjectData.Full, reportManager.ProjectData.Date);
 
-            ModelModifiers.StampPartFabUDA(selectedObjects.SelectedModelParts, phaseNumber, issueNumber);
-            ViewManager.CreateFabView(phaseNumber, issueNumber, projectData, selectedObjects);
+            ModelModifiers.StampPartFabUDA(selectedObjects.SelectedModelParts, reportManager.PhaseNum, reportManager.IssueNum);
+            ViewManager.CreateFabView(reportManager.PhaseNum, reportManager.IssueNum, reportManager.ProjectData, selectedObjects);
         }
 
-        public static void CreateBoltOrder(string phaseNumber, string issueNumber, PrismProjectData projectData, string siteDate)
+        public static void CreateBoltOrder(ReportManager reportManager, string siteDate)
         {
-            ReportManager myReportManager = new ReportManager(projectData, phaseNumber, issueNumber);
-           
-            myReportManager.CreateBoltList(myReportManager.FabReportPrefix, "Order Bolts");
-            myReportManager.Folders.ZipFolder(myReportManager.Folders.BoltPath);
-            EmailWriter.WriteBoltOrderEmail(projectData, myReportManager.FabReportPrefix, issueNumber, phaseNumber, siteDate, myReportManager.Folders.BoltPath);
+            reportManager.CreateBoltList(reportManager.FabReportPrefix, "Order Bolts");
+            reportManager.Folders.ZipFolder(reportManager.Folders.BoltPath);
+            EmailWriter.WriteBoltOrderEmail(reportManager.ProjectData, reportManager.FabReportPrefix, reportManager.IssueNum, reportManager.PhaseNum, siteDate, reportManager.Folders.BoltPath);
+        }
+
+        private static void CreateSeversafeOrder(ReportManager reportManager, SelectedObjects selectedObjects, string siteDate, int divisionNo)
+        {
+         //   SeversafeOrder.CreateSeversafeOrder(selectedObjects.SeversafeParts, siteDate, reportManager, divisionNo, reportManager.FabReportPrefix);
+            reportManager.Folders.ZipFolder(reportManager.Folders.EpoPath);
+            EmailWriter.WriteEpoEmail(reportManager.ProjectData, reportManager.FabReportPrefix, reportManager.IssueNum, reportManager.PhaseNum, siteDate, reportManager.Folders.EpoPath);
+
         }
     }
 }

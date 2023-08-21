@@ -20,7 +20,15 @@ namespace Prism.ButtonOperations
 
             if (orderType.Contains("Bolts"))
             {
-                if (!CreateBoltOrder(orderType, myReportManager, phaseNumber, issueNumber, projectData, siteDate)) return false;
+                if (!CreateBoltOrder(orderType, myReportManager, siteDate)) return false;
+                return true;
+            }
+            if (orderType.Contains("Seversafe"))
+            {
+                int divisionNo = PrismWarnings.DivsionFrom();
+                if (divisionNo == 0) { PrismWarnings.Cancelled(); return false; }
+
+                SeversafeOrder.CreateSeversafeOrder(model, myObjects.SeversafeParts, siteDate, myReportManager, divisionNo, myReportManager.EpoReportPrefix, projectData);
                 return true;
             }
 
@@ -42,23 +50,22 @@ namespace Prism.ButtonOperations
 
             myReportManager.CreateMaterialReports(myObjects, orderType, stageType);
 
-            MoveOmitMaterial(orderType, myObjects, originalFabsecs);
+            myObjects.OmittedParts = MoveOmitMaterial(orderType, myObjects, originalFabsecs);
 
-            if (!FinishOrder(myObjects, stageNumber, projectData, myReportManager.MatReportPrefix, issueNumber, phaseNumber, orderType, myReportManager, false, fabsecsPresent)) { return false; }
+            if (!FinishOrder(myObjects, stageNumber, projectData, myReportManager.MatReportPrefix, issueNumber, phaseNumber, orderType, myReportManager, siteDate, false, fabsecsPresent)) { return false; }
 
             return true;
         }
 
-        public static bool CreateBoltOrder(string orderType, ReportManager reportManager, string phaseNumber, string issueNumber, PrismProjectData projectData, string siteDate)
+        public static bool CreateBoltOrder(string orderType, ReportManager reportManager, string siteDate)
         {
             int typeOfOrder = PrismWarnings.BoltOrderType();
 
-            reportManager = new ReportManager(projectData, phaseNumber, issueNumber);
             if (!reportManager.Folders.CreateBoltFolder()) return false;
 
             if (typeOfOrder == 1) { reportManager.CreateSelectedBoltList(reportManager.BoltReportPrefix, orderType); } else reportManager.CreateBoltList(reportManager.BoltReportPrefix, orderType);
             reportManager.Folders.ZipFolder(reportManager.Folders.BoltPath);
-            EmailWriter.WriteBoltOrderEmail(projectData, reportManager.BoltReportPrefix, issueNumber, phaseNumber, siteDate, reportManager.Folders.BoltPath);
+            EmailWriter.WriteBoltOrderEmail(reportManager.ProjectData, reportManager.BoltReportPrefix, reportManager.IssueNum, reportManager.PhaseNum, siteDate, reportManager.Folders.BoltPath);
             return true;
         }
 
@@ -103,42 +110,53 @@ namespace Prism.ButtonOperations
                 {
                     ReportManager.SelectDrawingsInDocManager(null);
                     DrawingManager dm = new DrawingManager(model, projectData, phaseNumber, issueNumber, myObjects);
-                    if(dm.NotLabelledDrawings.Count != 0) { PrismWarnings.IncorrectlyAssignedDrawings(); return false; }
+                    if (dm.NotLabelledDrawings.Count != 0) { PrismWarnings.IncorrectlyAssignedDrawings(); return false; }
 
                     List<int> drawingCount = new List<int> { 0, dm.PgcDrawings.Count };
                     DrawingManager.PrintAndIssueDrawings(myReportManager.Folders.MatFolder, myReportManager.Folders.MatPath, drawingCount, "\\PGC", 0, 1, myReportManager);
                     fabsecCarcasses.SelectParts();
                     myReportManager.CreateG2Assy();
-                    myObjects.SelectedModelParts.SelectParts();                   
+                    myObjects.SelectedModelParts.SelectParts();
 
-                    if (!originalFabsecs.ModifyAttributes(stageNumber, projectData)) { return false; }                  
+                    if (!originalFabsecs.ModifyAttributes(stageNumber, projectData)) { return false; }
                 }
                 else { return false; }
             }
             return true;
         }
 
-        private static void MoveOmitMaterial(string orderType, SelectedObjects myObjects, List<Part> originalFabsecs)
+        private static List<Part> MoveOmitMaterial(string orderType, SelectedObjects myObjects, List<Part> originalFabsecs)
         {
+            List<Part> movedParts = new List<Part>();
             if (orderType == "Omit Material")
             {
-                ModelModifiers.MoveAndRenameOmittedMembers(myObjects.SelectedModelParts, -100000);
-                if(originalFabsecs != null)
+                bool keepPartInModel = PrismWarnings.KeepPartInModel();
+                movedParts.AddRange(ModelModifiers.MoveAndRenameOmittedMembers(myObjects.SelectedModelParts, -100000, keepPartInModel));
+                if (originalFabsecs != null)
                 {
-                    ModelModifiers.MoveAndRenameOmittedMembers(originalFabsecs, -100000);
+                    movedParts.AddRange(ModelModifiers.MoveAndRenameOmittedMembers(originalFabsecs, -100000, keepPartInModel));
                 }
             }
+            return movedParts;
         }
 
         public static bool FinishOrder(SelectedObjects myObjects, int stageNumber, PrismProjectData projectData, string matReportPrefix,
-            string issueNumber, string phaseNumber, string orderType, ReportManager reportManager, bool isSpecialFittingOrder = false, bool fabsecsPresent = false)
+            string issueNumber, string phaseNumber, string orderType, ReportManager reportManager, string siteDate, bool isSpecialFittingOrder = false, bool fabsecsPresent = false)
         {
-            if (!myObjects.SelectedModelParts.ModifyAttributes(stageNumber, projectData, isSpecialFittingOrder)) { return false; }
+            if (orderType == "Omit Material")
+            {
+                if (!myObjects.OmittedParts.ModifyAttributes(8, projectData, isSpecialFittingOrder)) { return false; }
+            }
+            else
+            {
+
+                if (!myObjects.SelectedModelParts.ModifyAttributes(stageNumber, projectData, isSpecialFittingOrder)) { return false; }
+            }
 
             PrismWarnings.MaterialOrderComplete(projectData);
 
             reportManager.Folders.ZipFolder(reportManager.Folders.MatPath);
-            EmailWriter.WriteMatEmail(projectData, myObjects, matReportPrefix, issueNumber, phaseNumber, orderType, reportManager.Folders.MatPath, fabsecsPresent);
+            EmailWriter.WriteMatEmail(projectData, myObjects, matReportPrefix, issueNumber, phaseNumber, orderType, reportManager.Folders.MatPath, fabsecsPresent, siteDate);
 
             Logging.LogProgress(projectData.ProjName, "Material 3", 0, myObjects.AssembliesList.Count);
             return true;

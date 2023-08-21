@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(About));
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
@@ -41,7 +42,7 @@
             // pictureBox1
             // 
             this.pictureBox1.Image = global::Prism.Properties.Resources.Severfield_blue_RGB_PNG;
-            this.pictureBox1.Location = new System.Drawing.Point(60, 12);
+            this.pictureBox1.Location = new System.Drawing.Point(57, 12);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(311, 97);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -51,7 +52,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(47, 193);
+            this.label2.Location = new System.Drawing.Point(47, 180);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(338, 13);
             this.label2.TabIndex = 1;
@@ -60,7 +61,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(35, 216);
+            this.label3.Location = new System.Drawing.Point(35, 203);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(365, 13);
             this.label3.TabIndex = 2;
@@ -68,7 +69,7 @@
             // 
             // btn_Close
             // 
-            this.btn_Close.Location = new System.Drawing.Point(325, 258);
+            this.btn_Close.Location = new System.Drawing.Point(325, 234);
             this.btn_Close.Name = "btn_Close";
             this.btn_Close.Size = new System.Drawing.Size(93, 36);
             this.btn_Close.TabIndex = 3;
@@ -79,15 +80,15 @@
             // lbl_AboutVersionNo
             // 
             this.lbl_AboutVersionNo.AutoSize = true;
-            this.lbl_AboutVersionNo.Location = new System.Drawing.Point(185, 149);
+            this.lbl_AboutVersionNo.Location = new System.Drawing.Point(174, 143);
             this.lbl_AboutVersionNo.Name = "lbl_AboutVersionNo";
-            this.lbl_AboutVersionNo.Size = new System.Drawing.Size(66, 13);
+            this.lbl_AboutVersionNo.Size = new System.Drawing.Size(87, 13);
             this.lbl_AboutVersionNo.TabIndex = 1;
-            this.lbl_AboutVersionNo.Text = "Version: ???";
+            this.lbl_AboutVersionNo.Text = "Version: 1.0.0.00";
             // 
             // btn_Contact
             // 
-            this.btn_Contact.Location = new System.Drawing.Point(226, 258);
+            this.btn_Contact.Location = new System.Drawing.Point(226, 234);
             this.btn_Contact.Name = "btn_Contact";
             this.btn_Contact.Size = new System.Drawing.Size(93, 36);
             this.btn_Contact.TabIndex = 3;
@@ -99,7 +100,7 @@
             // 
             this.linkLabel1.AutoSize = true;
             this.linkLabel1.LinkBehavior = System.Windows.Forms.LinkBehavior.HoverUnderline;
-            this.linkLabel1.Location = new System.Drawing.Point(150, 112);
+            this.linkLabel1.Location = new System.Drawing.Point(147, 112);
             this.linkLabel1.Name = "linkLabel1";
             this.linkLabel1.Size = new System.Drawing.Size(143, 13);
             this.linkLabel1.TabIndex = 4;
@@ -111,7 +112,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(426, 307);
+            this.ClientSize = new System.Drawing.Size(426, 278);
             this.Controls.Add(this.linkLabel1);
             this.Controls.Add(this.btn_Contact);
             this.Controls.Add(this.btn_Close);
@@ -119,8 +120,9 @@
             this.Controls.Add(this.label2);
             this.Controls.Add(this.lbl_AboutVersionNo);
             this.Controls.Add(this.pictureBox1);
-            this.MaximumSize = new System.Drawing.Size(442, 346);
-            this.MinimumSize = new System.Drawing.Size(442, 346);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MaximumSize = new System.Drawing.Size(442, 317);
+            this.MinimumSize = new System.Drawing.Size(442, 317);
             this.Name = "About";
             this.Text = "About";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();

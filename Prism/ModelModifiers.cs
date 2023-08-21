@@ -75,35 +75,42 @@ namespace Prism
             }
         }
 
-        public static bool ModifyAttributes(this List<Part> selectedObjects, int stageNumber, PrismProjectData projectData, bool isSpecialFittingOrder = false)
+        public static bool ModifyAttributes(this List<Part> selectedObjects, int stageNumber, PrismProjectData projectData, bool isSpecialFittingOrder = false, bool isSeversafe = false)
         {
             foreach (Part part in selectedObjects)
             {
-                if (isSpecialFittingOrder) part.SetUserProperty(ModelUDA.Pre_Ordered(), 1);
-                part.SetUserProperty(ModelUDA.CurrentStageName(stageNumber), projectData.Full);
-                part.SetUserProperty(ModelUDA.CurrentStageDate(stageNumber), projectData.Date);
-                if(stageNumber == 3)
+                if (!ModifyAttribute(part, stageNumber, projectData, isSpecialFittingOrder, isSeversafe)) return false;
+            }
+            return true;
+        }
+
+        public static bool ModifyAttribute(Part part, int stageNumber, PrismProjectData projectData, bool isSpecialFittingOrder = false, bool isSeversafe = false)
+        {
+            part.Select();
+            if (isSpecialFittingOrder) part.SetUserProperty(ModelUDA.Pre_Ordered(), 1);
+            part.SetUserProperty(ModelUDA.CurrentStageName(stageNumber), projectData.Full);
+            part.SetUserProperty(ModelUDA.CurrentStageDate(stageNumber), projectData.Date);
+            if (stageNumber == 3 && !isSeversafe)
+            {
+                TableRow row = UniClassCodes.GetUniClassDetailForPart(projectData.ProjNumberAndName, part);
+                if (row != null)
                 {
-                    TableRow row = UniClassCodes.GetUniClassDetailForPart(projectData.ProjNumberAndName, part);
-                    if(row != null)
-                    {
-                        ModifyUDA(part, "SEV-UDA-130", row.Code);
-                        ModifyUDA(part, "SEV-UDA-131", row.Title);
-                    }
+                    ModifyUDA(part, "SEV-UDA-130", row.Code);
+                    ModifyUDA(part, "SEV-UDA-131", row.Title);
                 }
-                if (stageNumber == 7)
-                {
-                    part.SetUserProperty(ModelUDA.PartMarkAtFab(), part.GetPartMark());
-                   // if (projectData.Full != "Mark Gibson") { part.LockPart(); }
-                }
-                part.Modify();
-                if (!Operation.IsNumberingUpToDate(part) && stageNumber == 7)
-                { 
-                    Logging.PartsModifiedAfterRun();
-                    PrismWarnings.NumbersNoLongerUpToDate();
-                   
-                    return false;
-                }
+            }
+            if (stageNumber == 7)
+            {
+                part.SetUserProperty(ModelUDA.PartMarkAtFab(), part.GetPartMark());
+                // if (projectData.Full != "Mark Gibson") { part.LockPart(); }
+            }
+            part.Modify();
+            if (stageNumber == 7 && !Operation.IsNumberingUpToDate(part))
+            {
+                Logging.PartsModifiedAfterRun();
+                PrismWarnings.NumbersNoLongerUpToDate();
+
+                return false;
             }
             return true;
         }
@@ -188,7 +195,7 @@ namespace Prism
         }
 
         public static void AddPrelimMarks(this SelectedObjects selectedObjects, PrismProjectData pData)
-        {          
+        {
             int currentLastNumber = Logging.GetLastUsedPrelim(pData.ProjNumberAndName);
 
             foreach (Part p in selectedObjects.SelectedModelParts)
@@ -232,24 +239,76 @@ namespace Prism
             part.SetUserProperty(ModelUDA.ObjectLock(), 1);
         }
 
-        public static void MoveAndRenameOmittedMembers(List<Part> partsToBeMoved, double distanceToMoveInZ)
+        public static List<Part> MoveAndRenameOmittedMembers(List<Part> partsToBeMoved, double distanceToMoveInZ, bool keepOriginal)
         {
+            List<Part> movedParts = new List<Part>();
+
             foreach (Part p in partsToBeMoved)
             {
-                p.Name = "OMIT";
-                p.AssemblyNumber.Prefix = "OMIT";
-                p.PartNumber.Prefix = "OMIT";
-                string test = p.Class;
-                p.Class = "6";
-                p.GetPhase(out Phase currentPhase);
-                Phase myPhase = new Phase((Convert.ToInt32(currentPhase.PhaseNumber) + 1000000), $"Phase {currentPhase.PhaseNumber} OMIT", "", 0);
-                myPhase.Insert();
-                p.SetPhase(myPhase);
-                p.Modify();
-                Vector myVector = new Vector(0, 0, distanceToMoveInZ);
-                Operation.MoveObject(p, myVector);
-                p.Select();
+                if (keepOriginal)
+                {
+                    Vector newVector = new Vector(0, 0, distanceToMoveInZ);
+                    Part copiedMember = Operation.CopyObject(p, newVector) as Part;
+
+                    copiedMember.Name = "OMIT";
+                    copiedMember.AssemblyNumber.Prefix = "OMIT";
+                    copiedMember.PartNumber.Prefix = "OMIT";
+                    copiedMember.Class = "6";
+                    copiedMember.GetPhase(out Phase currentPhase);
+                    Phase myPhase = new Phase((Convert.ToInt32(currentPhase.PhaseNumber) + 1000000), $"Phase {currentPhase.PhaseNumber} OMIT", "", 0);
+                    myPhase.Insert();
+                    copiedMember.SetPhase(myPhase);
+                    copiedMember.Modify();
+
+                    for (int i = 0; i < 10; i++)
+                    {
+                        copiedMember.SetUserProperty(ModelUDA.CurrentStageName(i), p.StageString(ModelUDA.CurrentStageName(i))); //Set prism values and prelim on the new copied fabsec
+                        copiedMember.SetUserProperty(ModelUDA.CurrentStageDate(i), p.StageString(ModelUDA.CurrentStageDate(i))); //All these values are unique in the model settings
+                        p.SetUserProperty(ModelUDA.CurrentStageName(i), "");
+                        p.SetUserProperty(ModelUDA.CurrentStageDate(i), "");
+                    }
+
+                    copiedMember.SetUserProperty(ModelUDA.FabsecUniqueNumber(), p.StageString(ModelUDA.FabsecUniqueNumber()));
+                    copiedMember.SetUserProperty(ModelUDA.PrelimMark(), p.GetPrelimMark());
+                    copiedMember.SetUserProperty(ModelUDA.PartMarkAtFab(), p.StageString(ModelUDA.PartMarkAtFab()));
+                    copiedMember.SetUserProperty(ModelUDA.FabStampUDA(), p.StageString(ModelUDA.FabStampUDA()));
+
+                    p.SetUserProperty(ModelUDA.FabsecUniqueNumber(), "");
+                    p.SetUserProperty(ModelUDA.PrelimMark(), "");
+                    p.SetUserProperty(ModelUDA.PartMarkAtFab(), "");
+                    p.SetUserProperty(ModelUDA.FabStampUDA(), "");
+
+                    p.Modify();
+
+                    movedParts.Add(copiedMember);
+                }
+                else
+                {
+                    p.Name = "OMIT";
+                    p.AssemblyNumber.Prefix = "OMIT";
+                    p.PartNumber.Prefix = "OMIT";
+                    p.Class = "6";
+                    p.GetPhase(out Phase currentPhase);
+                    Phase myPhase = new Phase((Convert.ToInt32(currentPhase.PhaseNumber) + 1000000), $"Phase {currentPhase.PhaseNumber} OMIT", "", 0);
+                    myPhase.Insert();
+                    p.SetPhase(myPhase);
+                    p.Modify();
+                    Vector myVector = new Vector(0, 0, distanceToMoveInZ);
+                    Operation.MoveObject(p, myVector);
+                    p.Select();
+
+                    movedParts.Add(p);
+                }
+
             }
+            return movedParts;
+        }
+
+        private static string StageString(this Part part, string stageType)
+        {
+            string stageString = "";
+            part.GetUserProperty(stageType, ref stageString);
+            return stageString;
         }
 
         public static void PerformNumbering()
@@ -386,18 +445,38 @@ namespace Prism
             }
         }
 
-        public static void SetPartsRed(List<ModelObject> myParts)
+        public static void SetPartsRed(List<ModelObject> myParts, bool reset = true)
         {
-            ModelObjectVisualization.SetTransparencyForAll(TemporaryTransparency.SEMITRANSPARENT);
-            ModelObjectVisualization.SetTemporaryStateForAll(new Color(0.5, 0.5, 0.5));
-            ModelObjectVisualization.SetTemporaryState(myParts, new Color(1, 0, 0));
+            Color red = new Color(1, 0, 0);
+            SetColouring(myParts, red, reset);
         }
 
-        public static void SetPartsBlue(List<ModelObject> myParts)
+        public static void SetPartsYellow(List<ModelObject> myParts, bool reset = true)
         {
-            ModelObjectVisualization.SetTransparencyForAll(TemporaryTransparency.SEMITRANSPARENT);
-            ModelObjectVisualization.SetTemporaryStateForAll(new Color(0.5, 0.5, 0.5));
-            ModelObjectVisualization.SetTemporaryState(myParts, new Color(0, 0, 1));
+            Color yellow = new Color(1, 1, 0);
+            SetColouring(myParts, yellow, reset);
+        }
+
+        public static void SetPartsGreen(List<ModelObject> myParts, bool reset = true)
+        {
+            Color green = new Color(0, 1, 0);
+            SetColouring(myParts, green, reset);
+        }
+
+        public static void SetPartsBlue(List<ModelObject> myParts, bool reset = true)
+        {
+            Color blue = new Color(0, 0, 1);
+            SetColouring(myParts, blue, reset);
+        }
+
+        private static void SetColouring(List<ModelObject> myParts, Color color, bool reset)
+        {
+            if (reset)
+            {
+                ModelObjectVisualization.SetTransparencyForAll(TemporaryTransparency.SEMITRANSPARENT);
+                ModelObjectVisualization.SetTemporaryStateForAll(new Color(0.5, 0.5, 0.5));
+            }
+            ModelObjectVisualization.SetTemporaryState(myParts, color);
         }
 
         public static int ChangeSpecialTag(string newTagString, out List<ModelObject> objects)

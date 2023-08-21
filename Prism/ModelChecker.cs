@@ -71,6 +71,7 @@ namespace Prism
             CheckFittings.IncorrectGrade.Clear();
             CheckFittings.IncorrectLength.Clear();
             CheckFittings.IncorrectThickness.Clear();
+            CheckFittings.UnOrderedObjects.Clear();
             CheckFittings.AllIncorrectPlate.Clear();
             HasNoFinish.Clear();
             PartsWithoutIntumescentLoading.Clear();
@@ -268,7 +269,7 @@ namespace Prism
         {
             if (!Constants.IsSpecialPerson())
             {
-                foreach (Part p in selectedObjects.SelectedModelParts)
+                foreach (Part p in selectedObjects.NonSeversafeParts)
                 {
                     string userProperty = "";
                     p.GetUserProperty(ModelUDA.PreviousStageName(stageNumber), ref userProperty);
@@ -427,15 +428,18 @@ namespace Prism
 
         public static void GetUnorderedParts(this Part mainPart)
         {
-            string prelimMark = "";
-            mainPart.GetUserProperty(ModelUDA.CurrentStageName(3), ref prelimMark); //Check prism uda material order complete for data
-            if (prelimMark.Length == 0)
+            if (!mainPart.Profile.ProfileString.Contains("PLT") && !mainPart.Profile.ProfileString.Contains("FLT"))
             {
-                NotOrderedParts.Add(mainPart);
-            }
-            else
-            {
-                OrderedParts.Add(mainPart);
+                string prelimMark = "";
+                mainPart.GetUserProperty(ModelUDA.CurrentStageName(3), ref prelimMark); //Check prism uda material order complete for data
+                if (prelimMark.Length == 0)
+                {
+                    NotOrderedParts.Add(mainPart);
+                }
+                else
+                {
+                    OrderedParts.Add(mainPart);
+                }
             }
         }
 

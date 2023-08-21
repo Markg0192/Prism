@@ -11,6 +11,8 @@ namespace Prism
         public static string IssueDrawings = "IssueStampDrawings.cs";
         public static string PrismDataLogLocation = @"\\sev-los-fs1\application data$\Prism\Model Data";
 
+
+
         public static string ModelDataLogLocation(string jobName)
         {
            return $@"\\sev-los-fs1\application data$\Prism\Model Data\{jobName}";
