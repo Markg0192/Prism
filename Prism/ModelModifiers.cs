@@ -155,6 +155,7 @@ namespace Prism
             {
                 p.PartNumber.StartNumber = Convert.ToInt32(startNumber);
                 p.AssemblyNumber.StartNumber = Convert.ToInt32(startNumber);
+                p.Modify();
             }
         }
 
@@ -353,6 +354,13 @@ namespace Prism
 
             assToBeSelected.Modify();
 
+        }
+
+        public static string GetFabsecEngRef(this Part p)
+        {
+            string engRef = "";
+            p.GetUserProperty(ModelUDA.FabsecEngRef(), ref engRef);
+            return engRef;
         }
 
         public static string GetPrelimMark(this Part p)

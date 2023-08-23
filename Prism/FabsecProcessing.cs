@@ -203,6 +203,7 @@ namespace Prism
                 copiedFabsec.SetUserProperty(ModelUDA.CurrentStageName(2), fabsec.StageString(ModelUDA.CurrentStageName(2))); //This means they won't copy with the member naturally.
                 copiedFabsec.SetUserProperty(ModelUDA.CurrentStageDate(2), fabsec.StageString(ModelUDA.CurrentStageDate(2)));
                 copiedFabsec.SetUserProperty(ModelUDA.PrelimMark(), fabsec.GetPrelimMark());
+                copiedFabsec.SetUserProperty(ModelUDA.FabsecEngRef(), fabsec.GetFabsecEngRef());
                 selectedObjects.SelectedModelParts.Add(copiedFabsec);
             }
             return fabsecCarcassList;

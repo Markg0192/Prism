@@ -336,6 +336,8 @@ namespace Prism
         {
             // Use the vector to get the setting out point for the orientation hole
 
+            double boltCutLength = flangeThick > 30 ? 200 : 130;
+            
             BoltArray b = new BoltArray()
             {
                 Tolerance = 2.0
@@ -362,7 +364,7 @@ namespace Prism
             b.SecondPosition = new Point(soPoint.X + deltaX, soPoint.Y + deltaY, soPoint.Z + 2 * endDistance);
 
             b.BoltType = BoltGroup.BoltTypeEnum.BOLT_TYPE_SITE;
-            b.CutLength = 130;
+            b.CutLength = boltCutLength;
 
             b.ExtraLength = 0;
             b.ThreadInMaterial = BoltGroup.BoltThreadInMaterialEnum.THREAD_IN_MATERIAL_YES;
