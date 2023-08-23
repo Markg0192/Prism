@@ -461,5 +461,38 @@ namespace Prism
                 }
             }
         }
+        public static bool NameAndClassAign(SelectedObjects myObjects)
+        {
+            ModelChecker.IncorrectNameAndClass.Clear();
+            ModelChecker.NameAndClassAligned(myObjects);
+            IgnoreType ignore = PrismWarnings.DisplayOrderErrors(ModelChecker.IncorrectNameAndClass, Error.NameAndClass);
+
+            if (ignore == IgnoreType.AutoFix)
+            {
+                AutoFix.PartNameAndClass();
+            }
+            if (ignore == IgnoreType.Stop)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        public static bool PartsHaveExecutionClass(SelectedObjects myObjects)
+        {
+            ModelChecker.MissingExecutionClass.Clear();
+            ModelChecker.HasExecutionClass(myObjects);
+            IgnoreType ignore = PrismWarnings.DisplayOrderErrors(ModelChecker.MissingExecutionClass, Error.Execution);
+
+            if (ignore == IgnoreType.AutoFix)
+            {
+                AutoFix.ExecutionClass();
+            }
+            if (ignore == IgnoreType.Stop)
+            {
+                return false;
+            }
+            return true;
+        }
     }
 }

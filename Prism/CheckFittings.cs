@@ -33,6 +33,12 @@ namespace Prism
             if (ModelModifiers.GetPartLength(part) >= GdomValues.MinimumFittingLength)
             {
                 string partProf = part.Profile.ProfileString;
+
+                if (partProf == GdomValues.SeversafePotProfile) // ignore anything with the seversafe pot profile
+                {
+                    return false;
+                }
+
                 // Define a regular expression pattern to match the required prefixes.
                 string pattern = "^(UB|UC|PFC|RSA|PG|WESTOK|UKC|UKB|JUMBO|SHS|CHS|RHS|CF-RHS|CF-CHS|CF-SHS)";
 

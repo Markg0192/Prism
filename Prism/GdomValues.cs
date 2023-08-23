@@ -17,6 +17,7 @@ namespace Prism
         public static string RafterName = "RAFTER";
         public static string PortalRafterName = "PORTAL-RAFTER";
         public static string BraceName = "BRACE";
+        public static string SeversafePotProfile = "SHS50*50*4.0";
 
         public static int MaxFittingLength(Factory factory, double plateThickness, bool isFlat)
         {
