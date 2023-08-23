@@ -241,8 +241,18 @@ namespace Prism
 
         private void btn_SpecialOperations_Click(object sender, EventArgs e)
         {
-            
-           
+            ModelObjectEnumerator moe = new Tekla.Structures.Model.UI.ModelObjectSelector().GetSelectedObjects();
+
+            var allUnsupportedTypes = new HashSet<string>();
+
+            foreach (ModelObject obj in moe)
+            {
+                if (obj is Beam beam) // Using Beam may need to revisit for non beam main parts (like maybe breps or contour plates
+                {
+                   ReportProperties newProps = new ReportProperties(obj);
+                }
+            }
+
         }
 
         private async void CreatePackageAsync()

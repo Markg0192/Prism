@@ -2,6 +2,11 @@
 {
     public static class ModelUDA
     {
+        public static string FabsecEngRef()
+        {
+            return "SEV-UDA-9";
+        }
+
         public static string SpecialFittingTag()
         {
             return "SEV-UDA-129";
