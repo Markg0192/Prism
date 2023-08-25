@@ -24,7 +24,7 @@ namespace Prism.ButtonOperations
             reportManager.CreateFabReports(myObjects.NonSeversafeParts, myObjects.AllBolts);
 
             CpuSpeedCheck(cpuCounter);
-            DrawingManager drawingManager = new DrawingManager(model, projectData, phaseNumber, issueNumber, myObjects);
+            DrawingManager drawingManager = new DrawingManager(model, projectData, phaseNumber, issueNumber);
 
             CpuSpeedCheck(cpuCounter);
             PrismMacroBuilder.IssueAndLockStampOff();

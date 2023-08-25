@@ -1,4 +1,5 @@
 ﻿using Aspose.Words.Drawing;
+using Microsoft.Office.Interop.Excel;
 using Microsoft.Office.Interop.Outlook;
 using Prism.ButtonOperations;
 using Prism.CustomDialogs;
@@ -12,6 +13,7 @@ using System.Windows.Forms;
 using Tekla.Structures.Model;
 using Tekla.Structures.Model.Operations;
 using static Prism.Enums;
+using Model = Tekla.Structures.Model.Model;
 using Task = System.Threading.Tasks.Task;
 using TextBox = System.Windows.Forms.TextBox;
 
@@ -120,7 +122,11 @@ namespace Prism
             }
             else
             {
-                if (!await Task.Run(() => InitialSetup(StageTypes.Prelim3, true))) { EndFunction(0); return; };
+                if (!orderType.Contains("Bolts"))
+                {
+                    if (!await Task.Run(() => InitialSetup(StageTypes.Prelim3, true))) { EndFunction(0); return; };
+                }
+                else { ModelChecker.ClearOldLists(); }
 
                 if (!await Task.Run(() => _selectedObjects.MaterialButton3op(_projectData, txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text,
                     orderType, (int)StageTypes.Prelim3, StageTypes.Prelim3, _model, txt_MatSiteDate.Text))) { EndFunction(0); return; }
@@ -137,7 +143,7 @@ namespace Prism
             ReportManager myReportManager = new ReportManager(_projectData, txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text);
             if (orderType.Contains("Omit"))
             {
-                if (!await Task.Run(() => InitialSetup(StageTypes.Prelim3, true))) { EndFunction(0); return false; };
+               
                 if (!myReportManager.Folders.CreateMatFolder(false)) { EndFunction(0); return false; };
                 myReportManager.CreateMaterialReports(_selectedObjects, orderType, StageTypes.Prelim3);
                 if (!MaterialButton3.FinishOrder(_selectedObjects, (int)StageTypes.Prelim3, _projectData, myReportManager.MatReportPrefix,
@@ -146,11 +152,20 @@ namespace Prism
             else
             {
                 int orderAction = PrismWarnings.SpecialFittingOrder();
-                if (orderAction == 2 || orderAction == 3)
+                
+               if (!await Task.Run(() => InitialSetup(StageTypes.Prelim3, true))) { EndFunction(0); return false; };
+                if (orderAction == 2 || orderAction == 3) //then user wants to create a material order
                 {
-                    if (!OrderSpecials(orderAction, orderType, StageTypes.Prelim3, false, myReportManager)) { EndFunction(0); return false; }
+                    if (!OrderSpecials(orderAction, orderType, StageTypes.Prelim3, myReportManager)) { EndFunction(0); return false; }
                     if (!MaterialButton3.FinishOrder(_selectedObjects, (int)StageTypes.Prelim3, _projectData, myReportManager.MatReportPrefix,
                         txt_MaterialIssueNumber.Text, txt_MaterialPhaseNumber.Text, orderType, myReportManager, txt_MatSiteDate.Text, true)) { return false; }
+                }
+                if(orderAction == 4 || orderAction == 5) //then user wants to make drawings
+                { 
+                    //if order action == 4 then the user wants to run drawings on just the tagged stuff.
+                    List<Part> selectedParts = orderAction == 4 ? ModelModifiers.SelectSpecialTaggedInSelection(_selectedObjects) : _selectedObjects.SelectedModelParts;
+                    ModelModifiers.PerformNumbering();
+                    ModelModifiers.CreateDrawings(selectedParts);
                 }
             }
             return true;
@@ -167,32 +182,30 @@ namespace Prism
             EndFunction(1);
         }
 
-        private bool OrderSpecials(int orderAction, string orderType, StageTypes stageType, bool fabsecsPresent, ReportManager myReportManager)
-        {
-            if (!InitialSetup(StageTypes.Prelim3, true)) { EndFunction(0); return false; }
-
-            if (!myReportManager.Folders.CreateMatFolder(fabsecsPresent)) return false;
-
+        private bool OrderSpecials(int orderAction, string orderType, StageTypes stageType, ReportManager myReportManager)
+        { 
+            bool runDrawings = PrismWarnings.RunSpecialFittingDrawings();
+            if (!myReportManager.Folders.CreateMatFolder(false, runDrawings)) return false;
+             
             if (orderAction == 2) //User wants to order using special fitting tags
             {
-                List<Part> specialTaggedParts = new List<Part>();
-                foreach (Part part in _selectedObjects.SelectedModelParts)
-                {
-                    string specialTag = "";  //this is the number read from teklas UDA when no execution class is applied, we are defaulting to it not having one here
-                    part.GetUserProperty(ModelUDA.SpecialFittingTag(), ref specialTag);
-
-                    if (specialTag != "")
-                    {
-                        specialTaggedParts.Add(part);
-                    }
-                }
-
-                specialTaggedParts.SelectParts();
+                ModelModifiers.SelectSpecialTaggedInSelection(_selectedObjects);
+                _selectedObjects = new SelectedObjects(stageType); // we reset selected objects here (because we just changed the selection)
                 myReportManager.CreateMaterialReports(_selectedObjects, orderType, stageType);
             }
             if (orderAction == 3) //User wants to order all selected
             {
                 myReportManager.CreateMaterialReports(_selectedObjects, orderType, stageType);
+            }
+                        
+            if (runDrawings)
+            {
+                ReportManager.SelectDrawingsInDocManager(null);
+                DrawingManager dm = new DrawingManager(_model, _projectData, txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text);
+                if (dm.NotLabelledDrawings.Count != 0) { PrismWarnings.IncorrectlyAssignedDrawings(); return false; }
+
+                List<int> drawingCount = new List<int> { 0, dm.AllFittings.Count };
+                DrawingManager.PrintAndIssueDrawings(myReportManager.Folders.MatFolder, myReportManager.Folders.MatPath, drawingCount, "\\SPC", 0, 1, myReportManager);
             }
             return true;
         }
@@ -243,16 +256,15 @@ namespace Prism
         {
             ModelObjectEnumerator moe = new Tekla.Structures.Model.UI.ModelObjectSelector().GetSelectedObjects();
 
-            var allUnsupportedTypes = new HashSet<string>();
+            var listofdub = new List<double>();
 
             foreach (ModelObject obj in moe)
             {
-                if (obj is Beam beam) // Using Beam may need to revisit for non beam main parts (like maybe breps or contour plates
+                if (obj is Part beam)
                 {
-                   ReportProperties newProps = new ReportProperties(obj);
+                    listofdub.Add(ModelModifiers.GetPartLength(beam));
                 }
             }
-
         }
 
         private async void CreatePackageAsync()

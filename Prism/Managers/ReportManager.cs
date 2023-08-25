@@ -199,8 +199,7 @@ namespace Prism
 
             string reportBolts = Path.Combine(FirmFolderLoc.ReportTemplates(), boltReportName);
             Operation.CreateReportFromSelected(reportBolts, Path.Combine(Folders.BoltPath, $"{reportPrefix}{boltListOutputName}"), _title1, _title2, _title3);
-            TextToPDF(Folders.BoltPath);
-
+           // TextToPDF(Folders.BoltPath);
         }
 
 

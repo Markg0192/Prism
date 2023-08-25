@@ -68,5 +68,17 @@ namespace Prism.CustomDialogs
             }
             ModelModifiers.SetPartsBlue(objects);
         }
+
+        private void btn_CreateTaggedDrawings_Click(object sender, EventArgs e)
+        {
+            orderAction = 4;
+            Close();
+        }
+
+        private void btn_CreateSelectedDrawings_Click(object sender, EventArgs e)
+        {
+            orderAction = 5;
+            Close();
+        }
     }
 }

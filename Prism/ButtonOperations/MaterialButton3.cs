@@ -16,13 +16,13 @@ namespace Prism.ButtonOperations
         {
             ReportManager myReportManager = new ReportManager(projectData, phaseNumber, issueNumber);
             // HDBolts.StampConnectionCodeOnMainMember(myObjects);
-            bool fabsecsPresent = FabsecProcessing.AddCarcassToSelection(model, myObjects, out List<Part> originalFabsecs, out List<Part> fabsecCarcasses);
 
             if (orderType.Contains("Bolts"))
             {
                 if (!CreateBoltOrder(orderType, myReportManager, siteDate)) return false;
                 return true;
             }
+
             if (orderType.Contains("Seversafe"))
             {
                 int divisionNo = PrismWarnings.DivsionFrom();
@@ -32,6 +32,7 @@ namespace Prism.ButtonOperations
                 return true;
             }
 
+            bool fabsecsPresent = FabsecProcessing.AddCarcassToSelection(model, myObjects, out List<Part> originalFabsecs, out List<Part> fabsecCarcasses);
             foreach (Part myPart in myObjects.SelectedModelParts)
             {
                 myPart.GetUnorderedParts();
@@ -105,22 +106,23 @@ namespace Prism.ButtonOperations
         {
             if (fabsecsPresent)
             {
-                bool fabsecWarning = PrismWarnings.FabsecsPresent();
+                bool fabsecWarning = PrismWarnings.RunFabsecDrawings();
                 if (fabsecWarning)
                 {
                     ReportManager.SelectDrawingsInDocManager(null);
-                    DrawingManager dm = new DrawingManager(model, projectData, phaseNumber, issueNumber, myObjects);
+                    DrawingManager dm = new DrawingManager(model, projectData, phaseNumber, issueNumber);
                     if (dm.NotLabelledDrawings.Count != 0) { PrismWarnings.IncorrectlyAssignedDrawings(); return false; }
 
                     List<int> drawingCount = new List<int> { 0, dm.PgcDrawings.Count };
                     DrawingManager.PrintAndIssueDrawings(myReportManager.Folders.MatFolder, myReportManager.Folders.MatPath, drawingCount, "\\PGC", 0, 1, myReportManager);
-                    fabsecCarcasses.SelectParts();
-                    myReportManager.CreateG2Assy();
-                    myObjects.SelectedModelParts.SelectParts();
-
-                    if (!originalFabsecs.ModifyAttributes(stageNumber, projectData)) { return false; }
                 }
-                else { return false; }
+                fabsecCarcasses.SelectParts();
+                myReportManager.CreateG2Assy();
+                myObjects.SelectedModelParts.SelectParts();
+
+                if (!originalFabsecs.ModifyAttributes(stageNumber, projectData)) { return false; }
+
+              //  else { return false; }
             }
             return true;
         }
@@ -149,7 +151,6 @@ namespace Prism.ButtonOperations
             }
             else
             {
-
                 if (!myObjects.SelectedModelParts.ModifyAttributes(stageNumber, projectData, isSpecialFittingOrder)) { return false; }
             }
 

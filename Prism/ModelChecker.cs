@@ -463,9 +463,9 @@ namespace Prism
         }
         public static bool NameAndClassAign(SelectedObjects myObjects)
         {
-            ModelChecker.IncorrectNameAndClass.Clear();
-            ModelChecker.NameAndClassAligned(myObjects);
-            IgnoreType ignore = PrismWarnings.DisplayOrderErrors(ModelChecker.IncorrectNameAndClass, Error.NameAndClass);
+            IncorrectNameAndClass.Clear();
+            NameAndClassAligned(myObjects);
+            IgnoreType ignore = PrismWarnings.DisplayOrderErrors(IncorrectNameAndClass, Error.NameAndClass);
 
             if (ignore == IgnoreType.AutoFix)
             {
@@ -480,9 +480,9 @@ namespace Prism
 
         public static bool PartsHaveExecutionClass(SelectedObjects myObjects)
         {
-            ModelChecker.MissingExecutionClass.Clear();
-            ModelChecker.HasExecutionClass(myObjects);
-            IgnoreType ignore = PrismWarnings.DisplayOrderErrors(ModelChecker.MissingExecutionClass, Error.Execution);
+            MissingExecutionClass.Clear();
+            HasExecutionClass(myObjects);
+            IgnoreType ignore = PrismWarnings.DisplayOrderErrors(MissingExecutionClass, Error.Execution);
 
             if (ignore == IgnoreType.AutoFix)
             {

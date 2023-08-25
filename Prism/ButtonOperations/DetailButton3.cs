@@ -14,7 +14,7 @@ namespace Prism.ButtonOperations
 
             if (result)
             {
-                myObjects.CreateDrawings();        
+                myObjects.SelectedModelParts.CreateDrawings();        
             }
             else
             {
