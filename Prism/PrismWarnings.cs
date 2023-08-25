@@ -168,10 +168,18 @@ namespace Prism
             return true;*/
         }
 
-        public static bool FabsecsPresent()
+        public static bool RunFabsecDrawings()
         {
-            const string notUpToDateMessage = "There are FABSEC members present in your selection, I will process these, have you tidied the carcass drawings?";
+            const string notUpToDateMessage = "There are FABSEC members present in your selection, would you like to add the carcass drawings to the order?\r\rNOTE: if you do not do this now you will have to do this yourself at a later date.";
             const string notUpToDateTitle = "FABSECS!";
+            return CreateYesNoForm(notUpToDateMessage, notUpToDateTitle);
+            //return MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+        }
+
+        public static bool RunSpecialFittingDrawings()
+        {
+            const string notUpToDateMessage = "Have you created drawings for these special fittings? If so would you like to include these in the order?.";
+            const string notUpToDateTitle = "Special fittings.";
             return CreateYesNoForm(notUpToDateMessage, notUpToDateTitle);
             //return MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
         }

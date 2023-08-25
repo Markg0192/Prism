@@ -39,10 +39,8 @@ namespace Prism
         public List<Drawing> FrozenDrawings = new List<Drawing>();
         public List<Drawing> UnFrozenDrawings = new List<Drawing>();
 
-        public DrawingManager(Model model, PrismProjectData projectData, string phaseNum, string issueNum, SelectedObjects selectedObjects)
+        public DrawingManager(Model model, PrismProjectData projectData, string phaseNum, string issueNum)
         {
-            _selectedObjects = selectedObjects;
-
             _folders = new FolderManager(projectData, phaseNum, issueNum);
             Logging.DebugLog("folder manaager made", "");
             this._model = model;
@@ -169,7 +167,7 @@ namespace Prism
                         case string t when t.Contains("PGC"):
                             AllFittings.Add(drawing);
                             PgcDrawings.Add(drawing);
-                            break;
+                            break; 
                         case string t when t.Contains("Not Required") && drawing is SinglePartDrawing:
                             AllFittings.Add(drawing);
                             NotRequiredDrawings.Add(drawing);

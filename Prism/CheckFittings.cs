@@ -29,7 +29,7 @@ namespace Prism
         }
 
         private static bool IsAPartThatShouldBeOrdered(Part part)
-        { 
+        {
             if (ModelModifiers.GetPartLength(part) >= GdomValues.MinimumFittingLength)
             {
                 string partProf = part.Profile.ProfileString;
@@ -55,11 +55,37 @@ namespace Prism
             myPart.GetReportProperty("WEB_THICKNESS", ref plateThickness);
 
             double length = ModelModifiers.GetPartLength(myPart);
-            bool isFlat = IsPartFlatBar(factory, profile, myPart.Material.MaterialString, length, plateThickness);
 
-            GetFittingsWithIncorrectMaterial(myPart.Material.MaterialString, isFlat, myPart);
+            ContourPlate cp = myPart as ContourPlate;
+
+            if (cp == null)
+            {
+                double width = ModelModifiers.GetPartWidth(myPart);
+                profile = AddWidthToContour(profile, length, width);
+
+                bool isFlat = IsPartFlatBar(factory, profile, myPart.Material.MaterialString, length, plateThickness);
+                GetFittingsWhichAreTooLong(myPart, factory, plateThickness, isFlat, length);
+                GetFittingsWithIncorrectMaterial(myPart.Material.MaterialString, isFlat, myPart);
+            }
+            else
+            {
+                GetFittingsWithIncorrectMaterial(myPart.Material.MaterialString, false, myPart);
+            }
+
             GetFittingsWithIncorrectThickness(plateThickness, factory, myPart);
-            GetFittingsWhichAreTooLong(myPart, factory, plateThickness, isFlat, length);
+        }
+
+        private static string AddWidthToContour(string profile, double length, double width)
+        {
+            string returnProfile = profile;
+            if (profile.Contains("*"))
+            {
+                return profile;
+            }
+            else
+            {
+                return profile + $"*{width}";
+            }
         }
 
         private static void GetFittingsWithIncorrectMaterial(string grade, bool isFlat, Part myPart)

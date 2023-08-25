@@ -2,6 +2,7 @@
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using Tekla.Structures.Model;
 
 namespace Prism
 {
@@ -13,6 +14,7 @@ namespace Prism
     public class FolderManager
     {
         private const string _fabsecCarcasses = "PGC";
+        private const string _specialFittings = "SPC";
         private const string _assFolder = "ASS";
         private const string _fitFolder = "FIT";
         private const string _prtFolder = "PRT";
@@ -38,6 +40,7 @@ namespace Prism
             string fitPath = Path.Combine(FabPath, _fitFolder);
             string prtPath = Path.Combine(FabPath, _prtFolder);
             FabsecCarcassPath = Path.Combine(MatPath, _fabsecCarcasses);
+            SpecialFittingPath = Path.Combine(MatPath, _specialFittings);
             IfcPath = Path.Combine(FabPath, _ifcFolder);
             NcPath = Path.Combine(FabPath, _ncFolder);
             ReportPath = Path.Combine(FabPath, _reportFolder);
@@ -61,6 +64,7 @@ namespace Prism
         public readonly string DspPath;
         public readonly string ShaftPath;
         public readonly string FabsecCarcassPath;
+        public readonly string SpecialFittingPath;
         public readonly string IfcPath;
         private string ProjectLocation;
         private List<string> DrawingVaultFolders = new List<string>();
@@ -90,7 +94,7 @@ namespace Prism
             }
             return true;
         }
-        public bool CreateMatFolder(bool fabsecsPresent)
+        public bool CreateMatFolder(bool fabsecsPresent, bool specialFittingsPresent = false)
         {
             if (!CheckForExistingFolder(MatPath)) return false;
 
@@ -98,6 +102,10 @@ namespace Prism
             if (fabsecsPresent)
             {
                 Directory.CreateDirectory(FabsecCarcassPath);
+            }
+            if(specialFittingsPresent)
+            {
+                Directory.CreateDirectory(SpecialFittingPath);
             }
             return true;
         }

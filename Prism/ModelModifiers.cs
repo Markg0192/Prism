@@ -221,6 +221,23 @@ namespace Prism
             Logging.SetLastUsedPrelim(pData.ProjNumberAndName, currentLastNumber);
         }
 
+        public static List<Part> SelectSpecialTaggedInSelection(SelectedObjects selectedObjects)
+        {
+            List<Part> specialTaggedParts = new List<Part>();
+            foreach (Part part in selectedObjects.SelectedModelParts)
+            {
+                string specialTag = "";  //this is the number read from teklas UDA when no execution class is applied, we are defaulting to it not having one here
+                part.GetUserProperty(ModelUDA.SpecialFittingTag(), ref specialTag);
+
+                if (specialTag != "")
+                {
+                    specialTaggedParts.Add(part);
+                }
+            }
+            specialTaggedParts.SelectParts();
+            return specialTaggedParts;
+        }
+
         public static void ClearPrelimMarking(ProjectInfo pInfo, string resetNumber)
         {
             pInfo.SetUserProperty(ModelUDA.LastUsedPrelim(), Convert.ToInt32(resetNumber));
@@ -228,14 +245,24 @@ namespace Prism
 
         public static double GetPartLength(Part myPart)
         {
-            ArrayList points = myPart.GetCenterLine(true);
+            double length = 0.0;
+            myPart.GetReportProperty("LENGTH", ref length);
+            return length;
+           /* ArrayList points = myPart.GetCenterLine(true);
             Point start = points[0] as Point;
             Point end = points[1] as Point;
             double Length = Distance.PointToPoint(end, start);
-            return Length;
+            return Length;*/
         }
 
-        public static void LockPart(this Part part)
+        public static double GetPartWidth(Part myPart)
+        {
+            double width = 0.0;
+            myPart.GetReportProperty("FLANGE_LENGTH_B", ref width);
+            return width;
+        }
+
+            public static void LockPart(this Part part)
         {
             part.SetUserProperty(ModelUDA.ObjectLock(), 1);
         }
@@ -317,13 +344,13 @@ namespace Prism
             new MacroBuilder().Callback("acmd_partnumbers_selected", string.Empty, "main_frame").Run();
         }
 
-        public static void CreateDrawings(this SelectedObjects selectedObjects)
+        public static void CreateDrawings(this List<Part> selectedObjects)
         {
             FileInfo file = new FileInfo(FirmFolderLoc.DrawingWizard());
             AutoDrawingRule rule = new AutoDrawingRule(file.FullName);
             AutoDrawingsStatusEnum status;
             List<Identifier> idList = new List<Identifier>();
-            foreach (Part part in selectedObjects.SelectedModelParts)
+            foreach (Part part in selectedObjects)
             {
                 idList.Add(part.Identifier);
             }
