@@ -277,21 +277,21 @@ namespace Prism
         public static async void SelectDrawingsInDocManager(List<Part> selectedParts)
         {
             if (PrismMacroBuilder.DrawingOperations())
-            {
-                Logging.DebugLog("Macro Built", "");
+          /*  {
+               Logging.DebugLog("Macro Built", "");
             }
-            else { Logging.DebugLog("Macro not built", ""); }
+            else { Logging.DebugLog("Macro not built", ""); }*/
 
             if (selectedParts != null) selectedParts.SelectParts();
-            Logging.DebugLog("Selected parts", "");
+          //  Logging.DebugLog("Selected parts", "");
 
             Operation.RunMacro(Constants.DrawingOperation);
-            Logging.DebugLog("Drawing operation complete", "");
+            //Logging.DebugLog("Drawing operation complete", "");
 
             while (Operation.IsMacroRunning()) // Wait until macro for selecting drawings in the document manager is complete before moving on
             {
                 await System.Threading.Tasks.Task.Delay(10);
-                Logging.DebugLog("Drawing operation wait", "");
+              //  Logging.DebugLog("Drawing operation wait", "");
             }
         }
 

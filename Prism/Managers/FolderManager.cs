@@ -19,6 +19,7 @@ namespace Prism
         private const string _fitFolder = "FIT";
         private const string _prtFolder = "PRT";
         private const string _dspFolder = "DSP";
+        private const string _wldFolder = "WLD";
         private const string _shaftFolder = "SHA";
         private const string _ncFolder = "NC";
         private const string _reportFolder = "Lists";
@@ -45,27 +46,29 @@ namespace Prism
             NcPath = Path.Combine(FabPath, _ncFolder);
             ReportPath = Path.Combine(FabPath, _reportFolder);
             DspPath = Path.Combine(FabPath, _dspFolder);
+            WldPath = Path.Combine(FabPath, _wldFolder);
             ShaftPath = Path.Combine(FabPath, _shaftFolder);
             _folderNames = new List<string>
-                {assPath, fitPath, prtPath, DspPath, NcPath, ReportPath, ShaftPath, IfcPath};
+                {assPath, fitPath, prtPath, DspPath, NcPath, ReportPath, ShaftPath, IfcPath, WldPath};
             DrawingVaultFolders = new List<string>
             { _assFolder, _prtFolder, _fitFolder, _shaftFolder, _ifcFolder};
         }
 
-        public readonly string FabFolder;
-        public readonly string MatFolder;
-        public readonly string EpoFolder;
-        public readonly string FabPath;
-        public readonly string MatPath;
-        public readonly string EpoPath;
-        public readonly string BoltPath;
-        public readonly string NcPath;
-        public readonly string ReportPath;
-        public readonly string DspPath;
-        public readonly string ShaftPath;
-        public readonly string FabsecCarcassPath;
-        public readonly string SpecialFittingPath;
-        public readonly string IfcPath;
+        public string FabFolder { get; set; }
+        public string MatFolder {get;set;}
+        public string EpoFolder {get;set;}
+        public string FabPath {get;set;}
+        public string MatPath {get;set;}
+        public string EpoPath {get;set;}
+        public string BoltPath {get;set;}
+        public string NcPath {get;set;}
+        public string ReportPath {get;set;}
+        public string DspPath {get;set;}
+        public string WldPath {get;set;}
+        public string ShaftPath {get;set;}
+        public string FabsecCarcassPath {get;set;}
+        public string SpecialFittingPath {get;set;}
+        public string IfcPath {get;set;}
         private string ProjectLocation;
         private List<string> DrawingVaultFolders = new List<string>();
 

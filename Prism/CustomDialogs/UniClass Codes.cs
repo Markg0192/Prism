@@ -9,13 +9,13 @@ namespace Prism.CustomDialogs
     {
         string fileLocation;
 
-        public UniClass_Codes(string jobName)
+        public UniClass_Codes(string jobName, ExternalService.WebService1 service)
         {
             InitializeComponent();
-            fileLocation = Constants.ModelDataLogLocation(jobName) + "\\Project Info.txt";
+            fileLocation = Constants.ModelProjectInforLocation(jobName);
             TopMost = true;
             CenterToScreen();
-            PopulateBoxes(fileLocation);
+            PopulateBoxes(fileLocation, service);
         }
 
         private void btn_UCApply_Click(object sender, EventArgs e)
@@ -39,9 +39,9 @@ namespace Prism.CustomDialogs
             return td;
         }
 
-        private void PopulateBoxes(string filePath)
+        private void PopulateBoxes(string filePath, ExternalService.WebService1 service)
         {
-            TableData td = ReadTableData(filePath);
+            TableData td = ReadTableData(filePath, service);
             txt_UCFilter1.Text = td.Rows[0].Filter;
             txt_UCCode1.Text = td.Rows[0].Code;
             txt_UCTitle1.Text = td.Rows[0].Title;
@@ -68,37 +68,33 @@ namespace Prism.CustomDialogs
             txt_UCTitle8.Text = td.Rows[7].Title;
         }
 
-        public static TableData ReadTableData(string filePath)
+        public static TableData ReadTableData(string filePath, ExternalService.WebService1 service)
         {
             bool startReading = false;
             TableData tableData = new TableData();
 
-            using (StreamReader reader = new StreamReader(filePath))
+            foreach (string line in service.ReadAllLinesIntoArray(Constants.PrismDataLogLocation, Constants.ModelProjectInforLocation(filePath)))
             {
-                string line;
-                while ((line = reader.ReadLine()) != null)
+                if (line.Contains("---Filter------------Code----------------Title"))
                 {
-                    if (line.Contains("---Filter------------Code----------------Title"))
+                    startReading = true;
+                    continue;
+                }
+
+                if (startReading)
+                {
+                    string[] parts = line.Split(new[] { '*' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (parts.Length >= 3)
                     {
-                        startReading = true;
-                        continue;
+                        string filter = parts[0].Trim();
+                        string code = parts[1].Trim();
+                        string title = parts[2].Trim();
+
+                        tableData.Rows.Add(new TableRow(filter, code, title));
                     }
-
-                    if (startReading)
+                    if (parts.Length < 3)
                     {
-                        string[] parts = line.Split(new[] { '*' }, StringSplitOptions.RemoveEmptyEntries);
-                        if (parts.Length >= 3)
-                        {
-                            string filter = parts[0].Trim();
-                            string code = parts[1].Trim();
-                            string title = parts[2].Trim();
-
-                            tableData.Rows.Add(new TableRow(filter, code, title));
-                        }
-                        if(parts.Length < 3)
-                        {
-                            tableData.Rows.Add(new TableRow("", "", ""));
-                        }
+                        tableData.Rows.Add(new TableRow("", "", ""));
                     }
                 }
             }
@@ -110,7 +106,7 @@ namespace Prism.CustomDialogs
         {
             StreamReader read = new StreamReader(filePath);
             string line1 = read.ReadLine();
-            string line2 = read.ReadLine();                
+            string line2 = read.ReadLine();
             string line3 = read.ReadLine();
             string line4 = read.ReadLine();
             string line5 = read.ReadLine();
@@ -134,7 +130,7 @@ namespace Prism.CustomDialogs
             writer.WriteLine(line6);
             writer.WriteLine(line7);
             writer.WriteLine(line8);
-            writer.WriteLine(line9);                
+            writer.WriteLine(line9);
             writer.WriteLine(line10);
             writer.WriteLine(line11);
             writer.WriteLine(line12);

@@ -126,12 +126,11 @@ namespace Prism
                             $"{OrderTypeText(orderType)} for {PhaseOrVariation(projData.IsVariation)} {phaseNumber}, issue {issueNumber}, in {projData.ProjNumber}, {projData.ProjName}.{_mailNewLine}" +
                             $"{RemoveOrAddText(orderType)} as soon as possible.{_mailNewLine}" +
                             $"{_mailNewLine}" +
-                            $"This material order contains the following;{_mailNewLine}" +
+                            $"{RemoveOrAddMaterial(orderType)}{_mailNewLine}" +
                             $"{objects.SelectedModelParts.Count} Parts.{_mailNewLine}" +
                             $"{objects.PartWeight} T. {_mailNewLine}" +
                             $"{_mailNewLine}" +
-                            $"Date material required is {SiteDateNote(siteDate)}{_mailNewLine}" +
-                            $"{_mailNewLine}" +
+                            $"{DateRequired(orderType, siteDate)}" +
                             $"Regards,{_mailNewLine}{_mailNewLine}" +
                             $"{projData.Full}";
 
@@ -219,6 +218,15 @@ namespace Prism
             return "phase";
         }
 
+        private static string DateRequired(string orderType, string siteDate)
+        {
+            if(orderType.Contains("Omit"))
+            {
+                return "";
+            }
+            return $"Date material required is {SiteDateNote(siteDate)}{_mailNewLine}{_mailNewLine}";
+        }
+
         private static string OrderTypeText(string orderType)
         {
             if (orderType == "Order Material")
@@ -261,6 +269,23 @@ namespace Prism
             if (orderType.Contains("Omit"))
             {
                 return "Please remove this from the material order of this phase";
+            }
+            return "";
+        }
+
+        private static string RemoveOrAddMaterial(string orderType)
+        {
+            if(orderType.Contains("Order"))
+            {
+                return $"The material to be ordered is as follows;";
+            }
+            if (orderType.Contains("Add"))
+            {
+                return "The material to be added is as follows;";
+            }
+            if (orderType.Contains("Omit"))
+            {
+                return "The material to be omitted is as follows;";
             }
             return "";
         }

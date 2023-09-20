@@ -33,7 +33,7 @@ namespace Prism.ButtonOperations
             if (drawingManager.NotLabelledDrawings.Count != 0)
             {
                 PrismWarnings.IncorrectlyAssignedDrawings();
-                Logging.UnAssignedDrawings(projectData.ProjNumber, drawingManager.NotLabelledDrawings);
+                Logging.UnAssignedDrawings(projectData.ProjNumber, drawingManager.NotLabelledDrawings, projectData.WebService);
                 return false;
             }
 
@@ -50,8 +50,9 @@ namespace Prism.ButtonOperations
 
             EmailWriter.WriteFabEmail(projectData, myObjects, reportManager.FabReportPrefix, issueNumber, phaseNumber, siteDate, reportManager.Folders.FabPath);
 
-            Logging.UpdateFrozenDrawingCount(projectData.ProjNumberAndName, drawingManager.FrozenDrawings.Count, drawingManager.UnFrozenDrawings.Count);
-            Logging.LogProgress(projectData.ProjName, "Fab Package", 0, myObjects.AssembliesList.Count);
+            Logging.UpdateFrozenDrawingCount(projectData.ProjNumberAndName, drawingManager.FrozenDrawings.Count, drawingManager.UnFrozenDrawings.Count, projectData.WebService);
+            Logging.LogProgress(projectData.ProjName, "Fab Package", 0, myObjects.AssembliesList.Count, projectData.WebService);
+
             return true;
         }
 
@@ -78,7 +79,13 @@ namespace Prism.ButtonOperations
             int shaStartPoint = prtStartPoint + prtEndPoint;
             int shaEndPoint = dm.ShaDrawings.Count;
 
-            return new List<int>() { fitStartPoint, fitEndPoint, notRequiredStartPoint, notRequiredEndPoint, pgcStartPoint, pgcEndPoint, prtStartPoint, prtEndPoint, shaStartPoint, shaEndPoint };
+            int assStartPoint = 0;
+            int assEndPoint = dm.AssDrawings.Count;
+
+            int wldStartPoint = assEndPoint;
+            int wldEndPoint = dm.WldDrawings.Count;
+
+            return new List<int>() { fitStartPoint, fitEndPoint, notRequiredStartPoint, notRequiredEndPoint, pgcStartPoint, pgcEndPoint, prtStartPoint, prtEndPoint, shaStartPoint, shaEndPoint, assStartPoint, assEndPoint, wldStartPoint, wldEndPoint};
         }
     }
 }

@@ -257,7 +257,7 @@ namespace Prism
 
         public static bool AreYouHappyWithNumbering()
         {
-            const string notUpToDateMessage = "Are you happy with your numbering?";
+            const string notUpToDateMessage = "Are you happy with your numbering?\r\rNOTE: If any numbering dialog is open please close this before continuing, Prism may fail if you move forward with numbering windows active.";
             const string notUpToDateTitle = "Numbering";
             return CreateYesNoForm(notUpToDateMessage, notUpToDateTitle);
             //return MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
@@ -337,7 +337,7 @@ namespace Prism
 
         public static void IncorrectlyAssignedDrawings()
         {
-            string notUpToDateMessage = "You have drawings that are not assigned to correctly, in the Title 1 field of each drawing the folder to print to must be asssigned. Title 1 must contain one of the following: \r\"ASS\", \"FIT\", \"PRT\", \"SHA\", \"PGC\", \"Not Required\" \r\rIf this issue persists seek help from the development team.";
+            string notUpToDateMessage = "You have drawings that are not assigned to correctly, in the Title 1 field of each drawing the folder to print to must be asssigned. Title 1 must contain one of the following: \r\"ASS\", \"FIT\", \"PRT\", \"SHA\", \"PGC\", \"WLD\", \"Not Required\" \r\rIf this issue persists seek help from the development team.";
             const string notUpToDateTitle = "Update drawings";
             CreateOKForm(notUpToDateMessage, notUpToDateTitle);
             //MessageBox.Show(notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);

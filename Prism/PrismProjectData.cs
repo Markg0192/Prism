@@ -8,7 +8,7 @@ namespace Prism
     /// </summary>
     public class PrismProjectData
     {
-        public PrismProjectData(ProjectInfo projectInfo, string modelPath)
+        public PrismProjectData(ProjectInfo projectInfo, string modelPath, ExternalService.WebService1 webService)
         {
             pInfo = projectInfo;
             ProjName = projectInfo.Name;
@@ -21,6 +21,7 @@ namespace Prism
             Full = First + " " + Last;
             Initials = new string(new char[] { First.ToCharArray()[0], Last.ToCharArray()[0] }).ToUpper();
             ProjPath = modelPath;
+            WebService = webService;
         }
 
         public readonly string ProjNumberAndName;
@@ -34,6 +35,7 @@ namespace Prism
         public readonly string Initials;
         public bool IsVariation = false;
         public ProjectInfo pInfo;
+        public ExternalService.WebService1 WebService;
 
         private string Capitalise(string original)
         {

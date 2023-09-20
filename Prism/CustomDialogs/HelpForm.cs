@@ -11,7 +11,7 @@ namespace Prism
         private string HelpFolder = @"\\sev-los-fs1\application data$\Prism\Help";
         private HelpNode RootNode;
 
-        public HelpForm(string name, string parent)
+        public HelpForm(string name, string parent, ExternalService.WebService1 service)
         {
             InitializeComponent();
             CenterToScreen();
@@ -19,7 +19,7 @@ namespace Prism
 
             TreeView.SelectedImageIndex = 2;
 
-            CreateHelpFromRootFolder(HelpFolder);
+           // CreateHelpFromRootFolder(HelpFolder, service);
 
             if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(parent))
                 Browser.Navigate(HelpFolder + @"\Index.mht");
@@ -51,12 +51,12 @@ namespace Prism
             }
         } 
 
-        private void CreateHelpFromRootFolder(string folderpath)
+       /* private void CreateHelpFromRootFolder(int filePathLine, ExternalService.WebService1 service)
         {
-            if (!Directory.Exists(folderpath)) return;
+            if (!service.DirectoryExists(filePathLine)) return;
 
             RootNode = new HelpNode("Index", folderpath + @"\Index.mht");
-            AddNodes(ref RootNode, folderpath);
+            AddNodes(ref RootNode, folderpath, service);
 
             var root = new TreeNode("Index");
             root.ImageIndex = 0;
@@ -65,22 +65,22 @@ namespace Prism
             TreeView.Nodes.Add(root);
             BuildTree(RootNode, root);
         }
-
-        private void AddNodes(ref HelpNode root, string folderpath)
+       */
+     /*   private void AddNodes(ref HelpNode root, string folderpath, ExternalService.WebService1 service)
         {
-            var directories = Directory.GetDirectories(folderpath);
+            var directories = service.GetDirectories(folderpath);// Directory.GetDirectories(folderpath);
             foreach (var d in directories)
             {
                 var name = new DirectoryInfo(Path.GetDirectoryName(d + "\\")).Name;
                 if (name.Contains("-")) name = name.Split('-')[1];
 
                 var filepath = d + "\\" + name + ".mht";
-                var files = Directory.GetFiles(d + "\\", "*.mht");
+                var files = service.DirectoryGetFiles(d + "\\", "*.mht");
                 if (!files.Contains(filepath)) break;
                 var newNode = new HelpNode(name, filepath);
-                foreach (var dir in Directory.GetDirectories(d + "\\"))
+                foreach (var dir in service.GetDirectories(d + "\\"))
                 {
-                    AddNodes(ref newNode, d + "\\");
+                    AddNodes(ref newNode, d + "\\", service);
                 }
 
                 foreach (var file in files)
@@ -96,7 +96,7 @@ namespace Prism
 
                 root.NodeList.Add(newNode);
             }
-        }
+        }*/
 
         private class HelpNode
         {

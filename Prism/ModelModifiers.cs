@@ -92,7 +92,7 @@ namespace Prism
             part.SetUserProperty(ModelUDA.CurrentStageDate(stageNumber), projectData.Date);
             if (stageNumber == 3 && !isSeversafe)
             {
-                TableRow row = UniClassCodes.GetUniClassDetailForPart(projectData.ProjNumberAndName, part);
+                TableRow row = UniClassCodes.GetUniClassDetailForPart(projectData.ProjNumberAndName, part, projectData.WebService);
                 if (row != null)
                 {
                     ModifyUDA(part, "SEV-UDA-130", row.Code);
@@ -107,7 +107,7 @@ namespace Prism
             part.Modify();
             if (stageNumber == 7 && !Operation.IsNumberingUpToDate(part))
             {
-                Logging.PartsModifiedAfterRun();
+               // Logging.PartsModifiedAfterRun();
                 PrismWarnings.NumbersNoLongerUpToDate();
 
                 return false;
@@ -130,7 +130,7 @@ namespace Prism
             string timesOrdered = "";
             bolts.GetUserProperty(ModelUDA.TimesBoltOrdered(), ref timesOrdered);
 
-            if (timesOrdered != "")
+            if (timesOrdered != "" && timesOrdered.Contains("Times ordered"))
             {
                 var nu = timesOrdered.Split('=');
                 int newOrderCount = Convert.ToInt32(nu[1]) + 1;
@@ -195,9 +195,9 @@ namespace Prism
             }
         }
 
-        public static void AddPrelimMarks(this SelectedObjects selectedObjects, PrismProjectData pData)
+        public static void AddPrelimMarks(this SelectedObjects selectedObjects, PrismProjectData pData, ExternalService.WebService1 service)
         {
-            int currentLastNumber = Logging.GetLastUsedPrelim(pData.ProjNumberAndName);
+            int currentLastNumber = Logging.GetLastUsedPrelim(pData.ProjNumberAndName, service);
 
             foreach (Part p in selectedObjects.SelectedModelParts)
             {
@@ -207,7 +207,7 @@ namespace Prism
                     {
                         Console.WriteLine("Failed to read last number");
                         currentLastNumber = 1;
-                        Logging.SetLastUsedPrelim(pData.ProjNumberAndName, currentLastNumber);
+                        Logging.SetLastUsedPrelim(pData.ProjNumberAndName, currentLastNumber, service);
                     }
                     else
                     {
@@ -218,7 +218,7 @@ namespace Prism
                 currentLastNumber++;
             }
 
-            Logging.SetLastUsedPrelim(pData.ProjNumberAndName, currentLastNumber);
+            Logging.SetLastUsedPrelim(pData.ProjNumberAndName, currentLastNumber, service);
         }
 
         public static List<Part> SelectSpecialTaggedInSelection(SelectedObjects selectedObjects)

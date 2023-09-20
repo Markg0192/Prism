@@ -11,7 +11,7 @@ namespace Prism.ButtonOperations
 
             ModelModifiers.SelectParts(myObjects.SelectedModelParts);
             if (!myObjects.SelectedModelParts.ModifyAttributes(stageNumber, projectData)) { return false; }
-            Logging.LogProgress(projectData.ProjName, "Material 1", ModelChecker.IncorrectNameAndClass.Count + ModelChecker.MissingExecutionClass.Count, myObjects.AssembliesList.Count);
+            Logging.LogProgress(projectData.ProjName, "Material 1", ModelChecker.IncorrectNameAndClass.Count + ModelChecker.MissingExecutionClass.Count, myObjects.AssembliesList.Count, projectData.WebService);
             return true;
 
         }
