@@ -333,10 +333,9 @@ namespace Prism
         {
             _webService = new WebService1();
             AuthHeader soapHead = new AuthHeader();
-            SecurityUtils secUtils = new SecurityUtils("Cli2Ex");
+            SecurityUtils secUtils = new SecurityUtils("Extd6L!u8nO1%qR7");
             
             soapHead.Username = secUtils.Encrypt(Environment.UserName);
-            soapHead.Password = secUtils.Encrypt("admin");
             soapHead.ProgramName = secUtils.Encrypt("Prism");
             soapHead.ProgramVersion = secUtils.Encrypt(System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString());
             soapHead.DomainName = secUtils.Encrypt(Environment.UserDomainName);
