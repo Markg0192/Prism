@@ -9,8 +9,6 @@ using Application = Microsoft.Office.Interop.Excel.Application;
 using Model = Tekla.Structures.Model.Model;
 using Point = Tekla.Structures.Geometry3d.Point;
 using Tekla.Structures.Geometry3d;
-using Tekla.Structures;
-using System.Net;
 
 namespace Prism
 {

@@ -83,6 +83,9 @@ namespace Prism
             SetNextPrelimToUseLabel();
 
             Logging.AddToMaterialOrderProcessedCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndName), _webService);
+
+           
+            
             EndFunction(1);
         }
 
@@ -172,10 +175,13 @@ namespace Prism
 
         private void btn_SpecialOperations_Click(object sender, EventArgs e)
         {
-            Logging.AddToMaterialOrderProcessedCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndName), _webService);
-            Logging.AddToFabCompleteCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndName), _webService);
+            _webService.CreateDirectory(50, "\\\\sev-los-fs1\\application data$\\Prism\\BadFile");
 
-       /*     Logging.LogProgress(_projectData.ProjName, "1", 1, 10, _projectData.WebService);
+
+          //Logging.AddToMaterialOrderProcessedCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndName), _webService);
+          //Logging.AddToFabCompleteCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndName), _webService);
+
+          /*Logging.LogProgress(_projectData.ProjName, "1", 1, 10, _projectData.WebService);
 
             int currentLastNumber = Logging.GetLastUsedPrelim(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndName), _projectData.WebService);
 
