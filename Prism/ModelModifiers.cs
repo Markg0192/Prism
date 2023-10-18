@@ -92,7 +92,7 @@ namespace Prism
             part.SetUserProperty(ModelUDA.CurrentStageDate(stageNumber), projectData.Date);
             if (stageNumber == 3 && !isSeversafe)
             {
-                TableRow row = UniClassCodes.GetUniClassDetailForPart(projectData.ProjNumberAndName, part, projectData.WebService);
+                TableRow row = UniClassCodes.GetUniClassDetailForPart(projectData.ProjNumberAndGuid, part, projectData.WebService);
                 if (row != null)
                 {
                     ModifyUDA(part, "SEV-UDA-130", row.Code);
@@ -197,7 +197,7 @@ namespace Prism
 
         public static void AddPrelimMarks(this SelectedObjects selectedObjects, PrismProjectData pData, ExternalService.WebService1 service)
         {
-            int currentLastNumber = Logging.GetLastUsedPrelim(pData.ProjNumberAndName, service);
+            int currentLastNumber = Logging.GetLastUsedPrelim(pData.ProjNumberAndGuid, service);
 
             foreach (Part p in selectedObjects.SelectedModelParts)
             {
@@ -207,7 +207,7 @@ namespace Prism
                     {
                         Console.WriteLine("Failed to read last number");
                         currentLastNumber = 1;
-                        Logging.SetLastUsedPrelim(pData.ProjNumberAndName, currentLastNumber, service);
+                        Logging.SetLastUsedPrelim(pData.ProjNumberAndGuid, currentLastNumber, service);
                     }
                     else
                     {
@@ -218,7 +218,7 @@ namespace Prism
                 currentLastNumber++;
             }
 
-            Logging.SetLastUsedPrelim(pData.ProjNumberAndName, currentLastNumber, service);
+            Logging.SetLastUsedPrelim(pData.ProjNumberAndGuid, currentLastNumber, service);
         }
 
         public static List<Part> SelectSpecialTaggedInSelection(SelectedObjects selectedObjects)

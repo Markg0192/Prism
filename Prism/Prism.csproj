@@ -250,6 +250,12 @@
     <Compile Include="CustomDialogs\ProjectControllers.Designer.cs">
       <DependentUpon>ProjectControllers.cs</DependentUpon>
     </Compile>
+    <Compile Include="CustomDialogs\ResetPrelim.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CustomDialogs\ResetPrelim.Designer.cs">
+      <DependentUpon>ResetPrelim.cs</DependentUpon>
+    </Compile>
     <Compile Include="CustomDialogs\SpecialFittingOrders.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -399,6 +405,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="CustomDialogs\ProjectControllers.resx">
       <DependentUpon>ProjectControllers.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CustomDialogs\ResetPrelim.resx">
+      <DependentUpon>ResetPrelim.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="CustomDialogs\SpecialFittingOrders.resx">
       <DependentUpon>SpecialFittingOrders.cs</DependentUpon>

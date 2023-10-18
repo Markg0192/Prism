@@ -16,7 +16,7 @@ namespace Prism
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new PrismUI());*/
 
-            bool internalUser = System.Environment.UserDomainName == "SFPLC";
+            bool internalUser = System.Environment.UserDomainName == "SFRPLC";
             bool validExternalUser = false;
 
             Application.EnableVisualStyles();

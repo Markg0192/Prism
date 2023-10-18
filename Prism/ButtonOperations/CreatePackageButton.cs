@@ -50,7 +50,7 @@ namespace Prism.ButtonOperations
 
             EmailWriter.WriteFabEmail(projectData, myObjects, reportManager.FabReportPrefix, issueNumber, phaseNumber, siteDate, reportManager.Folders.FabPath);
 
-            Logging.UpdateFrozenDrawingCount(projectData.ProjNumberAndName, drawingManager.FrozenDrawings.Count, drawingManager.UnFrozenDrawings.Count, projectData.WebService);
+            Logging.UpdateFrozenDrawingCount(projectData.ProjNumberAndGuid, drawingManager.FrozenDrawings.Count, drawingManager.UnFrozenDrawings.Count, projectData.WebService);
             Logging.LogProgress(projectData.ProjName, "Fab Package", 0, myObjects.AssembliesList.Count, projectData.WebService);
 
             return true;

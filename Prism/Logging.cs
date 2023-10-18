@@ -60,13 +60,19 @@ namespace Prism
 
             foreach (string folder in service.GetDirectories(Constants.PrismDataLogLocation, ""))
             {
-                logExists = service.FileExists(folder, 8, pData.ProjNumberAndName);
+                if(service.FileExists(folder, 8, pData.ProjNumberAndGuid))
+                {
+                    logExists = true;
+                    continue;
+                }
             }
             if (!logExists)
             { 
-                service.CreateNewDirectory(Constants.PrismModelData, pData.ProjNumberAndName);
+                service.CreateNewDirectory(Constants.PrismModelData, pData.ProjNumberAndGuid);
   
-                WriteFirstDataLog(Constants.PrismModelData, Constants.ModelProjectInforLocation(pData.ProjNumberAndName), pData.pInfo, service);
+                WriteFirstDataLog(Constants.PrismModelData, Constants.ModelProjectInforLocation(pData.ProjNumberAndGuid), pData.pInfo, service);
+
+                PrismWarnings.FirstTimeInTheModel();
             }
         }
 
@@ -146,11 +152,15 @@ namespace Prism
         {
             if (Environment.UserName != "mark.gibson")
             {
+                bool isPrelimReset = buttonPress.StartsWith("PRELIM RESET");
+                string textType1 = isPrelimReset ? "Number before reset:" : "Assemblies processed:";
+                string textType2 = isPrelimReset ? "Number after reset:" : "Auto-Fix count:";
+
                 string[] content = new string[]
                 {
                     "--------------------------------------------------------------------------------------------------",
                     $"{DateTime.Now} - User: {Environment.UserName} - Model: {modelName}",
-                    $"Button press: {buttonPress} - Assemblies processed: {totalObjects} - Auto-Fix count: {autoFixCount}"
+                    $"Button press: {buttonPress} - {textType1} {totalObjects} - {textType2} {autoFixCount}"
                 };
 
                 service.WriteAppendStringsToFile(Constants.PrismLogLocation, content, "");

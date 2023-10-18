@@ -82,10 +82,10 @@ namespace Prism
 
             SetNextPrelimToUseLabel();
 
-            Logging.AddToMaterialOrderProcessedCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndName), _webService);
+            Logging.AddToMaterialOrderProcessedCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndGuid), _webService);
 
-           
-            
+
+
             EndFunction(1);
         }
 
@@ -178,18 +178,18 @@ namespace Prism
             _webService.CreateDirectory(50, "\\\\sev-los-fs1\\application data$\\Prism\\BadFile");
 
 
-          //Logging.AddToMaterialOrderProcessedCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndName), _webService);
-          //Logging.AddToFabCompleteCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndName), _webService);
+            //Logging.AddToMaterialOrderProcessedCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndName), _webService);
+            //Logging.AddToFabCompleteCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndName), _webService);
 
-          /*Logging.LogProgress(_projectData.ProjName, "1", 1, 10, _projectData.WebService);
+            /*Logging.LogProgress(_projectData.ProjName, "1", 1, 10, _projectData.WebService);
 
-            int currentLastNumber = Logging.GetLastUsedPrelim(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndName), _projectData.WebService);
+              int currentLastNumber = Logging.GetLastUsedPrelim(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndName), _projectData.WebService);
 
-            Logging.SetLastUsedPrelim(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndName), 20, _projectData.WebService);
+              Logging.SetLastUsedPrelim(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndName), 20, _projectData.WebService);
 
-            currentLastNumber = Logging.GetLastUsedPrelim(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndName), _projectData.WebService);
+              currentLastNumber = Logging.GetLastUsedPrelim(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndName), _projectData.WebService);
 
-            Logging.UpdateFrozenDrawingCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndName), 12, 21, _projectData.WebService);*/
+              Logging.UpdateFrozenDrawingCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndName), 12, 21, _projectData.WebService);*/
         }
 
         public bool InitialSetup(StageTypes stageType, bool checkForPreviousSteps)
@@ -257,7 +257,7 @@ namespace Prism
 
             await Task.Run(() => FabMisc.FabMiscOp(_model, txt_SiteDate.Text, _selectedObjects, runSeversafe, myReportManager, divisionNo, _projectData));
 
-            Logging.AddToFabCompleteCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndName), _webService);
+            Logging.AddToFabCompleteCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndGuid), _webService);
 
             EndFunction(1);
         }
@@ -313,7 +313,7 @@ namespace Prism
             SetNextPrelimToUseLabel();
             SetStatusLabels($"Connected to: {_projectData.ProjNumber}-{_projectData.ProjName}");
         }
- 
+
         private void CheckSpecialUser()
         {
             if (Constants.SpecialOperationUser())
@@ -340,12 +340,12 @@ namespace Prism
             _webService = new WebService1();
             AuthHeader soapHead = new AuthHeader();
             SecurityUtils secUtils = new SecurityUtils("Extd6L!u8nO1%qR7");
-            
+
             soapHead.Username = secUtils.Encrypt(Environment.UserName);
             soapHead.ProgramName = secUtils.Encrypt("Prism");
             soapHead.ProgramVersion = secUtils.Encrypt(System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString());
             soapHead.DomainName = secUtils.Encrypt(Environment.UserDomainName);
-           
+
             _webService.AuthHeaderValue = soapHead;
 
             try { _webService.HelloWorld(); }
@@ -531,18 +531,6 @@ namespace Prism
             CheckForMaterialButton();
         }
 
-        private void btn_ResetPrelims_Click(object sender, EventArgs e)
-        {
-            bool performReset = PrismWarnings.ResetPrelimMarking();
-            if (performReset)
-            {
-                Logging.SetLastUsedPrelim(_projectData.ProjNumberAndName, Convert.ToInt32(txt_ResetPrelimTo.Text), _projectData.WebService);
-                SetNextPrelimToUseLabel();
-                //ModelModifiers.ClearPrelimMarking(_model.GetProjectInfo(), txt_ResetPrelimTo.Text);
-                //PrismWarnings.PrelimStartReset(txt_ResetPrelimTo.Text);
-            }
-        }
-
         private void cmb_ColumnOrientationType_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (cmb_ColumnOrientationType.Text == "Holes and plate")
@@ -685,7 +673,7 @@ namespace Prism
 
         private void SetNextPrelimToUseLabel()
         {
-            lbl_NextPrelim.Text = Logging.GetLastUsedPrelim(_projectData.ProjNumberAndName, _projectData.WebService).ToString();
+            lbl_NextPrelim.Text = Logging.GetLastUsedPrelim(_projectData.ProjNumberAndGuid, _projectData.WebService).ToString();
         }
 
         private void btn_PrelimLabelRefresh_Click(object sender, EventArgs e)
@@ -695,7 +683,7 @@ namespace Prism
 
         private void uniClassCodesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var form = new UniClass_Codes(_projectData.ProjNumberAndName.ToString(), _webService);
+            var form = new UniClass_Codes(_projectData.ProjNumberAndGuid.ToString(), _webService);
             form.ShowDialog();
         }
 
@@ -708,6 +696,13 @@ namespace Prism
         private void txt_MatSiteDate_TextChanged(object sender, EventArgs e)
         {
             CheckForAcceptableSiteDate(ref txt_MatSiteDate);
+        }
+
+        private void advancedSettingsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ResetPrelim resetPrelim = new ResetPrelim(_projectData, _webService);
+            resetPrelim.ShowDialog();
+            SetNextPrelimToUseLabel();
         }
     }
 }
