@@ -8,10 +8,9 @@ namespace Prism
 {
     public static class UniClassCodes
     {
-        public static TableRow GetUniClassDetailForPart(string jobName, Part part)
+        public static TableRow GetUniClassDetailForPart(string jobName, Part part, ExternalService.WebService1 service)
         {
-            string fileLocation = Constants.ModelDataLogLocation(jobName) + "\\Project Info.txt";
-            TableData td = UniClass_Codes.ReadTableData(fileLocation);
+            TableData td = UniClass_Codes.ReadTableData(Constants.ModelProjectInforLocation(jobName), service);
 
             foreach (TableRow row in td.Rows)
             {

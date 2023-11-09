@@ -31,6 +31,7 @@ namespace Prism
         public List<Drawing> ShaDrawings = new List<Drawing>();
         public List<Drawing> PrtDrawings = new List<Drawing>();
         public List<Drawing> PgcDrawings = new List<Drawing>();
+        public List<Drawing> WldDrawings = new List<Drawing>();
         public List<Drawing> NotRequiredDrawings = new List<Drawing>();
         public List<Drawing> NotReqAssDrawings = new List<Drawing>();
         public List<Drawing> NotLabelledDrawings = new List<Drawing>();
@@ -42,11 +43,11 @@ namespace Prism
         public DrawingManager(Model model, PrismProjectData projectData, string phaseNum, string issueNum)
         {
             _folders = new FolderManager(projectData, phaseNum, issueNum);
-            Logging.DebugLog("folder manaager made", "");
+            Logging.DebugLog("folder manaager made", "", projectData.WebService);
             this._model = model;
 
             DrawingsAreUpToDate = CreateDrawingList();
-            Logging.DebugLog("drawingList made", "");
+            Logging.DebugLog("drawingList made", "", projectData.WebService);
         }
 
         public static List<PrismDrawing> PrismDrawingList = new List<PrismDrawing>();
@@ -61,24 +62,20 @@ namespace Prism
         }
         public static void PrintDrawings(ReportManager reportManager, DrawingManager drawingManager, List<int> drawingCount)
         {
-            if (drawingManager.FitDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\FIT", 0, 1, reportManager);
-            if (drawingManager.PgcDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\PGC", 4, 5, reportManager);
-            if (drawingManager.PrtDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\PRT", 6, 7, reportManager);
-            if (drawingManager.ShaDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\SHA", 8, 9, reportManager);
+            if (drawingManager.FitDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\FIT", 0, 1, reportManager, false);
+            if (drawingManager.PgcDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\PGC", 4, 5, reportManager, false);
+            if (drawingManager.PrtDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\PRT", 6, 7, reportManager, false);
+            if (drawingManager.ShaDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\SHA", 8, 9, reportManager, false);
+            if (drawingManager.AssDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\ASS", 10, 11, reportManager, true);
+            if (drawingManager.WldDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\WLD", 12, 13, reportManager, true);
 
-            if (drawingManager.AssDrawings.Count != 0)
-            {
-                Thread.Sleep(2000);
-                PrismMacroBuilder.PrintSelectedASSDrawings(reportManager.Folders.FabFolder, drawingManager.AssDrawings.Count);
-                WaitForPrinting(reportManager.Folders.FabPath + "\\ASS", drawingManager.AssDrawings.Count);
-                PrismMacroBuilder.IssueAndLockStampOn();
-            }
+            PrismMacroBuilder.ClearPrintDialog();
         }
 
-        public static void PrintAndIssueDrawings(string issueFolder, string issuePath, List<int> drawingCount, string folderPath, int countIndex1, int countIndex2, ReportManager reportManager)
+        public static void PrintAndIssueDrawings(string issueFolder, string issuePath, List<int> drawingCount, string folderPath, int countIndex1, int countIndex2, ReportManager reportManager, bool isAss)
         {
             Thread.Sleep(2000);
-            PrismMacroBuilder.PrintSelectedDrawings(issueFolder, folderPath, drawingCount[countIndex1], drawingCount[countIndex2]);
+            PrismMacroBuilder.PrintSelectedDrawings(Constants.PrismPackageFolderName + "\\\\" + issueFolder, folderPath, drawingCount[countIndex1], drawingCount[countIndex2], isAss);
             WaitForPrinting(issuePath + folderPath, drawingCount[countIndex2]);
             PrismMacroBuilder.IssueAndLockStampOn();
         }
@@ -132,12 +129,12 @@ namespace Prism
                 var drawing = Tekla.Structures.DrawingInternal.Operation.GetDrawing(id);
 
                 if (!(drawing is GADrawing))
-                { 
+                {
                     drawing.Select();
 
                     if (drawing.IsFrozen) { FrozenDrawings.Add(drawing); }
                     else { UnFrozenDrawings.Add(drawing); }
-                  
+
                     string title1 = drawing.Title1;
                     if (drawing.UpToDateStatus != DrawingUpToDateStatus.DrawingIsUpToDate)
                     {
@@ -167,7 +164,10 @@ namespace Prism
                         case string t when t.Contains("PGC"):
                             AllFittings.Add(drawing);
                             PgcDrawings.Add(drawing);
-                            break; 
+                            break;
+                        case string t when t.Contains("WLD"):
+                            WldDrawings.Add(drawing);
+                            break;
                         case string t when t.Contains("Not Required") && drawing is SinglePartDrawing:
                             AllFittings.Add(drawing);
                             NotRequiredDrawings.Add(drawing);
@@ -215,14 +215,14 @@ namespace Prism
             }
             using (StreamReader sr = new StreamReader(idPath))
             {
-                Logging.DebugLog("Found idDessin", "");
+                //   Logging.DebugLog("Found idDessin", "");
 
                 string line;
                 while ((line = sr.ReadLine()) != null)
                 {
                     var list = line.Split(',');
                     List<string> newStringList = new List<string>();
-                    Logging.DebugLog(list[0] + "-" + list[1], "");
+                    //  Logging.DebugLog(list[0] + "-" + list[1], "");
 
                     foreach (var item in list)
                     {
@@ -245,7 +245,7 @@ namespace Prism
         public void PrintDrawingToModelFolder(string fabPath)
         {
             string printerExeFile = GetDPMPrinterExeFile();
-            Logging.DebugLog("Got dpm printer exe" + printerExeFile, "");
+            //   Logging.DebugLog("Got dpm printer exe" + printerExeFile, "");
 
             ParallelLoopResult result = Parallel.ForEach(PrismDrawingList, prismDrawing =>
             {
@@ -256,54 +256,54 @@ namespace Prism
                 process.WaitForExit();
             });
 
-            Logging.DebugLog("Drawing loop complete", "");
+            //  Logging.DebugLog("Drawing loop complete", "");
         }
 
-        public void PrintDrawingsToVault(SelectedObjects myObjects, ReportManager rp, string contractNumber)
-        {
-            string printerExeFile = GetDPMPrinterExeFile();
-            DrawingVaultInterface.Drawing dv = new DrawingVaultInterface.Drawing("cc89a98a-e0c4-480a-83f9-0b27ec66be2b");
-            string serverFileLocation = dv.ServerFileLocation;
-            contractNumber = ProcessContractNumber(contractNumber);
+        /* public void PrintDrawingsToVault(SelectedObjects myObjects, ReportManager rp, string contractNumber)
+         {
+             string printerExeFile = GetDPMPrinterExeFile();
+           //  DrawingVaultInterface.Drawing dv = new DrawingVaultInterface.Drawing("cc89a98a-e0c4-480a-83f9-0b27ec66be2b");
+             string serverFileLocation = dv.ServerFileLocation;
+             contractNumber = ProcessContractNumber(contractNumber);
 
-            IFCExporter.ExportIndividualIFC(myObjects, rp.Folders.IfcPath, contractNumber);
-            Logging.DebugLog("IFC exports complete", contractNumber);
+             IFCExporter.ExportIndividualIFC(myObjects, rp.Folders.IfcPath, contractNumber);
+             Logging.DebugLog("IFC exports complete", contractNumber);
 
-            //contractNumber = "102"; 
-            rp.Folders.CreateDrawingVaultFolders($"{serverFileLocation}{contractNumber}");
+             //contractNumber = "102"; 
+             rp.Folders.CreateDrawingVaultFolders($"{serverFileLocation}{contractNumber}");
 
-            List<string> drawings = new List<string>();
-            ParallelLoopResult result = Parallel.ForEach(PrismDrawingList, prismDrawing =>
-            {
-                string drawingNumber = prismDrawing.PdfName.Split('-')[0];
-                string revision = prismDrawing.RevMark == "0" ? "" : prismDrawing.RevMark; // if rev is 0 we need to return blank here for the vault
-                string fileLocation = $@"{serverFileLocation}{contractNumber}\{prismDrawing.DrawingFolderName}\{prismDrawing.PdfName}";
-                DateTime fileModifiedDate = DateTime.Now;
+             List<string> drawings = new List<string>();
+             ParallelLoopResult result = Parallel.ForEach(PrismDrawingList, prismDrawing =>
+             {
+                 string drawingNumber = prismDrawing.PdfName.Split('-')[0];
+                 string revision = prismDrawing.RevMark == "0" ? "" : prismDrawing.RevMark; // if rev is 0 we need to return blank here for the vault
+                 string fileLocation = $@"{serverFileLocation}{contractNumber}\{prismDrawing.DrawingFolderName}\{prismDrawing.PdfName}";
+                 DateTime fileModifiedDate = DateTime.Now;
 
-                drawings.Add($"{contractNumber}, {drawingNumber}, {revision}, {prismDrawing.DrawingSize}, {fileLocation}, {fileModifiedDate.ToString()}");
+                 drawings.Add($"{contractNumber}, {drawingNumber}, {revision}, {prismDrawing.DrawingSize}, {fileLocation}, {fileModifiedDate.ToString()}");
 
-                ProcessStartInfo startInfo = new ProcessStartInfo();
-                startInfo.FileName = printerExeFile;
+                 ProcessStartInfo startInfo = new ProcessStartInfo();
+                 startInfo.FileName = printerExeFile;
 
-                startInfo.Arguments = GetArguments(prismDrawing.DpmPrinterSetting, prismDrawing.DpmFileName, $@"{serverFileLocation}{contractNumber}\{prismDrawing.DpmPDFSaveName}");
-                var process = System.Diagnostics.Process.Start(startInfo);
-                process.WaitForExit();
-            });
+                 startInfo.Arguments = GetArguments(prismDrawing.DpmPrinterSetting, prismDrawing.DpmFileName, $@"{serverFileLocation}{contractNumber}\{prismDrawing.DpmPDFSaveName}");
+                 var process = System.Diagnostics.Process.Start(startInfo);
+                 process.WaitForExit();
+             });
 
-            // dv.ReviewLog();
-            dv.CommitChanges(drawings);
-            dv.Dispose();
-        }
+             // dv.ReviewLog();
+             dv.CommitChanges(drawings);
+             dv.Dispose();
+         }*/
 
         private static string GetDPMPrinterExeFile()
         {
             string binString = null;
             TeklaStructuresSettings.GetAdvancedOption("XSBIN", ref binString);
 
-            Logging.DebugLog($"bin string = {binString}", "");
+            //  Logging.DebugLog($"bin string = {binString}", "");
 
             string exeFile = @"applications\Tekla\Model\DPMPrinter\DPMPrinterCommand.exe";
-            Logging.DebugLog(Path.Combine(binString, exeFile), "");
+            // Logging.DebugLog(Path.Combine(binString, exeFile), "");
 
             return Path.Combine(binString, exeFile);
         }

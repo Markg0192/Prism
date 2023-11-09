@@ -29,11 +29,16 @@ namespace Prism
                 ModelModifiers.PerformNumbering(); //Perform a numbering
                 myFabsecCarcasses.SavePrelimNumbers(); //save prelim marks on carcasses (should look like PG1-1, PG1-2, PG2-1, PG2-2 etc...)
 
-                List<Part> myFabsecs = myFabsecCarcasses.CopyPGs(selectedObjects); //Copy carcasses back into model space and add these to selected objects
-                myFabsecs.RemoveGreenFromFabsecs(); // remove green from model space fabsecs
-                myFabsecs.ReMarkModelFabsecs(); // remove unique prefixing from model members and return to local phase numbering
-                myFabsecCarcasses.CreateCarcassDrawings(selectedObjects, model); //Create carcass drawings from the members in the material grave
-                if (!myFabsecCarcasses.ModifyAttributes(2, projectData)) { return false; }
+                bool result = PrismWarnings.AreYouHappyWithNumbering();
+
+                if (result)
+                {
+                    List<Part> myFabsecs = myFabsecCarcasses.CopyPGs(selectedObjects); //Copy carcasses back into model space and add these to selected objects
+                    myFabsecs.RemoveGreenFromFabsecs(); // remove green from model space fabsecs
+                    myFabsecs.ReMarkModelFabsecs(); // remove unique prefixing from model members and return to local phase numbering
+                    myFabsecCarcasses.CreateCarcassDrawings(selectedObjects, model); //Create carcass drawings from the members in the material grave
+                    if (!myFabsecCarcasses.ModifyAttributes(2, projectData)) { return false; }
+                }
             }
             return true;
         }

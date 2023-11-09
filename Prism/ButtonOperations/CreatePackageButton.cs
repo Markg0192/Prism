@@ -16,12 +16,9 @@ namespace Prism.ButtonOperations
             if (runSeversafe) { if (!reportManager.Folders.CreateEpoFolder()) return false; }
 
             if (myObjects.SeversafePresent) { myObjects.NonSeversafeParts.SelectParts(); }
-            if (!Constants.IsSpecialPerson()) { myObjects.ExportBSWX(reportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType); }
 
             CpuSpeedCheck(cpuCounter);
-            ReportManager.SelectDrawingsInDocManager(myObjects.NonSeversafeParts);
-            
-            reportManager.CreateFabReports(myObjects.NonSeversafeParts, myObjects.AllBolts);
+            ReportManager.SelectDrawingsInDocManager(myObjects.NonSeversafeParts);           
 
             CpuSpeedCheck(cpuCounter);
             DrawingManager drawingManager = new DrawingManager(model, projectData, phaseNumber, issueNumber);
@@ -33,25 +30,29 @@ namespace Prism.ButtonOperations
             if (drawingManager.NotLabelledDrawings.Count != 0)
             {
                 PrismWarnings.IncorrectlyAssignedDrawings();
-                Logging.UnAssignedDrawings(projectData.ProjNumber, drawingManager.NotLabelledDrawings);
+                Logging.UnAssignedDrawings(projectData.ProjNumber, drawingManager.NotLabelledDrawings, projectData.WebService);
                 return false;
             }
 
             List<int> drawingCount = CountDrawings(drawingManager);
             DrawingManager.PrintDrawings(reportManager, drawingManager, drawingCount);
+ 
+            reportManager.CreateFabReports(myObjects.NonSeversafeParts, myObjects.AllBolts);
+            if (!Constants.IsSpecialPerson()) { myObjects.ExportBSWX(reportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType); }
 
             if (!myObjects.NonSeversafeParts.ModifyAttributes((int)stageType, projectData)) { return false; }
 
             reportManager.Folders.RemoveUnusedFolders();
 
-            reportManager.Folders.ZipFolder(reportManager.Folders.FabPath);
+            bool zipFileCanBeAttached = reportManager.Folders.ZipFolder(reportManager.Folders.FabPath);
 
-            PrismWarnings.FabPackComplete(projectData);
+            PrismWarnings.FabPackComplete(projectData, zipFileCanBeAttached);
 
-            EmailWriter.WriteFabEmail(projectData, myObjects, reportManager.FabReportPrefix, issueNumber, phaseNumber, siteDate, reportManager.Folders.FabPath);
+            EmailWriter.WriteFabEmail(projectData, myObjects, reportManager.FabReportPrefix, issueNumber, phaseNumber, siteDate, reportManager.Folders.FabPath, zipFileCanBeAttached);
 
-            Logging.UpdateFrozenDrawingCount(projectData.ProjNumberAndName, drawingManager.FrozenDrawings.Count, drawingManager.UnFrozenDrawings.Count);
-            Logging.LogProgress(projectData.ProjName, "Fab Package", 0, myObjects.AssembliesList.Count);
+            Logging.UpdateFrozenDrawingCount(projectData.ProjNumberAndGuid, drawingManager.FrozenDrawings.Count, drawingManager.UnFrozenDrawings.Count, projectData.WebService);
+            Logging.LogProgress(projectData.ProjNumberAndName, "Fab Package", 0, myObjects.AssembliesList.Count, projectData.WebService);
+
             return true;
         }
 
@@ -78,7 +79,13 @@ namespace Prism.ButtonOperations
             int shaStartPoint = prtStartPoint + prtEndPoint;
             int shaEndPoint = dm.ShaDrawings.Count;
 
-            return new List<int>() { fitStartPoint, fitEndPoint, notRequiredStartPoint, notRequiredEndPoint, pgcStartPoint, pgcEndPoint, prtStartPoint, prtEndPoint, shaStartPoint, shaEndPoint };
+            int assStartPoint = 0;
+            int assEndPoint = dm.AssDrawings.Count;
+
+            int wldStartPoint = assEndPoint;
+            int wldEndPoint = dm.WldDrawings.Count;
+
+            return new List<int>() { fitStartPoint, fitEndPoint, notRequiredStartPoint, notRequiredEndPoint, pgcStartPoint, pgcEndPoint, prtStartPoint, prtEndPoint, shaStartPoint, shaEndPoint, assStartPoint, assEndPoint, wldStartPoint, wldEndPoint };
         }
     }
 }

@@ -102,7 +102,7 @@ namespace Prism
                         "                wpf.View(\"DPMPrinterFeature.DPMPrinterViewWindow\").Find(\"AID_PDFPD_LoadSaveCombo\").As.Selector.Select(0);" + Environment.NewLine +
 
                         "                wpf.View(\"DPMPrinterFeature.DPMPrinterViewWindow\").Find(\"AID_PDFPD_SettingsTabControl\", \"AID_PDFPD_ParentStackPanel\", \"AID_PDFPD_FileLocationPanel\", \"AID_PDFPD_FileLocation\").As.TextBox.SetText(\"" + printLocation + "\\\\ASS\");" + Environment.NewLine +
-                       
+
                         "                wpf.View(\"DPMPrinterFeature.DPMPrinterViewWindow\").Find(\"AID_PDFPD_SettingsTabControl\", \"AID_PDFPD_ParentStackPanel\", \"AID_PDFPD_PrintTargetStackPanel\", \"AID_PDFPD_PDFRadio\").As.ToggleButton.State.SetChecked();" + Environment.NewLine +
                         "                wpf.View(\"DPMPrinterFeature.DPMPrinterViewWindow\").Find(\"AID_PDFPD_SettingsTabControl\", \"AID_PDFPD_ParentStackPanel\", \"AID_PDFPD_OrientationPanel\", \"AID_PDFPD_Orientation\").As.Selector.Select(0);" + Environment.NewLine +
                         "                wpf.View(\"DPMPrinterFeature.DPMPrinterViewWindow\").Find(\"AID_PDFPD_SettingsTabControl\", \"AID_PDFPD_ParentStackPanel\", \"AID_PDFPD_CenterDrawingOnPaper\").As.ToggleButton.State.SetChecked();" + Environment.NewLine +
@@ -151,7 +151,7 @@ namespace Prism
                         "         {" + Environment.NewLine +
                         "              Tekla.Macros.Wpf.Runtime.IWpfMacroHost wpf = runtime.Get<Tekla.Macros.Wpf.Runtime.IWpfMacroHost>();" + Environment.NewLine +
                         "              wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_ButtonIssue\").As.Button.Invoke();" + Environment.NewLine +
-                   //   "              wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_ButtonLockOn\").As.Button.Invoke();" + Environment.NewLine +
+                        //   "              wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_ButtonLockOn\").As.Button.Invoke();" + Environment.NewLine +
                         "          }" + Environment.NewLine +
                         "     }" + Environment.NewLine +
                         " }";
@@ -188,7 +188,7 @@ namespace Prism
                         "              wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_ShowAllDocuments\").As.Button.Invoke();" + Environment.NewLine +
                         "              wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_ButtonSelectDrawings\").As.Button.Invoke();" + Environment.NewLine +
                         "              wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_ButtonLockOff\").As.Button.Invoke();" + Environment.NewLine +
-                        "              wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_ButtonUnissue\").As.Button.Invoke();" + Environment.NewLine +           
+                        "              wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_ButtonUnissue\").As.Button.Invoke();" + Environment.NewLine +
                         "          }" + Environment.NewLine +
                         "     }" + Environment.NewLine +
                         " }";
@@ -199,8 +199,46 @@ namespace Prism
             Operation.RunMacro(Constants.IssueDrawings);
         }
 
-        public static void PrintSelectedDrawings(string fileToPrintTo, string folderName, int startPoint, int drawingCount)
+        public static void ClearPrintDialog()
         {
+            var macrodir = "";
+            TeklaStructuresSettings.GetAdvancedOption("XS_MACRO_DIRECTORY", ref macrodir);
+            var dir = macrodir.Split(';')[0];
+
+            var writer = new StreamWriter(dir + $@"\modeling\{Constants.ClearPrintDialog}");
+            var macro =
+                        "#pragma warning disable 1633 // Unrecognized #pragma directive" + Environment.NewLine +
+                        "#pragma reference \"Tekla.Macros.Wpf.Runtime\"" + Environment.NewLine +
+                        "#pragma reference \"Tekla.Macros.Runtime\"" + Environment.NewLine +
+                        "#pragma warning restore 1633 // Unrecognized #pragma directive" + Environment.NewLine +
+                        Environment.NewLine +
+                        "namespace UserMacros" + Environment.NewLine +
+                        "    {" + Environment.NewLine +
+                        "        public sealed class Macro" + Environment.NewLine +
+                        "        {" + Environment.NewLine +
+                        "            [Tekla.Macros.Runtime.MacroEntryPointAttribute()]" + Environment.NewLine +
+                        "            public static void Run(Tekla.Macros.Runtime.IMacroRuntime runtime)" + Environment.NewLine +
+                        "            {" + Environment.NewLine +
+                        "                Tekla.Macros.Wpf.Runtime.IWpfMacroHost wpf = runtime.Get<Tekla.Macros.Wpf.Runtime.IWpfMacroHost>();" + Environment.NewLine +
+                        "                wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_DataGridControl\").As.DataGrid.NewSelection.With(0).Invoke();" + Environment.NewLine +
+                        "                wpf.InvokeCommand(\"CommandRepository\", \"Common.PrintDrawings\");" + Environment.NewLine +
+                        "                wpf.View(\"DPMPrinterFeature.DPMPrinterViewWindow\").Find(\"AID_PDFPD_SettingsTabControl\", \"AID_PDFPD_ParentStackPanel\", \"AID_PDFPD_FileLocationPanel\", \"AID_PDFPD_FileLocation\").As.TextBox.SetText(\"./ \");" + Environment.NewLine +
+                        "                wpf.View(\"DPMPrinterFeature.DPMPrinterViewWindow\").As.Window.Close();" + Environment.NewLine +
+                        "                wpf.View(\"DocumentManager.MainWindow\").As.Window.Close();" + Environment.NewLine +
+                        "            }" + Environment.NewLine +
+                        "        }" + Environment.NewLine +
+                        "    }";
+
+            writer.Write(macro);
+            writer.Close();
+
+            Operation.RunMacro(Constants.ClearPrintDialog);
+        }
+
+        public static void PrintSelectedDrawings(string fileToPrintTo, string folderName, int startPoint, int drawingCount, bool isAss)
+        {
+            string drawingType = isAss ? "\"albl_Assembly_drawings\"" : "\"albl_single_part_drawings\"";
+
             string printLocation = $".\\\\{fileToPrintTo}";
             var macrodir = "";
             TeklaStructuresSettings.GetAdvancedOption("XS_MACRO_DIRECTORY", ref macrodir);
@@ -223,7 +261,7 @@ namespace Prism
                         "                Tekla.Macros.Wpf.Runtime.IWpfMacroHost wpf = runtime.Get<Tekla.Macros.Wpf.Runtime.IWpfMacroHost>();" + Environment.NewLine +
 
 
-                        "                wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_CategoryList\").As.Selector.DoSelection.With(\"albl_single_part_drawings\").Invoke();" + Environment.NewLine +
+                       $"                wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_CategoryList\").As.Selector.DoSelection.With({drawingType}).Invoke();" + Environment.NewLine +
 
                         "                wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_DataGridControl\", \"AID_DocMgr_Mark\").As.Button.Invoke();" + Environment.NewLine +
                         "                wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_DataGridControl\", \"AID_DocMgr_Title1\").As.Button.Invoke();" + Environment.NewLine +

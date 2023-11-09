@@ -1,0 +1,959 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:tns="http://www.severfield.com/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" targetNamespace="http://www.severfield.com/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://www.severfield.com/">
+      <s:element name="HelloWorld">
+        <s:complexType />
+      </s:element>
+      <s:element name="HelloWorldResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="HelloWorldResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AuthHeader" type="tns:AuthHeader" />
+      <s:complexType name="AuthHeader">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Username" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ProgramName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ProgramVersion" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DomainName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ExternalKey" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="InternalKey" type="s:string" />
+        </s:sequence>
+        <s:anyAttribute />
+      </s:complexType>
+      <s:element name="WriteToSpecificLine">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="filePathLine" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="lineToWriteTo" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="content" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="additionalPath" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="WriteToSpecificLineResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="WriteToSpecificLineResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="WriteAllLinesWithArray">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="filePathLine" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="content" type="tns:ArrayOfString" />
+            <s:element minOccurs="0" maxOccurs="1" name="addtionalPath" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfString">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="string" nillable="true" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="WriteAllLinesWithArrayResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="WriteAppendStringToFile">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="filePathLine" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="content" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="additionalPath" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="WriteAppendStringToFileResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="WriteAppendStringsToFile">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="filePathLine" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="content" type="tns:ArrayOfString" />
+            <s:element minOccurs="0" maxOccurs="1" name="additionalPath" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="WriteAppendStringsToFileResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="ReadSpecificLine">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="filePathLine" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="lineToRead" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="additionalPath" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ReadSpecificLineResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ReadSpecificLineResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ReadAllLinesIntoArray">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="filePathLine" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="additionalPath" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ReadAllLinesIntoArrayResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ReadAllLinesIntoArrayResult" type="tns:ArrayOfString" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetDirectories">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="filePathLine" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="additionalPath" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetDirectoriesResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetDirectoriesResult" type="tns:ArrayOfString" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DirectoryExists">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="filePathLine" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="additionalPath" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DirectoryExistsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="DirectoryExistsResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetDirectoryName">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="filePathName" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="additionalPath" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetDirectoryNameResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetDirectoryNameResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DirectoryGetFiles">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="filePathLine" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="searchPattern" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="additionalPath" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DirectoryGetFilesResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="DirectoryGetFilesResult" type="tns:ArrayOfString" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CreateDirectory">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="fileLocation" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="additionalPath" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CreateDirectoryResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="FileExists">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="fileToCheck" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="filePathLine" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="additionalPath" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="FileExistsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="FileExistsResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CreateNewDirectory">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="fileLocation" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="additionalPath" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CreateNewDirectoryResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="WriteToExcel">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="filePathLine" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="row" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="col" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="content" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="additionalPath" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="WriteToExcelResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="WriteToExcelResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ReadFromExcel">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="filePathLine" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="row" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="col" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="addtionalLine" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ReadFromExcelResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ReadFromExcelResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="WriteToExcelRange">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="filePathLine" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="startRow" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="startCol" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="content" type="tns:ArrayOfArrayOfAnyType" />
+            <s:element minOccurs="0" maxOccurs="1" name="addtionalPath" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfArrayOfAnyType">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="ArrayOfAnyType" nillable="true" type="tns:ArrayOfAnyType" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfAnyType">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="anyType" nillable="true" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="WriteToExcelRangeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="WriteToExcelRangeResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ReadFromExcelRange">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="filePathLine" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="startRow" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="startCol" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="endRow" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="endCol" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="additionalPath" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ReadFromExcelRangeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ReadFromExcelRangeResult" type="tns:ArrayOfArrayOfAnyType" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CreateNewExcelSheet">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="filePathLine" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="sheetName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="additionalPath" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CreateNewExcelSheetResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="CreateNewExcelSheetResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="HelloWorldSoapIn">
+    <wsdl:part name="parameters" element="tns:HelloWorld" />
+  </wsdl:message>
+  <wsdl:message name="HelloWorldSoapOut">
+    <wsdl:part name="parameters" element="tns:HelloWorldResponse" />
+  </wsdl:message>
+  <wsdl:message name="HelloWorldAuthHeader">
+    <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
+  </wsdl:message>
+  <wsdl:message name="WriteToSpecificLineSoapIn">
+    <wsdl:part name="parameters" element="tns:WriteToSpecificLine" />
+  </wsdl:message>
+  <wsdl:message name="WriteToSpecificLineSoapOut">
+    <wsdl:part name="parameters" element="tns:WriteToSpecificLineResponse" />
+  </wsdl:message>
+  <wsdl:message name="WriteToSpecificLineAuthHeader">
+    <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
+  </wsdl:message>
+  <wsdl:message name="WriteAllLinesWithArraySoapIn">
+    <wsdl:part name="parameters" element="tns:WriteAllLinesWithArray" />
+  </wsdl:message>
+  <wsdl:message name="WriteAllLinesWithArraySoapOut">
+    <wsdl:part name="parameters" element="tns:WriteAllLinesWithArrayResponse" />
+  </wsdl:message>
+  <wsdl:message name="WriteAllLinesWithArrayAuthHeader">
+    <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
+  </wsdl:message>
+  <wsdl:message name="WriteAppendStringToFileSoapIn">
+    <wsdl:part name="parameters" element="tns:WriteAppendStringToFile" />
+  </wsdl:message>
+  <wsdl:message name="WriteAppendStringToFileSoapOut">
+    <wsdl:part name="parameters" element="tns:WriteAppendStringToFileResponse" />
+  </wsdl:message>
+  <wsdl:message name="WriteAppendStringToFileAuthHeader">
+    <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
+  </wsdl:message>
+  <wsdl:message name="WriteAppendStringsToFileSoapIn">
+    <wsdl:part name="parameters" element="tns:WriteAppendStringsToFile" />
+  </wsdl:message>
+  <wsdl:message name="WriteAppendStringsToFileSoapOut">
+    <wsdl:part name="parameters" element="tns:WriteAppendStringsToFileResponse" />
+  </wsdl:message>
+  <wsdl:message name="WriteAppendStringsToFileAuthHeader">
+    <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
+  </wsdl:message>
+  <wsdl:message name="ReadSpecificLineSoapIn">
+    <wsdl:part name="parameters" element="tns:ReadSpecificLine" />
+  </wsdl:message>
+  <wsdl:message name="ReadSpecificLineSoapOut">
+    <wsdl:part name="parameters" element="tns:ReadSpecificLineResponse" />
+  </wsdl:message>
+  <wsdl:message name="ReadSpecificLineAuthHeader">
+    <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
+  </wsdl:message>
+  <wsdl:message name="ReadAllLinesIntoArraySoapIn">
+    <wsdl:part name="parameters" element="tns:ReadAllLinesIntoArray" />
+  </wsdl:message>
+  <wsdl:message name="ReadAllLinesIntoArraySoapOut">
+    <wsdl:part name="parameters" element="tns:ReadAllLinesIntoArrayResponse" />
+  </wsdl:message>
+  <wsdl:message name="ReadAllLinesIntoArrayAuthHeader">
+    <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetDirectoriesSoapIn">
+    <wsdl:part name="parameters" element="tns:GetDirectories" />
+  </wsdl:message>
+  <wsdl:message name="GetDirectoriesSoapOut">
+    <wsdl:part name="parameters" element="tns:GetDirectoriesResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetDirectoriesAuthHeader">
+    <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
+  </wsdl:message>
+  <wsdl:message name="DirectoryExistsSoapIn">
+    <wsdl:part name="parameters" element="tns:DirectoryExists" />
+  </wsdl:message>
+  <wsdl:message name="DirectoryExistsSoapOut">
+    <wsdl:part name="parameters" element="tns:DirectoryExistsResponse" />
+  </wsdl:message>
+  <wsdl:message name="DirectoryExistsAuthHeader">
+    <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetDirectoryNameSoapIn">
+    <wsdl:part name="parameters" element="tns:GetDirectoryName" />
+  </wsdl:message>
+  <wsdl:message name="GetDirectoryNameSoapOut">
+    <wsdl:part name="parameters" element="tns:GetDirectoryNameResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetDirectoryNameAuthHeader">
+    <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
+  </wsdl:message>
+  <wsdl:message name="DirectoryGetFilesSoapIn">
+    <wsdl:part name="parameters" element="tns:DirectoryGetFiles" />
+  </wsdl:message>
+  <wsdl:message name="DirectoryGetFilesSoapOut">
+    <wsdl:part name="parameters" element="tns:DirectoryGetFilesResponse" />
+  </wsdl:message>
+  <wsdl:message name="DirectoryGetFilesAuthHeader">
+    <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
+  </wsdl:message>
+  <wsdl:message name="CreateDirectorySoapIn">
+    <wsdl:part name="parameters" element="tns:CreateDirectory" />
+  </wsdl:message>
+  <wsdl:message name="CreateDirectorySoapOut">
+    <wsdl:part name="parameters" element="tns:CreateDirectoryResponse" />
+  </wsdl:message>
+  <wsdl:message name="CreateDirectoryAuthHeader">
+    <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
+  </wsdl:message>
+  <wsdl:message name="FileExistsSoapIn">
+    <wsdl:part name="parameters" element="tns:FileExists" />
+  </wsdl:message>
+  <wsdl:message name="FileExistsSoapOut">
+    <wsdl:part name="parameters" element="tns:FileExistsResponse" />
+  </wsdl:message>
+  <wsdl:message name="FileExistsAuthHeader">
+    <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
+  </wsdl:message>
+  <wsdl:message name="CreateNewDirectorySoapIn">
+    <wsdl:part name="parameters" element="tns:CreateNewDirectory" />
+  </wsdl:message>
+  <wsdl:message name="CreateNewDirectorySoapOut">
+    <wsdl:part name="parameters" element="tns:CreateNewDirectoryResponse" />
+  </wsdl:message>
+  <wsdl:message name="CreateNewDirectoryAuthHeader">
+    <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
+  </wsdl:message>
+  <wsdl:message name="WriteToExcelSoapIn">
+    <wsdl:part name="parameters" element="tns:WriteToExcel" />
+  </wsdl:message>
+  <wsdl:message name="WriteToExcelSoapOut">
+    <wsdl:part name="parameters" element="tns:WriteToExcelResponse" />
+  </wsdl:message>
+  <wsdl:message name="WriteToExcelAuthHeader">
+    <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
+  </wsdl:message>
+  <wsdl:message name="ReadFromExcelSoapIn">
+    <wsdl:part name="parameters" element="tns:ReadFromExcel" />
+  </wsdl:message>
+  <wsdl:message name="ReadFromExcelSoapOut">
+    <wsdl:part name="parameters" element="tns:ReadFromExcelResponse" />
+  </wsdl:message>
+  <wsdl:message name="ReadFromExcelAuthHeader">
+    <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
+  </wsdl:message>
+  <wsdl:message name="WriteToExcelRangeSoapIn">
+    <wsdl:part name="parameters" element="tns:WriteToExcelRange" />
+  </wsdl:message>
+  <wsdl:message name="WriteToExcelRangeSoapOut">
+    <wsdl:part name="parameters" element="tns:WriteToExcelRangeResponse" />
+  </wsdl:message>
+  <wsdl:message name="WriteToExcelRangeAuthHeader">
+    <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
+  </wsdl:message>
+  <wsdl:message name="ReadFromExcelRangeSoapIn">
+    <wsdl:part name="parameters" element="tns:ReadFromExcelRange" />
+  </wsdl:message>
+  <wsdl:message name="ReadFromExcelRangeSoapOut">
+    <wsdl:part name="parameters" element="tns:ReadFromExcelRangeResponse" />
+  </wsdl:message>
+  <wsdl:message name="ReadFromExcelRangeAuthHeader">
+    <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
+  </wsdl:message>
+  <wsdl:message name="CreateNewExcelSheetSoapIn">
+    <wsdl:part name="parameters" element="tns:CreateNewExcelSheet" />
+  </wsdl:message>
+  <wsdl:message name="CreateNewExcelSheetSoapOut">
+    <wsdl:part name="parameters" element="tns:CreateNewExcelSheetResponse" />
+  </wsdl:message>
+  <wsdl:message name="CreateNewExcelSheetAuthHeader">
+    <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
+  </wsdl:message>
+  <wsdl:portType name="WebService1Soap">
+    <wsdl:operation name="HelloWorld">
+      <wsdl:input message="tns:HelloWorldSoapIn" />
+      <wsdl:output message="tns:HelloWorldSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="WriteToSpecificLine">
+      <wsdl:input message="tns:WriteToSpecificLineSoapIn" />
+      <wsdl:output message="tns:WriteToSpecificLineSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="WriteAllLinesWithArray">
+      <wsdl:input message="tns:WriteAllLinesWithArraySoapIn" />
+      <wsdl:output message="tns:WriteAllLinesWithArraySoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="WriteAppendStringToFile">
+      <wsdl:input message="tns:WriteAppendStringToFileSoapIn" />
+      <wsdl:output message="tns:WriteAppendStringToFileSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="WriteAppendStringsToFile">
+      <wsdl:input message="tns:WriteAppendStringsToFileSoapIn" />
+      <wsdl:output message="tns:WriteAppendStringsToFileSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ReadSpecificLine">
+      <wsdl:input message="tns:ReadSpecificLineSoapIn" />
+      <wsdl:output message="tns:ReadSpecificLineSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ReadAllLinesIntoArray">
+      <wsdl:input message="tns:ReadAllLinesIntoArraySoapIn" />
+      <wsdl:output message="tns:ReadAllLinesIntoArraySoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetDirectories">
+      <wsdl:input message="tns:GetDirectoriesSoapIn" />
+      <wsdl:output message="tns:GetDirectoriesSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DirectoryExists">
+      <wsdl:input message="tns:DirectoryExistsSoapIn" />
+      <wsdl:output message="tns:DirectoryExistsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetDirectoryName">
+      <wsdl:input message="tns:GetDirectoryNameSoapIn" />
+      <wsdl:output message="tns:GetDirectoryNameSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DirectoryGetFiles">
+      <wsdl:input message="tns:DirectoryGetFilesSoapIn" />
+      <wsdl:output message="tns:DirectoryGetFilesSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CreateDirectory">
+      <wsdl:input message="tns:CreateDirectorySoapIn" />
+      <wsdl:output message="tns:CreateDirectorySoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="FileExists">
+      <wsdl:input message="tns:FileExistsSoapIn" />
+      <wsdl:output message="tns:FileExistsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CreateNewDirectory">
+      <wsdl:input message="tns:CreateNewDirectorySoapIn" />
+      <wsdl:output message="tns:CreateNewDirectorySoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="WriteToExcel">
+      <wsdl:input message="tns:WriteToExcelSoapIn" />
+      <wsdl:output message="tns:WriteToExcelSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ReadFromExcel">
+      <wsdl:input message="tns:ReadFromExcelSoapIn" />
+      <wsdl:output message="tns:ReadFromExcelSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="WriteToExcelRange">
+      <wsdl:input message="tns:WriteToExcelRangeSoapIn" />
+      <wsdl:output message="tns:WriteToExcelRangeSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ReadFromExcelRange">
+      <wsdl:input message="tns:ReadFromExcelRangeSoapIn" />
+      <wsdl:output message="tns:ReadFromExcelRangeSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CreateNewExcelSheet">
+      <wsdl:input message="tns:CreateNewExcelSheetSoapIn" />
+      <wsdl:output message="tns:CreateNewExcelSheetSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="WebService1Soap" type="tns:WebService1Soap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="HelloWorld">
+      <soap:operation soapAction="http://www.severfield.com/HelloWorld" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:HelloWorldAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="WriteToSpecificLine">
+      <soap:operation soapAction="http://www.severfield.com/WriteToSpecificLine" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:WriteToSpecificLineAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="WriteAllLinesWithArray">
+      <soap:operation soapAction="http://www.severfield.com/WriteAllLinesWithArray" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:WriteAllLinesWithArrayAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="WriteAppendStringToFile">
+      <soap:operation soapAction="http://www.severfield.com/WriteAppendStringToFile" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:WriteAppendStringToFileAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="WriteAppendStringsToFile">
+      <soap:operation soapAction="http://www.severfield.com/WriteAppendStringsToFile" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:WriteAppendStringsToFileAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ReadSpecificLine">
+      <soap:operation soapAction="http://www.severfield.com/ReadSpecificLine" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:ReadSpecificLineAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ReadAllLinesIntoArray">
+      <soap:operation soapAction="http://www.severfield.com/ReadAllLinesIntoArray" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:ReadAllLinesIntoArrayAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetDirectories">
+      <soap:operation soapAction="http://www.severfield.com/GetDirectories" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetDirectoriesAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DirectoryExists">
+      <soap:operation soapAction="http://www.severfield.com/DirectoryExists" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:DirectoryExistsAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetDirectoryName">
+      <soap:operation soapAction="http://www.severfield.com/GetDirectoryName" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetDirectoryNameAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DirectoryGetFiles">
+      <soap:operation soapAction="http://www.severfield.com/DirectoryGetFiles" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:DirectoryGetFilesAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CreateDirectory">
+      <soap:operation soapAction="http://www.severfield.com/CreateDirectory" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:CreateDirectoryAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="FileExists">
+      <soap:operation soapAction="http://www.severfield.com/FileExists" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:FileExistsAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CreateNewDirectory">
+      <soap:operation soapAction="http://www.severfield.com/CreateNewDirectory" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:CreateNewDirectoryAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="WriteToExcel">
+      <soap:operation soapAction="http://www.severfield.com/WriteToExcel" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:WriteToExcelAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ReadFromExcel">
+      <soap:operation soapAction="http://www.severfield.com/ReadFromExcel" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:ReadFromExcelAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="WriteToExcelRange">
+      <soap:operation soapAction="http://www.severfield.com/WriteToExcelRange" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:WriteToExcelRangeAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ReadFromExcelRange">
+      <soap:operation soapAction="http://www.severfield.com/ReadFromExcelRange" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:ReadFromExcelRangeAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CreateNewExcelSheet">
+      <soap:operation soapAction="http://www.severfield.com/CreateNewExcelSheet" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:CreateNewExcelSheetAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="WebService1Soap12" type="tns:WebService1Soap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="HelloWorld">
+      <soap12:operation soapAction="http://www.severfield.com/HelloWorld" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:HelloWorldAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="WriteToSpecificLine">
+      <soap12:operation soapAction="http://www.severfield.com/WriteToSpecificLine" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:WriteToSpecificLineAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="WriteAllLinesWithArray">
+      <soap12:operation soapAction="http://www.severfield.com/WriteAllLinesWithArray" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:WriteAllLinesWithArrayAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="WriteAppendStringToFile">
+      <soap12:operation soapAction="http://www.severfield.com/WriteAppendStringToFile" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:WriteAppendStringToFileAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="WriteAppendStringsToFile">
+      <soap12:operation soapAction="http://www.severfield.com/WriteAppendStringsToFile" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:WriteAppendStringsToFileAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ReadSpecificLine">
+      <soap12:operation soapAction="http://www.severfield.com/ReadSpecificLine" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:ReadSpecificLineAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ReadAllLinesIntoArray">
+      <soap12:operation soapAction="http://www.severfield.com/ReadAllLinesIntoArray" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:ReadAllLinesIntoArrayAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetDirectories">
+      <soap12:operation soapAction="http://www.severfield.com/GetDirectories" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GetDirectoriesAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DirectoryExists">
+      <soap12:operation soapAction="http://www.severfield.com/DirectoryExists" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:DirectoryExistsAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetDirectoryName">
+      <soap12:operation soapAction="http://www.severfield.com/GetDirectoryName" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GetDirectoryNameAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DirectoryGetFiles">
+      <soap12:operation soapAction="http://www.severfield.com/DirectoryGetFiles" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:DirectoryGetFilesAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CreateDirectory">
+      <soap12:operation soapAction="http://www.severfield.com/CreateDirectory" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:CreateDirectoryAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="FileExists">
+      <soap12:operation soapAction="http://www.severfield.com/FileExists" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:FileExistsAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CreateNewDirectory">
+      <soap12:operation soapAction="http://www.severfield.com/CreateNewDirectory" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:CreateNewDirectoryAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="WriteToExcel">
+      <soap12:operation soapAction="http://www.severfield.com/WriteToExcel" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:WriteToExcelAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ReadFromExcel">
+      <soap12:operation soapAction="http://www.severfield.com/ReadFromExcel" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:ReadFromExcelAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="WriteToExcelRange">
+      <soap12:operation soapAction="http://www.severfield.com/WriteToExcelRange" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:WriteToExcelRangeAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ReadFromExcelRange">
+      <soap12:operation soapAction="http://www.severfield.com/ReadFromExcelRange" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:ReadFromExcelRangeAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CreateNewExcelSheet">
+      <soap12:operation soapAction="http://www.severfield.com/CreateNewExcelSheet" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:CreateNewExcelSheetAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="WebService1">
+    <wsdl:port name="WebService1Soap" binding="tns:WebService1Soap">
+      <soap:address location="http://localhost:55591/ExternalService.asmx" />
+    </wsdl:port>
+    <wsdl:port name="WebService1Soap12" binding="tns:WebService1Soap12">
+      <soap12:address location="http://localhost:55591/ExternalService.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
