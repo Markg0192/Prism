@@ -297,10 +297,10 @@
             this.lbl_UCApplySuccess.BackColor = System.Drawing.Color.Transparent;
             this.lbl_UCApplySuccess.Location = new System.Drawing.Point(12, 266);
             this.lbl_UCApplySuccess.Name = "lbl_UCApplySuccess";
-            this.lbl_UCApplySuccess.Size = new System.Drawing.Size(93, 13);
+            this.lbl_UCApplySuccess.Size = new System.Drawing.Size(133, 13);
             this.lbl_UCApplySuccess.TabIndex = 3;
-            this.lbl_UCApplySuccess.Text = "Code data applied";
-            this.lbl_UCApplySuccess.Visible = false;
+            this.lbl_UCApplySuccess.Text = "Press apply to store values";
+            this.lbl_UCApplySuccess.Click += new System.EventHandler(this.lbl_UCApplySuccess_Click);
             // 
             // UniClass_Codes
             // 

@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Tekla.Structures.Geometry3d;
 using Tekla.Structures.Model;
 using static Prism.Enums;
@@ -25,6 +26,7 @@ namespace Prism
         public static List<ModelObject> OrderedParts = new List<ModelObject>();
         public static List<ModelObject> PartsWithoutIntumescentLoading = new List<ModelObject>();
         public static List<ModelObject> IncorrectOrientation = new List<ModelObject>();
+        private static List<BoltGroup> UnorderedShearStuds = new List<BoltGroup>();
 
         public static void BoltThrough2Ply(SelectedObjects selectedObjects)
         {
@@ -48,6 +50,9 @@ namespace Prism
                 PrismWarnings.IgnoreFittingCheck();
             }
 
+            UnorderedShearStuds.AddRange(GetShearStudBoltGroups(selectedObjects.AllBolts[0]));
+            UnorderedShearStuds.AddRange(GetShearStudBoltGroups(selectedObjects.AllBolts[1]));
+
             foreach (Assembly ass in selectedObjects.AssembliesList)
             {
                 Part myMainPart = ass.GetMainPart() as Part;
@@ -63,7 +68,37 @@ namespace Prism
                     CheckFittings.GetIncorrectFittings(mySecondaryPart, location);
                 }
             }
-            return CheckForAndActionErrors();
+            return CheckForAndActionErrors(selectedObjects);
+        }
+
+        private static List<BoltGroup> GetShearStudBoltGroups(List<BoltGroup> boltGroups)
+        {
+            return boltGroups
+                .Where(boltGroup => boltGroup.BoltStandard == "SHEAR-STUD" && CheckBoltProperty(boltGroup))
+                .ToList();
+        }
+
+        private static bool CheckBoltProperty(BoltGroup boltGroup)
+        {
+            string property = "";
+            boltGroup.GetReportProperty(ModelUDA.BoltShearStudTag(), ref property);
+            return property == "";
+        }
+
+
+        private static bool IsShearStud(List<BoltGroup> boltGroup)
+        {
+            string property = null;
+            return boltGroup.Any(bolt =>
+            {
+                if (bolt.BoltStandard == "SHEAR-STUD")
+                {
+                    property = "";
+                    bolt.GetReportProperty(ModelUDA.BoltShearStudTag(), ref property);
+                    return property == "";
+                }
+                return false;
+            });
         }
 
         public static void ClearOldLists()
@@ -285,7 +320,7 @@ namespace Prism
             return true;
         }
 
-        private static bool CheckForAndActionErrors()
+        private static bool CheckForAndActionErrors(SelectedObjects selectedObjects)
         {
             if (!OrderErrors()) { return false; }
             if (!FinishErrors()) { return false; }
@@ -306,7 +341,37 @@ namespace Prism
 
             if (!IntumesecentLoadingErrors()) { return false; }
 
+            ShearStudsNotOrdered(selectedObjects);
+
             return CheckFittings.DisplayFittingErrors();
+        }
+
+        private static void ShearStudsNotOrdered(SelectedObjects selectedObjects)
+        {
+            if (UnorderedShearStuds.Count > 0)
+            {
+                bool orderForBoltsComplete = PrismWarnings.UnorderedShearStuds();
+                if (orderForBoltsComplete)
+                {
+                    foreach (BoltGroup boltGroup in UnorderedShearStuds)
+                    {
+                        string property = "";
+                        boltGroup.GetReportProperty(ModelUDA.BoltShearStudTag(), ref property);
+                        if (property == "")
+                        {
+                            boltGroup.SetUserProperty(ModelUDA.BoltShearStudTag(), "Ordered");
+                        }
+                    }
+                }
+                else
+                {
+                    bool orderNow = PrismWarnings.OrderShearStuds();
+                    if (orderNow)
+                    {
+                        Order.ShearStuds();
+                    }
+                }
+            }
         }
 
         public static IgnoreType PhaseMatchErrors()

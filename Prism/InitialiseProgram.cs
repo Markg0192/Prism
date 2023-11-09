@@ -1,5 +1,6 @@
 ﻿using SeverfieldLicenceService;
 using System;
+using System.Diagnostics;
 using System.Windows.Forms;
 
 namespace Prism
@@ -16,7 +17,7 @@ namespace Prism
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new PrismUI());*/
 
-            bool internalUser = System.Environment.UserDomainName == "SFPLC";
+            bool internalUser = System.Environment.UserDomainName == "SFRPLC";
             bool validExternalUser = false;
 
             Application.EnableVisualStyles();
@@ -34,7 +35,12 @@ namespace Prism
 
             if (internalUser || validExternalUser)
             {
-                Application.Run(new PrismUI());
+                var launcher = new Launcher();
+                if (launcher.CloseNow) return;
+                if (!launcher.RestartRequired)
+                    Application.Run(new PrismUI());
+                else
+                    Process.Start("Prism.exe");
             }
             else { Application.Exit(); return; }
         }

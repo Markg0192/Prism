@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Prism.CustomDialogs
@@ -8,6 +9,7 @@ namespace Prism.CustomDialogs
     public partial class UniClass_Codes : Form
     {
         string fileLocation;
+        private ExternalService.WebService1 _service;
 
         public UniClass_Codes(string jobName, ExternalService.WebService1 service)
         {
@@ -16,14 +18,20 @@ namespace Prism.CustomDialogs
             TopMost = true;
             CenterToScreen();
             PopulateBoxes(fileLocation, service);
+            _service = service;
         }
 
-        private void btn_UCApply_Click(object sender, EventArgs e)
+        private async void btn_UCApply_Click(object sender, EventArgs e)
         {
-            TableData tableData = BuildTables();
-            PrintTableData(tableData, fileLocation);
-            lbl_UCApplySuccess.Visible = true;
+            lbl_UCApplySuccess.Text = "Applying...";
+            await Task.Run(() =>
+            {
+                TableData tableData = BuildTables();
+                PrintTableData(tableData, fileLocation, _service);
+            });
+            lbl_UCApplySuccess.Text = "Code data applied.";
         }
+
 
         TableData BuildTables()
         {
@@ -73,7 +81,7 @@ namespace Prism.CustomDialogs
             bool startReading = false;
             TableData tableData = new TableData();
 
-            foreach (string line in service.ReadAllLinesIntoArray(Constants.PrismDataLogLocation, Constants.ModelProjectInforLocation(filePath)))
+            foreach (string line in service.ReadAllLinesIntoArray(Constants.PrismDataLogLocation, filePath))
             {
                 if (line.Contains("---Filter------------Code----------------Title"))
                 {
@@ -102,16 +110,8 @@ namespace Prism.CustomDialogs
             return tableData;
         }
 
-        static void PrintTableData(TableData tableData, string filePath)
+        static void PrintTableData(TableData tableData, string filePath, ExternalService.WebService1 service)
         {
-            StreamReader read = new StreamReader(filePath);
-            string line1 = read.ReadLine();
-            string line2 = read.ReadLine();
-            string line3 = read.ReadLine();
-            string line4 = read.ReadLine();
-            string line5 = read.ReadLine();
-            string line6 = read.ReadLine();
-            string line7 = read.ReadLine();
             string line8 = tableData.Rows[0].Filter + "****" + tableData.Rows[0].Code + "****" + tableData.Rows[0].Title;
             string line9 = tableData.Rows[1].Filter + "****" + tableData.Rows[1].Code + "****" + tableData.Rows[1].Title;
             string line10 = tableData.Rows[2].Filter + "****" + tableData.Rows[2].Code + "****" + tableData.Rows[2].Title;
@@ -120,29 +120,25 @@ namespace Prism.CustomDialogs
             string line13 = tableData.Rows[5].Filter + "****" + tableData.Rows[5].Code + "****" + tableData.Rows[5].Title;
             string line14 = tableData.Rows[6].Filter + "****" + tableData.Rows[6].Code + "****" + tableData.Rows[6].Title;
             string line15 = tableData.Rows[7].Filter + "****" + tableData.Rows[7].Code + "****" + tableData.Rows[7].Title;
-            read.Close();
-            StreamWriter writer = new StreamWriter(filePath);
-            writer.WriteLine(line1);
-            writer.WriteLine(line2);
-            writer.WriteLine(line3);
-            writer.WriteLine(line4);
-            writer.WriteLine(line5);
-            writer.WriteLine(line6);
-            writer.WriteLine(line7);
-            writer.WriteLine(line8);
-            writer.WriteLine(line9);
-            writer.WriteLine(line10);
-            writer.WriteLine(line11);
-            writer.WriteLine(line12);
-            writer.WriteLine(line13);
-            writer.WriteLine(line14);
-            writer.WriteLine(line15);
-            writer.Close();
+
+            service.WriteToSpecificLine(Constants.PrismModelData, 8, line8, filePath);
+            service.WriteToSpecificLine(Constants.PrismModelData, 9, line9, filePath);
+            service.WriteToSpecificLine(Constants.PrismModelData, 10, line10, filePath);
+            service.WriteToSpecificLine(Constants.PrismModelData, 11, line11, filePath);
+            service.WriteToSpecificLine(Constants.PrismModelData, 12, line12, filePath);
+            service.WriteToSpecificLine(Constants.PrismModelData, 13, line13, filePath);
+            service.WriteToSpecificLine(Constants.PrismModelData, 14, line14, filePath);
+            service.WriteToSpecificLine(Constants.PrismModelData, 15, line15, filePath);
         }
 
         private void btn_UCCLose_Click(object sender, EventArgs e)
         {
             this.Close();
+        }
+
+        private void lbl_UCApplySuccess_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

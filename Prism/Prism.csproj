@@ -37,6 +37,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -250,6 +251,12 @@
     <Compile Include="CustomDialogs\ProjectControllers.Designer.cs">
       <DependentUpon>ProjectControllers.cs</DependentUpon>
     </Compile>
+    <Compile Include="CustomDialogs\ResetPrelim.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CustomDialogs\ResetPrelim.Designer.cs">
+      <DependentUpon>ResetPrelim.cs</DependentUpon>
+    </Compile>
     <Compile Include="CustomDialogs\SpecialFittingOrders.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -310,7 +317,15 @@
     <Compile Include="Geometry\Line1D.cs" />
     <Compile Include="IFCExporter.cs" />
     <Compile Include="InitialiseProgram.cs" />
+    <Compile Include="Launcher.cs" />
+    <Compile Include="LauncherForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="LauncherForm.Designer.cs">
+      <DependentUpon>LauncherForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Logging.cs" />
+    <Compile Include="Order.cs" />
     <Compile Include="PrismMacroBuilder.cs" />
     <Compile Include="Managers\ViewManager.cs" />
     <Compile Include="ModelPart.cs" />
@@ -400,6 +415,9 @@
     <EmbeddedResource Include="CustomDialogs\ProjectControllers.resx">
       <DependentUpon>ProjectControllers.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="CustomDialogs\ResetPrelim.resx">
+      <DependentUpon>ResetPrelim.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="CustomDialogs\SpecialFittingOrders.resx">
       <DependentUpon>SpecialFittingOrders.cs</DependentUpon>
     </EmbeddedResource>
@@ -408,6 +426,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="CustomDialogs\YesNoForm.resx">
       <DependentUpon>YesNoForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LauncherForm.resx">
+      <DependentUpon>LauncherForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PrismUI.resx">
       <DependentUpon>PrismUI.cs</DependentUpon>

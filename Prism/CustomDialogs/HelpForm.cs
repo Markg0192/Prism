@@ -22,7 +22,8 @@ namespace Prism
             CreateHelpFromRootFolder(9, service);
 
             if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(parent))
-                Browser.Navigate(HelpFolder + @"\Index.mht");
+               
+                Browser.Navigate(service.GetDirectoryName(9, "") + @"\Index.mht");
             else
                 BrowseTo(name, parent);
         }
