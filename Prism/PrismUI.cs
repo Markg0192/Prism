@@ -175,7 +175,9 @@ namespace Prism
 
         private void btn_SpecialOperations_Click(object sender, EventArgs e)
         {
-            _webService.CreateDirectory(50, "\\\\sev-los-fs1\\application data$\\Prism\\BadFile");
+         
+            PrismWarnings.FabPackComplete(_projectData, true);
+         //   _webService.CreateDirectory(50, "\\\\sev-los-fs1\\application data$\\Prism\\BadFile");
 
 
             //Logging.AddToMaterialOrderProcessedCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndName), _webService);
@@ -337,7 +339,9 @@ namespace Prism
 
         private void SetupWebService()
         {
-            _webService = new WebService1();
+            _webService = new WebService1(); 
+            _webService.Url = @"https://webapps.severfield.com/CETExtWebService/ExternalService.asmx";
+
             AuthHeader soapHead = new AuthHeader();
             SecurityUtils secUtils = new SecurityUtils("Extd6L!u8nO1%qR7");
 
@@ -347,6 +351,7 @@ namespace Prism
             soapHead.DomainName = secUtils.Encrypt(Environment.UserDomainName);
 
             _webService.AuthHeaderValue = soapHead;
+           
 
             try { _webService.HelloWorld(); }
             catch
@@ -667,7 +672,7 @@ namespace Prism
 
         private void projectUsersToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var form = new ProjectControllers(_model.GetProjectInfo());
+            var form = new ProjectControllers(_projectData.ProjNumberAndGuid, _webService, _model.GetProjectInfo());
             form.ShowDialog();
         }
 
@@ -683,7 +688,7 @@ namespace Prism
 
         private void uniClassCodesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var form = new UniClass_Codes(_projectData.ProjNumberAndGuid.ToString(), _webService);
+            var form = new UniClass_Codes(_projectData.ProjNumberAndGuid, _webService);
             form.ShowDialog();
         }
 

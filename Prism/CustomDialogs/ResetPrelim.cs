@@ -25,10 +25,11 @@ namespace Prism.CustomDialogs
             {
                 int lastUsedNoBeforeReset = Convert.ToInt32(Logging.GetLastUsedPrelim(ProjectData.ProjNumberAndGuid, ProjectData.WebService).ToString());
                 SetNewValues(ProjectData);
-                PrismWarnings.PrelimNumberStartReset();
+                string newStartPoint = Logging.GetLastUsedPrelim(ProjectData.ProjNumberAndGuid, ProjectData.WebService).ToString();
 
-                lbl_NextPrelim.Text = Logging.GetLastUsedPrelim(ProjectData.ProjNumberAndGuid, ProjectData.WebService).ToString();
-                Logging.LogProgress(ProjectData.ProjName, "PRELIM RESET - before/after", Convert.ToInt32(lbl_NextPrelim.Text), lastUsedNoBeforeReset, WebService);
+                PrismWarnings.PrelimNumberStartReset(lastUsedNoBeforeReset, Convert.ToInt32(newStartPoint));               
+                lbl_NextPrelim.Text = newStartPoint;
+                Logging.LogProgress(ProjectData.ProjNumberAndName, "PRELIM RESET - before/after", Convert.ToInt32(newStartPoint), lastUsedNoBeforeReset, WebService);
             }
         }
 

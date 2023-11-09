@@ -5,20 +5,6 @@ namespace Prism
 {
     public static class HDBolts
     {
-        public static void OrderHDBolts(SelectedObjects selectedObjects, ReportManager reportManager)
-        {
-            List<Part> myHDBolts = GetHdBoltItems(selectedObjects, true);
-            ModelModifiers.SelectParts(myHDBolts);
-            reportManager.CreateHDBoltList(); // currently does nothing
-        }
-
-        public static void OrderHDBoltTopNutAndWasher(SelectedObjects selectedObjects, ReportManager reportManager)
-        {
-            List<Part> myHDBolts = GetHdBoltItems(selectedObjects, false);
-            ModelModifiers.SelectParts(myHDBolts);
-            reportManager.CreateHDBoltList(); // currently does nothing
-        }
-
         public static void StampConnectionCodeOnMainMember(SelectedObjects selectedObjects)
         {
             foreach (Beam b in selectedObjects.SelectedModelParts)

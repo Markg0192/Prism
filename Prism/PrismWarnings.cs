@@ -1,5 +1,7 @@
 ﻿using Prism.CustomDialogs;
+using System;
 using System.Collections.Generic;
+using System.EnterpriseServices;
 using System.Windows.Forms;
 using Tekla.Structures.Model;
 using Tekla.Structures.Model.UI;
@@ -101,6 +103,13 @@ namespace Prism
         {
             string notUpToDateMessage = $"You have selected some abnormal fittings that should either be bought out items or changed to something standard.\r\r{Warning}";
             const string notUpToDateTitle = "Abnormal Fittings";
+            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+        }
+
+        public static void PrelimNumberStartReset(int old, int newP)
+        {
+            string notUpToDateMessage = $"Prelim numbering start point has been modified from {old} to {newP}";
+            string notUpToDateTitle = "Prelim start modified";
             CreateOKForm(notUpToDateMessage, notUpToDateTitle);
         }
 
@@ -330,21 +339,26 @@ namespace Prism
             CreateOKForm(notUpToDateMessage, notUpToDateTitle) ;
         }
 
-        public static void FabPackComplete(PrismProjectData projectData)
+        public static void FabPackComplete(PrismProjectData projectData, bool fileCanBeAttached)
         {
-            string notUpToDateMessage = $"Thanks {projectData.First}, your fab package is now complete, please attach your fab package, located in your model folder, " +
-                       $"to the following email and send to the relevant team.";
+            string notUpToDateMessage = $"Thanks {projectData.First},\r\rYour fab package is now complete, your package can be found in your model folder." +
+                       $"\r\r{Note(fileCanBeAttached)}";
             string notUpToDateTitle = "Complete";
             CreateOKForm(notUpToDateMessage, notUpToDateTitle) ;
         }
 
-        public static void PrelimNumberStartReset()
+        private static string Note(bool fileCanBeAttached)
         {
-            string notUpToDateMessage = "Your prelim number start point has been set to the new value.";
-            const string notUpToDateTitle = "Prelim set.";
-            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+            if(fileCanBeAttached)
+            {
+                return "It has also been attached to the following email, please forward this to the relevant team.";
+            }
+            else
+            {
+                return "Your package is too large to be attached to the following mail, please add your own link to the email and send to the relevant team.";
+            }
         }
-
+        
         public static void ErrorsFixed(int numberOfErrors)
         {
             string messageEnd = "errors fixed.";
@@ -382,6 +396,20 @@ namespace Prism
             return IgnoreType.Unspecified;
         }
 
+        public static bool UnorderedShearStuds()
+        {
+            const string notUpToDateMessage = "Prism has detected shear studs in your selection, these should have been manually pre-ordered by now.\r\rClick yes to confirm you have pre-ordered these.";
+            const string notUpToDateTitle = "Shear studs";
+            return CreateYesNoForm(notUpToDateMessage, notUpToDateTitle);
+        }
+
+        public static bool OrderShearStuds()
+        {
+            const string notUpToDateMessage = "Do you want to run an order for unordered studs in the selection now?";
+            const string notUpToDateTitle = "Shear studs";
+            return CreateYesNoForm(notUpToDateMessage, notUpToDateTitle);
+        }
+
         private static void CreateOKForm(string message, string title)
         {
             OkForm okForm = new OkForm(message, title);
@@ -396,5 +424,7 @@ namespace Prism
             yesNo.ShowDialog();
             return yesNo.Yes;
         }
+
+
     }
 }

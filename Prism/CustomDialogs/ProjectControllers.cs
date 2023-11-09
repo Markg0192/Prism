@@ -1,11 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Tekla.Structures.Model;
 
@@ -14,26 +7,27 @@ namespace Prism.CustomDialogs
     public partial class ProjectControllers : Form
     {
         private ProjectInfo _pInfo;
+        private string fileLocation;
+        private ExternalService.WebService1 service;
 
-        public ProjectControllers(ProjectInfo pInfo)
+        public ProjectControllers(string jobName, ExternalService.WebService1 service, ProjectInfo pInfo)
         {
             InitializeComponent();
             TopMost = true;
             CenterToScreen();
+            fileLocation = Constants.ModelProjectInforLocation(jobName);
+            this.service = service;
             _pInfo = pInfo;
             ReadExistingControllers(pInfo);
         }
 
         private void ReadExistingControllers(ProjectInfo pInfo)
         {
-            string projectManager = "";
-            pInfo.GetUserProperty("PrismPM", ref projectManager);
-            string doManager = "";
-            pInfo.GetUserProperty("PrismDOM", ref doManager);
-            string documentControl = "";
-            pInfo.GetUserProperty("PrismDOC", ref documentControl);
-            string others = "";
-            pInfo.GetUserProperty("PrismOTHERS", ref others);
+            string projectManager = service.ReadSpecificLine(Constants.PrismModelData, 17, fileLocation);
+            string doManager = service.ReadSpecificLine(Constants.PrismModelData, 18, fileLocation);
+            string documentControl = service.ReadSpecificLine(Constants.PrismModelData, 19, fileLocation);
+            string others = service.ReadSpecificLine(Constants.PrismModelData, 20, fileLocation);
+
             txt_DocumentControl.Text = documentControl;
             txt_Others.Text = others;
             txt_ProjectManagement.Text = projectManager;
@@ -42,16 +36,21 @@ namespace Prism.CustomDialogs
 
         private void SetNewValues(ProjectInfo pInfo)
         {
-            pInfo.SetUserProperty("PrismPM", txt_ProjectManagement.Text);
-            pInfo.SetUserProperty("PrismDOM", txt_DOManager.Text);
-            pInfo.SetUserProperty("PrismDOC", txt_DocumentControl.Text);
-            pInfo.SetUserProperty("PrismOTHERS", txt_Others.Text);
+            service.WriteToSpecificLine(Constants.PrismModelData, 17, txt_ProjectManagement.Text, fileLocation);
+            service.WriteToSpecificLine(Constants.PrismModelData, 18, txt_DOManager.Text, fileLocation);
+            service.WriteToSpecificLine(Constants.PrismModelData, 19, txt_DocumentControl.Text, fileLocation);
+            service.WriteToSpecificLine(Constants.PrismModelData, 20, txt_Others.Text, fileLocation);
         }
 
-        private void btn_Apply_Click(object sender, EventArgs e)
+        private async void btn_Apply_Click(object sender, EventArgs e)
         {
-            SetNewValues(_pInfo);
-            FormCCString();
+            lbl_ApplyStatus.Text = "Applying...";
+            await System.Threading.Tasks.Task.Run(() =>
+            {
+                SetNewValues(_pInfo);
+                FormCCString();
+            });
+            lbl_ApplyStatus.Text = "Code data applied.";
         }
 
         private string FormCCString()

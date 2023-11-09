@@ -25,7 +25,7 @@ namespace Prism.ButtonOperations
                     AutoFix.MemberOrientation();
                 }
 
-                Logging.LogProgress(projectData.ProjName, "Material 2", 0, myObjects.AssembliesList.Count, projectData.WebService);
+                Logging.LogProgress(projectData.ProjNumberAndName, "Material 2", 0, myObjects.AssembliesList.Count, projectData.WebService);
                 return true;
             }
             return false;

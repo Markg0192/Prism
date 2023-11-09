@@ -2,6 +2,8 @@
 {
     public static class ModelUDA
     {
+
+
         public static string FabsecEngRef()
         {
             return "SEV-UDA-9";
@@ -121,17 +123,23 @@
 
         public static string BoltOrderedBy()
         {
-            return "SEV-UDA-137";
+            return "SEV-UDA-136";
             return "BOLT_USERFIELD_7";
         }
 
         public static string BoltOrderedDate()
         {
-            return "SEV-UDA-138";
+            return "SEV-UDA-137";
             return "BOLT_USERFIELD_8";
         }
 
-        public static string TimesBoltOrdered()
+        public static string BoltOrderedAmount()
+        {
+            return "SEV-UDA-138";
+            return "BOLT_USERFIELD_6";
+        }
+
+        public static string BoltShearStudTag()
         {
             return "SEV-UDA-139";
             return "BOLT_USERFIELD_6";

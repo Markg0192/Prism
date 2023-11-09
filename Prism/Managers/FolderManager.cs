@@ -28,15 +28,16 @@ namespace Prism
 
         public FolderManager(PrismProjectData projectData, string phaseNum, string issueNum)
         {
-            ProjectLocation = projectData.ProjPath;
+            PrismFileLocaton = projectData.ProjPath + "\\" + Constants.PrismPackageFolderName;
+            if(!Directory.Exists(PrismFileLocaton)) { Directory.CreateDirectory(PrismFileLocaton); }
             FabFolder = $"{projectData.ProjNumber}-{phaseNum}-FAB-ISSUE{issueNum}";
             MatFolder = $"{projectData.ProjNumber}-{phaseNum}-PRELIM-ISSUE{issueNum}";
             EpoFolder = $"{projectData.ProjNumber}-{phaseNum}-EPO-ISSUE{issueNum}";
             string boltFolder = $"{projectData.ProjNumber}-{phaseNum}-BOLT-ISSUE{issueNum}";
-            FabPath = Path.Combine(projectData.ProjPath, FabFolder);
-            MatPath = Path.Combine(projectData.ProjPath, MatFolder);
-            EpoPath = Path.Combine(projectData.ProjPath, EpoFolder);
-            BoltPath = Path.Combine(projectData.ProjPath, boltFolder);
+            FabPath = Path.Combine(PrismFileLocaton, FabFolder);
+            MatPath = Path.Combine(PrismFileLocaton, MatFolder);
+            EpoPath = Path.Combine(PrismFileLocaton, EpoFolder);
+            BoltPath = Path.Combine(PrismFileLocaton, boltFolder);
             string assPath = Path.Combine(FabPath, _assFolder);
             string fitPath = Path.Combine(FabPath, _fitFolder);
             string prtPath = Path.Combine(FabPath, _prtFolder);
@@ -70,6 +71,8 @@ namespace Prism
         public string SpecialFittingPath {get;set;}
         public string IfcPath {get;set;}
         private string ProjectLocation;
+        private string PrismFileLocaton { get; set; }
+
         private List<string> DrawingVaultFolders = new List<string>();
 
         public bool CreateFabFolders()
@@ -136,7 +139,7 @@ namespace Prism
                 PrismWarnings.FolderAlreadyExists(folderPath);
                 return false;
             }
-            var zip = Directory.GetFiles(ProjectLocation, "*.zip");
+            var zip = Directory.GetFiles(PrismFileLocaton, "*.zip");
             if (zip.Contains($"{folderPath}.zip"))
             {
                 PrismWarnings.FolderAlreadyExists($"{folderPath}.zip");
@@ -170,13 +173,19 @@ namespace Prism
             }
         }
 
-        public void ZipFolder(string folderPath)
+        public bool ZipFolder(string folderPath)
         {
-            if (Directory.Exists($"{folderPath}.zip"))
+            int bytesAllowedOnAttachment = 40000000; //approx 39500KB
+            string zipFilePath = $"{folderPath}.zip";
+            if (Directory.Exists(zipFilePath))
             {
-                File.Delete($"{folderPath}.zip");
+                File.Delete(zipFilePath);
             }
-            ZipFile.CreateFromDirectory(folderPath, $"{folderPath}.zip");
+            ZipFile.CreateFromDirectory(folderPath, zipFilePath);
+
+            FileInfo zipFileInfo = new FileInfo(zipFilePath);
+            long zipFolderSizeInBytes = zipFileInfo.Length;
+            return zipFolderSizeInBytes < bytesAllowedOnAttachment;
         }
     }
 }
