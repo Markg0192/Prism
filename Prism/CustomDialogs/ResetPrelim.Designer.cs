@@ -122,7 +122,7 @@
             // 
             // btn_Close
             // 
-            this.btn_Close.Location = new System.Drawing.Point(349, 152);
+            this.btn_Close.Location = new System.Drawing.Point(352, 124);
             this.btn_Close.Name = "btn_Close";
             this.btn_Close.Size = new System.Drawing.Size(62, 23);
             this.btn_Close.TabIndex = 50;
@@ -145,7 +145,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImage = global::Prism.Properties.Resources.watereddownlogo;
-            this.ClientSize = new System.Drawing.Size(423, 187);
+            this.ClientSize = new System.Drawing.Size(423, 160);
             this.Controls.Add(this.btn_Close);
             this.Controls.Add(this.btn_Refresh);
             this.Controls.Add(this.btn_PrelimReset);

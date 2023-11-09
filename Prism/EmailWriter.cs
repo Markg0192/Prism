@@ -41,7 +41,7 @@ namespace Prism
             Attachment attachment = email.Attachments.Add(attachmentPath);
 
             email.To = _seversafeTeamEmail;
-            email.CC = FormCCString(projData.pInfo, false);
+            email.CC = FormCCString(false, projData.WebService, projData.ProjNumberAndGuid);
             email.Display();
             //email.Send();
 
@@ -50,7 +50,7 @@ namespace Prism
             outlookApp = null;
         }
 
-        public static void WriteFabEmail(PrismProjectData projData, SelectedObjects objects, string fabPrefix, string issueNumber, string phaseNumber, string siteDate, string fabPath)
+        public static void WriteFabEmail(PrismProjectData projData, SelectedObjects objects, string fabPrefix, string issueNumber, string phaseNumber, string siteDate, string fabPath, bool zipFileCanBeAttached)
         {
             Application outlookApp = new Application();
 
@@ -72,11 +72,14 @@ namespace Prism
                             $"Regards,{_mailNewLine}{_mailNewLine}" +
                             $"{projData.Full}";
 
-            string attachmentPath = $"{fabPath}.zip";
-            Attachment attachment = email.Attachments.Add(attachmentPath);
+            if (zipFileCanBeAttached)
+            {
+                string attachmentPath = $"{fabPath}.zip";
+                Attachment attachment = email.Attachments.Add(attachmentPath);
+            }
 
             //email.To = "ni.fabissue@severfield.com";
-            email.CC = FormCCString(projData.pInfo, false);
+            email.CC = FormCCString(false, projData.WebService, projData.ProjNumberAndGuid);
             email.Display();
             //email.Send();
 
@@ -105,7 +108,7 @@ namespace Prism
             Attachment attachment = email.Attachments.Add(attachmentPath);
 
             email.To = _purchasingEmail;
-            email.CC = FormCCString(projData.pInfo, false);
+            email.CC = FormCCString(false, projData.WebService, projData.ProjNumberAndGuid);
             email.Display();
             //email.Send();
 
@@ -138,7 +141,7 @@ namespace Prism
             Attachment attachment = email.Attachments.Add(attachmentPath);
 
             email.To = _purchasingEmail;
-            email.CC = FormCCString(projData.pInfo, fabsecPresent);
+            email.CC = FormCCString(fabsecPresent, projData.WebService, projData.ProjNumberAndGuid);
             email.Display();
             //email.Send();
 
@@ -167,6 +170,11 @@ namespace Prism
             // Release the Outlook application object
             System.Runtime.InteropServices.Marshal.ReleaseComObject(outlookApp);
             outlookApp = null;
+        }
+
+        private static string ProjNumberAndGuid(ProjectInfo pInfo)
+        {
+            return pInfo.ProjectNumber + pInfo.GUID;
         }
 
         private static string WriteEpoLengths()
@@ -220,7 +228,7 @@ namespace Prism
 
         private static string DateRequired(string orderType, string siteDate)
         {
-            if(orderType.Contains("Omit"))
+            if (orderType.Contains("Omit"))
             {
                 return "";
             }
@@ -275,7 +283,7 @@ namespace Prism
 
         private static string RemoveOrAddMaterial(string orderType)
         {
-            if(orderType.Contains("Order"))
+            if (orderType.Contains("Order"))
             {
                 return $"The material to be ordered is as follows;";
             }
@@ -307,16 +315,12 @@ namespace Prism
             return "";
         }
 
-        private static string FormCCString(ProjectInfo pInfo, bool fabsecPresent)
+        private static string FormCCString(bool fabsecPresent, ExternalService.WebService1 service, string jobName)
         {
-            string projectManager = "";
-            pInfo.GetUserProperty("PrismPM", ref projectManager);
-            string doManager = "";
-            pInfo.GetUserProperty("PrismDOM", ref doManager);
-            string documentControl = "";
-            pInfo.GetUserProperty("PrismDOC", ref documentControl);
-            string others = "";
-            pInfo.GetUserProperty("PrismOTHERS", ref others);
+            string projectManager = service.ReadSpecificLine(Constants.PrismModelData, 17, Constants.ModelProjectInforLocation(jobName));           
+            string doManager = service.ReadSpecificLine(Constants.PrismModelData, 18, Constants.ModelProjectInforLocation(jobName));            
+            string documentControl = service.ReadSpecificLine(Constants.PrismModelData, 19, Constants.ModelProjectInforLocation(jobName));           
+            string others = service.ReadSpecificLine(Constants.PrismModelData, 20, Constants.ModelProjectInforLocation(jobName));
 
             string[] pString = projectManager.Split(' ');
             string[] doManagerString = doManager.Split(' ');

@@ -40,11 +40,13 @@
             this.label5 = new System.Windows.Forms.Label();
             this.btn_Apply = new System.Windows.Forms.Button();
             this.btn_Close = new System.Windows.Forms.Button();
+            this.lbl_ApplyStatus = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // label1
             // 
             this.label1.AutoSize = true;
+            this.label1.BackColor = System.Drawing.Color.Transparent;
             this.label1.Location = new System.Drawing.Point(12, 9);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(371, 13);
@@ -81,30 +83,30 @@
             // 
             // txt_ProjectManagement
             // 
-            this.txt_ProjectManagement.Location = new System.Drawing.Point(187, 43);
+            this.txt_ProjectManagement.Location = new System.Drawing.Point(160, 43);
             this.txt_ProjectManagement.Name = "txt_ProjectManagement";
-            this.txt_ProjectManagement.Size = new System.Drawing.Size(196, 20);
+            this.txt_ProjectManagement.Size = new System.Drawing.Size(223, 20);
             this.txt_ProjectManagement.TabIndex = 2;
             // 
             // txt_DOManager
             // 
-            this.txt_DOManager.Location = new System.Drawing.Point(187, 69);
+            this.txt_DOManager.Location = new System.Drawing.Point(160, 69);
             this.txt_DOManager.Name = "txt_DOManager";
-            this.txt_DOManager.Size = new System.Drawing.Size(196, 20);
+            this.txt_DOManager.Size = new System.Drawing.Size(223, 20);
             this.txt_DOManager.TabIndex = 2;
             // 
             // txt_DocumentControl
             // 
-            this.txt_DocumentControl.Location = new System.Drawing.Point(187, 95);
+            this.txt_DocumentControl.Location = new System.Drawing.Point(160, 95);
             this.txt_DocumentControl.Name = "txt_DocumentControl";
-            this.txt_DocumentControl.Size = new System.Drawing.Size(196, 20);
+            this.txt_DocumentControl.Size = new System.Drawing.Size(223, 20);
             this.txt_DocumentControl.TabIndex = 2;
             // 
             // txt_Others
             // 
-            this.txt_Others.Location = new System.Drawing.Point(187, 119);
+            this.txt_Others.Location = new System.Drawing.Point(160, 119);
             this.txt_Others.Name = "txt_Others";
-            this.txt_Others.Size = new System.Drawing.Size(196, 20);
+            this.txt_Others.Size = new System.Drawing.Size(223, 20);
             this.txt_Others.TabIndex = 2;
             // 
             // label5
@@ -139,6 +141,16 @@
             this.btn_Close.UseVisualStyleBackColor = true;
             this.btn_Close.Click += new System.EventHandler(this.btn_Close_Click);
             // 
+            // lbl_ApplyStatus
+            // 
+            this.lbl_ApplyStatus.AutoSize = true;
+            this.lbl_ApplyStatus.BackColor = System.Drawing.Color.Transparent;
+            this.lbl_ApplyStatus.Location = new System.Drawing.Point(12, 151);
+            this.lbl_ApplyStatus.Name = "lbl_ApplyStatus";
+            this.lbl_ApplyStatus.Size = new System.Drawing.Size(133, 13);
+            this.lbl_ApplyStatus.TabIndex = 4;
+            this.lbl_ApplyStatus.Text = "Press apply to store values";
+            // 
             // ProjectControllers
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -146,6 +158,7 @@
             this.BackColor = System.Drawing.Color.White;
             this.BackgroundImage = global::Prism.Properties.Resources.watereddownlogo;
             this.ClientSize = new System.Drawing.Size(392, 180);
+            this.Controls.Add(this.lbl_ApplyStatus);
             this.Controls.Add(this.btn_Close);
             this.Controls.Add(this.btn_Apply);
             this.Controls.Add(this.txt_Others);
@@ -181,5 +194,6 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Button btn_Apply;
         private System.Windows.Forms.Button btn_Close;
+        private System.Windows.Forms.Label lbl_ApplyStatus;
     }
 }

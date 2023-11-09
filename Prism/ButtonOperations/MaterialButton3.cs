@@ -12,34 +12,23 @@ namespace Prism.ButtonOperations
             ReportManager myReportManager = new ReportManager(projectData, phaseNumber, issueNumber);
             // HDBolts.StampConnectionCodeOnMainMember(myObjects);
 
-            if (orderType.Contains("Bolts"))
-            {
-                if (!CreateBoltOrder(orderType, myReportManager, siteDate)) return false;
-                return true;
-            }
+            //First check if the order is for Bolts, Seversafe or HD Bolts.
+            bool boltSeversafeAndHdBoltsResult = Order.BoltsSeversafeAndHdBolts(orderType, myReportManager, siteDate, model, myObjects, projectData, out bool orderRequired);
+            if(orderRequired) return boltSeversafeAndHdBoltsResult;
 
-            if (orderType.Contains("Seversafe"))
-            {
-                int divisionNo = PrismWarnings.DivsionFrom();
-                if (divisionNo == 0) { PrismWarnings.Cancelled(); return false; }
-
-                SeversafeOrder.CreateSeversafeOrder(model, myObjects.SeversafeParts, siteDate, myReportManager, divisionNo, myReportManager.EpoReportPrefix, projectData);
-                return true;
-            }
-
+            //If there are fabsecs present the we need to add the carcass to the selection instead of those in the model space
             bool fabsecsPresent = FabsecProcessing.AddCarcassToSelection(model, myObjects, out List<Part> originalFabsecs, out List<Part> fabsecCarcasses);
             foreach (Part myPart in myObjects.SelectedModelParts)
             {
                 myPart.GetUnorderedParts();
             }
 
-            OrderHDBolts(orderType, myObjects, myReportManager, projectData.ProjName, projectData.WebService); //Doesn't do anything..
-
+            //Check if everything in the selection needs to be ordered/omitted
             if (!ShouldPartsBeOrdered(orderType)) { return false; }
 
             if (!myReportManager.Folders.CreateMatFolder(fabsecsPresent)) return false;
 
-            if (!OrderFabsecs(fabsecsPresent, myReportManager, model, projectData, phaseNumber, issueNumber, myObjects, stageNumber, originalFabsecs, fabsecCarcasses)) { return false; }
+            if (!Order.Fabsecs(fabsecsPresent, myReportManager, model, projectData, phaseNumber, issueNumber, myObjects, stageNumber, originalFabsecs, fabsecCarcasses)) { return false; }
 
             ModelModifiers.VariationCheck(phaseNumber, myObjects, projectData);
             myObjects.AddPrelimMarks(projectData, projectData.WebService);
@@ -51,29 +40,6 @@ namespace Prism.ButtonOperations
             if (!FinishOrder(myObjects, stageNumber, projectData, myReportManager.MatReportPrefix, issueNumber, phaseNumber, orderType, myReportManager, siteDate, false, fabsecsPresent)) { return false; }
 
             return true;
-        }
-
-        public static bool CreateBoltOrder(string orderType, ReportManager reportManager, string siteDate)
-        {
-            int typeOfOrder = PrismWarnings.BoltOrderType();
-
-            if (!reportManager.Folders.CreateBoltFolder()) return false;
-
-            if (typeOfOrder == 1) { reportManager.CreateSelectedBoltList(reportManager.BoltReportPrefix, orderType); }
-            else reportManager.CreateBoltList(reportManager.BoltReportPrefix, orderType);
-
-            reportManager.Folders.ZipFolder(reportManager.Folders.BoltPath);
-            EmailWriter.WriteBoltOrderEmail(reportManager.ProjectData, reportManager.BoltReportPrefix, reportManager.IssueNum, reportManager.PhaseNum, siteDate, reportManager.Folders.BoltPath);
-            return true;
-        }
-
-        private static void OrderHDBolts(string orderType, SelectedObjects myObjects, ReportManager myReportManager, string projectName, ExternalService.WebService1 service)
-        {
-            if (orderType == "Order HD Bolts") //Order HD bolts not an option therefore this statement is never true(for now)
-            {
-                HDBolts.OrderHDBolts(myObjects, myReportManager);
-                Logging.LogProgress(projectName, "Material 3 - HD Bolts", 0, myObjects.AssembliesList.Count, service);
-            }
         }
 
         private static bool ShouldPartsBeOrdered(string orderType)
@@ -94,33 +60,6 @@ namespace Prism.ButtonOperations
                     PrismWarnings.HasAlreadyBeenOrdered();
                     return false;
                 }
-            }
-            return true;
-        }
-
-        private static bool OrderFabsecs(bool fabsecsPresent, ReportManager myReportManager, Model model, PrismProjectData projectData, string phaseNumber,
-            string issueNumber, SelectedObjects myObjects, int stageNumber, List<Part> originalFabsecs, List<Part> fabsecCarcasses)
-        {
-            if (fabsecsPresent)
-            {
-                bool includeCarcassDrawings = PrismWarnings.RunFabsecDrawings();
-                if (includeCarcassDrawings)
-                {
-                    ReportManager.SelectDrawingsInDocManager(null);
-                    DrawingManager dm = new DrawingManager(model, projectData, phaseNumber, issueNumber);
-                    if (dm.NotLabelledDrawings.Count != 0) { PrismWarnings.IncorrectlyAssignedDrawings(); return false; }
-
-                    List<int> drawingCount = new List<int> { 0, dm.PgcDrawings.Count };
-                    DrawingManager.PrintAndIssueDrawings(myReportManager.Folders.MatFolder, myReportManager.Folders.MatPath, drawingCount, "\\PGC", 0, 1, myReportManager, false);
-                    PrismMacroBuilder.ClearPrintDialog();
-                }
-                fabsecCarcasses.SelectParts();
-                myReportManager.CreateG2Assy();
-                myObjects.SelectedModelParts.SelectParts();
-
-                if (!originalFabsecs.ModifyAttributes(stageNumber, projectData)) { return false; }
-
-                //  else { return false; }
             }
             return true;
         }
@@ -157,7 +96,7 @@ namespace Prism.ButtonOperations
             reportManager.Folders.ZipFolder(reportManager.Folders.MatPath);
             EmailWriter.WriteMatEmail(projectData, myObjects, matReportPrefix, issueNumber, phaseNumber, orderType, reportManager.Folders.MatPath, fabsecsPresent, siteDate);
 
-            Logging.LogProgress(projectData.ProjName, "Material 3", 0, myObjects.AssembliesList.Count, projectData.WebService);
+            Logging.LogProgress(projectData.ProjNumberAndName, "Material 3", 0, myObjects.AssembliesList.Count, projectData.WebService);
             return true;
         }
     }

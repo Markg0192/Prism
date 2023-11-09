@@ -1,7 +1,9 @@
 ﻿using MarksWebService;
 using Prism.ExternalService;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Web.Services;
 using System.Web.Services.Description;
 using Tekla.Structures.Drawing;
@@ -56,24 +58,57 @@ namespace Prism
         public static void CreateModelLog(PrismProjectData pData, ExternalService.WebService1 service)
         {
             //this method checks the model data folder on our server for a folder named after the users current model, if it does not exist we create it
-            bool logExists = false;
+            bool newLogExists = false;
+            bool oldLogExists = false;
 
             foreach (string folder in service.GetDirectories(Constants.PrismDataLogLocation, ""))
             {
-                if(service.FileExists(folder, 8, pData.ProjNumberAndGuid))
+                if (service.FileExists(folder, 8, pData.ProjNumberAndGuid))
                 {
-                    logExists = true;
-                    continue;
+                    newLogExists = true;
+                    break;
                 }
             }
-            if (!logExists)
+            if (!newLogExists)
+            {
+                foreach (string folder in service.GetDirectories(Constants.PrismDataLogLocation, ""))
+                {
+                    if (service.FileExists(folder, 8, pData.ProjNumberAndName))
+                    {
+                        oldLogExists = true;
+                        break;
+                    }
+                }
+                if (oldLogExists)
+                {
+                    CreateNewLogUsingOldLog(pData, service);
+                }
+            }
+
+            if (!newLogExists && !oldLogExists)
             { 
                 service.CreateNewDirectory(Constants.PrismModelData, pData.ProjNumberAndGuid);
-  
+
                 WriteFirstDataLog(Constants.PrismModelData, Constants.ModelProjectInforLocation(pData.ProjNumberAndGuid), pData.pInfo, service);
 
                 PrismWarnings.FirstTimeInTheModel();
             }
+        }
+
+        private static void CreateNewLogUsingOldLog(PrismProjectData pData, ExternalService.WebService1 service)
+        {
+            service.CreateNewDirectory(Constants.PrismModelData, pData.ProjNumberAndGuid);
+
+            string[] array = service.ReadAllLinesIntoArray(Constants.PrismDataLogLocation, Constants.ModelProjectInforLocation(pData.ProjNumberAndName));
+
+            service.WriteAllLinesWithArray(Constants.PrismDataLogLocation, array, Constants.ModelProjectInforLocation(pData.ProjNumberAndGuid));
+
+            string[] oldLogOverwrite = new string[] { $"File overwritten, now exists as {pData.ProjNumberAndGuid}\r", "Old info before copy:\r" };
+
+            // Concatenate oldLogOverwrite and array
+            string[] combinedArray = oldLogOverwrite.Concat(array).ToArray();
+
+            service.WriteAllLinesWithArray(Constants.PrismDataLogLocation, combinedArray, Constants.ModelProjectInforLocation(pData.ProjNumberAndName));
         }
 
         public static void WriteFirstDataLog(int filePathLine, string additonalString, ProjectInfo pInfo, ExternalService.WebService1 service)
@@ -118,14 +153,14 @@ namespace Prism
 
         public static void UpdateFrozenDrawingCount(string jobName, int frozenDrawings, int unFrozenDrawings, ExternalService.WebService1 service)
         {
-            string frozenDrawingLine = service.ReadSpecificLine(Constants.PrismModelData, 4, jobName);
+            string frozenDrawingLine = service.ReadSpecificLine(Constants.PrismModelData, 4, Constants.ModelProjectInforLocation(jobName));
             string frozenDrawingCount1 = frozenDrawingLine.Split('=')[1].Trim();
             string frozenDrawingCount2 = (Convert.ToInt32(frozenDrawingCount1.Split(',')[0].Trim()) + frozenDrawings).ToString();
 
             string unFrozenDrawingCount = (Convert.ToInt32(frozenDrawingLine.Split('=')[2].Trim()) + unFrozenDrawings).ToString();
 
             string content = $"Frozen drawing count: Frozen = {frozenDrawingCount2}, Un-Frozen = {unFrozenDrawingCount}";
-            service.WriteToSpecificLine(Constants.PrismModelData, 4, content, jobName);
+            service.WriteToSpecificLine(Constants.PrismModelData, 4, content, Constants.ModelProjectInforLocation(jobName));
         }
 
         public static void AddToMaterialOrderProcessedCount(string jobName, WebService1 service)
@@ -150,7 +185,7 @@ namespace Prism
 
         public static void LogProgress(string modelName, string buttonPress, int autoFixCount, int totalObjects, ExternalService.WebService1 service)
         {
-            if (Environment.UserName != "mark.gibson")
+            if (Environment.UserName != "mrk.gibson")
             {
                 bool isPrelimReset = buttonPress.StartsWith("PRELIM RESET");
                 string textType1 = isPrelimReset ? "Number before reset:" : "Assemblies processed:";

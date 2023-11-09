@@ -11,6 +11,7 @@ namespace Prism
         public static string DrawingOperation = "PrismDrawingOperation.cs";
         public static string IssueDrawings = "IssueStampDrawings.cs";
         public static string ClearPrintDialog = "ClearPrintDialog.cs";
+        public static string PrismPackageFolderName = "Prism Packages";
 
         public static int PrismDataLogLocation = 1;
         public static int PrismDebugLogLoction = 2;
@@ -28,7 +29,7 @@ namespace Prism
 
         public static string ModelProjectInforLocation(string jobName)
         {
-            return $@"{jobName}\\Project Info.txt";
+            return $@"{jobName}\Project Info.txt";
           //  return $@"\\sev-los-fs1\application data$\Prism\Model Data\{jobName}\Project Info.txt";
         }
 

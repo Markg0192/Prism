@@ -121,14 +121,14 @@ namespace Prism
             {
                 bolts.SetUserProperty(ModelUDA.BoltOrderedBy(), name);
                 bolts.SetUserProperty(ModelUDA.BoltOrderedDate(), date);
-                bolts.SetUserProperty(ModelUDA.TimesBoltOrdered(), TimesBoltOrdered(bolts));
+                bolts.SetUserProperty(ModelUDA.BoltOrderedAmount(), TimesBoltOrdered(bolts));
             }
         }
 
         private static string TimesBoltOrdered(BoltGroup bolts)
         {
             string timesOrdered = "";
-            bolts.GetUserProperty(ModelUDA.TimesBoltOrdered(), ref timesOrdered);
+            bolts.GetUserProperty(ModelUDA.BoltOrderedAmount(), ref timesOrdered);
 
             if (timesOrdered != "" && timesOrdered.Contains("Times ordered"))
             {
