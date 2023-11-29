@@ -38,7 +38,7 @@ namespace Prism
                 MessageBox.Show("Failed to connect to the web service, please ensure internet connection. If the problem persists, contact help.");
                 Environment.Exit(1);
             }
-            return _service;
+            return _service;  
         }
 
         public class SecurityUtils
