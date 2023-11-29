@@ -16,11 +16,22 @@
     <LoadFromTemplate>
     </LoadFromTemplate>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'DefaultBuild' " />
+  <PropertyGroup Condition=" '$(Configuration)' == 'DefaultBuild' ">
+    <OutputPath>C:\Users\mark.gibson\source\repos\Prism\PrismInstaller</OutputPath>
+    <PackageName>Prism</PackageName>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="PrismInstaller.aip">
       <SubType>Code</SubType>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Prism\Prism.csproj">
+      <Name>Prism</Name>
+      <Project>{392ce316-72e3-4b40-9df7-16c8d7ec84c4}</Project>
+      <Private>True</Private>
+      <OutputsToImport>PrimaryOutput</OutputsToImport>
+    </ProjectReference>
   </ItemGroup>
   <Target Name="Build">
     <Error Text="This project requires Advanced Installer tool. Please download it from https://www.advancedinstaller.com/download.html" />

@@ -1,5 +1,4 @@
-﻿using MarksWebService;
-using Prism.ButtonOperations;
+﻿using Prism.ButtonOperations;
 using Prism.CustomDialogs;
 using Prism.ExternalService;
 using Prism.Properties;
@@ -26,8 +25,6 @@ namespace Prism
         public PrismUI()
         {
             InitializeComponent();
-            CenterToScreen();
-            InitializePrism();
         }
 
         private async void btn_Material1_Click_1(object sender, EventArgs e)
@@ -82,9 +79,7 @@ namespace Prism
 
             SetNextPrelimToUseLabel();
 
-            Logging.AddToMaterialOrderProcessedCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndGuid), _webService);
-
-
+            Logging.AddToMaterialOrderProcessedCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndGuid));
 
             EndFunction(1);
         }
@@ -108,13 +103,13 @@ namespace Prism
             if (orderAction == 2) //User wants to order using special fitting tags
             {
                 ModelModifiers.SelectSpecialTaggedInSelection(_selectedObjects);
-                ModelModifiers.AddPrelimMarks(_selectedObjects, _projectData, _webService);
+                ModelModifiers.AddPrelimMarks(_selectedObjects, _projectData);
                 _selectedObjects = new SelectedObjects(stageType); // we reset selected objects here (because we just changed the selection)
                 myReportManager.CreateMaterialReports(_selectedObjects, orderType, stageType);
             }
             if (orderAction == 3) //User wants to order all selected
             {
-                ModelModifiers.AddPrelimMarks(_selectedObjects, _projectData, _webService);
+                ModelModifiers.AddPrelimMarks(_selectedObjects, _projectData);
                 myReportManager.CreateMaterialReports(_selectedObjects, orderType, stageType);
             }
 
@@ -168,16 +163,15 @@ namespace Prism
 
         private void btnCreatePackage1_Click_1(object sender, EventArgs e)
         {
-            Logging.DebugLog("create package start", "", _projectData.WebService);
+            Logging.DebugLog("create package start", "");
             CreatePackageAsync();
             // CreatePackageNotAsync();
         }
 
         private void btn_SpecialOperations_Click(object sender, EventArgs e)
         {
-         
-            PrismWarnings.FabPackComplete(_projectData, true);
-         //   _webService.CreateDirectory(50, "\\\\sev-los-fs1\\application data$\\Prism\\BadFile");
+           // PrismWarnings.BigTi{meUsage(4000);
+            //   _webService.CreateDirectory(50, "\\\\sev-los-fs1\\application data$\\Prism\\BadFile");
 
 
             //Logging.AddToMaterialOrderProcessedCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndName), _webService);
@@ -252,14 +246,14 @@ namespace Prism
 
             SetStatusLabels("Creating Fab Package");
 
-            Logging.DebugLog("setup complete", "", _projectData.WebService);
+            Logging.DebugLog("setup complete", "");
 
             ReportManager myReportManager = new ReportManager(_projectData, phaseNumber.Text, issueNumber.Text);
             if (!await Task.Run(() => _selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber.Text, issueNumber.Text, StageTypes.FAB, txt_SiteDate.Text, runSeversafe))) { EndFunction(0); return; }
 
             await Task.Run(() => FabMisc.FabMiscOp(_model, txt_SiteDate.Text, _selectedObjects, runSeversafe, myReportManager, divisionNo, _projectData));
 
-            Logging.AddToFabCompleteCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndGuid), _webService);
+            Logging.AddToFabCompleteCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndGuid));
 
             EndFunction(1);
         }
@@ -298,8 +292,21 @@ namespace Prism
 
         private void InitializePrism()
         {
-            SetupWebService();
+            string key = Prism.Properties.Settings.Default.UniqueId;
 
+            if(key == "Default" && Environment.UserDomainName != "SFRPLC")
+            {
+                var form = new AuthKeyInput();
+                form.ShowDialog();
+                key = form.AuthKeyInputString;
+            }
+            _webService = WebService.SetupWebService(key);
+
+            if (!_webService.ValidUser()) { Application.Exit(); return; }
+          
+            Prism.Properties.Settings.Default.UniqueId = key;
+            Prism.Properties.Settings.Default.Save();
+            //if webservice is a succes save the key
             CheckModelConnection();
 
             CheckSpecialUser();
@@ -309,9 +316,9 @@ namespace Prism
 
         private void CompleteSetup()
         {
-            Logging.LoginMessage(_projectData.ProjName, _webService, "Login Succesful");
+            Logging.LoginMessage(_projectData.ProjName, "Login Succesful");
 
-            Logging.CreateModelLog(_projectData, _webService);
+            Logging.CreateModelLog(_projectData);
             SetNextPrelimToUseLabel();
             SetStatusLabels($"Connected to: {_projectData.ProjNumber}-{_projectData.ProjName}");
         }
@@ -331,34 +338,10 @@ namespace Prism
             if (!_model.GetConnectionStatus())
             {
                 MessageBox.Show("Failed to connect to a correct version of Tekla Model");
-                Logging.LoginMessage("", _webService, "Login Failed");
+                Logging.LoginMessage("", "Login Failed");
                 Application.Exit();
             }
             _projectData = new PrismProjectData(_model.GetProjectInfo(), _model.GetInfo().ModelPath, _webService);
-        }
-
-        private void SetupWebService()
-        {
-            _webService = new WebService1(); 
-            _webService.Url = @"https://webapps.severfield.com/CETExtWebService/ExternalService.asmx";
-
-            AuthHeader soapHead = new AuthHeader();
-            SecurityUtils secUtils = new SecurityUtils("Extd6L!u8nO1%qR7");
-
-            soapHead.Username = secUtils.Encrypt(Environment.UserName);
-            soapHead.ProgramName = secUtils.Encrypt("Prism");
-            soapHead.ProgramVersion = secUtils.Encrypt(System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString());
-            soapHead.DomainName = secUtils.Encrypt(Environment.UserDomainName);
-
-            _webService.AuthHeaderValue = soapHead;
-           
-
-            try { _webService.HelloWorld(); }
-            catch
-            {
-                MessageBox.Show("Failed to connect to the web service, please ensure internet connection. If the problem persists, contact help.");
-                Environment.Exit(1);
-            }
         }
 
         private async Task<bool> ProcessSpecialFittings(string orderType)
@@ -678,7 +661,7 @@ namespace Prism
 
         private void SetNextPrelimToUseLabel()
         {
-            lbl_NextPrelim.Text = Logging.GetLastUsedPrelim(_projectData.ProjNumberAndGuid, _projectData.WebService).ToString();
+            lbl_NextPrelim.Text = Logging.GetLastUsedPrelim(_projectData.ProjNumberAndGuid).ToString();
         }
 
         private void btn_PrelimLabelRefresh_Click(object sender, EventArgs e)
@@ -688,7 +671,7 @@ namespace Prism
 
         private void uniClassCodesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var form = new UniClass_Codes(_projectData.ProjNumberAndGuid, _webService);
+            var form = new UniClass_Codes(_projectData.ProjNumberAndGuid);
             form.ShowDialog();
         }
 
@@ -705,9 +688,18 @@ namespace Prism
 
         private void advancedSettingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            ResetPrelim resetPrelim = new ResetPrelim(_projectData, _webService);
+            ResetPrelim resetPrelim = new ResetPrelim(_projectData);
             resetPrelim.ShowDialog();
             SetNextPrelimToUseLabel();
+        }
+
+        private void PrismUI_Shown(object sender, EventArgs e)
+        {
+            Cursor = Cursors.WaitCursor;
+            Update();
+            InitializePrism();
+            pnl_Home.BackgroundImage = Resources.watereddownlogo;
+            Cursor = Cursors.Default;
         }
     }
 }

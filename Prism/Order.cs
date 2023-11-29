@@ -30,7 +30,7 @@ namespace Prism
             if (orderType == "Order HD Bolts") //Order HD bolts not an option therefore this statement is never true(for now) 
             {
                 orderRequired = true;
-                return OrderHoldingDownBolts(myObjects, myReportManager, projectData.ProjNumberAndName, projectData.WebService); //Doesn't do anything..
+                return OrderHoldingDownBolts(myObjects, myReportManager, projectData.ProjNumberAndName); //Doesn't do anything..
             }
             return true;
         }
@@ -85,12 +85,12 @@ namespace Prism
             return true;
         }
 
-        private static bool OrderHoldingDownBolts(SelectedObjects selectedObjects, ReportManager reportManager, string projectName, ExternalService.WebService1 service)
+        private static bool OrderHoldingDownBolts(SelectedObjects selectedObjects, ReportManager reportManager, string projectName)
         {
             List<Part> myHDBolts = HDBolts.GetHdBoltItems(selectedObjects, true);
             ModelModifiers.SelectParts(myHDBolts);
             reportManager.CreateHDBoltList(); // currently does nothing
-            Logging.LogProgress(projectName, "Material 3 - HD Bolts", 0, selectedObjects.AssembliesList.Count, service);
+            Logging.LogProgress(projectName, "Material 3 - HD Bolts", 0, selectedObjects.AssembliesList.Count);
             return true;
         }
 

@@ -125,8 +125,7 @@ namespace Prism
             // 
             // pnl_Home
             // 
-            this.pnl_Home.BackColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.pnl_Home.BackgroundImage = global::Prism.Properties.Resources.watereddownlogo;
+            this.pnl_Home.BackColor = System.Drawing.Color.LightGray;
             this.pnl_Home.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.pnl_Home.Controls.Add(this.info_Home);
             this.pnl_Home.Controls.Add(this.btn_MainPackageCreation);
@@ -849,14 +848,16 @@ namespace Prism
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.BackColor = System.Drawing.SystemColors.Control;
-            this.ClientSize = new System.Drawing.Size(1022, 390);
+            this.ClientSize = new System.Drawing.Size(1022, 358);
             this.Controls.Add(this.flowLayoutPanel1);
             this.Controls.Add(this.menuStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "PrismUI";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Prism";
             this.TopMost = true;
+            this.Shown += new System.EventHandler(this.PrismUI_Shown);
             this.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.PrismUI_PreviewKeyDown);
             this.flowLayoutPanel1.ResumeLayout(false);
             this.pnl_Home.ResumeLayout(false);

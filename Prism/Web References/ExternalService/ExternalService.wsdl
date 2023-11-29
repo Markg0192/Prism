@@ -16,12 +16,11 @@
       <s:complexType name="AuthHeader">
         <s:sequence>
           <s:element minOccurs="0" maxOccurs="1" name="Username" type="s:string" />
-          <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
           <s:element minOccurs="0" maxOccurs="1" name="ProgramName" type="s:string" />
           <s:element minOccurs="0" maxOccurs="1" name="ProgramVersion" type="s:string" />
           <s:element minOccurs="0" maxOccurs="1" name="DomainName" type="s:string" />
-          <s:element minOccurs="0" maxOccurs="1" name="ExternalKey" type="s:string" />
-          <s:element minOccurs="0" maxOccurs="1" name="InternalKey" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="UniqueUserId" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="MotherBoardId" type="s:string" />
         </s:sequence>
         <s:anyAttribute />
       </s:complexType>
@@ -311,6 +310,40 @@
           </s:sequence>
         </s:complexType>
       </s:element>
+      <s:element name="TestDoMurlingThing">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="input" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="TestDoMurlingThingResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="TestDoMurlingThingResult" type="tns:ArrayOfString" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SetComponentParameters">
+        <s:complexType />
+      </s:element>
+      <s:element name="SetComponentParametersResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SetComponentParametersResult" type="tns:ArrayOfString" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ValidUser">
+        <s:complexType />
+      </s:element>
+      <s:element name="ValidUserResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="ValidUserResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
     </s:schema>
   </wsdl:types>
   <wsdl:message name="HelloWorldSoapIn">
@@ -484,6 +517,33 @@
   <wsdl:message name="CreateNewExcelSheetAuthHeader">
     <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
   </wsdl:message>
+  <wsdl:message name="TestDoMurlingThingSoapIn">
+    <wsdl:part name="parameters" element="tns:TestDoMurlingThing" />
+  </wsdl:message>
+  <wsdl:message name="TestDoMurlingThingSoapOut">
+    <wsdl:part name="parameters" element="tns:TestDoMurlingThingResponse" />
+  </wsdl:message>
+  <wsdl:message name="TestDoMurlingThingAuthHeader">
+    <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
+  </wsdl:message>
+  <wsdl:message name="SetComponentParametersSoapIn">
+    <wsdl:part name="parameters" element="tns:SetComponentParameters" />
+  </wsdl:message>
+  <wsdl:message name="SetComponentParametersSoapOut">
+    <wsdl:part name="parameters" element="tns:SetComponentParametersResponse" />
+  </wsdl:message>
+  <wsdl:message name="SetComponentParametersAuthHeader">
+    <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
+  </wsdl:message>
+  <wsdl:message name="ValidUserSoapIn">
+    <wsdl:part name="parameters" element="tns:ValidUser" />
+  </wsdl:message>
+  <wsdl:message name="ValidUserSoapOut">
+    <wsdl:part name="parameters" element="tns:ValidUserResponse" />
+  </wsdl:message>
+  <wsdl:message name="ValidUserAuthHeader">
+    <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
+  </wsdl:message>
   <wsdl:portType name="WebService1Soap">
     <wsdl:operation name="HelloWorld">
       <wsdl:input message="tns:HelloWorldSoapIn" />
@@ -560,6 +620,18 @@
     <wsdl:operation name="CreateNewExcelSheet">
       <wsdl:input message="tns:CreateNewExcelSheetSoapIn" />
       <wsdl:output message="tns:CreateNewExcelSheetSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="TestDoMurlingThing">
+      <wsdl:input message="tns:TestDoMurlingThingSoapIn" />
+      <wsdl:output message="tns:TestDoMurlingThingSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SetComponentParameters">
+      <wsdl:input message="tns:SetComponentParametersSoapIn" />
+      <wsdl:output message="tns:SetComponentParametersSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ValidUser">
+      <wsdl:input message="tns:ValidUserSoapIn" />
+      <wsdl:output message="tns:ValidUserSoapOut" />
     </wsdl:operation>
   </wsdl:portType>
   <wsdl:binding name="WebService1Soap" type="tns:WebService1Soap">
@@ -754,6 +826,36 @@
         <soap:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
+    <wsdl:operation name="TestDoMurlingThing">
+      <soap:operation soapAction="http://www.severfield.com/TestDoMurlingThing" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:TestDoMurlingThingAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SetComponentParameters">
+      <soap:operation soapAction="http://www.severfield.com/SetComponentParameters" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:SetComponentParametersAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ValidUser">
+      <soap:operation soapAction="http://www.severfield.com/ValidUser" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:ValidUserAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
   </wsdl:binding>
   <wsdl:binding name="WebService1Soap12" type="tns:WebService1Soap">
     <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
@@ -942,6 +1044,36 @@
       <wsdl:input>
         <soap12:body use="literal" />
         <soap12:header message="tns:CreateNewExcelSheetAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="TestDoMurlingThing">
+      <soap12:operation soapAction="http://www.severfield.com/TestDoMurlingThing" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:TestDoMurlingThingAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SetComponentParameters">
+      <soap12:operation soapAction="http://www.severfield.com/SetComponentParameters" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:SetComponentParametersAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ValidUser">
+      <soap12:operation soapAction="http://www.severfield.com/ValidUser" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:ValidUserAuthHeader" part="AuthHeader" use="literal" />
       </wsdl:input>
       <wsdl:output>
         <soap12:body use="literal" />

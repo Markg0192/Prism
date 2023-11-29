@@ -41,6 +41,7 @@
             // 
             // pictureBox1
             // 
+            this.pictureBox1.BackColor = System.Drawing.Color.Transparent;
             this.pictureBox1.Image = global::Prism.Properties.Resources.Severfield_blue_RGB_PNG;
             this.pictureBox1.Location = new System.Drawing.Point(57, 12);
             this.pictureBox1.Name = "pictureBox1";
@@ -52,6 +53,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
+            this.label2.BackColor = System.Drawing.Color.Transparent;
             this.label2.Location = new System.Drawing.Point(47, 180);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(338, 13);
@@ -61,6 +63,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
+            this.label3.BackColor = System.Drawing.Color.Transparent;
             this.label3.Location = new System.Drawing.Point(35, 203);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(365, 13);
@@ -80,6 +83,7 @@
             // lbl_AboutVersionNo
             // 
             this.lbl_AboutVersionNo.AutoSize = true;
+            this.lbl_AboutVersionNo.BackColor = System.Drawing.Color.Transparent;
             this.lbl_AboutVersionNo.Location = new System.Drawing.Point(174, 143);
             this.lbl_AboutVersionNo.Name = "lbl_AboutVersionNo";
             this.lbl_AboutVersionNo.Size = new System.Drawing.Size(87, 13);
@@ -99,6 +103,7 @@
             // linkLabel1
             // 
             this.linkLabel1.AutoSize = true;
+            this.linkLabel1.BackColor = System.Drawing.Color.Transparent;
             this.linkLabel1.LinkBehavior = System.Windows.Forms.LinkBehavior.HoverUnderline;
             this.linkLabel1.Location = new System.Drawing.Point(147, 112);
             this.linkLabel1.Name = "linkLabel1";
@@ -112,6 +117,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackgroundImage = global::Prism.Properties.Resources.watereddownlogo;
             this.ClientSize = new System.Drawing.Size(426, 278);
             this.Controls.Add(this.linkLabel1);
             this.Controls.Add(this.btn_Contact);

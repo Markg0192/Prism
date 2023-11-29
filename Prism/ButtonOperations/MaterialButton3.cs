@@ -31,7 +31,7 @@ namespace Prism.ButtonOperations
             if (!Order.Fabsecs(fabsecsPresent, myReportManager, model, projectData, phaseNumber, issueNumber, myObjects, stageNumber, originalFabsecs, fabsecCarcasses)) { return false; }
 
             ModelModifiers.VariationCheck(phaseNumber, myObjects, projectData);
-            myObjects.AddPrelimMarks(projectData, projectData.WebService);
+            myObjects.AddPrelimMarks(projectData);
 
             myReportManager.CreateMaterialReports(myObjects, orderType, stageType);
 
@@ -96,7 +96,7 @@ namespace Prism.ButtonOperations
             reportManager.Folders.ZipFolder(reportManager.Folders.MatPath);
             EmailWriter.WriteMatEmail(projectData, myObjects, matReportPrefix, issueNumber, phaseNumber, orderType, reportManager.Folders.MatPath, fabsecsPresent, siteDate);
 
-            Logging.LogProgress(projectData.ProjNumberAndName, "Material 3", 0, myObjects.AssembliesList.Count, projectData.WebService);
+            Logging.LogProgress(projectData.ProjNumberAndName, "Material 3", 0, myObjects.AssembliesList.Count);
             return true;
         }
     }
