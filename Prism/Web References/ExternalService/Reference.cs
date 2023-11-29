@@ -70,6 +70,12 @@ namespace Prism.ExternalService {
         
         private System.Threading.SendOrPostCallback CreateNewExcelSheetOperationCompleted;
         
+        private System.Threading.SendOrPostCallback TestDoMurlingThingOperationCompleted;
+        
+        private System.Threading.SendOrPostCallback SetComponentParametersOperationCompleted;
+        
+        private System.Threading.SendOrPostCallback ValidUserOperationCompleted;
+        
         private bool useDefaultCredentialsSetExplicitly;
         
         /// <remarks/>
@@ -173,6 +179,15 @@ namespace Prism.ExternalService {
         
         /// <remarks/>
         public event CreateNewExcelSheetCompletedEventHandler CreateNewExcelSheetCompleted;
+        
+        /// <remarks/>
+        public event TestDoMurlingThingCompletedEventHandler TestDoMurlingThingCompleted;
+        
+        /// <remarks/>
+        public event SetComponentParametersCompletedEventHandler SetComponentParametersCompleted;
+        
+        /// <remarks/>
+        public event ValidUserCompletedEventHandler ValidUserCompleted;
         
         /// <remarks/>
         [System.Web.Services.Protocols.SoapHeaderAttribute("AuthHeaderValue")]
@@ -818,6 +833,92 @@ namespace Prism.ExternalService {
         }
         
         /// <remarks/>
+        [System.Web.Services.Protocols.SoapHeaderAttribute("AuthHeaderValue")]
+        [System.Web.Services.Protocols.SoapDocumentMethodAttribute("http://www.severfield.com/TestDoMurlingThing", RequestNamespace="http://www.severfield.com/", ResponseNamespace="http://www.severfield.com/", Use=System.Web.Services.Description.SoapBindingUse.Literal, ParameterStyle=System.Web.Services.Protocols.SoapParameterStyle.Wrapped)]
+        public string[] TestDoMurlingThing(string input) {
+            object[] results = this.Invoke("TestDoMurlingThing", new object[] {
+                        input});
+            return ((string[])(results[0]));
+        }
+        
+        /// <remarks/>
+        public void TestDoMurlingThingAsync(string input) {
+            this.TestDoMurlingThingAsync(input, null);
+        }
+        
+        /// <remarks/>
+        public void TestDoMurlingThingAsync(string input, object userState) {
+            if ((this.TestDoMurlingThingOperationCompleted == null)) {
+                this.TestDoMurlingThingOperationCompleted = new System.Threading.SendOrPostCallback(this.OnTestDoMurlingThingOperationCompleted);
+            }
+            this.InvokeAsync("TestDoMurlingThing", new object[] {
+                        input}, this.TestDoMurlingThingOperationCompleted, userState);
+        }
+        
+        private void OnTestDoMurlingThingOperationCompleted(object arg) {
+            if ((this.TestDoMurlingThingCompleted != null)) {
+                System.Web.Services.Protocols.InvokeCompletedEventArgs invokeArgs = ((System.Web.Services.Protocols.InvokeCompletedEventArgs)(arg));
+                this.TestDoMurlingThingCompleted(this, new TestDoMurlingThingCompletedEventArgs(invokeArgs.Results, invokeArgs.Error, invokeArgs.Cancelled, invokeArgs.UserState));
+            }
+        }
+        
+        /// <remarks/>
+        [System.Web.Services.Protocols.SoapHeaderAttribute("AuthHeaderValue")]
+        [System.Web.Services.Protocols.SoapDocumentMethodAttribute("http://www.severfield.com/SetComponentParameters", RequestNamespace="http://www.severfield.com/", ResponseNamespace="http://www.severfield.com/", Use=System.Web.Services.Description.SoapBindingUse.Literal, ParameterStyle=System.Web.Services.Protocols.SoapParameterStyle.Wrapped)]
+        public string[] SetComponentParameters() {
+            object[] results = this.Invoke("SetComponentParameters", new object[0]);
+            return ((string[])(results[0]));
+        }
+        
+        /// <remarks/>
+        public void SetComponentParametersAsync() {
+            this.SetComponentParametersAsync(null);
+        }
+        
+        /// <remarks/>
+        public void SetComponentParametersAsync(object userState) {
+            if ((this.SetComponentParametersOperationCompleted == null)) {
+                this.SetComponentParametersOperationCompleted = new System.Threading.SendOrPostCallback(this.OnSetComponentParametersOperationCompleted);
+            }
+            this.InvokeAsync("SetComponentParameters", new object[0], this.SetComponentParametersOperationCompleted, userState);
+        }
+        
+        private void OnSetComponentParametersOperationCompleted(object arg) {
+            if ((this.SetComponentParametersCompleted != null)) {
+                System.Web.Services.Protocols.InvokeCompletedEventArgs invokeArgs = ((System.Web.Services.Protocols.InvokeCompletedEventArgs)(arg));
+                this.SetComponentParametersCompleted(this, new SetComponentParametersCompletedEventArgs(invokeArgs.Results, invokeArgs.Error, invokeArgs.Cancelled, invokeArgs.UserState));
+            }
+        }
+        
+        /// <remarks/>
+        [System.Web.Services.Protocols.SoapHeaderAttribute("AuthHeaderValue")]
+        [System.Web.Services.Protocols.SoapDocumentMethodAttribute("http://www.severfield.com/ValidUser", RequestNamespace="http://www.severfield.com/", ResponseNamespace="http://www.severfield.com/", Use=System.Web.Services.Description.SoapBindingUse.Literal, ParameterStyle=System.Web.Services.Protocols.SoapParameterStyle.Wrapped)]
+        public bool ValidUser() {
+            object[] results = this.Invoke("ValidUser", new object[0]);
+            return ((bool)(results[0]));
+        }
+        
+        /// <remarks/>
+        public void ValidUserAsync() {
+            this.ValidUserAsync(null);
+        }
+        
+        /// <remarks/>
+        public void ValidUserAsync(object userState) {
+            if ((this.ValidUserOperationCompleted == null)) {
+                this.ValidUserOperationCompleted = new System.Threading.SendOrPostCallback(this.OnValidUserOperationCompleted);
+            }
+            this.InvokeAsync("ValidUser", new object[0], this.ValidUserOperationCompleted, userState);
+        }
+        
+        private void OnValidUserOperationCompleted(object arg) {
+            if ((this.ValidUserCompleted != null)) {
+                System.Web.Services.Protocols.InvokeCompletedEventArgs invokeArgs = ((System.Web.Services.Protocols.InvokeCompletedEventArgs)(arg));
+                this.ValidUserCompleted(this, new ValidUserCompletedEventArgs(invokeArgs.Results, invokeArgs.Error, invokeArgs.Cancelled, invokeArgs.UserState));
+            }
+        }
+        
+        /// <remarks/>
         public new void CancelAsync(object userState) {
             base.CancelAsync(userState);
         }
@@ -847,17 +948,15 @@ namespace Prism.ExternalService {
         
         private string usernameField;
         
-        private string passwordField;
-        
         private string programNameField;
         
         private string programVersionField;
         
         private string domainNameField;
         
-        private string externalKeyField;
+        private string uniqueUserIdField;
         
-        private string internalKeyField;
+        private string motherBoardIdField;
         
         private System.Xml.XmlAttribute[] anyAttrField;
         
@@ -868,16 +967,6 @@ namespace Prism.ExternalService {
             }
             set {
                 this.usernameField = value;
-            }
-        }
-        
-        /// <remarks/>
-        public string Password {
-            get {
-                return this.passwordField;
-            }
-            set {
-                this.passwordField = value;
             }
         }
         
@@ -912,22 +1001,22 @@ namespace Prism.ExternalService {
         }
         
         /// <remarks/>
-        public string ExternalKey {
+        public string UniqueUserId {
             get {
-                return this.externalKeyField;
+                return this.uniqueUserIdField;
             }
             set {
-                this.externalKeyField = value;
+                this.uniqueUserIdField = value;
             }
         }
         
         /// <remarks/>
-        public string InternalKey {
+        public string MotherBoardId {
             get {
-                return this.internalKeyField;
+                return this.motherBoardIdField;
             }
             set {
-                this.internalKeyField = value;
+                this.motherBoardIdField = value;
             }
         }
         
@@ -1314,6 +1403,84 @@ namespace Prism.ExternalService {
         private object[] results;
         
         internal CreateNewExcelSheetCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        /// <remarks/>
+        public bool Result {
+            get {
+                this.RaiseExceptionIfNecessary();
+                return ((bool)(this.results[0]));
+            }
+        }
+    }
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
+    public delegate void TestDoMurlingThingCompletedEventHandler(object sender, TestDoMurlingThingCompletedEventArgs e);
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    public partial class TestDoMurlingThingCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        internal TestDoMurlingThingCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        /// <remarks/>
+        public string[] Result {
+            get {
+                this.RaiseExceptionIfNecessary();
+                return ((string[])(this.results[0]));
+            }
+        }
+    }
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
+    public delegate void SetComponentParametersCompletedEventHandler(object sender, SetComponentParametersCompletedEventArgs e);
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    public partial class SetComponentParametersCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        internal SetComponentParametersCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        /// <remarks/>
+        public string[] Result {
+            get {
+                this.RaiseExceptionIfNecessary();
+                return ((string[])(this.results[0]));
+            }
+        }
+    }
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
+    public delegate void ValidUserCompletedEventHandler(object sender, ValidUserCompletedEventArgs e);
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    public partial class ValidUserCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        internal ValidUserCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
                 base(exception, cancelled, userState) {
             this.results = results;
         }

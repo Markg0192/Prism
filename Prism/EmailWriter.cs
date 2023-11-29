@@ -1,4 +1,13 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
+using Google.Apis.Auth.OAuth2;
+using Google.Apis.Gmail.v1;
+using Google.Apis.Services;
+using Google.Apis.Util.Store;
+using System.IO;
+using System.Net.Mail;
+using System.Text;
+using System.Threading;
 using Microsoft.Office.Interop.Outlook;
 using Tekla.Structures.Model;
 using Attachment = Microsoft.Office.Interop.Outlook.Attachment;
@@ -15,6 +24,9 @@ namespace Prism
         private const string marksEmail = "mark.gibson@severfield.com";
         private const string dansEmail = "dan.thompson@severfield.com";
         private const string johnsEmail = "john.gradwell@severfield.com";
+        private static readonly string[] Scopes = { GmailService.Scope.GmailCompose };
+        private static readonly string ApplicationName = "Your Application Name";
+        private static GmailService service;
 
         public static void WriteEpoEmail(PrismProjectData projData, string fabPrefix, string issueNumber, string phaseNumber, string siteDate, string fabPath)
         {
@@ -317,10 +329,10 @@ namespace Prism
 
         private static string FormCCString(bool fabsecPresent, ExternalService.WebService1 service, string jobName)
         {
-            string projectManager = service.ReadSpecificLine(Constants.PrismModelData, 17, Constants.ModelProjectInforLocation(jobName));           
-            string doManager = service.ReadSpecificLine(Constants.PrismModelData, 18, Constants.ModelProjectInforLocation(jobName));            
-            string documentControl = service.ReadSpecificLine(Constants.PrismModelData, 19, Constants.ModelProjectInforLocation(jobName));           
-            string others = service.ReadSpecificLine(Constants.PrismModelData, 20, Constants.ModelProjectInforLocation(jobName));
+            string projectManager = WebService.ReadSpecificLine(Constants.PrismModelData, 17, Constants.ModelProjectInforLocation(jobName));           
+            string doManager = WebService.ReadSpecificLine(Constants.PrismModelData, 18, Constants.ModelProjectInforLocation(jobName));            
+            string documentControl = WebService.ReadSpecificLine(Constants.PrismModelData, 19, Constants.ModelProjectInforLocation(jobName));           
+            string others = WebService.ReadSpecificLine(Constants.PrismModelData, 20, Constants.ModelProjectInforLocation(jobName));
 
             string[] pString = projectManager.Split(' ');
             string[] doManagerString = doManager.Split(' ');

@@ -23,7 +23,7 @@ namespace Prism
 
             if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(parent))
                
-                Browser.Navigate(service.GetDirectoryName(9, "") + @"\Index.mht");
+                Browser.Navigate(WebService.GetDirectoryName(9, "") + @"\Index.mht");
             else
                 BrowseTo(name, parent);
         }
@@ -56,7 +56,7 @@ namespace Prism
         {
             if (!service.DirectoryExists(filePathLine, "")) return;
 
-            RootNode = new HelpNode("Index", service.GetDirectoryName(filePathLine, @"\Index.mht"));
+            RootNode = new HelpNode("Index", WebService.GetDirectoryName(filePathLine, @"\Index.mht"));
             AddNodes(ref RootNode, 9, service);
 
             var root = new TreeNode("Index");
@@ -69,17 +69,17 @@ namespace Prism
        
         private void AddNodes(ref HelpNode root, int filePathLine, ExternalService.WebService1 service)
         {
-            var directories = service.GetDirectories(filePathLine, "");// Directory.GetDirectories(folderpath);
+            var directories = WebService.GetDirectories(filePathLine, "");// Directory.GetDirectories(folderpath);
             foreach (var d in directories)
             {
                 var name = new DirectoryInfo(Path.GetDirectoryName(d + "\\")).Name;
                 if (name.Contains("-")) name = name.Split('-')[1];
 
                 var filepath = d + "\\" + name + ".mht";
-                var files = service.DirectoryGetFiles(90, "*.mht", d);
+                var files = WebService.DirectoryGetFiles(9, "*.mht", d);
                 if (!files.Contains(filepath)) break;
                 var newNode = new HelpNode(name, filepath);
-                foreach (var dir in service.GetDirectories(90, d))
+                foreach (var dir in WebService.GetDirectories(9, d))
                 {
                     AddNodes(ref newNode, 9, service);
                 }

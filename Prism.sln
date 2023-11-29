@@ -5,8 +5,6 @@ VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Prism", "Prism\Prism.csproj", "{392CE316-72E3-4B40-9DF7-16C8D7EC84C4}"
 EndProject
-Project("{840C416C-B8F3-42BC-B0DD-F6BB14C9F8CB}") = "PrismInstaller", "PrismInstaller\PrismInstaller.aiproj", "{5300820A-F380-4DE9-8B64-5C507E02E6E1}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		All|Any CPU = All|Any CPU
@@ -20,12 +18,6 @@ Global
 		{392CE316-72E3-4B40-9DF7-16C8D7EC84C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{392CE316-72E3-4B40-9DF7-16C8D7EC84C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{392CE316-72E3-4B40-9DF7-16C8D7EC84C4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5300820A-F380-4DE9-8B64-5C507E02E6E1}.All|Any CPU.ActiveCfg = DefaultBuild
-		{5300820A-F380-4DE9-8B64-5C507E02E6E1}.All|Any CPU.Build.0 = DefaultBuild
-		{5300820A-F380-4DE9-8B64-5C507E02E6E1}.Debug|Any CPU.ActiveCfg = DefaultBuild
-		{5300820A-F380-4DE9-8B64-5C507E02E6E1}.Debug|Any CPU.Build.0 = DefaultBuild
-		{5300820A-F380-4DE9-8B64-5C507E02E6E1}.Release|Any CPU.ActiveCfg = DefaultBuild
-		{5300820A-F380-4DE9-8B64-5C507E02E6E1}.Release|Any CPU.Build.0 = DefaultBuild
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

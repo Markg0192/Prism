@@ -23,10 +23,10 @@ namespace Prism.CustomDialogs
 
         private void ReadExistingControllers(ProjectInfo pInfo)
         {
-            string projectManager = service.ReadSpecificLine(Constants.PrismModelData, 17, fileLocation);
-            string doManager = service.ReadSpecificLine(Constants.PrismModelData, 18, fileLocation);
-            string documentControl = service.ReadSpecificLine(Constants.PrismModelData, 19, fileLocation);
-            string others = service.ReadSpecificLine(Constants.PrismModelData, 20, fileLocation);
+            string projectManager = WebService.ReadSpecificLine(Constants.PrismModelData, 17, fileLocation);
+            string doManager = WebService.ReadSpecificLine(Constants.PrismModelData, 18, fileLocation);
+            string documentControl = WebService.ReadSpecificLine(Constants.PrismModelData, 19, fileLocation);
+            string others = WebService.ReadSpecificLine(Constants.PrismModelData, 20, fileLocation);
 
             txt_DocumentControl.Text = documentControl;
             txt_Others.Text = others;
@@ -36,10 +36,10 @@ namespace Prism.CustomDialogs
 
         private void SetNewValues(ProjectInfo pInfo)
         {
-            service.WriteToSpecificLine(Constants.PrismModelData, 17, txt_ProjectManagement.Text, fileLocation);
-            service.WriteToSpecificLine(Constants.PrismModelData, 18, txt_DOManager.Text, fileLocation);
-            service.WriteToSpecificLine(Constants.PrismModelData, 19, txt_DocumentControl.Text, fileLocation);
-            service.WriteToSpecificLine(Constants.PrismModelData, 20, txt_Others.Text, fileLocation);
+            WebService.WriteToSpecificLine(Constants.PrismModelData, 17, txt_ProjectManagement.Text, fileLocation);
+            WebService.WriteToSpecificLine(Constants.PrismModelData, 18, txt_DOManager.Text, fileLocation);
+            WebService.WriteToSpecificLine(Constants.PrismModelData, 19, txt_DocumentControl.Text, fileLocation);
+            WebService.WriteToSpecificLine(Constants.PrismModelData, 20, txt_Others.Text, fileLocation);
         }
 
         private async void btn_Apply_Click(object sender, EventArgs e)

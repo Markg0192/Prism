@@ -18,9 +18,19 @@ namespace Prism
             Date = DateTime.Now.ToString("dd/MM/yyyy");
             string[] NameArray = Environment.UserName.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
             First = Capitalise(NameArray[0]);
-            Last = Capitalise(NameArray[1]);
-            Full = First + " " + Last;
-            Initials = new string(new char[] { First.ToCharArray()[0], Last.ToCharArray()[0] }).ToUpper();
+            if (NameArray.Length != 2)
+            {
+                Last = "";
+                Full = First; ;
+                Initials = First[0].ToString().ToUpper();
+            }
+            else
+            {
+                Last = Capitalise(NameArray[1]);
+                Full = First + " " + Last;
+                Initials = new string(new char[] { First.ToCharArray()[0], Last.ToCharArray()[0] }).ToUpper();
+            }
+
             ProjPath = modelPath;
             WebService = webService;
         }

@@ -11,7 +11,7 @@
             if(!myObjects.SelectedModelParts.ModifyAttributes(stageNumber, projectData)) { return false; }
             ModelModifiers.RedrawViews();
             int autoFixCount = ModelChecker.PhasesDoNotMatch.Count + ModelChecker.StartNumbersDoNotMatch.Count;
-            Logging.LogProgress(projectData.ProjNumberAndName, "Detail 2", autoFixCount, myObjects.AssembliesList.Count, projectData.WebService);
+            Logging.LogProgress(projectData.ProjNumberAndName, "Detail 2", autoFixCount, myObjects.AssembliesList.Count);
             return true;
         }
     }

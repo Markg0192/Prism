@@ -30,7 +30,7 @@ namespace Prism.ButtonOperations
             if (drawingManager.NotLabelledDrawings.Count != 0)
             {
                 PrismWarnings.IncorrectlyAssignedDrawings();
-                Logging.UnAssignedDrawings(projectData.ProjNumber, drawingManager.NotLabelledDrawings, projectData.WebService);
+                Logging.UnAssignedDrawings(projectData.ProjNumber, drawingManager.NotLabelledDrawings);
                 return false;
             }
 
@@ -50,8 +50,8 @@ namespace Prism.ButtonOperations
 
             EmailWriter.WriteFabEmail(projectData, myObjects, reportManager.FabReportPrefix, issueNumber, phaseNumber, siteDate, reportManager.Folders.FabPath, zipFileCanBeAttached);
 
-            Logging.UpdateFrozenDrawingCount(projectData.ProjNumberAndGuid, drawingManager.FrozenDrawings.Count, drawingManager.UnFrozenDrawings.Count, projectData.WebService);
-            Logging.LogProgress(projectData.ProjNumberAndName, "Fab Package", 0, myObjects.AssembliesList.Count, projectData.WebService);
+            Logging.UpdateFrozenDrawingCount(projectData.ProjNumberAndGuid, drawingManager.FrozenDrawings.Count, drawingManager.UnFrozenDrawings.Count);
+            Logging.LogProgress(projectData.ProjNumberAndName, "Fab Package", 0, myObjects.AssembliesList.Count);
 
             return true;
         }

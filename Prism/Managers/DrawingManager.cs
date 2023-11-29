@@ -1,5 +1,4 @@
 ﻿using Microsoft.Office.Interop.Outlook;
-using Org.BouncyCastle.Asn1.X509.Qualified;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -43,11 +42,11 @@ namespace Prism
         public DrawingManager(Model model, PrismProjectData projectData, string phaseNum, string issueNum)
         {
             _folders = new FolderManager(projectData, phaseNum, issueNum);
-            Logging.DebugLog("folder manaager made", "", projectData.WebService);
+            Logging.DebugLog("folder manaager made", "");
             this._model = model;
 
             DrawingsAreUpToDate = CreateDrawingList();
-            Logging.DebugLog("drawingList made", "", projectData.WebService);
+            Logging.DebugLog("drawingList made", "");
         }
 
         public static List<PrismDrawing> PrismDrawingList = new List<PrismDrawing>();

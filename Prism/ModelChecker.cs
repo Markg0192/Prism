@@ -82,9 +82,8 @@ namespace Prism
         {
             string property = "";
             boltGroup.GetReportProperty(ModelUDA.BoltShearStudTag(), ref property);
-            return property == "";
+            return string.IsNullOrEmpty(property); // Return true if the property is not null or empty
         }
-
 
         private static bool IsShearStud(List<BoltGroup> boltGroup)
         {
