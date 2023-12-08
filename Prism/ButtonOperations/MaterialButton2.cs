@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Tekla.Structures.Model;
-using Tekla.Structures.Model.UI;
+﻿using Tekla.Structures.Model;
 using static Prism.Enums;
 
 namespace Prism.ButtonOperations
@@ -13,11 +10,11 @@ namespace Prism.ButtonOperations
             //HDBolts.StampConnectionCodeOnMainMember(myObjects);
             if (ModelChecker.MemberOrientationIsCorrect(myObjects, out IgnoreType ignore))
             {
-                if (!Constants.IsSpecialPerson())
-                {
-                    if (!myObjects.ProcessFabsecs(model, projectData)) { return false; }
-                }
-                myObjects.AddStartNumbers(startNumber);
+                if (!FabsecProcessing.PrepFabsecCarcassesForMaterialOrder(myObjects, model, startNumber)) return false;
+                // if (!myObjects.ProcessFabsecs(model, projectData)) { return false; }
+
+                myObjects.NonFabsecParts.AddStartNumbers(startNumber);
+
                 if (!myObjects.SelectedModelParts.ModifyAttributes(stageNumber, projectData)) { return false; }
 
                 if (ignore == IgnoreType.AutoFix)

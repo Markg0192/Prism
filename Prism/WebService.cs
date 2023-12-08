@@ -17,7 +17,7 @@ namespace Prism
         public static WebService1 SetupWebService(string key)
         {
             _service = new WebService1();
-           // _service.Url = @"https://webapps.severfield.com/CETExtWebService/ExternalService.asmx";
+            _service.Url = @"https://webapps.severfield.com/CETExtWebService/ExternalService.asmx";
 
             AuthHeader soapHead = new AuthHeader();
             SecurityUtils secUtils = new SecurityUtils("Extd6L!u8nO1%qR7"); //This security is used for the Authentication header
@@ -32,8 +32,7 @@ namespace Prism
 
             _service.AuthHeaderValue = soapHead;
 
-            try { _service.HelloWorld(); }
-            catch
+            if (_service.HelloWorld() != "Hello World")
             {
                 MessageBox.Show("Failed to connect to the web service, please ensure internet connection. If the problem persists, contact help.");
                 Environment.Exit(1);

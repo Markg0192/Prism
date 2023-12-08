@@ -16,6 +16,7 @@ using Tekla.Structures.RemotingHelper;
 using Tekla.Structures.Drawing;
 using Part = Tekla.Structures.Model.Part;
 using ModelObject = Tekla.Structures.Model.ModelObject;
+using Org.BouncyCastle.Tls;
 
 namespace Prism
 {
@@ -102,15 +103,11 @@ namespace Prism
             if (stageNumber == 7)
             {
                 part.SetUserProperty(ModelUDA.PartMarkAtFab(), part.GetPartMark());
-                // if (projectData.Full != "Mark Gibson") { part.LockPart(); }
             }
             part.Modify();
             if (stageNumber == 7 && !Operation.IsNumberingUpToDate(part))
             {
-               // Logging.PartsModifiedAfterRun();
-                PrismWarnings.NumbersNoLongerUpToDate();
-
-                return false;
+                return PrismWarnings.NumbersNoLongerUpToDate();
             }
             return true;
         }
@@ -149,9 +146,9 @@ namespace Prism
             }
         }
 
-        public static void AddStartNumbers(this SelectedObjects selectedObjects, string startNumber)
+        public static void AddStartNumbers(this List<ModelObject> parts, string startNumber)
         {
-            foreach (Part p in selectedObjects.SelectedModelParts)
+            foreach (Part p in parts)
             {
                 p.PartNumber.StartNumber = Convert.ToInt32(startNumber);
                 p.AssemblyNumber.StartNumber = Convert.ToInt32(startNumber);
@@ -246,13 +243,13 @@ namespace Prism
         public static double GetPartLength(Part myPart)
         {
             double length = 0.0;
-            myPart.GetReportProperty("LENGTH", ref length);
+            myPart.GetReportProperty(ModelUDA.Length(), ref length);
             return length;
-           /* ArrayList points = myPart.GetCenterLine(true);
-            Point start = points[0] as Point;
-            Point end = points[1] as Point;
-            double Length = Distance.PointToPoint(end, start);
-            return Length;*/
+            /* ArrayList points = myPart.GetCenterLine(true);
+             Point start = points[0] as Point;
+             Point end = points[1] as Point;
+             double Length = Distance.PointToPoint(end, start);
+             return Length;*/
         }
 
         public static double GetPartWidth(Part myPart)
@@ -262,12 +259,12 @@ namespace Prism
             return width;
         }
 
-            public static void LockPart(this Part part)
+        public static void LockPart(this Part part)
         {
             part.SetUserProperty(ModelUDA.ObjectLock(), 1);
         }
 
-        public static List<Part> MoveAndRenameOmittedMembers(List<Part> partsToBeMoved, double distanceToMoveInZ, bool keepOriginal)
+        public static List<Part> MoveAndRenameOmittedMembers(List<ModelObject> partsToBeMoved, double distanceToMoveInZ, bool keepOriginal)
         {
             List<Part> movedParts = new List<Part>();
 
@@ -325,11 +322,133 @@ namespace Prism
                     Operation.MoveObject(p, myVector);
                     p.Select();
 
-                    movedParts.Add(p);
+
                 }
 
             }
             return movedParts;
+        }
+
+        public static void CopyAndOmitPart(double distanceToMoveInZ, Part p, List<Part> movedParts)
+        {
+            Vector newVector = new Vector(0, 0, distanceToMoveInZ);
+            Part copiedMember = Operation.CopyObject(p, newVector) as Part;
+
+            copiedMember.Name = "OMIT";
+            copiedMember.AssemblyNumber.Prefix = "OMIT";
+            copiedMember.PartNumber.Prefix = "OMIT";
+            copiedMember.Class = "6";
+            copiedMember.GetPhase(out Phase currentPhase);
+            Phase myPhase = new Phase((Convert.ToInt32(currentPhase.PhaseNumber) + 1000000), $"Phase {currentPhase.PhaseNumber} OMIT", "", 0);
+            myPhase.Insert();
+            copiedMember.SetPhase(myPhase);
+            copiedMember.Modify();
+
+            for (int i = 0; i < 10; i++)
+            {
+                copiedMember.SetUserProperty(ModelUDA.CurrentStageName(i), p.StageString(ModelUDA.CurrentStageName(i))); //Set prism values and prelim on the new copied fabsec
+                copiedMember.SetUserProperty(ModelUDA.CurrentStageDate(i), p.StageString(ModelUDA.CurrentStageDate(i))); //All these values are unique in the model settings
+                p.SetUserProperty(ModelUDA.CurrentStageName(i), "");
+                p.SetUserProperty(ModelUDA.CurrentStageDate(i), "");
+            }
+
+            copiedMember.SetUserProperty(ModelUDA.FabsecUniqueNumber(), p.StageString(ModelUDA.FabsecUniqueNumber()));
+            copiedMember.SetUserProperty(ModelUDA.PrelimMark(), p.GetPrelimMark());
+            copiedMember.SetUserProperty(ModelUDA.PartMarkAtFab(), p.StageString(ModelUDA.PartMarkAtFab()));
+            copiedMember.SetUserProperty(ModelUDA.FabStampUDA(), p.StageString(ModelUDA.FabStampUDA()));
+
+            p.SetUserProperty(ModelUDA.FabsecUniqueNumber(), "");
+            p.SetUserProperty(ModelUDA.PrelimMark(), "");
+            p.SetUserProperty(ModelUDA.PartMarkAtFab(), "");
+            p.SetUserProperty(ModelUDA.FabStampUDA(), "");
+
+            p.Modify();
+
+            movedParts.Add(copiedMember);
+        }
+
+        private static void MoveAndOmitPart(Part p, double distanceToMoveInZ, List<Part> movedParts)
+        {
+            p.Name = "OMIT";
+            p.AssemblyNumber.Prefix = "OMIT";
+            p.PartNumber.Prefix = "OMIT";
+            p.Class = "6";
+            p.GetPhase(out Phase currentPhase);
+            Phase myPhase = new Phase((Convert.ToInt32(currentPhase.PhaseNumber) + 1000000), $"Phase {currentPhase.PhaseNumber} OMIT", "", 0);
+            myPhase.Insert();
+            p.SetPhase(myPhase);
+            p.Modify();
+            Vector myVector = new Vector(0, 0, distanceToMoveInZ);
+            Operation.MoveObject(p, myVector);
+            p.Select();
+            movedParts.Add(p);
+        }
+
+        public static List<Part> MoveAndRenameOmittedMembers2(List<ModelObject> partsToBeMoved, double distanceToMoveInZ, bool keepOriginal, Model model, bool isFabsec = false)
+        {
+            List<Part> movedParts = new List<Part>();
+            string isCarcassCreated = "";
+
+            foreach (Part p in partsToBeMoved)
+            {
+                if (isFabsec)
+                {
+                    p.GetUserProperty(ModelUDA.FabsecCarcassOrdered(), ref isCarcassCreated);
+                }
+
+                HandleMember(p, distanceToMoveInZ, keepOriginal, model, movedParts, isCarcassCreated != "");
+            }
+
+            return movedParts;
+        }
+
+        private static void HandleMember(Part fabsec, double distanceToMoveInZ, bool keepOriginal, Model model, List<Part> movedParts, bool isFabsecWithCarcassCreated)
+        {
+            if (isFabsecWithCarcassCreated)
+            {
+                Part carcass = FabsecProcessing.GetCarcassFromSelected(model, fabsec) as Part;
+
+                MoveAndOmitPart(carcass, distanceToMoveInZ * 2, movedParts);
+                if (keepOriginal)
+                {
+                    ClearFabsecAttributes(fabsec);
+                }
+                else { fabsec.Delete(); }
+            }
+            else
+            {
+                if (keepOriginal)
+                {
+                    CopyAndOmitPart(distanceToMoveInZ, fabsec, movedParts);
+                    ClearFabsecAttributes(fabsec);
+                }
+                else { MoveAndOmitPart(fabsec, distanceToMoveInZ, movedParts); }
+            }
+        }
+
+        private static void HandleNonFabsecMember(Part part, double distanceToMoveInZ, bool keepOriginal, List<Part> movedParts)
+        {
+            // ... existing logic for non-fabsec members
+        }
+
+        private static void UpdateCarcassAttributes(Part carcass)
+        {
+            // Implement the logic to update attributes of the carcass
+        }
+
+        private static void ClearFabsecAttributes(Part fabsec)
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                fabsec.SetUserProperty(ModelUDA.CurrentStageName(i), "");
+                fabsec.SetUserProperty(ModelUDA.CurrentStageDate(i), "");
+            }
+
+            fabsec.SetUserProperty(ModelUDA.FabsecUniqueNumber(), "");
+            fabsec.SetUserProperty(ModelUDA.PrelimMark(), "");
+            fabsec.SetUserProperty(ModelUDA.PartMarkAtFab(), "");
+            fabsec.SetUserProperty(ModelUDA.FabStampUDA(), "");
+            fabsec.Modify();
         }
 
         private static string StageString(this Part part, string stageType)
@@ -358,6 +477,21 @@ namespace Prism
         }
 
         public static void SelectParts(this List<Part> partsToBeSelected)
+        {
+            ArrayList selectList = new ArrayList();
+            foreach (Part part in partsToBeSelected)
+            {
+                selectList.Add(part);
+            }
+            Tekla.Structures.Model.UI.ModelObjectSelector ms = new Tekla.Structures.Model.UI.ModelObjectSelector();
+            ms.Select(selectList);
+            foreach (Part part in selectList)
+            {
+                part.Modify();
+            }
+        }
+
+        public static void SelectParts(this List<ModelObject> partsToBeSelected)
         {
             ArrayList selectList = new ArrayList();
             foreach (Part part in partsToBeSelected)

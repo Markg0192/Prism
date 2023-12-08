@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.EnterpriseServices.Internal;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -109,6 +110,8 @@ namespace Prism
         public List<Part> SelectedModelParts { get; set; }
         public List<string> MyMarks { get; set; }
         public List<ModelObject> LockedParts { get; set; }
+        public List<ModelObject> FabsecParts = new List<ModelObject>();
+        public List<ModelObject> NonFabsecParts = new List<ModelObject>();
         public List<Part> SeversafeParts { get; set; }
         public List<Part> NonSeversafeParts { get; set; }
         public List<Part> OmittedParts = new List<Part>();
@@ -155,7 +158,12 @@ namespace Prism
                     else
                     {
                         NonSeversafeParts.Add(myPart);
-                    }
+                        if (myPart.Profile.ProfileString.Contains("PG"))
+                        {
+                            FabsecParts.Add(myPart);
+                        }
+                        else { NonFabsecParts.Add(myPart); }
+                    } 
 
                     double weight = 0;
                     myPart.GetReportProperty(ModelUDA.Weight(), ref weight);

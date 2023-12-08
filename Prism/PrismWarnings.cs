@@ -55,6 +55,13 @@ namespace Prism
             return form.OrderBoltsFrom;
         }
 
+        public static int FabsecCarcassAction()
+        {
+            var form = new FabsecCarcassOrder();
+            form.ShowDialog();
+            return form.OrderAction;
+        }
+
         public static void LockedPartsSelected()
         {
             const string notUpToDateMessage = "You have selected some parts that are locked, please de-select or unlock these to continue.";
@@ -232,6 +239,15 @@ namespace Prism
             return CreateYesNoForm(notUpToDateMessage, notUpToDateTitle);
         }
 
+        public static bool FabsecsGreenAlreadyOn()
+        {
+            const string notUpToDateMessage = "Careful: This check processes fabsecs by setting unique marking and adding green to selected members.\n" + 
+                "It looks like you have done this already on some selected parts. Are you sure you want to do this again? Clicking no will skip the fabsec processing" +
+                " but will continue to do the other checks in this step.";
+            const string notUpToDateTitle = "Fabsec Green";
+            return CreateYesNoForm(notUpToDateMessage, notUpToDateTitle);
+
+        }
         public static bool ShouldSeverSafeBeProcessed()
         {
             const string notUpToDateMessage = "You have Seversafe in your selection, would you like to create an order for this?";
@@ -289,6 +305,65 @@ namespace Prism
             CreateOKForm(notUpToDateMessage, notUpToDateTitle);
         }
 
+        public static void HasNotBeenOrderedFabsec()
+        {
+            string notUpToDateMessage = $"Before creating Carcasses you must order the plate material.\n"
+                + $"Prism UDA 'Material Order Complete' (SEV-UDA-114) is empty on {Warning} selected parts, " +
+                $"this indicates it has not been ordered, please correct this to continue.";
+            const string notUpToDateTitle = "Missing prelim marks";
+            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+        }
+
+        public static void FabsecCarcassSelected()
+        {
+            string notUpToDateMessage = $"It looks like you have selected Fabsec Carcasses, you should not do this. Select the fabsec in the model space to continue.";
+            const string notUpToDateTitle = "Select Fabsecs";
+            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+        }
+
+        public static void FabsecCarcassAlreadyOrdered()
+        {
+            string notUpToDateMessage = $"It looks like you are trying to order Fabsec Carcasses that have already been ordered.\nPlease check the Carcass Ordered UDA, if this is not blank Prism will assume the order for this piece is already complete.";
+            const string notUpToDateTitle = "Carcass already ordered";
+            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+        }
+
+        public static void FabsecSelectedDoesNotHaveCarcass()
+        {
+            string notUpToDateMessage = $"Fabsec member(s) in your selection have not had Carcasses made, you must do this first.";
+            const string notUpToDateTitle = "Create Carcasses";
+            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+        }
+
+        public static void FabsecAlreadyHasCarcass()
+        {
+            string notUpToDateMessage = $"Fabsec member(s) in your selection already have Carcasses made, change your selection.";
+            const string notUpToDateTitle = "Carcasses already existing";
+            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+        }
+
+        public static void CannotProcessThisTypeOfOrder()
+        {
+            string notUpToDateMessage = $"Prism cannot process this type of order, please try another.";
+            const string notUpToDateTitle = "Select Fabsecs";
+            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+        }
+
+        public static void AddedLengthToFabsecFailed(int numberOfFailedMembers)
+        {
+            string notUpToDateMessage = $"Prism is unable to add green to {numberOfFailedMembers} of your selected members.\n" + 
+                "This is usually caused by cuts on the end of the member, please remove the cuts to continue";
+            const string notUpToDateTitle = "Fabsec green failed";
+            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+        }
+
+        public static void NoFabsecsSelected()
+        {
+            string notUpToDateMessage = $"To work with Fabsec Carcasses you must first select some in the model.";
+            const string notUpToDateTitle = "Select Fabsecs";
+            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+        }
+
         public static void DrawingsNotUpToDate()
         {
             string notUpToDateMessage = "There are drawings in your selection that are not up to date. These must be updated before continuing.";
@@ -303,11 +378,11 @@ namespace Prism
             CreateOKForm(notUpToDateMessage, notUpToDateTitle);
         }
 
-        public static void NumbersNoLongerUpToDate()
+        public static bool NumbersNoLongerUpToDate()
         {
-            string notUpToDateMessage = "Numbers that were up to date before running Prism are now modified, please review.";
+            string notUpToDateMessage = "Numbers that were up to date before running Prism are now modified, this should be reviewed, do you want to ignroe this warning?";
             const string notUpToDateTitle = "Error";
-            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+            return CreateYesNoForm(notUpToDateMessage, notUpToDateTitle);
         }
 
         public static void SeversafeOrderCancelled()
@@ -333,7 +408,7 @@ namespace Prism
 
         public static void MaterialOrderComplete(PrismProjectData projectData)
         {
-            string notUpToDateMessage = $"Thanks {projectData.First}, your material order is now complete, " +
+            string notUpToDateMessage = $"Thanks {projectData.First}, your order has been assembled, " +
                  $"please forward the following email to the relevant purchasing team";
             string notUpToDateTitle = "Complete";
             CreateOKForm(notUpToDateMessage, notUpToDateTitle) ;
@@ -341,7 +416,7 @@ namespace Prism
 
         public static void FabPackComplete(PrismProjectData projectData, bool fileCanBeAttached)
         {
-            string notUpToDateMessage = $"Thanks {projectData.First},\r\rYour fab package is now complete, your package can be found in your model folder." +
+            string notUpToDateMessage = $"Thanks {projectData.First},\r\rYour fab package has been assembled, your package can be found in your model folder." +
                        $"\r\r{Note(fileCanBeAttached)}";
             string notUpToDateTitle = "Complete";
             CreateOKForm(notUpToDateMessage, notUpToDateTitle) ;

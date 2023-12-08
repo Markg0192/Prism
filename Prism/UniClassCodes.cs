@@ -1,7 +1,6 @@
 ﻿using Aspose.Words.Lists;
 using Prism.CustomDialogs;
 using System.Collections.Generic;
-using Tekla.Structures.Analysis.Operations;
 using Tekla.Structures.Model;
 
 namespace Prism

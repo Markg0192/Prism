@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Org.BouncyCastle.Utilities;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -8,7 +10,8 @@ using Tekla.Structures.Filtering;
 using Tekla.Structures.Filtering.Categories;
 using Tekla.Structures.Geometry3d;
 using Tekla.Structures.Model;
-using Tekla.Structures.Model.Operations;
+using Model = Tekla.Structures.Model.Model;
+using Operation = Tekla.Structures.Model.Operations.Operation;
 
 namespace Prism
 {
@@ -17,38 +20,110 @@ namespace Prism
         private static double moveDistance = 100000;
         private static double carcassGreen = 100;
 
-        public static bool ProcessFabsecs(this SelectedObjects selectedObjects, Model model, PrismProjectData projectData)
+        public static bool PrepFabsecCarcassesForMaterialOrder(this SelectedObjects selectedObjects, Model model, string startNumber)
         {
-            List<Part> myFabsecCarcasses = GetMyFabsecs(selectedObjects); //Run through the selection and single out Fabsecs
-            if (myFabsecCarcasses.Count() != 0) //Keep going if there are fabsecs present
+            List<ModelObject> myFabsecs = selectedObjects.FabsecParts;
+            if (myFabsecs.Count != 0)
             {
-                myFabsecCarcasses.MovePGs(selectedObjects); // Move the model fabsecs to the "Material grave, deep below the model space" and remove them from selected objects
-                myFabsecCarcasses.AddUniqueNumbering(model.GetProjectInfo());//Number each part uniquely with a profile specific prefix.
-                myFabsecCarcasses.AddGreenToCarcasses(); //Add "green" to carcasses, currently 100mm each side.
-                myFabsecCarcasses.SelectParts(); //select carcasses only for numbering
-                ModelModifiers.PerformNumbering(); //Perform a numbering
-                myFabsecCarcasses.SavePrelimNumbers(); //save prelim marks on carcasses (should look like PG1-1, PG1-2, PG2-1, PG2-2 etc...)
-
-                bool result = PrismWarnings.AreYouHappyWithNumbering();
-
-                if (result)
+                bool skipMainFabsecProcessing = !CheckPrismShouldAddGreenToFabsecs(myFabsecs);
+                if (!skipMainFabsecProcessing)
                 {
-                    List<Part> myFabsecs = myFabsecCarcasses.CopyPGs(selectedObjects); //Copy carcasses back into model space and add these to selected objects
-                    myFabsecs.RemoveGreenFromFabsecs(); // remove green from model space fabsecs
-                    myFabsecs.ReMarkModelFabsecs(); // remove unique prefixing from model members and return to local phase numbering
-                    myFabsecCarcasses.CreateCarcassDrawings(selectedObjects, model); //Create carcass drawings from the members in the material grave
-                    if (!myFabsecCarcasses.ModifyAttributes(2, projectData)) { return false; }
+                    myFabsecs.AddUniqueNumbering(model.GetProjectInfo());
+                    if (!myFabsecs.AddGreenToCarcasses()) return false;
+                    myFabsecs.SelectParts();
+                    ModelModifiers.PerformNumbering();
+                }
+                myFabsecs.SavePrelimNumbers(startNumber, skipMainFabsecProcessing);
+            }
+            return true;
+        }
+
+        private static bool CheckPrismShouldAddGreenToFabsecs(List<ModelObject> myFabsecs)
+        {
+            foreach (Part p in myFabsecs)
+            {
+                string attribute = "";
+                p.GetReportProperty(ModelUDA.CurrentStageName(2), ref attribute);
+                if (attribute != "")
+                {
+                    return PrismWarnings.FabsecsGreenAlreadyOn();
                 }
             }
             return true;
         }
 
-        private static void SavePrelimNumbers(this List<Part> fabsecCarcassList)
+        private static void SavePrelimNumbers(this List<ModelObject> modelObjects, string startNumber, bool skip)
         {
-            foreach (Part carcass in fabsecCarcassList)
+            foreach (Part p in modelObjects)
             {
-                carcass.SetUserProperty(ModelUDA.PrelimMark(), carcass.GetPartMark());
+                p.SetUserProperty(ModelUDA.FabsecStartNumber(), startNumber);
+                if (!skip) p.SetUserProperty(ModelUDA.PrelimMark(), p.GetPartMark());
             }
+        }
+
+        public static bool CreateFabsecCarcasses(this SelectedObjects selectedObjects, Model model)
+        {
+            if (!CheckForCarcass(selectedObjects.FabsecParts)) return false;
+            List<ModelObject> myCarcasses = selectedObjects.FabsecParts.CopyPGs(selectedObjects);
+            if (!myCarcasses.AddGreenToCarcasses()) return false;
+            selectedObjects.FabsecParts.ChangeNumberingFromPGToStandard();
+            model.CommitChanges();
+            myCarcasses.ForceCarcassNumbering();
+            myCarcasses.CreateCarcassDrawings(selectedObjects, model); //Create carcass drawings from the members in the material grave
+            ModifyAttribute(selectedObjects.FabsecParts, ModelUDA.FabsecCarcassInfo(), Constants.FabsecModelShaftIndicator);
+            ModifyAttribute(myCarcasses, ModelUDA.FabsecCarcassInfo(), Constants.FabsecCarcassIndicator);
+            return true;
+        }
+
+        private static void ChangeNumberingFromPGToStandard(this List<ModelObject> fabsecs)
+        {
+            foreach (Part p in fabsecs)
+            {
+                string startNumber = "";
+                p.GetUserProperty(ModelUDA.FabsecStartNumber(), ref startNumber);
+                p.AssemblyNumber.Prefix = "";
+                p.AssemblyNumber.StartNumber = Convert.ToInt32(startNumber);
+                p.PartNumber.Prefix = "A";
+                p.PartNumber.StartNumber = Convert.ToInt32(startNumber);
+                p.Modify();
+            }
+        }
+
+        private static void ModifyAttribute(List<ModelObject> listOfParts, string attributeToModify, string content)
+        {
+            foreach (Part part in listOfParts)
+            {
+                part.SetUserProperty(attributeToModify, content);
+                part.Modify();
+            }
+        }
+
+        public static void ForceCarcassNumbering(this List<ModelObject> myCarcasses)
+        {
+            Tekla.Structures.Model.UI.ModelObjectSelector ms = new Tekla.Structures.Model.UI.ModelObjectSelector();
+
+            //  ArrayList fullSelection = new ArrayList(myCarcasses);
+            foreach (Part carcass in myCarcasses)
+            {
+                string carcassPrelim = "";
+                carcass.GetReportProperty(ModelUDA.PrelimMark(), ref carcassPrelim);
+                if (carcassPrelim != "")
+                {
+                    string[] splitCarcassNumber = carcassPrelim.Split('-');
+                    ms.Select(new ArrayList { carcass });
+                    /*       carcass.PartNumber.Prefix = splitCarcassNumber[0] + "-";
+                           carcass.AssemblyNumber.Prefix = splitCarcassNumber[0] + "-";
+                           carcass.AssemblyNumber.StartNumber = 1;
+                           carcass.PartNumber.StartNumber = 1;
+                           carcass.Modify();*/
+
+                    //  fullSelection.Add(carcass);
+                    PrismMacroBuilder.FabsecNumberForcer(splitCarcassNumber[0], splitCarcassNumber[1]);
+
+                }
+            }
+            //   ms.Select(fullSelection);
+            //   ModelModifiers.PerformNumbering();
         }
 
         public static List<Part> GetMyFabsecs(this SelectedObjects selectedObjects)
@@ -59,7 +134,6 @@ namespace Prism
             foreach (Part part in selectedObjects.SelectedModelParts)
             {
                 if (part.Profile.ProfileString.StartsWith(pgString))
-
                 {
                     fabsecList.Add(part);
                 }
@@ -86,27 +160,83 @@ namespace Prism
             return myCarcasses;
         }
 
-        private static bool PGsArePresent(List<Part> partsList)
+        public static ModelObject GetCarcassFromSelected(Model model, Part fabsec)
         {
-            foreach (Part part in partsList)
-            {
-                string sectionSize = part.Profile.ProfileString.Substring(0, 2);
-                if (sectionSize == "PG") return true;
-            }
-            return false;
+            List<Part> allFabsecs = GetAllFabsecs(model);
+            List<Part> mathcingMembers = allFabsecs.FindAll(x => x.GetPrelimMark() == fabsec.GetPrelimMark());
+            Part myCarcass = mathcingMembers.FirstOrDefault(x => x.Identifier.GUID != fabsec.Identifier.GUID);
+            return myCarcass;
         }
 
         public static bool AddCarcassToSelection(Model model, SelectedObjects selectedObjects, out List<Part> originalFabsecs, out List<Part> fabsecCarcasses)
         {
-            if (PGsArePresent(selectedObjects.SelectedModelParts))
+            if (!CheckCarcassHasBeenCreated(selectedObjects.FabsecParts))
+            { originalFabsecs = null; fabsecCarcasses = null; return false; }
+            if (ModelChecker.NotOrderedParts.Count != 0)
             {
-                fabsecCarcasses = GetCarcassesFromSelected(model, selectedObjects, out originalFabsecs);
-                selectedObjects.SelectedModelParts.SelectParts();
-                return true;
+                PrismWarnings.Warning = ModelChecker.NotOrderedParts.Count.ToString();
+                PrismWarnings.HasNotBeenOrderedFabsec();
+                originalFabsecs = null; fabsecCarcasses = null;
+                return false;
             }
-            fabsecCarcasses = null;
-            originalFabsecs = null;
-            return false;
+            fabsecCarcasses = GetCarcassesFromSelected(model, selectedObjects, out originalFabsecs);
+            selectedObjects.SelectedModelParts.SelectParts();
+            return true;
+        }
+
+        private static bool CheckCarcassHasBeenCreated(List<ModelObject> fabsecs)
+        {
+            foreach (Part fabsec in fabsecs)
+            {
+                string attribute = "";
+                fabsec.GetUserProperty(ModelUDA.FabsecCarcassInfo(), ref attribute);
+                string carcassOrdered = "";
+                fabsec.GetUserProperty(ModelUDA.FabsecCarcassOrdered(), ref carcassOrdered);
+                if (attribute != Constants.FabsecModelShaftIndicator && attribute != Constants.FabsecCarcassIndicator)
+                {
+                    PrismWarnings.FabsecSelectedDoesNotHaveCarcass();
+                    return false;
+                }
+                if (attribute == Constants.FabsecCarcassIndicator)
+                {
+                    PrismWarnings.FabsecCarcassSelected();
+                    return false;
+                }
+                if (carcassOrdered != "")
+                {
+                    PrismWarnings.FabsecCarcassAlreadyOrdered();
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static bool CheckForCarcass(List<ModelObject> fabsecs)
+        {
+            foreach (Part fabsec in fabsecs)
+            {
+                string attribute = "";
+                fabsec.GetUserProperty(ModelUDA.FabsecCarcassInfo(), ref attribute);
+                if (ModelChecker.NotOrderedParts.Count != 0)
+                {
+                    PrismWarnings.Warning = ModelChecker.NotOrderedParts.Count.ToString();
+                    PrismWarnings.HasNotBeenOrderedFabsec();
+                    return false;
+                }
+                if (attribute == Constants.FabsecModelShaftIndicator)
+                {
+                    PrismWarnings.FabsecAlreadyHasCarcass();
+                    return false;
+                }
+                if (attribute == Constants.FabsecCarcassIndicator)
+                {
+                    PrismWarnings.FabsecCarcassSelected();
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private static List<Part> GetAllFabsecs(Model model)
@@ -139,9 +269,10 @@ namespace Prism
             return allFabsecs;
         }
 
-        private static void AddUniqueNumbering(this List<Part> fabsecList, ProjectInfo pInfo)
+        private static void AddUniqueNumbering(this List<ModelObject> fabsecList, ProjectInfo pInfo)
         {
-            var groupedParts = fabsecList.GroupBy(p => new { profile = p.Profile.ProfileString }); //Group fabsecs by their profile
+            List<Part> myParts = fabsecList.OfType<Part>().ToList();
+            var groupedParts = myParts.GroupBy(p => new { profile = p.Profile.ProfileString }); //Group fabsecs by their profile
 
             foreach (var gp in groupedParts)
             {
@@ -194,9 +325,9 @@ namespace Prism
             }
         }
 
-        private static List<Part> CopyPGs(this List<Part> fabsecList, SelectedObjects selectedObjects)
+        private static List<ModelObject> CopyPGs(this List<ModelObject> fabsecList, SelectedObjects selectedObjects)
         {
-            List<Part> fabsecCarcassList = new List<Part>();
+            List<ModelObject> fabsecCarcassList = new List<ModelObject>();
             foreach (Part fabsec in fabsecList)
             {
                 Vector myVector = new Vector(0, 0, moveDistance);
@@ -207,6 +338,8 @@ namespace Prism
                 copiedFabsec.SetUserProperty(ModelUDA.CurrentStageDate(1), fabsec.StageString(ModelUDA.CurrentStageDate(1))); //All these values are unique in the model settings
                 copiedFabsec.SetUserProperty(ModelUDA.CurrentStageName(2), fabsec.StageString(ModelUDA.CurrentStageName(2))); //This means they won't copy with the member naturally.
                 copiedFabsec.SetUserProperty(ModelUDA.CurrentStageDate(2), fabsec.StageString(ModelUDA.CurrentStageDate(2)));
+                copiedFabsec.SetUserProperty(ModelUDA.CurrentStageName(2), fabsec.StageString(ModelUDA.CurrentStageName(3)));
+                copiedFabsec.SetUserProperty(ModelUDA.CurrentStageDate(2), fabsec.StageString(ModelUDA.CurrentStageDate(3)));
                 copiedFabsec.SetUserProperty(ModelUDA.PrelimMark(), fabsec.GetPrelimMark());
                 copiedFabsec.SetUserProperty(ModelUDA.FabsecEngRef(), fabsec.GetFabsecEngRef());
                 selectedObjects.SelectedModelParts.Add(copiedFabsec);
@@ -232,27 +365,45 @@ namespace Prism
             }
         }
 
-        private static void AddGreenToCarcasses(this List<Part> fabsecCarcassList)
+        private static bool AddGreenToCarcasses(this List<ModelObject> fabsecCarcassList)
         {
+            List<ModelObject> fabsecsFailedToAddLength = new List<ModelObject>();
             foreach (Beam carcass in fabsecCarcassList)
             {
+                double lengthBeforeExtension = ModelModifiers.GetPartLength(carcass);
                 carcass.StartPointOffset.Dx -= carcassGreen;
                 carcass.EndPointOffset.Dx += carcassGreen;
                 carcass.Modify();
+                double lengthAfterExtension = ModelModifiers.GetPartLength(carcass);
+                if (lengthAfterExtension != lengthBeforeExtension + carcassGreen * 2)
+                {
+                    fabsecsFailedToAddLength.Add(carcass);
+                }
             }
+            if(fabsecsFailedToAddLength.Count > 0)
+            {
+                PrismWarnings.AddedLengthToFabsecFailed(fabsecsFailedToAddLength.Count);
+                return false;
+            }
+
+            return true;
         }
 
-        private static void RemoveGreenFromFabsecs(this List<Part> fabsecList)
+        public static void RemoveGreenFromFabsecs(this List<ModelObject> fabsecList)
         {
             foreach (Beam carcass in fabsecList)
             {
+                double length = 0;
+                ModelModifiers.GetPartLength(carcass);
+                carcass.SetUserProperty(ModelUDA.FabsecOrderLength(), Math.Round(length, 0).ToString());
+
                 carcass.StartPointOffset.Dx += carcassGreen;
                 carcass.EndPointOffset.Dx -= carcassGreen;
                 carcass.Modify();
             }
         }
 
-        private static void CreateCarcassDrawings(this List<Part> fabsecCarcassList, SelectedObjects selectedObjects, Model model)
+        private static void CreateCarcassDrawings(this List<ModelObject> fabsecCarcassList, SelectedObjects selectedObjects, Model model)
         {
             FileInfo file = new FileInfo(FirmFolderLoc.FabsecCarcassDrawingWizard());
             AutoDrawingRule rule = new AutoDrawingRule(file.FullName);
@@ -266,8 +417,6 @@ namespace Prism
             fabsecCarcassList.SelectParts();
             ModelModifiers.PerformNumbering();
             DrawingCreator.CreateDrawings(rule, idList, out status);
-            selectedObjects.SelectedModelParts.SelectParts();
         }
-
     }
 }
