@@ -1,5 +1,4 @@
-﻿using System;
-using Tekla.Structures.Model;
+﻿using Tekla.Structures.Model;
 using Tekla.Structures.Model.Operations;
 using Tekla.Structures.Geometry3d;
 using Tekla.Structures.Drawing.Automation;
@@ -16,7 +15,8 @@ using Tekla.Structures.RemotingHelper;
 using Tekla.Structures.Drawing;
 using Part = Tekla.Structures.Model.Part;
 using ModelObject = Tekla.Structures.Model.ModelObject;
-using Org.BouncyCastle.Tls;
+using System;
+//using Org.BouncyCastle.Tls;
 
 namespace Prism
 {

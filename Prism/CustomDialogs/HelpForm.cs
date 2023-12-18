@@ -22,7 +22,7 @@ namespace Prism
             CreateHelpFromRootFolder(9, service);
 
             if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(parent))
-               
+
                 Browser.Navigate(WebService.GetDirectoryName(9, "") + @"\Index.mht");
             else
                 BrowseTo(name, parent);
@@ -47,10 +47,10 @@ namespace Prism
                         break;
                     }
                 }
-                
+
                 BrowseTo(name, parent, node);
             }
-        } 
+        }
 
         private void CreateHelpFromRootFolder(int filePathLine, ExternalService.WebService1 service)
         {
@@ -66,20 +66,20 @@ namespace Prism
             TreeView.Nodes.Add(root);
             BuildTree(RootNode, root);
         }
-       
+
         private void AddNodes(ref HelpNode root, int filePathLine, ExternalService.WebService1 service)
         {
             var directories = WebService.GetDirectories(filePathLine, "");// Directory.GetDirectories(folderpath);
             foreach (var d in directories)
             {
                 var name = new DirectoryInfo(Path.GetDirectoryName(d + "\\")).Name;
-                if (name.Contains("-")) name = name.Split('-')[1];
+                var files = WebService.DirectoryGetFiles(9, "*.mht", name);
 
-                var filepath = d + "\\" + name + ".mht";
-                var files = WebService.DirectoryGetFiles(9, "*.mht", d);
+                var filepath = d + "\\" + name.Split('-')[1] + ".mht";
+
                 if (!files.Contains(filepath)) break;
                 var newNode = new HelpNode(name, filepath);
-                foreach (var dir in WebService.GetDirectories(9, d))
+                foreach (var dir in WebService.GetDirectories(9, name))
                 {
                     AddNodes(ref newNode, 9, service);
                 }

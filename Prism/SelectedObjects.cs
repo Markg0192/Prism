@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.EnterpriseServices.Internal;
+//using System.EnterpriseServices.Internal;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -158,7 +158,7 @@ namespace Prism
                     else
                     {
                         NonSeversafeParts.Add(myPart);
-                        if (myPart.Profile.ProfileString.Contains("PG"))
+                        if (myPart.Profile.ProfileString.StartsWith("PG"))
                         {
                             FabsecParts.Add(myPart);
                         }

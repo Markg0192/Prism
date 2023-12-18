@@ -1,5 +1,5 @@
-﻿using Microsoft.Office.Interop.Excel;
-using Org.BouncyCastle.Utilities;
+﻿//using Microsoft.Office.Interop.Excel;
+//using Org.BouncyCastle.Utilities;
 using System.Collections.Generic;
 using Tekla.Structures.Drawing;
 using Tekla.Structures.Model;

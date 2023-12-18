@@ -1,6 +1,6 @@
-﻿using Microsoft.Office.Interop.Excel;
+﻿//using Microsoft.Office.Interop.Excel;
 using Microsoft.Office.Interop.Outlook;
-using Org.BouncyCastle.Utilities;
+//using Org.BouncyCastle.Utilities;
 using System.Collections.Generic;
 using Tekla.Structures.Model;
 using Model = Tekla.Structures.Model.Model;

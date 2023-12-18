@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Task = System.Threading.Tasks.Task;
 using static Prism.Enums;
 using System.Windows.Forms.VisualStyles;
-using System.Xml.Linq;
+//using System.Xml.Linq;
 using Tekla.Structures.Drawing;
 using ModelObject = Tekla.Structures.Model.ModelObject;
 using Part = Tekla.Structures.Model.Part;

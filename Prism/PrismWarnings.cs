@@ -1,7 +1,6 @@
 ﻿using Prism.CustomDialogs;
 using System;
 using System.Collections.Generic;
-using System.EnterpriseServices;
 using System.Windows.Forms;
 using Tekla.Structures.Model;
 using Tekla.Structures.Model.UI;

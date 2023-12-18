@@ -1,4 +1,4 @@
-﻿using Org.BouncyCastle.Utilities;
+﻿//using Org.BouncyCastle.Utilities;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -17,7 +17,7 @@ namespace Prism
 {
     public static class FabsecProcessing
     {
-        private static double moveDistance = 100000;
+        private static double moveDistance = 1000000;
         private static double carcassGreen = 100;
 
         public static bool PrepFabsecCarcassesForMaterialOrder(this SelectedObjects selectedObjects, Model model, string startNumber)
