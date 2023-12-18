@@ -109,6 +109,7 @@ namespace Prism
             FabReportPrefix = ($"{projectData.ProjNumber}-{phaseNum}-FAB-ISSUE{issueNum}");
             MatReportPrefix = ($"{projectData.ProjNumber}-{phaseNum}-PRELIM-ISSUE{issueNum}");
             EpoReportPrefix = ($"{projectData.ProjNumber}-{phaseNum}-EPO-ISSUE{issueNum}");
+            CarcassReportPrefix = ($"{projectData.ProjNumber}-{phaseNum}-FABSEC-ISSUE{issueNum}");
             BoltReportPrefix = $"{projectData.ProjNumber}-{phaseNum}-BOLT-ISSUE{issueNum}";
             _title1 = phaseNum;
             _title2 = projectData.Initials;
@@ -120,6 +121,7 @@ namespace Prism
         public readonly string MatReportPrefix;
         public readonly string EpoReportPrefix;
         public readonly string BoltReportPrefix;
+        public readonly string CarcassReportPrefix;
 
         public void CreateMaterialReports(SelectedObjects selectedObjects, string orderType, StageTypes stageType, bool fabsecsPresent = false)
         {
@@ -175,7 +177,7 @@ namespace Prism
         public void CreateG2Assy()
         {
             string g2ReportName = Path.Combine(FirmFolderLoc.ReportTemplates(), _g2ReportName);
-            Operation.CreateReportFromSelected(g2ReportName, Path.Combine(Folders.MatPath, $"{MatReportPrefix}{_g2ReportOutput}"), _title1, _title2, _title3);
+            Operation.CreateReportFromSelected(g2ReportName, Path.Combine(Folders.CarcassOrderPath, $"{CarcassReportPrefix}{_g2ReportOutput}"), _title1, _title2, _title3);
         }
 
         public void CreateBoltList(string reportPrefix, string orderType)

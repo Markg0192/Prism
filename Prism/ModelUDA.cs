@@ -48,6 +48,11 @@
             return "WEIGHT";
         }
 
+        public static string Length()
+        {
+            return "LENGTH";
+        }
+
         public static string ObjectLock()
         {
             return "OBJECT_LOCKED";
@@ -149,6 +154,26 @@
         {
             return "USER_PHASE";
             //return "SEV-UDA-125";
+        }
+
+        public static string FabsecCarcassInfo()
+        {
+            return "SEV-UDA-132";
+        }
+
+        public static string FabsecStartNumber()
+        {
+            return "SEV-UDA-133";
+        }
+
+        public static string FabsecCarcassOrdered()
+        {
+            return "SEV-UDA-134";
+        }
+
+        public static string FabsecOrderLength()
+        {
+            return "SEV-UDA-135";
         }
 
         public static string NextFabsecPrefixNumber() //Hidden UDA

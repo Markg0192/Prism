@@ -7,6 +7,182 @@ namespace Prism
 {
     public static class PrismMacroBuilder
     {
+        public static void FabsecNumberForcer(string prefix, string prelim)
+        {
+            var macrodir = "";
+            TeklaStructuresSettings.GetAdvancedOption("XS_MACRO_DIRECTORY", ref macrodir);
+            var dir = macrodir.Split(';')[0];
+
+            var writer = new StreamWriter(dir + $@"\modeling\{Constants.ForceFabsecNumber}");
+            var macro =
+                        "#pragma warning disable 1633 // Unrecognized #pragma directive" + Environment.NewLine +
+                        "#pragma reference \"Tekla.Macros.Wpf.Runtime\"" + Environment.NewLine +
+                        "#pragma reference \"Tekla.Macros.Akit\"" + Environment.NewLine +
+                        "#pragma reference \"Tekla.Macros.Runtime\"" + Environment.NewLine +
+                        "#pragma warning restore 1633 // Unrecognized #pragma directive" + Environment.NewLine +
+                        "" + Environment.NewLine +
+                        "namespace UserMacros" + Environment.NewLine +
+                        "    {" + Environment.NewLine +
+                        "        public sealed class Macro" + Environment.NewLine +
+                        "        {" + Environment.NewLine +
+                        "            [Tekla.Macros.Runtime.MacroEntryPointAttribute()]" + Environment.NewLine +
+                        "            public static void Run(Tekla.Macros.Runtime.IMacroRuntime runtime)" + Environment.NewLine +
+                        "            {" + Environment.NewLine +
+                        "                Tekla.Macros.Akit.IAkitScriptHost akit = runtime.Get<Tekla.Macros.Akit.IAkitScriptHost>();" + Environment.NewLine +
+                        "                Tekla.Macros.Wpf.Runtime.IWpfMacroHost wpf = runtime.Get<Tekla.Macros.Wpf.Runtime.IWpfMacroHost>();" + Environment.NewLine +
+                        //     "                wpf.InvokeCommand(\"Panels\", \"Hide\", \"CatalogTree.CatalogTreeView\");" + Environment.NewLine +
+                        //     "                wpf.InvokeCommand(\"Panels\", \"Show\", \"PropertyPane.PropertyPane\");" + Environment.NewLine +
+                        //     "                wpf.View(\"PropertyPane.PropertyPane\").Find(\"PropertyTemplate_SteelBeam\", \"AID_PropertyTextBox_proSERIE\").As.TextBox.SetText(\"" + prefix + "-\");" + Environment.NewLine +
+                        //     "                wpf.View(\"PropertyPane.PropertyPane\").Find(\"PropertyTemplate_SteelBeam\", \"AID_PropertyTextBox_proASSEMBLYSERIE\").As.TextBox.SetText(\"" + prefix + "-\");" + Environment.NewLine +
+                        //     "                wpf.View(\"PropertyPane.PropertyPane\").Find(\"PropertyTemplate_SteelBeam\", \"AID_PropertyTextBox_proSTARTNUMBER\").As.TextBox.SetText(\"1\");" + Environment.NewLine +
+                        //     "                wpf.View(\"PropertyPane.PropertyPane\").Find(\"PropertyTemplate_SteelBeam\", \"AID_PropertyTextBox_proASSEMBLYSTARTNUMBER\").As.TextBox.SetText(\"1\");" + Environment.NewLine +
+                        //     "                wpf.View(\"PropertyPane.PropertyPane\").Find(\"AID_PropertyPane_CommitChangesButton\").As.Button.Invoke();" + Environment.NewLine +
+                        //     "                wpf.InvokeCommand(\"Panels\", \"Hide\", \"PropertyPane.PropertyPane\");" + Environment.NewLine +
+                        //     "                wpf.InvokeCommand(\"Panels\", \"Show\", \"CatalogTree.CatalogTreeView\");" + Environment.NewLine +
+
+                        "                wpf.InvokeCommand(\"CommandRepository\", \"Numbering.ClearPartAndAssemblyNumbers\");" + Environment.NewLine +
+                       "                akit.PushButton(\"warning_ok\", \"cleared_selected_numbering\");             " + Environment.NewLine +
+                        "                wpf.InvokeCommand(\"CommandRepository\", \"Numbering.ChangePartNumber\");    " + Environment.NewLine +
+                        "                akit.ValueChange(\"assign_part_number\", \"Position\", \"" + prelim + "\");  " + Environment.NewLine +
+                        "                akit.PushButton(\"AssignPB\", \"assign_part_number\");                       " + Environment.NewLine +
+                        "                akit.PushButton(\"CancelPB\", \"assign_part_number\");                       " + Environment.NewLine +
+
+                        "            }" + Environment.NewLine +
+                        "        }" + Environment.NewLine +
+                        "    }";
+            writer.Write(macro);
+            writer.Close();
+
+            Operation.RunMacro(Constants.ForceFabsecNumber);
+
+            while (Operation.IsMacroRunning()) // Wait until macro for selecting drawings in the document manager is complete before moving on
+            {
+                System.Threading.Tasks.Task.Delay(10);
+            }
+        }
+
+        public static void FabsecAssignNumber(string prefix, string prelim)
+        {
+            var macrodir = "";
+            TeklaStructuresSettings.GetAdvancedOption("XS_MACRO_DIRECTORY", ref macrodir);
+            var dir = macrodir.Split(';')[0];
+
+            var writer = new StreamWriter(dir + $@"\modeling\{Constants.ForceFabsecNumber}");
+            var macro =
+                        "#pragma warning disable 1633 // Unrecognized #pragma directive" + Environment.NewLine +
+                        "#pragma reference \"Tekla.Macros.Wpf.Runtime\"" + Environment.NewLine +
+                        "#pragma reference \"Tekla.Macros.Akit\"" + Environment.NewLine +
+                        "#pragma reference \"Tekla.Macros.Runtime\"" + Environment.NewLine +
+                        "#pragma warning restore 1633 // Unrecognized #pragma directive" + Environment.NewLine +
+                        "" + Environment.NewLine +
+                        "namespace UserMacros" + Environment.NewLine +
+                        "    {" + Environment.NewLine +
+                        "        public sealed class Macro" + Environment.NewLine +
+                        "        {" + Environment.NewLine +
+                        "            [Tekla.Macros.Runtime.MacroEntryPointAttribute()]" + Environment.NewLine +
+                        "            public static void Run(Tekla.Macros.Runtime.IMacroRuntime runtime)" + Environment.NewLine +
+                        "            {" + Environment.NewLine +
+                        "                Tekla.Macros.Akit.IAkitScriptHost akit = runtime.Get<Tekla.Macros.Akit.IAkitScriptHost>();" + Environment.NewLine +
+                        "                Tekla.Macros.Wpf.Runtime.IWpfMacroHost wpf = runtime.Get<Tekla.Macros.Wpf.Runtime.IWpfMacroHost>();" + Environment.NewLine +
+                        "                akit.ValueChange(\"assign_part_number\", \"Position\", \"" + prelim + "\");  " + Environment.NewLine +
+                      //  "                akit.PushButton(\"AssignPB\", \"assign_part_number\");                       " + Environment.NewLine +
+                      //  "                akit.PushButton(\"CancelPB\", \"assign_part_number\");                       " + Environment.NewLine +
+                        "            }" + Environment.NewLine +
+                        "        }" + Environment.NewLine +
+                        "    }";
+            writer.Write(macro);
+            writer.Close();
+
+            Operation.RunMacro(Constants.ForceFabsecNumber);
+
+            while (Operation.IsMacroRunning()) // Wait until macro for selecting drawings in the document manager is complete before moving on
+            {
+                System.Threading.Tasks.Task.Delay(10);
+            }
+        }
+        public static void FabsecAssignNumber2(string prefix, string prelim)
+        {
+            var macrodir = "";
+            TeklaStructuresSettings.GetAdvancedOption("XS_MACRO_DIRECTORY", ref macrodir);
+            var dir = macrodir.Split(';')[0];
+
+            var writer = new StreamWriter(dir + $@"\modeling\{Constants.ForceFabsecNumber}");
+            var macro =
+                        "#pragma warning disable 1633 // Unrecognized #pragma directive" + Environment.NewLine +
+                        "#pragma reference \"Tekla.Macros.Wpf.Runtime\"" + Environment.NewLine +
+                        "#pragma reference \"Tekla.Macros.Akit\"" + Environment.NewLine +
+                        "#pragma reference \"Tekla.Macros.Runtime\"" + Environment.NewLine +
+                        "#pragma warning restore 1633 // Unrecognized #pragma directive" + Environment.NewLine +
+                        "" + Environment.NewLine +
+                        "namespace UserMacros" + Environment.NewLine +
+                        "    {" + Environment.NewLine +
+                        "        public sealed class Macro" + Environment.NewLine +
+                        "        {" + Environment.NewLine +
+                        "            [Tekla.Macros.Runtime.MacroEntryPointAttribute()]" + Environment.NewLine +
+                        "            public static void Run(Tekla.Macros.Runtime.IMacroRuntime runtime)" + Environment.NewLine +
+                        "            {" + Environment.NewLine +
+                        "                Tekla.Macros.Akit.IAkitScriptHost akit = runtime.Get<Tekla.Macros.Akit.IAkitScriptHost>();" + Environment.NewLine +
+                        "                Tekla.Macros.Wpf.Runtime.IWpfMacroHost wpf = runtime.Get<Tekla.Macros.Wpf.Runtime.IWpfMacroHost>();" + Environment.NewLine +
+                       // "                akit.ValueChange(\"assign_part_number\", \"Position\", \"" + prelim + "\");  " + Environment.NewLine +
+                        "                akit.PushButton(\"AssignPB\", \"assign_part_number\");                       " + Environment.NewLine +
+                       // "                akit.PushButton(\"CancelPB\", \"assign_part_number\");                       " + Environment.NewLine +
+                        "            }" + Environment.NewLine +
+                        "        }" + Environment.NewLine +
+                        "    }";
+            writer.Write(macro);
+            writer.Close();
+
+            Operation.RunMacro(Constants.ForceFabsecNumber);
+
+            while (Operation.IsMacroRunning()) // Wait until macro for selecting drawings in the document manager is complete before moving on
+            {
+                System.Threading.Tasks.Task.Delay(10);
+            }
+        }
+
+
+        public static void FabsecAssignNumber3(string prefix, string prelim)
+        {
+            var macrodir = "";
+            TeklaStructuresSettings.GetAdvancedOption("XS_MACRO_DIRECTORY", ref macrodir);
+            var dir = macrodir.Split(';')[0];
+
+            var writer = new StreamWriter(dir + $@"\modeling\{Constants.ForceFabsecNumber}");
+            var macro =
+                        "#pragma warning disable 1633 // Unrecognized #pragma directive" + Environment.NewLine +
+                        "#pragma reference \"Tekla.Macros.Wpf.Runtime\"" + Environment.NewLine +
+                        "#pragma reference \"Tekla.Macros.Akit\"" + Environment.NewLine +
+                        "#pragma reference \"Tekla.Macros.Runtime\"" + Environment.NewLine +
+                        "#pragma warning restore 1633 // Unrecognized #pragma directive" + Environment.NewLine +
+                        "" + Environment.NewLine +
+                        "namespace UserMacros" + Environment.NewLine +
+                        "    {" + Environment.NewLine +
+                        "        public sealed class Macro" + Environment.NewLine +
+                        "        {" + Environment.NewLine +
+                        "            [Tekla.Macros.Runtime.MacroEntryPointAttribute()]" + Environment.NewLine +
+                        "            public static void Run(Tekla.Macros.Runtime.IMacroRuntime runtime)" + Environment.NewLine +
+                        "            {" + Environment.NewLine +
+                        "                Tekla.Macros.Akit.IAkitScriptHost akit = runtime.Get<Tekla.Macros.Akit.IAkitScriptHost>();" + Environment.NewLine +
+                        "                Tekla.Macros.Wpf.Runtime.IWpfMacroHost wpf = runtime.Get<Tekla.Macros.Wpf.Runtime.IWpfMacroHost>();" + Environment.NewLine +
+                      //  "                akit.ValueChange(\"assign_part_number\", \"Position\", \"" + prelim + "\");  " + Environment.NewLine +
+                       // "                akit.PushButton(\"AssignPB\", \"assign_part_number\");                       " + Environment.NewLine +
+                        "                akit.PushButton(\"CancelPB\", \"assign_part_number\");                       " + Environment.NewLine +
+                        "            }" + Environment.NewLine +
+                        "        }" + Environment.NewLine +
+                        "    }";
+            writer.Write(macro);
+            writer.Close();
+
+            Operation.RunMacro(Constants.ForceFabsecNumber);
+
+            while (Operation.IsMacroRunning()) // Wait until macro for selecting drawings in the document manager is complete before moving on
+            {
+                System.Threading.Tasks.Task.Delay(10);
+            }
+        }
+
+
+
         public static void RefreshDrawings()
         {
             var macrodir = "";

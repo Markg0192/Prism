@@ -121,7 +121,6 @@ namespace Prism
 
         public static void WriteFirstDataLog(int filePathLine, string additonalString, ProjectInfo pInfo)
         {
-        https://backgrounds.wetransfer.net/creator/wepresent/2309-p1/wp3-fs/1_fKdfFG/img.aa2c970228497abdc717.jpg
             int currentLastNumber = 0;
             pInfo.GetUserProperty(ModelUDA.LastUsedPrelim(), ref currentLastNumber);
 
@@ -203,7 +202,7 @@ namespace Prism
 
         public static void LogProgress(string modelName, string buttonPress, int autoFixCount, int totalObjects)
         {
-            if (Environment.UserName != "mark. gibson")
+            if (Environment.UserName != "mark.gibson")
             {
                 bool isPrelimReset = buttonPress.StartsWith("PRELIM RESET");
                 string textType1 = isPrelimReset ? "Number before reset:" : "Assemblies processed:";

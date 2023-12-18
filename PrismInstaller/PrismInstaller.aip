@@ -13,10 +13,10 @@
     <ROW Property="ARPCOMMENTS" Value="This installer database contains the logic and data required to install [|ProductName]." ValueLocId="*"/>
     <ROW Property="ARPPRODUCTICON" Value="ico.exe" Type="8"/>
     <ROW Property="Manufacturer" Value="Severfield"/>
-    <ROW Property="ProductCode" Value="1033:{7B6DFAB8-0793-4EF3-BB53-7F23D5244E34} " Type="16"/>
+    <ROW Property="ProductCode" Value="1033:{6A735ACA-C76F-4362-8AC8-95AD26B75765} " Type="16"/>
     <ROW Property="ProductLanguage" Value="1033"/>
     <ROW Property="ProductName" Value="Prism"/>
-    <ROW Property="ProductVersion" Value="3.0.0" Options="32"/>
+    <ROW Property="ProductVersion" Value="3.2.0" Options="32"/>
     <ROW Property="SecureCustomProperties" Value="OLDPRODUCTS;AI_NEWERPRODUCTFOUND"/>
     <ROW Property="UpgradeCode" Value="{9C13391E-D13E-4AB7-8D21-D98BB459A54B}"/>
     <ROW Property="WindowsType9X" MultiBuildValue="DefaultBuild:Windows 9x/ME" ValueLocId="-"/>

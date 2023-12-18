@@ -1,16 +1,7 @@
-﻿using System;
-using System.Diagnostics;
-using Google.Apis.Auth.OAuth2;
-using Google.Apis.Gmail.v1;
-using Google.Apis.Services;
-using Google.Apis.Util.Store;
-using System.IO;
-using System.Net.Mail;
-using System.Text;
-using System.Threading;
-using Microsoft.Office.Interop.Outlook;
+﻿using Microsoft.Office.Interop.Outlook;
 using Tekla.Structures.Model;
 using Attachment = Microsoft.Office.Interop.Outlook.Attachment;
+using Application = Microsoft.Office.Interop.Outlook.Application;
 
 namespace Prism
 {
@@ -24,9 +15,7 @@ namespace Prism
         private const string marksEmail = "mark.gibson@severfield.com";
         private const string dansEmail = "dan.thompson@severfield.com";
         private const string johnsEmail = "john.gradwell@severfield.com";
-        private static readonly string[] Scopes = { GmailService.Scope.GmailCompose };
         private static readonly string ApplicationName = "Your Application Name";
-        private static GmailService service;
 
         public static void WriteEpoEmail(PrismProjectData projData, string fabPrefix, string issueNumber, string phaseNumber, string siteDate, string fabPath)
         {
@@ -129,6 +118,75 @@ namespace Prism
             outlookApp = null;
         }
 
+        public static void WriteFabsecCarcassEmail(PrismProjectData projData, string fabPrefix, string issueNumber, string phaseNumber, string siteDate, string boltPath)
+        {
+            Application outlookApp = new Application();
+
+            MailItem email = (MailItem)outlookApp.CreateItem(OlItemType.olMailItem);
+            email.Subject = $"{fabPrefix} Fabsec Carcass Order";
+
+            email.Body = $"Hello,{_mailNewLine}" +
+                            $"{_mailNewLine}" +
+                            $"This is the fabsec carcass order for phase {phaseNumber}, issue {issueNumber}, in {projData.ProjNumber}, {projData.ProjName}.{_mailNewLine}" +
+                            $"Please process these carcasses when possible.{_mailNewLine}{_mailNewLine}" +
+                            $"{DateRequiredNote("These carcasses are required for fab", siteDate)}" +
+                            $"Regards,{_mailNewLine}{_mailNewLine}" +
+                            $"{projData.Full}";
+
+            string attachmentPath = $"{boltPath}.zip";
+            Attachment attachment = email.Attachments.Add(attachmentPath);
+
+            email.To = _fabsecTeamEmail;
+            email.CC = _purchasingEmail; //FormCCString(true, projData.WebService, projData.ProjNumberAndGuid);
+            email.Display();
+            //email.Send();
+
+            // Release the Outlook application object
+            System.Runtime.InteropServices.Marshal.ReleaseComObject(outlookApp);
+            outlookApp = null;
+        }
+
+
+        /*  public static async void TestNewEmail()
+          {
+              var requestBody = new SendMailPostRequestBody
+              {
+                  Message = new Message
+                  {
+                      Subject = "Meet for lunch?",
+                      Body = new ItemBody
+                      {
+                          ContentType = BodyType.Text,
+                          Content = "The new cafeteria is open.",
+                      },
+                      ToRecipients = new List<Microsoft.Graph.Models.Recipient>
+          {
+              new Microsoft.Graph.Models.Recipient
+              {
+                  EmailAddress = new EmailAddress
+                  {
+                      Address = "mark.gibson@severfield.com",
+                  },
+              },
+          },
+                      CcRecipients = new List<Microsoft.Graph.Models.Recipient>
+          {
+              new Microsoft.Graph.Models.Recipient
+              {
+                  EmailAddress = new EmailAddress
+                  {
+                      Address = "mark.gibson@severfield.com",
+                  },
+              },
+          },
+                  },
+                  SaveToSentItems = false,
+              };
+
+              // To initialize your graphClient, see https://learn.microsoft.com/en-us/graph/sdks/create-client?from=snippets&tabs=csharp
+              await graphClient.Me.SendMail.PostAsync(requestBody);
+          }*/
+
         public static void WriteMatEmail(PrismProjectData projData, SelectedObjects objects, string fabPrefix, string issueNumber, string phaseNumber, string orderType, string matPath, bool fabsecPresent, string siteDate)
         {
             Application outlookApp = new Application();
@@ -214,7 +272,7 @@ namespace Prism
 
         private static void FormIssueEmail(string emailAddress, string subject, string body)
         {
-            Process.Start("mailto:" + emailAddress + "?subject=" + subject + "&body=" + body);
+            System.Diagnostics.Process.Start("mailto:" + emailAddress + "?subject=" + subject + "&body=" + body);
         }
 
         private static string SiteDateNote(string siteDate)
@@ -245,6 +303,15 @@ namespace Prism
                 return "";
             }
             return $"Date material required is {SiteDateNote(siteDate)}{_mailNewLine}{_mailNewLine}";
+        }
+
+        private static string DateRequiredNote(string note, string siteDate)
+        {
+            if (siteDate == "")
+            {
+                return "";
+            }
+            return $"{note} {siteDate}{_mailNewLine}{_mailNewLine}";
         }
 
         private static string OrderTypeText(string orderType)
@@ -329,9 +396,9 @@ namespace Prism
 
         private static string FormCCString(bool fabsecPresent, ExternalService.WebService1 service, string jobName)
         {
-            string projectManager = WebService.ReadSpecificLine(Constants.PrismModelData, 17, Constants.ModelProjectInforLocation(jobName));           
-            string doManager = WebService.ReadSpecificLine(Constants.PrismModelData, 18, Constants.ModelProjectInforLocation(jobName));            
-            string documentControl = WebService.ReadSpecificLine(Constants.PrismModelData, 19, Constants.ModelProjectInforLocation(jobName));           
+            string projectManager = WebService.ReadSpecificLine(Constants.PrismModelData, 17, Constants.ModelProjectInforLocation(jobName));
+            string doManager = WebService.ReadSpecificLine(Constants.PrismModelData, 18, Constants.ModelProjectInforLocation(jobName));
+            string documentControl = WebService.ReadSpecificLine(Constants.PrismModelData, 19, Constants.ModelProjectInforLocation(jobName));
             string others = WebService.ReadSpecificLine(Constants.PrismModelData, 20, Constants.ModelProjectInforLocation(jobName));
 
             string[] pString = projectManager.Split(' ');

@@ -81,7 +81,7 @@ namespace Prism
 
             Logging.AddToMaterialOrderProcessedCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndGuid));
 
-            EndFunction(1);
+            EndFunction(1, orderType.Contains("Omit"));
         }
 
         private async void btn_Detail1_Click_1(object sender, EventArgs e)
@@ -170,6 +170,10 @@ namespace Prism
 
         private void btn_SpecialOperations_Click(object sender, EventArgs e)
         {
+
+           
+
+
            // PrismWarnings.BigTi{meUsage(4000);
             //   _webService.CreateDirectory(50, "\\\\sev-los-fs1\\application data$\\Prism\\BadFile");
 
@@ -194,7 +198,7 @@ namespace Prism
             ModelChecker.ClearOldLists();
             _selectedObjects = new SelectedObjects(stageType);
 
-            if (Environment.UserName != "mark.gibson")
+        //    if (Environment.UserName != "mark.gibson")
             {
                 if (checkForPreviousSteps && !ModelChecker.ArePreviousStepsComplete(_selectedObjects, (int)stageType))
                 {
@@ -281,8 +285,9 @@ namespace Prism
             flowLayoutPanel1.Enabled = false;
         }
 
-        private void EndFunction(int cancelledOrComplete) //0 = cancelled 1 = Complete
+        private void EndFunction(int cancelledOrComplete, bool isOmit = false) //0 = cancelled 1 = Complete
         {
+            if(!isOmit) _selectedObjects.SelectedModelParts.SelectParts();
             string message = cancelledOrComplete == 0 ? "Cancelled" : "Complete";
             flowLayoutPanel1.BackColor = cancelledOrComplete == 0 ? Color.Tomato : Color.PaleGreen;
             flowLayoutPanel1.Enabled = true;

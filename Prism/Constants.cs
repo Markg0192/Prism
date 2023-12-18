@@ -5,6 +5,7 @@ namespace Prism
 {
     public static class Constants
     {
+        public static string ForceFabsecNumber = "ForceFabsecNumber.cs";
         public static string RefreshDrawingsMacro = "PrismRefreshDrawings.cs";
         public static string DrawingPrinterMacro = "PrismDrawingPrintss.cs";
         public static string DrawingOperation = "PrismDrawingOperation.cs";
@@ -20,6 +21,9 @@ namespace Prism
         public static int PrismUnassignedDrawingsLocation = 6;
         public static int PrismUserUserLogLocation = 7;
         public static int PrismModelData = 8;
+
+        public static string FabsecCarcassIndicator = "Fabsec Carcass";
+        public static string FabsecModelShaftIndicator = "Carcass Created From Member";
 
         public static string ModelDataLogLocation(string jobName)
         {
@@ -45,9 +49,9 @@ namespace Prism
         {
             List<string> specialOperationUsers = new List<string>
             {
-                "mark.gibson",
-                "Robert.McCormick",
-                "Matthew.Poots"
+                "mark. gibson",
+                "Robert. McCormick",
+                "Matthew Poots"
             };
 
             foreach (string user in specialOperationUsers)

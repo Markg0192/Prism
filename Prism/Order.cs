@@ -1,4 +1,6 @@
-﻿using Microsoft.Office.Interop.Excel;
+﻿//using Microsoft.Office.Interop.Excel;
+using Microsoft.Office.Interop.Outlook;
+//using Org.BouncyCastle.Utilities;
 using System.Collections.Generic;
 using Tekla.Structures.Model;
 using Model = Tekla.Structures.Model.Model;
@@ -35,6 +37,23 @@ namespace Prism
             return true;
         }
 
+        public static bool FabsecCarcasses(ReportManager myReportManager, Model model, PrismProjectData projectData, string phaseNumber, string issueNumber,
+            SelectedObjects myObjects, int stageNumber, string orderType, string orderDate)
+        {
+            int typeOfOrder = PrismWarnings.FabsecCarcassAction();
+
+            if (typeOfOrder == 1)
+            {
+                return FabsecProcessing.CreateFabsecCarcasses(myObjects, model);
+            }
+            if (typeOfOrder == 2)
+            {
+                if (!FabsecProcessing.AddCarcassToSelection(model, myObjects, out List<Part> originalFabsecs, out List<Part> fabsecCarcasses)) return false;
+                return OrderFabsecCarcasses(myReportManager, model, projectData, phaseNumber, issueNumber, myObjects, stageNumber, originalFabsecs, fabsecCarcasses, orderType, orderDate);
+            }
+            return false;
+        }
+
         private static bool OrderSeversafe(Model model, SelectedObjects myObjects, string siteDate, ReportManager myReportManager, PrismProjectData projectData)
         {
             int divisionNo = PrismWarnings.DivsionFrom();
@@ -58,31 +77,40 @@ namespace Prism
             return true;
         }
 
-        public static bool Fabsecs(bool fabsecsPresent, ReportManager myReportManager, Model model, PrismProjectData projectData, string phaseNumber,
-            string issueNumber, SelectedObjects myObjects, int stageNumber, List<Part> originalFabsecs, List<Part> fabsecCarcasses)
+        public static bool OrderFabsecCarcasses(ReportManager myReportManager, Model model, PrismProjectData projectData, string phaseNumber,
+            string issueNumber, SelectedObjects myObjects, int stageNumber, List<Part> originalFabsecs, List<Part> fabsecCarcasses, string orderType, string orderDate)
         {
-            if (fabsecsPresent)
+            if (!myReportManager.Folders.CreateFabsecCarcassFolder()) return false;
+            ReportManager.SelectDrawingsInDocManager(null);
+            DrawingManager dm = new DrawingManager(model, projectData, phaseNumber, issueNumber);
+            if (dm.NotLabelledDrawings.Count != 0) { PrismWarnings.IncorrectlyAssignedDrawings(); return false; }
+
+            List<int> drawingCount = new List<int> { 0, dm.PgcDrawings.Count };
+            DrawingManager.PrintAndIssueDrawings(myReportManager.Folders.FabsecCarcassFolder, myReportManager.Folders.CarcassOrderPath, drawingCount, "\\PGC", 0, 1, myReportManager, false);
+            PrismMacroBuilder.ClearPrintDialog();
+
+            fabsecCarcasses.SelectParts();
+            myReportManager.CreateG2Assy();
+            BswxExporter.ExportBSWX(myObjects, myReportManager.Folders.CarcassOrderPath, projectData, phaseNumber, issueNumber, Enums.StageTypes.Prelim3);
+            ModelModifiers.RemoveLog(myReportManager.Folders.CarcassOrderPath);
+
+            myObjects.SelectedModelParts.SelectParts();
+
+            if (!originalFabsecs.ModifyAttributes(stageNumber, projectData)) { return false; }
+            foreach(Part fabsec in originalFabsecs)
             {
-                bool includeCarcassDrawings = PrismWarnings.RunFabsecDrawings();
-                if (includeCarcassDrawings)
-                {
-                    ReportManager.SelectDrawingsInDocManager(null);
-                    DrawingManager dm = new DrawingManager(model, projectData, phaseNumber, issueNumber);
-                    if (dm.NotLabelledDrawings.Count != 0) { PrismWarnings.IncorrectlyAssignedDrawings(); return false; }
-
-                    List<int> drawingCount = new List<int> { 0, dm.PgcDrawings.Count };
-                    DrawingManager.PrintAndIssueDrawings(myReportManager.Folders.MatFolder, myReportManager.Folders.MatPath, drawingCount, "\\PGC", 0, 1, myReportManager, false);
-                    PrismMacroBuilder.ClearPrintDialog();
-                }
-                fabsecCarcasses.SelectParts();
-                myReportManager.CreateG2Assy();
-                myObjects.SelectedModelParts.SelectParts();
-
-                if (!originalFabsecs.ModifyAttributes(stageNumber, projectData)) { return false; }
-
-                //  else { return false; }
+                ModelModifiers.ModifyUDA(fabsec, ModelUDA.FabsecCarcassOrdered(), projectData.Date);
             }
+            model.CommitChanges();
+
+            myReportManager.Folders.ZipFolder(myReportManager.Folders.CarcassOrderPath);
+
+            PrismWarnings.MaterialOrderComplete(projectData);
+
+            EmailWriter.WriteFabsecCarcassEmail(myReportManager.ProjectData, myReportManager.CarcassReportPrefix, myReportManager.IssueNum, myReportManager.PhaseNum, orderDate, myReportManager.Folders.CarcassOrderPath);
+
             return true;
+
         }
 
         private static bool OrderHoldingDownBolts(SelectedObjects selectedObjects, ReportManager reportManager, string projectName)

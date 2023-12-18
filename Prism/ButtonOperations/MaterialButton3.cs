@@ -1,6 +1,12 @@
-﻿using System.Collections.Generic;
+﻿//using Microsoft.Office.Interop.Excel;
+//using Org.BouncyCastle.Utilities;
+using System.Collections.Generic;
+using Tekla.Structures.Drawing;
 using Tekla.Structures.Model;
 using static Prism.Enums;
+using Model = Tekla.Structures.Model.Model;
+using ModelObject = Tekla.Structures.Model.ModelObject;
+using Part = Tekla.Structures.Model.Part;
 
 namespace Prism.ButtonOperations
 {
@@ -14,32 +20,66 @@ namespace Prism.ButtonOperations
 
             //First check if the order is for Bolts, Seversafe or HD Bolts.
             bool boltSeversafeAndHdBoltsResult = Order.BoltsSeversafeAndHdBolts(orderType, myReportManager, siteDate, model, myObjects, projectData, out bool orderRequired);
-            if(orderRequired) return boltSeversafeAndHdBoltsResult;
+            if (orderRequired) return boltSeversafeAndHdBoltsResult;
 
             //If there are fabsecs present the we need to add the carcass to the selection instead of those in the model space
-            bool fabsecsPresent = FabsecProcessing.AddCarcassToSelection(model, myObjects, out List<Part> originalFabsecs, out List<Part> fabsecCarcasses);
-            foreach (Part myPart in myObjects.SelectedModelParts)
+            if(!FabsecOrderWorker(myObjects, orderType, myReportManager, model, projectData, phaseNumber, issueNumber, stageNumber, siteDate)) return false;
+
+            foreach (Part p in myObjects.SelectedModelParts)
             {
-                myPart.GetUnorderedParts();
+                p.GetUnorderedParts();
             }
 
             //Check if everything in the selection needs to be ordered/omitted
             if (!ShouldPartsBeOrdered(orderType)) { return false; }
 
-            if (!myReportManager.Folders.CreateMatFolder(fabsecsPresent)) return false;
+            if (!myReportManager.Folders.CreateMatFolder(false)) return false;
 
-            if (!Order.Fabsecs(fabsecsPresent, myReportManager, model, projectData, phaseNumber, issueNumber, myObjects, stageNumber, originalFabsecs, fabsecCarcasses)) { return false; }
+            //  if (!Order.Fabsecs(fabsecsPresent, myReportManager, model, projectData, phaseNumber, issueNumber, myObjects, stageNumber, originalFabsecs, fabsecCarcasses)) { return false; }
 
             ModelModifiers.VariationCheck(phaseNumber, myObjects, projectData);
             myObjects.AddPrelimMarks(projectData);
 
             myReportManager.CreateMaterialReports(myObjects, orderType, stageType);
 
-            myObjects.OmittedParts = MoveOmitMaterial(orderType, myObjects, originalFabsecs);
+            myObjects.OmittedParts = MoveOmitMaterial(orderType, myObjects, myObjects.FabsecParts, model);
 
-            if (!FinishOrder(myObjects, stageNumber, projectData, myReportManager.MatReportPrefix, issueNumber, phaseNumber, orderType, myReportManager, siteDate, false, fabsecsPresent)) { return false; }
+            if (!FinishOrder(myObjects, stageNumber, projectData, myReportManager.MatReportPrefix, issueNumber, phaseNumber, orderType, myReportManager, siteDate, false, myObjects.FabsecParts.Count > 0)) { return false; }
 
             return true;
+        }
+
+        private static bool FabsecOrderWorker(SelectedObjects myObjects, string orderType, ReportManager myReportManager, Model model, 
+            PrismProjectData projectData, string phaseNumber, string issueNumber, int stageNumber, string siteDate)
+        {
+            bool fabsecsPresent = myObjects.FabsecParts.Count > 0;
+            if (orderType.Contains("Fabsec Carcass") && (!orderType.Contains("Add") || !orderType.Contains("Omit")))
+            {
+                if (!fabsecsPresent)
+                {
+                    PrismWarnings.NoFabsecsSelected();
+                    return false;
+                }
+                GetUnorderedParts(myObjects.FabsecParts);
+
+                bool fabsecCarcassOrdering = Order.FabsecCarcasses(myReportManager, model, projectData, phaseNumber, issueNumber, myObjects, stageNumber, orderType, siteDate);
+                return fabsecCarcassOrdering;
+            }
+            if (orderType.Contains("Fabsec Carcass") && (orderType.Contains("Add") || orderType.Contains("Omit")))
+            {
+                PrismWarnings.CannotProcessThisTypeOfOrder();
+                return false;
+            }
+            return true;
+        }
+
+        private static void GetUnorderedParts(List<ModelObject> partsList)
+        {
+            foreach (ModelObject myModelObject in partsList)
+            {
+                Part myPart = myModelObject as Part;
+                myPart.GetUnorderedParts();
+            }
         }
 
         private static bool ShouldPartsBeOrdered(string orderType)
@@ -52,28 +92,25 @@ namespace Prism.ButtonOperations
                     return false;
                 }
             }
-
-            if (orderType != "Omit Material")
+            else if (ModelChecker.OrderedParts.Count != 0)
             {
-                if (ModelChecker.OrderedParts.Count != 0)
-                {
-                    PrismWarnings.HasAlreadyBeenOrdered();
-                    return false;
-                }
+                PrismWarnings.HasAlreadyBeenOrdered();
+                return false;
             }
+
             return true;
         }
 
-        private static List<Part> MoveOmitMaterial(string orderType, SelectedObjects myObjects, List<Part> originalFabsecs)
+        private static List<Part> MoveOmitMaterial(string orderType, SelectedObjects myObjects, List<ModelObject> originalFabsecs, Model model)
         {
             List<Part> movedParts = new List<Part>();
             if (orderType == "Omit Material")
             {
                 bool keepPartInModel = PrismWarnings.KeepPartInModel();
-                movedParts.AddRange(ModelModifiers.MoveAndRenameOmittedMembers(myObjects.SelectedModelParts, -100000, keepPartInModel));
-                if (originalFabsecs != null)
+                movedParts.AddRange(ModelModifiers.MoveAndRenameOmittedMembers2(myObjects.NonFabsecParts, -100000, keepPartInModel, model, false));
+                if (myObjects.FabsecParts.Count > 0)
                 {
-                    movedParts.AddRange(ModelModifiers.MoveAndRenameOmittedMembers(originalFabsecs, -100000, keepPartInModel));
+                    movedParts.AddRange(ModelModifiers.MoveAndRenameOmittedMembers2(myObjects.FabsecParts, -100000, keepPartInModel, model, true));
                 }
             }
             return movedParts;
@@ -90,6 +127,8 @@ namespace Prism.ButtonOperations
             {
                 if (!myObjects.SelectedModelParts.ModifyAttributes(stageNumber, projectData, isSpecialFittingOrder)) { return false; }
             }
+
+            if (fabsecsPresent && !orderType.Contains("Omit")) FabsecProcessing.RemoveGreenFromFabsecs(myObjects.FabsecParts);
 
             PrismWarnings.MaterialOrderComplete(projectData);
 

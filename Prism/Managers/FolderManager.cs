@@ -33,15 +33,17 @@ namespace Prism
             FabFolder = $"{projectData.ProjNumber}-{phaseNum}-FAB-ISSUE{issueNum}";
             MatFolder = $"{projectData.ProjNumber}-{phaseNum}-PRELIM-ISSUE{issueNum}";
             EpoFolder = $"{projectData.ProjNumber}-{phaseNum}-EPO-ISSUE{issueNum}";
+            FabsecCarcassFolder = $"{projectData.ProjNumber}-{phaseNum}-FABSEC-ISSUE{issueNum}";
             string boltFolder = $"{projectData.ProjNumber}-{phaseNum}-BOLT-ISSUE{issueNum}";
             FabPath = Path.Combine(PrismFileLocaton, FabFolder);
             MatPath = Path.Combine(PrismFileLocaton, MatFolder);
             EpoPath = Path.Combine(PrismFileLocaton, EpoFolder);
             BoltPath = Path.Combine(PrismFileLocaton, boltFolder);
+            CarcassOrderPath = Path.Combine(PrismFileLocaton, FabsecCarcassFolder);
             string assPath = Path.Combine(FabPath, _assFolder);
             string fitPath = Path.Combine(FabPath, _fitFolder);
             string prtPath = Path.Combine(FabPath, _prtFolder);
-            FabsecCarcassPath = Path.Combine(MatPath, _fabsecCarcasses);
+            FabsecCarcassPath = Path.Combine(CarcassOrderPath, _fabsecCarcasses);
             SpecialFittingPath = Path.Combine(MatPath, _specialFittings);
             IfcPath = Path.Combine(FabPath, _ifcFolder);
             NcPath = Path.Combine(FabPath, _ncFolder);
@@ -58,10 +60,12 @@ namespace Prism
         public string FabFolder { get; set; }
         public string MatFolder {get;set;}
         public string EpoFolder {get;set;}
+        public string FabsecCarcassFolder { get;set;}
         public string FabPath {get;set;}
         public string MatPath {get;set;}
         public string EpoPath {get;set;}
         public string BoltPath {get;set;}
+        public string CarcassOrderPath { get; set;}
         public string NcPath {get;set;}
         public string ReportPath {get;set;}
         public string DspPath {get;set;}
@@ -100,6 +104,7 @@ namespace Prism
             }
             return true;
         }
+
         public bool CreateMatFolder(bool fabsecsPresent, bool specialFittingsPresent = false)
         {
             if (!CheckForExistingFolder(MatPath)) return false;
@@ -113,6 +118,15 @@ namespace Prism
             {
                 Directory.CreateDirectory(SpecialFittingPath);
             }
+            return true;
+        }
+
+        public bool CreateFabsecCarcassFolder()
+        {
+            if (!CheckForExistingFolder(CarcassOrderPath)) return false;
+
+            Directory.CreateDirectory(CarcassOrderPath);
+            Directory.CreateDirectory(CarcassOrderPath + "\\PGC");
             return true;
         }
 
