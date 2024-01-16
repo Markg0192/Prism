@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Office.Interop.Outlook;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Tekla.Structures.Drawing;
@@ -39,7 +40,7 @@ namespace Prism
 
 
             // Prepare data for writing
-            List<string> newContent = new List<string>{"---------------------------This log was started on 21/08/23-------"};
+            List<string> newContent = new List<string> { "---------------------------This log was started on 21/08/23-------" };
             foreach (var entry in userCounts)
             {
                 newContent.Add($"{entry.Key}-{entry.Value}");
@@ -95,19 +96,7 @@ namespace Prism
 
             string[] array = WebService.ReadAllLinesIntoArray(Constants.PrismDataLogLocation, Constants.ModelProjectInforLocation(pData.ProjNumberAndName));
 
-            // Create a new array with additional slots for 4 more strings
-            string[] newArray = new string[array.Length + 4];
-
-            // Copy the original elements to the new array
-            Array.Copy(array, newArray, array.Length);
-
-            // Set the last four elements to blank strings
-            for (int i = array.Length; i < newArray.Length; i++)
-            {
-                newArray[i] = ""; // Assign a blank string
-            }
-
-            // Now newArray contains the original data plus four blank strings at the end, we now use these for project controllers.
+            string[] newArray = UpdateToNewLayout(array);
 
             WebService.WriteAllLinesWithArray(Constants.PrismDataLogLocation, newArray, Constants.ModelProjectInforLocation(pData.ProjNumberAndGuid));
 
@@ -117,6 +106,36 @@ namespace Prism
             string[] combinedArray = oldLogOverwrite.Concat(array).ToArray();
 
             WebService.WriteAllLinesWithArray(Constants.PrismDataLogLocation, combinedArray, Constants.ModelProjectInforLocation(pData.ProjNumberAndName));
+        }
+
+        private static string[] UpdateToNewLayout(string[] array)
+        {
+            if (array.Length < 20)
+            {
+                // Resize the array to length 15
+                Array.Resize(ref array, 22);
+            }
+
+            if (array.Length > 5 && array[5] != "------------Uniclass Codes----------------")
+            {
+                array[4] = "";
+                array[5] = "------------Uniclass Codes----------------";
+                array[6] = "---Filter------------Code----------------Title";
+                array[7] = "UniClass-Beam*****Ss_20_20_75_35*****Steel beam systems";
+                array[8] = "UniClass-Column****Ss_20_30_75_35*****Steel column systems";
+                array[9] = "UniClass-Heavy*****Ss_20_10_75_35*****Heavy steel framing systems";
+                array[10] = "UniClass-Light******Ss_20_10_75_45*****Light steel framing systems";
+                for (int i = 11; i < 15; i++)
+                {
+                    array[i] = "********";
+                }
+
+                for (int i = 15; i < array.Length; i++)
+                {
+                    array[i] = "";
+                }
+            }
+            return array;
         }
 
         public static void WriteFirstDataLog(int filePathLine, string additonalString, ProjectInfo pInfo)

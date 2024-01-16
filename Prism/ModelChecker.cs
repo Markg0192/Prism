@@ -42,7 +42,7 @@ namespace Prism
             }
         }
 
-        public static bool RunStage4Checks(this SelectedObjects selectedObjects)
+        public static bool RunStage4Checks(this SelectedObjects selectedObjects, string userName)
         {
             Factory location = PrismWarnings.FactoryLocation();
             if (location == Factory.Unknown)
@@ -68,7 +68,7 @@ namespace Prism
                     CheckFittings.GetIncorrectFittings(mySecondaryPart, location);
                 }
             }
-            return CheckForAndActionErrors(selectedObjects);
+            return CheckForAndActionErrors(userName);
         }
 
         private static List<BoltGroup> GetShearStudBoltGroups(List<BoltGroup> boltGroups)
@@ -319,7 +319,7 @@ namespace Prism
             return true;
         }
 
-        private static bool CheckForAndActionErrors(SelectedObjects selectedObjects)
+        private static bool CheckForAndActionErrors(string userName)
         {
             if (!OrderErrors()) { return false; }
             if (!FinishErrors()) { return false; }
@@ -340,17 +340,25 @@ namespace Prism
 
             if (!IntumesecentLoadingErrors()) { return false; }
 
-            ShearStudsNotOrdered(selectedObjects);
+            if (!ShearStudsNotOrdered(userName)) { return false; }
 
             return CheckFittings.DisplayFittingErrors();
         }
 
-        private static void ShearStudsNotOrdered(SelectedObjects selectedObjects)
+        private static bool ShearStudsNotOrdered(string userName)
         {
             if (UnorderedShearStuds.Count > 0)
             {
-                bool orderForBoltsComplete = PrismWarnings.UnorderedShearStuds();
-                if (orderForBoltsComplete)
+                bool studsOrdered = PrismWarnings.UnorderedShearStuds();
+
+                // If studs are not ordered and user decides not to ignore, return false
+                if (!studsOrdered && !PrismWarnings.IgnoreAndContinue())
+                {
+                    return false;
+                }
+
+                // Modify attributes only if studs have been ordered
+                if (studsOrdered)
                 {
                     foreach (BoltGroup boltGroup in UnorderedShearStuds)
                     {
@@ -358,20 +366,15 @@ namespace Prism
                         boltGroup.GetReportProperty(ModelUDA.BoltShearStudTag(), ref property);
                         if (property == "")
                         {
+                            boltGroup.SetUserProperty(ModelUDA.BoltOrderedBy(), userName);
                             boltGroup.SetUserProperty(ModelUDA.BoltShearStudTag(), "Ordered");
                         }
                     }
                 }
-                else
-                {
-                    bool orderNow = PrismWarnings.OrderShearStuds();
-                    if (orderNow)
-                    {
-                        Order.ShearStuds();
-                    }
-                }
             }
+            return true;
         }
+
 
         public static IgnoreType PhaseMatchErrors()
         {

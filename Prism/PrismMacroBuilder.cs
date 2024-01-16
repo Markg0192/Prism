@@ -30,23 +30,12 @@ namespace Prism
                         "            {" + Environment.NewLine +
                         "                Tekla.Macros.Akit.IAkitScriptHost akit = runtime.Get<Tekla.Macros.Akit.IAkitScriptHost>();" + Environment.NewLine +
                         "                Tekla.Macros.Wpf.Runtime.IWpfMacroHost wpf = runtime.Get<Tekla.Macros.Wpf.Runtime.IWpfMacroHost>();" + Environment.NewLine +
-                        //     "                wpf.InvokeCommand(\"Panels\", \"Hide\", \"CatalogTree.CatalogTreeView\");" + Environment.NewLine +
-                        //     "                wpf.InvokeCommand(\"Panels\", \"Show\", \"PropertyPane.PropertyPane\");" + Environment.NewLine +
-                        //     "                wpf.View(\"PropertyPane.PropertyPane\").Find(\"PropertyTemplate_SteelBeam\", \"AID_PropertyTextBox_proSERIE\").As.TextBox.SetText(\"" + prefix + "-\");" + Environment.NewLine +
-                        //     "                wpf.View(\"PropertyPane.PropertyPane\").Find(\"PropertyTemplate_SteelBeam\", \"AID_PropertyTextBox_proASSEMBLYSERIE\").As.TextBox.SetText(\"" + prefix + "-\");" + Environment.NewLine +
-                        //     "                wpf.View(\"PropertyPane.PropertyPane\").Find(\"PropertyTemplate_SteelBeam\", \"AID_PropertyTextBox_proSTARTNUMBER\").As.TextBox.SetText(\"1\");" + Environment.NewLine +
-                        //     "                wpf.View(\"PropertyPane.PropertyPane\").Find(\"PropertyTemplate_SteelBeam\", \"AID_PropertyTextBox_proASSEMBLYSTARTNUMBER\").As.TextBox.SetText(\"1\");" + Environment.NewLine +
-                        //     "                wpf.View(\"PropertyPane.PropertyPane\").Find(\"AID_PropertyPane_CommitChangesButton\").As.Button.Invoke();" + Environment.NewLine +
-                        //     "                wpf.InvokeCommand(\"Panels\", \"Hide\", \"PropertyPane.PropertyPane\");" + Environment.NewLine +
-                        //     "                wpf.InvokeCommand(\"Panels\", \"Show\", \"CatalogTree.CatalogTreeView\");" + Environment.NewLine +
-
                         "                wpf.InvokeCommand(\"CommandRepository\", \"Numbering.ClearPartAndAssemblyNumbers\");" + Environment.NewLine +
-                       "                akit.PushButton(\"warning_ok\", \"cleared_selected_numbering\");             " + Environment.NewLine +
+                        "                akit.PushButton(\"warning_ok\", \"cleared_selected_numbering\");             " + Environment.NewLine +
                         "                wpf.InvokeCommand(\"CommandRepository\", \"Numbering.ChangePartNumber\");    " + Environment.NewLine +
                         "                akit.ValueChange(\"assign_part_number\", \"Position\", \"" + prelim + "\");  " + Environment.NewLine +
                         "                akit.PushButton(\"AssignPB\", \"assign_part_number\");                       " + Environment.NewLine +
                         "                akit.PushButton(\"CancelPB\", \"assign_part_number\");                       " + Environment.NewLine +
-
                         "            }" + Environment.NewLine +
                         "        }" + Environment.NewLine +
                         "    }";

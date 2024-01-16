@@ -57,6 +57,7 @@ namespace Prism
                 XMLWriter.PDFPrintSettings(modelPath);
             }
         }
+
         public static void PrintDrawings(ReportManager reportManager, DrawingManager drawingManager, List<int> drawingCount)
         {
             if (drawingManager.FitDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\FIT", 0, 1, reportManager, false);

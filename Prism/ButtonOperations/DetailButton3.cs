@@ -6,7 +6,7 @@ namespace Prism.ButtonOperations
     {
         public static bool DetailButton3op(this SelectedObjects myObjects, PrismProjectData projectData, int stageNumber)
         {
-            if (!myObjects.RunStage4Checks()) { return false; }
+            if (!myObjects.RunStage4Checks(projectData.Full)) { return false; }
             myObjects.SelectedModelParts.SelectParts();
             ModelModifiers.PerformNumbering();
 

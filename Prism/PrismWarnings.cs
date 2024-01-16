@@ -474,6 +474,18 @@ namespace Prism
         {
             const string notUpToDateMessage = "Prism has detected shear studs in your selection, these should have been manually pre-ordered by now.\r\rClick yes to confirm you have pre-ordered these.";
             const string notUpToDateTitle = "Shear studs";
+            if (CreateYesNoForm(notUpToDateMessage, notUpToDateTitle))
+            {
+                return true;
+            }
+            return false;
+        }
+
+
+        public static bool IgnoreAndContinue()
+        {
+            const string notUpToDateMessage = "Would you like to ignore this error and continue?";
+            const string notUpToDateTitle = "Ignore";
             return CreateYesNoForm(notUpToDateMessage, notUpToDateTitle);
         }
 

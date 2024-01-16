@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 //using System.EnterpriseServices.Internal;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -10,9 +11,12 @@ using Tekla.Structures.Drawing;
 using Tekla.Structures.Filtering;
 using Tekla.Structures.Model;
 using Tekla.Structures.Model.Operations;
+using Tekla.Structures.ModelInternal;
 using static Prism.Enums;
 using ModelObject = Tekla.Structures.Model.ModelObject;
+using Operation = Tekla.Structures.Model.Operations.Operation;
 using Part = Tekla.Structures.Model.Part;
+using Task = System.Threading.Tasks.Task;
 
 namespace Prism
 {
@@ -36,7 +40,8 @@ namespace Prism
             Moe = new Tekla.Structures.Model.UI.ModelObjectSelector().GetSelectedObjects();
             MyMarks = new List<string>();
 
-            ProcessModelObjects(stageType);
+              ProcessModelObjects(stageType);
+            //ProcessModelObjectsAsync(stageType).GetAwaiter().GetResult();
 
             PartWeight = Math.Round(PartWeight / 1000, 3);
 
@@ -57,40 +62,6 @@ namespace Prism
 
                 AllBolts.Add(SiteBolts);
                 AllBolts.Add(ShopBolts);
-            }
-        }
-
-        private void ProcessModelObjects(StageTypes stageType)
-        {
-            foreach (object myObject in Moe)
-            {
-                if (!NumbersUpToDate) return;
-                if (myObject is BaseComponent myComponent)
-                {
-                    ProcessChildren(myComponent, stageType);
-                }
-                else
-                {
-                    ProcessObject(myObject, stageType);
-                }
-            }
-        }
-
-        private void ProcessChildren(BaseComponent component, StageTypes stageType)
-        {
-            foreach (object child in component.GetChildren())
-            {
-                if (child is BaseComponent componentChild)
-                {
-                    foreach (object grandChild in componentChild.GetChildren())
-                    {
-                        ProcessObject(grandChild, stageType);
-                    }
-                }
-                else
-                {
-                    ProcessObject(child, stageType);
-                }
             }
         }
 
@@ -130,57 +101,171 @@ namespace Prism
             }
         }
 
-        private void ProcessObject(object myObject, StageTypes stageType)
+        private void ProcessModelObjects(StageTypes stageType)
         {
-            if (myObject is Part myPart)
+            Stopwatch timer = Stopwatch.StartNew(); // Start the timer
+            foreach (object myObject in Moe)
             {
-                if (IsValidPart(myPart))
+                if (!NumbersUpToDate) return;
+                if (myObject is BaseComponent myComponent)
                 {
-                    bool isSeversafe = IsSeversafePart(myPart);
-                    if (stageType == StageTypes.FAB)
+                    ProcessChildren(myComponent, stageType);
+                }
+                else
+                {
+                    ProcessObject(myObject, stageType);
+                }
+            }
+            timer.Stop(); // Stop the timer
+            Console.WriteLine($"ProcessModelObjects took {timer.ElapsedMilliseconds} ms"); // Print the elapsed time
+        }
+
+        private void ProcessChildren(BaseComponent component, StageTypes stageType)
+        {
+            foreach (object child in component.GetChildren())
+            {
+                if (child is BaseComponent componentChild)
+                {
+                    foreach (object grandChild in componentChild.GetChildren())
                     {
-                        CheckXYZSize(myPart);
-                        if (!isSeversafe && !Operation.IsNumberingUpToDate(myPart))
-                        {
-                            PrismWarnings.NumberingIsNotUpToDate();
-                            NumbersUpToDate = false;
-                            return;
-                        }
+                        ProcessObject(grandChild, stageType);
                     }
-
-                    SelectedModelParts.Add(myPart);
-
-                    if (!isSeversafe && IsLocked(myPart)) LockedParts.Add(myPart);
-                    if (isSeversafe)
-                    {
-                        SeversafeParts.Add(myPart); SeversafePresent = true;
-                    }
-                    else
-                    {
-                        NonSeversafeParts.Add(myPart);
-                        if (myPart.Profile.ProfileString.StartsWith("PG"))
-                        {
-                            FabsecParts.Add(myPart);
-                        }
-                        else { NonFabsecParts.Add(myPart); }
-                    } 
-
-                    double weight = 0;
-                    myPart.GetReportProperty(ModelUDA.Weight(), ref weight);
-                    PartWeight = PartWeight + weight;
-
-                    MyMarks.Add(myPart.GetPartMark());
-
-                    if (myPart.GetAssembly() is Assembly assembly)
-                    {
-                        if (!AssembliesList.Any(x => x.Identifier.ToString() == assembly.Identifier.ToString()))
-                        {
-                            AssembliesList.Add(assembly);
-                        }
-                    }
+                }
+                else
+                {
+                    ProcessObject(child, stageType);
                 }
             }
         }
+
+        private void ProcessObject(object myObject, StageTypes stageType)
+        {
+            if (!(myObject is Part myPart) || !IsValidPart(myPart)) return;
+
+            bool isSeversafe = IsSeversafePart(myPart);
+            if (stageType == StageTypes.FAB)
+            {
+                CheckXYZSize(myPart);
+                if (!isSeversafe && !Operation.IsNumberingUpToDate(myPart))
+                {
+                    PrismWarnings.NumberingIsNotUpToDate();
+                    NumbersUpToDate = false;
+                    return;
+                }
+            }
+
+            CategorizeAndProcessPart(myPart, isSeversafe);
+            UpdatePartWeight(myPart);
+            AddPartMark(myPart);
+            ProcessAssembly(myPart);
+        }
+
+        private void CategorizeAndProcessPart(Part myPart, bool isSeversafe)
+        {
+            SelectedModelParts.Add(myPart);
+            if (isSeversafe)
+            {
+                SeversafeParts.Add(myPart);
+                SeversafePresent = true;
+            }
+            else
+            {
+                if (IsLocked(myPart)) LockedParts.Add(myPart);
+                NonSeversafeParts.Add(myPart);
+                ProcessFabsecPart(myPart);
+            }
+        }
+
+        private void UpdatePartWeight(Part myPart)
+        {
+            double weight = 0;
+            if (myPart.GetReportProperty(ModelUDA.Weight(), ref weight))
+            {
+                PartWeight += weight;
+            }
+        }
+
+        private void AddPartMark(Part myPart)
+        {
+            MyMarks.Add(myPart.GetPartMark());
+        }
+
+        private void ProcessAssembly(Part myPart)
+        {
+            if (myPart.GetAssembly() is Assembly assembly)
+            {
+                string assemblyId = assembly.Identifier.ToString();
+                if (!AssembliesList.Any(x => x.Identifier.ToString() == assemblyId))
+                {
+                    AssembliesList.Add(assembly);
+                }
+            }
+        }
+
+        private void ProcessFabsecPart(Part myPart)
+        {
+            if (myPart.Profile.ProfileString.StartsWith("PG"))
+            {
+                FabsecParts.Add(myPart);
+            }
+            else
+            {
+                NonFabsecParts.Add(myPart);
+            }
+        }
+
+
+        /*  private void ProcessObject(object myObject, StageTypes stageType)
+          {
+              if (myObject is Part myPart)
+              {
+                  if (IsValidPart(myPart))
+                  {
+                      bool isSeversafe = IsSeversafePart(myPart);
+                      if (stageType == StageTypes.FAB)
+                      {
+                          CheckXYZSize(myPart);
+                          if (!isSeversafe && !Operation.IsNumberingUpToDate(myPart))
+                          {
+                              PrismWarnings.NumberingIsNotUpToDate();
+                              NumbersUpToDate = false;
+                              return;
+                          }
+                      }
+
+                      SelectedModelParts.Add(myPart);
+
+                      if (!isSeversafe && IsLocked(myPart)) LockedParts.Add(myPart);
+                      if (isSeversafe)
+                      {
+                          SeversafeParts.Add(myPart); SeversafePresent = true;
+                      }
+                      else
+                      {
+                          NonSeversafeParts.Add(myPart);
+                          if (myPart.Profile.ProfileString.StartsWith("PG"))
+                          {
+                              FabsecParts.Add(myPart);
+                          }
+                          else { NonFabsecParts.Add(myPart); }
+                      } 
+
+                      double weight = 0;
+                      myPart.GetReportProperty(ModelUDA.Weight(), ref weight);
+                      PartWeight = PartWeight + weight;
+
+                      MyMarks.Add(myPart.GetPartMark());
+
+                      if (myPart.GetAssembly() is Assembly assembly)
+                      {
+                          if (!AssembliesList.Any(x => x.Identifier.ToString() == assembly.Identifier.ToString()))
+                          {
+                              AssembliesList.Add(assembly);
+                          }
+                      }
+                  }
+              }
+          }*/
 
         private bool IsSeversafePart(Part myPart)
         {
