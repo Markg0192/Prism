@@ -40,7 +40,7 @@ namespace Prism
             Moe = new Tekla.Structures.Model.UI.ModelObjectSelector().GetSelectedObjects();
             MyMarks = new List<string>();
 
-              ProcessModelObjects(stageType);
+            ProcessModelObjects(stageType);
             //ProcessModelObjectsAsync(stageType).GetAwaiter().GetResult();
 
             PartWeight = Math.Round(PartWeight / 1000, 3);
@@ -103,21 +103,24 @@ namespace Prism
 
         private void ProcessModelObjects(StageTypes stageType)
         {
-            Stopwatch timer = Stopwatch.StartNew(); // Start the timer
             foreach (object myObject in Moe)
             {
                 if (!NumbersUpToDate) return;
-                if (myObject is BaseComponent myComponent)
+                if (stageType != StageTypes.RocketPacket)
                 {
-                    ProcessChildren(myComponent, stageType);
+                    if (myObject is BaseComponent myComponent)
+                    {
+                        ProcessChildren(myComponent, stageType);
+                    }
+                    else
+                    {
+                        ProcessObject(myObject, stageType);
+                    }
+                    return;
                 }
-                else
-                {
-                    ProcessObject(myObject, stageType);
-                }
+
+                ProcessObject(myObject, stageType);
             }
-            timer.Stop(); // Stop the timer
-            Console.WriteLine($"ProcessModelObjects took {timer.ElapsedMilliseconds} ms"); // Print the elapsed time
         }
 
         private void ProcessChildren(BaseComponent component, StageTypes stageType)
@@ -143,7 +146,7 @@ namespace Prism
             if (!(myObject is Part myPart) || !IsValidPart(myPart)) return;
 
             bool isSeversafe = IsSeversafePart(myPart);
-            if (stageType == StageTypes.FAB)
+            if (stageType == StageTypes.FAB || stageType == StageTypes.RocketPacket)
             {
                 CheckXYZSize(myPart);
                 if (!isSeversafe && !Operation.IsNumberingUpToDate(myPart))

@@ -95,37 +95,6 @@ namespace Prism
             EndFunction(1);
         }
 
-        private bool OrderSpecials(int orderAction, string orderType, StageTypes stageType, ReportManager myReportManager)
-        {
-            bool runDrawings = PrismWarnings.RunSpecialFittingDrawings();
-            if (!myReportManager.Folders.CreateMatFolder(false, runDrawings)) return false;
-
-            if (orderAction == 2) //User wants to order using special fitting tags
-            {
-                ModelModifiers.SelectSpecialTaggedInSelection(_selectedObjects);
-                ModelModifiers.AddPrelimMarks(_selectedObjects, _projectData);
-                _selectedObjects = new SelectedObjects(stageType); // we reset selected objects here (because we just changed the selection)
-                myReportManager.CreateMaterialReports(_selectedObjects, orderType, stageType);
-            }
-            if (orderAction == 3) //User wants to order all selected
-            {
-                ModelModifiers.AddPrelimMarks(_selectedObjects, _projectData);
-                myReportManager.CreateMaterialReports(_selectedObjects, orderType, stageType);
-            }
-
-            if (runDrawings)
-            {
-                ReportManager.SelectDrawingsInDocManager(null);
-                DrawingManager dm = new DrawingManager(_model, _projectData, txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text);
-                if (dm.NotLabelledDrawings.Count != 0) { PrismWarnings.IncorrectlyAssignedDrawings(); return false; }
-
-                List<int> drawingCount = new List<int> { 0, dm.AllFittings.Count };
-                DrawingManager.PrintAndIssueDrawings(myReportManager.Folders.MatFolder, myReportManager.Folders.MatPath, drawingCount, "\\SPC", 0, 1, myReportManager, false);
-                PrismMacroBuilder.ClearPrintDialog();
-            }
-            return true;
-        }
-
         private async void btn_Detail2_Click_1(object sender, EventArgs e)
         {
             StartFunction();
@@ -164,32 +133,22 @@ namespace Prism
         private void btnCreatePackage1_Click_1(object sender, EventArgs e)
         {
             Logging.DebugLog("create package start", "");
-            CreatePackageAsync();
-            // CreatePackageNotAsync();
+            CreatePackageAsync(StageTypes.FAB);
         }
+
+        private async void btn_RocketPacket_Click(object sender, EventArgs e)
+        {
+            if(!PrismWarnings.RocketButtonCheck()) return;
+
+            if(!await Task.Run(() => InitialSetup(StageTypes.FAB, false))) { EndFunction(0); return; }
+            
+            CreatePackageAsync(StageTypes.RocketPacket);
+        }
+
 
         private void btn_SpecialOperations_Click(object sender, EventArgs e)
         {
 
-           
-
-
-           // PrismWarnings.BigTi{meUsage(4000);
-            //   _webService.CreateDirectory(50, "\\\\sev-los-fs1\\application data$\\Prism\\BadFile");
-
-
-            //Logging.AddToMaterialOrderProcessedCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndName), _webService);
-            //Logging.AddToFabCompleteCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndName), _webService);
-
-            /*Logging.LogProgress(_projectData.ProjName, "1", 1, 10, _projectData.WebService);
-
-              int currentLastNumber = Logging.GetLastUsedPrelim(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndName), _projectData.WebService);
-
-              Logging.SetLastUsedPrelim(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndName), 20, _projectData.WebService);
-
-              currentLastNumber = Logging.GetLastUsedPrelim(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndName), _projectData.WebService);
-
-              Logging.UpdateFrozenDrawingCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndName), 12, 21, _projectData.WebService);*/
         }
 
         public bool InitialSetup(StageTypes stageType, bool checkForPreviousSteps)
@@ -198,37 +157,35 @@ namespace Prism
             ModelChecker.ClearOldLists();
             _selectedObjects = new SelectedObjects(stageType);
 
-        //    if (Environment.UserName != "mark.gibson")
+            if (checkForPreviousSteps && !ModelChecker.ArePreviousStepsComplete(_selectedObjects, (int)stageType))
             {
-                if (checkForPreviousSteps && !ModelChecker.ArePreviousStepsComplete(_selectedObjects, (int)stageType))
-                {
-                    SetStatusLabels("Previous Steps Incomplete");
-                    return false;
-                }
-
-                if (_selectedObjects.NumbersUpToDate && _selectedObjects.AssembliesList.Count == 0)
-                {
-                    SetStatusLabels("No Parts Selected");
-                    PrismWarnings.NoPartsSelected();
-                    return false;
-                }
-                if (_selectedObjects.LockedParts.Count > 0)
-                {
-                    SetStatusLabels("Locked Parts Selected");
-                    PrismWarnings.LockedPartsSelected();
-                    ModelModifiers.SetPartsRed(_selectedObjects.LockedParts);
-                    return false;
-                }
+                SetStatusLabels("Previous Steps Incomplete");
+                return false;
             }
+
+            if (_selectedObjects.NumbersUpToDate && _selectedObjects.AssembliesList.Count == 0)
+            {
+                SetStatusLabels("No Parts Selected");
+                PrismWarnings.NoPartsSelected();
+                return false;
+            }
+            if (_selectedObjects.LockedParts.Count > 0)
+            {
+                SetStatusLabels("Locked Parts Selected");
+                PrismWarnings.LockedPartsSelected();
+                ModelModifiers.SetPartsRed(_selectedObjects.LockedParts);
+                return false;
+            }
+
             SetStatusLabels("Running Operation");
             return true;
         }
 
-        private async void CreatePackageAsync()
+        private async void CreatePackageAsync(StageTypes stageType)
         {
             StartFunction();
 
-            if (!await Task.Run(() => InitialSetup(StageTypes.FAB, true))) { EndFunction(0); return; }
+            if (!await Task.Run(() => InitialSetup(StageTypes.FAB, stageType == StageTypes.FAB))) { EndFunction(0); return; }
 
             if (!_selectedObjects.NumbersUpToDate) { SetStatusLabels("Numbers not up to date"); EndFunction(0); return; }
 
@@ -250,16 +207,45 @@ namespace Prism
 
             SetStatusLabels("Creating Fab Package");
 
-            Logging.DebugLog("setup complete", "");
-
             ReportManager myReportManager = new ReportManager(_projectData, phaseNumber.Text, issueNumber.Text);
-            if (!await Task.Run(() => _selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber.Text, issueNumber.Text, StageTypes.FAB, txt_SiteDate.Text, runSeversafe))) { EndFunction(0); return; }
+            if (!await Task.Run(() => _selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber.Text, issueNumber.Text, stageType, txt_SiteDate.Text, runSeversafe))) { EndFunction(0); return; }
 
             await Task.Run(() => FabMisc.FabMiscOp(_model, txt_SiteDate.Text, _selectedObjects, runSeversafe, myReportManager, divisionNo, _projectData));
 
             Logging.AddToFabCompleteCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndGuid));
 
             EndFunction(1);
+        }
+
+        private bool OrderSpecials(int orderAction, string orderType, StageTypes stageType, ReportManager myReportManager)
+        {
+            bool runDrawings = PrismWarnings.RunSpecialFittingDrawings();
+            if (!myReportManager.Folders.CreateMatFolder(false, runDrawings)) return false;
+
+            if (orderAction == 2) //User wants to order using special fitting tags
+            {
+                ModelModifiers.SelectSpecialTaggedInSelection(_selectedObjects);
+                ModelModifiers.AddPrelimMarks(_selectedObjects, _projectData);
+                _selectedObjects = new SelectedObjects(stageType); // we reset selected objects here (because we just changed the selection)
+                myReportManager.CreateMaterialReports(_selectedObjects, orderType, stageType);
+            }
+            if (orderAction == 3) //User wants to order all selected
+            {
+                ModelModifiers.AddPrelimMarks(_selectedObjects, _projectData);
+                myReportManager.CreateMaterialReports(_selectedObjects, orderType, stageType);
+            }
+
+            if (runDrawings)
+            {
+                ReportManager.SelectDrawingsInDocManager(null);
+                DrawingManager dm = new DrawingManager(_model, _projectData, txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text);
+                if (dm.NotLabelledDrawings.Count != 0) { PrismWarnings.IncorrectlyAssignedDrawings(); return false; }
+
+                List<int> drawingCount = new List<int> { 0, dm.AllFittings.Count };
+                DrawingManager.PrintAndIssueDrawings(myReportManager.Folders.MatFolder, myReportManager.Folders.MatPath, drawingCount, "\\SPC", 0, 1, myReportManager, false);
+                PrismMacroBuilder.ClearPrintDialog();
+            }
+            return true;
         }
 
         private void CreatePackageNotAsync()
@@ -287,7 +273,7 @@ namespace Prism
 
         private void EndFunction(int cancelledOrComplete, bool isOmit = false) //0 = cancelled 1 = Complete
         {
-            if(!isOmit) _selectedObjects.SelectedModelParts.SelectParts();
+            if (!isOmit) _selectedObjects.SelectedModelParts.SelectParts();
             string message = cancelledOrComplete == 0 ? "Cancelled" : "Complete";
             flowLayoutPanel1.BackColor = cancelledOrComplete == 0 ? Color.Tomato : Color.PaleGreen;
             flowLayoutPanel1.Enabled = true;
@@ -299,7 +285,7 @@ namespace Prism
         {
             string key = Prism.Properties.Settings.Default.UniqueId;
 
-            if(key == "Default" && Environment.UserDomainName != "SFRPLC")
+            if (key == "Default" && Environment.UserDomainName != "SFRPLC")
             {
                 var form = new AuthKeyInput();
                 form.ShowDialog();
@@ -308,7 +294,7 @@ namespace Prism
             _webService = WebService.SetupWebService(key);
 
             if (!_webService.ValidUser()) { Application.Exit(); return; }
-          
+
             Prism.Properties.Settings.Default.UniqueId = key;
             Prism.Properties.Settings.Default.Save();
             //if webservice is a succes save the key
@@ -611,11 +597,15 @@ namespace Prism
             {
                 btnCreatePackage1.Enabled = true;
                 btnCreatePackage1.BackColor = Color.Chartreuse;
+                btn_RocketPacket.Enabled = true;
+                btn_RocketPacket.BackColor = Color.Chartreuse;
             }
             else
             {
                 btnCreatePackage1.Enabled = false;
-                btnCreatePackage1.BackColor = Color.Gainsboro;
+                btnCreatePackage1.BackColor = Color.White;
+                btn_RocketPacket.Enabled = false;
+                btn_RocketPacket.BackColor = Color.White;
             }
         }
 
@@ -706,5 +696,7 @@ namespace Prism
             pnl_Home.BackgroundImage = Resources.watereddownlogo;
             Cursor = Cursors.Default;
         }
+
+
     }
 }

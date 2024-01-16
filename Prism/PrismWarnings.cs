@@ -481,11 +481,17 @@ namespace Prism
             return false;
         }
 
-
         public static bool IgnoreAndContinue()
         {
             const string notUpToDateMessage = "Would you like to ignore this error and continue?";
             const string notUpToDateTitle = "Ignore";
+            return CreateYesNoForm(notUpToDateMessage, notUpToDateTitle);
+        }
+
+        public static bool RocketButtonCheck()
+        {
+            const string notUpToDateMessage = "This will give you a fab package without doing any of Prisms standard checks, are you sure you want to continue?";
+            const string notUpToDateTitle = "Careful now";
             return CreateYesNoForm(notUpToDateMessage, notUpToDateTitle);
         }
 
