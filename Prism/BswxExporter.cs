@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections;
 using Tekla.Structures.Model;
 using static Prism.Enums;
-using Task = System.Threading.Tasks.Task;
 
 namespace Prism
 {
@@ -46,6 +42,7 @@ namespace Prism
             bimRevExp.SetComponentInput(myInputs);
             bimRevExp.LoadAttributesFromFile(ModelUDA.BSWXAttributeName(stageType));
             bimRevExp.SetAttribute("output_file_path", $@"{myFolder}\{modelData.ProjNumber}-{phaseNumber}-{typeString}-ISSUE{issueNumber}.bswx");
+            bimRevExp.SetAttribute("selected_parts_only", 1);
             bimRevExp.Insert();
             ModelModifiers.HideOrRestoreTekla(9);
             return true;

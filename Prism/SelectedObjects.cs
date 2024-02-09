@@ -1,22 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-//using System.EnterpriseServices.Internal;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using Tekla.Structures.Drawing;
-using Tekla.Structures.Filtering;
 using Tekla.Structures.Model;
-using Tekla.Structures.Model.Operations;
-using Tekla.Structures.ModelInternal;
 using static Prism.Enums;
 using ModelObject = Tekla.Structures.Model.ModelObject;
 using Operation = Tekla.Structures.Model.Operations.Operation;
 using Part = Tekla.Structures.Model.Part;
-using Task = System.Threading.Tasks.Task;
 
 namespace Prism
 {
@@ -28,7 +19,7 @@ namespace Prism
         private ModelObjectEnumerator Moe;
         public DrawingHandler MyDrawingHandler;
 
-        public SelectedObjects(StageTypes stageType)
+        public SelectedObjects(StageTypes stageType, string phaseNum, string issueNum)
         {
             NumbersUpToDate = true;
             AssembliesList = new List<Assembly>();
@@ -37,32 +28,13 @@ namespace Prism
             SeversafeParts = new List<Part>();
             NonSeversafeParts = new List<Part>();
             MyDrawingHandler = new DrawingHandler();
-            Moe = new Tekla.Structures.Model.UI.ModelObjectSelector().GetSelectedObjects();
+
             MyMarks = new List<string>();
 
-            ProcessModelObjects(stageType);
-            //ProcessModelObjectsAsync(stageType).GetAwaiter().GetResult();
+            Moe = new Tekla.Structures.Model.UI.ModelObjectSelector().GetSelectedObjects();
+            ProcessModelObjects(stageType, phaseNum, issueNum);
 
             PartWeight = Math.Round(PartWeight / 1000, 3);
-
-            if (AssembliesList != null)
-            {
-                List<BoltGroup> SiteBolts = new List<BoltGroup>();
-                List<BoltGroup> ShopBolts = new List<BoltGroup>();
-
-                foreach (Assembly assembly in AssembliesList)
-                {
-                    List<BoltGroup> myBolts = GetBoltsFromAssembly(assembly);
-                    if (myBolts != null)
-                    {
-                        SiteBolts.AddRange(myBolts.Where(b => b.Bolt && b.BoltType != BoltGroup.BoltTypeEnum.BOLT_TYPE_WORKSHOP));
-                        ShopBolts.AddRange(myBolts.Where(b => b.Bolt && b.BoltType == BoltGroup.BoltTypeEnum.BOLT_TYPE_WORKSHOP));
-                    }
-                }
-
-                AllBolts.Add(SiteBolts);
-                AllBolts.Add(ShopBolts);
-            }
         }
 
         public double SmallestX = 100000000;
@@ -72,12 +44,12 @@ namespace Prism
         public double BiggestY = -100000000;
         public double BiggestZ = -100000000;
 
-        //public double TotalWeight { get; set; }
+        public List<PrismBoltGroup> PrismBoltGroups = new List<PrismBoltGroup>();
+
         public double PartWeight { get; set; }
         public bool NumbersUpToDate { get; set; }
         public bool SeversafePresent = false;
         public List<Assembly> AssembliesList { get; set; }
-        public List<List<BoltGroup>> AllBolts = new List<List<BoltGroup>>();
         public List<Part> SelectedModelParts { get; set; }
         public List<string> MyMarks { get; set; }
         public List<ModelObject> LockedParts { get; set; }
@@ -101,47 +73,58 @@ namespace Prism
             }
         }
 
-        private void ProcessModelObjects(StageTypes stageType)
+        private void ProcessModelObjects(StageTypes stageType, string phaseNum, string issueNum)
         {
-            foreach (object myObject in Moe)
+            foreach (var myObject in Moe)
             {
                 if (!NumbersUpToDate) return;
-                if (stageType != StageTypes.RocketPacket)
-                {
-                    if (myObject is BaseComponent myComponent)
-                    {
-                        ProcessChildren(myComponent, stageType);
-                    }
-                    else
-                    {
-                        ProcessObject(myObject, stageType);
-                    }
-                    return;
-                }
 
-                ProcessObject(myObject, stageType);
-            }
-        }
-
-        private void ProcessChildren(BaseComponent component, StageTypes stageType)
-        {
-            foreach (object child in component.GetChildren())
-            {
-                if (child is BaseComponent componentChild)
+                // Process directly if RocketPacket or not a BaseComponent
+                if (stageType == StageTypes.RocketPacket || !(myObject is BaseComponent myComponent))
                 {
-                    foreach (object grandChild in componentChild.GetChildren())
-                    {
-                        ProcessObject(grandChild, stageType);
-                    }
+                    ProcessObject(myObject, stageType, phaseNum, issueNum);
                 }
                 else
                 {
-                    ProcessObject(child, stageType);
+                    ProcessChildren(myComponent, stageType, phaseNum, issueNum);
                 }
             }
         }
 
-        private void ProcessObject(object myObject, StageTypes stageType)
+        private void ProcessChildren(BaseComponent component, StageTypes stageType, string phaseNum, string issueNum)
+        {
+            var childrenEnumerator = component.GetChildren();
+            var allDescendants = new List<object>();
+
+            while (childrenEnumerator.MoveNext())
+            {
+                var child = childrenEnumerator.Current;
+                if (child == null) continue;
+
+                allDescendants.Add(child);
+
+                if (child is BaseComponent componentChild)
+                {
+                    var grandchildrenEnumerator = componentChild.GetChildren();
+                    while (grandchildrenEnumerator.MoveNext())
+                    {
+                        var grandChild = grandchildrenEnumerator.Current;
+                        if (grandChild != null)
+                        {
+                            allDescendants.Add(grandChild);
+                        }
+                    }
+                }
+            }
+
+            foreach (var descendant in allDescendants)
+            {
+                ProcessObject(descendant, stageType, phaseNum, issueNum);
+            }
+        }
+
+
+        private void ProcessObject(object myObject, StageTypes stageType, string phaseNum, string issueNum)
         {
             if (!(myObject is Part myPart) || !IsValidPart(myPart)) return;
 
@@ -160,7 +143,7 @@ namespace Prism
             CategorizeAndProcessPart(myPart, isSeversafe);
             UpdatePartWeight(myPart);
             AddPartMark(myPart);
-            ProcessAssembly(myPart);
+            ProcessAssembly(myPart, phaseNum, issueNum);
         }
 
         private void CategorizeAndProcessPart(Part myPart, bool isSeversafe)
@@ -193,7 +176,7 @@ namespace Prism
             MyMarks.Add(myPart.GetPartMark());
         }
 
-        private void ProcessAssembly(Part myPart)
+        private void ProcessAssembly(Part myPart, string phaseNum, string issueNum)
         {
             if (myPart.GetAssembly() is Assembly assembly)
             {
@@ -201,6 +184,17 @@ namespace Prism
                 if (!AssembliesList.Any(x => x.Identifier.ToString() == assemblyId))
                 {
                     AssembliesList.Add(assembly);
+
+                    var boltsFromAssembly = GetBoltsFromAssembly(assembly);
+                    if (boltsFromAssembly != null)
+                    {
+                        var prismBoltGroupsForAssembly = boltsFromAssembly
+                            .Where(boltGroup => boltGroup.Bolt) // Filter out BoltGroup objects where Bolt is false
+                            .Select(boltGroup => new PrismBoltGroup(boltGroup, phaseNum, issueNum))
+                            .ToList();
+
+                        PrismBoltGroups.AddRange(prismBoltGroupsForAssembly);
+                    }
                 }
             }
         }
@@ -216,59 +210,6 @@ namespace Prism
                 NonFabsecParts.Add(myPart);
             }
         }
-
-
-        /*  private void ProcessObject(object myObject, StageTypes stageType)
-          {
-              if (myObject is Part myPart)
-              {
-                  if (IsValidPart(myPart))
-                  {
-                      bool isSeversafe = IsSeversafePart(myPart);
-                      if (stageType == StageTypes.FAB)
-                      {
-                          CheckXYZSize(myPart);
-                          if (!isSeversafe && !Operation.IsNumberingUpToDate(myPart))
-                          {
-                              PrismWarnings.NumberingIsNotUpToDate();
-                              NumbersUpToDate = false;
-                              return;
-                          }
-                      }
-
-                      SelectedModelParts.Add(myPart);
-
-                      if (!isSeversafe && IsLocked(myPart)) LockedParts.Add(myPart);
-                      if (isSeversafe)
-                      {
-                          SeversafeParts.Add(myPart); SeversafePresent = true;
-                      }
-                      else
-                      {
-                          NonSeversafeParts.Add(myPart);
-                          if (myPart.Profile.ProfileString.StartsWith("PG"))
-                          {
-                              FabsecParts.Add(myPart);
-                          }
-                          else { NonFabsecParts.Add(myPart); }
-                      } 
-
-                      double weight = 0;
-                      myPart.GetReportProperty(ModelUDA.Weight(), ref weight);
-                      PartWeight = PartWeight + weight;
-
-                      MyMarks.Add(myPart.GetPartMark());
-
-                      if (myPart.GetAssembly() is Assembly assembly)
-                      {
-                          if (!AssembliesList.Any(x => x.Identifier.ToString() == assembly.Identifier.ToString()))
-                          {
-                              AssembliesList.Add(assembly);
-                          }
-                      }
-                  }
-              }
-          }*/
 
         private bool IsSeversafePart(Part myPart)
         {

@@ -16,6 +16,8 @@ namespace Prism.CustomDialogs
     public partial class SpecialFittingOrders : Form
     {
         public int orderAction;
+        private string phaseNum;
+        private string issueNum;
 
         public SpecialFittingOrders()
         {
@@ -26,13 +28,13 @@ namespace Prism.CustomDialogs
 
         private void btn_TagSpecial_Click(object sender, EventArgs e)
         {
-            orderAction = ModelModifiers.ChangeSpecialTag("Special", out List<ModelObject> objects);
+            orderAction = ModelModifiers.ChangeSpecialTag("Special", phaseNum, issueNum, out List<ModelObject> objects);
             ModelModifiers.SetPartsBlue(objects);
         }
 
         private void btn_RemoveSpecialTag_Click(object sender, EventArgs e)
         {
-            orderAction = ModelModifiers.ChangeSpecialTag("", out List<ModelObject> objects);
+            orderAction = ModelModifiers.ChangeSpecialTag("", phaseNum, issueNum, out List<ModelObject> objects);
             ModelModifiers.SetPartsRed(objects);
         }
 
@@ -55,7 +57,7 @@ namespace Prism.CustomDialogs
 
         private void btn_ShowTagged_Click(object sender, EventArgs e)
         {
-            SelectedObjects selectedObjects = new SelectedObjects(StageTypes.Prelim3);
+            SelectedObjects selectedObjects = new SelectedObjects(StageTypes.Prelim3, phaseNum, issueNum);
             List<ModelObject> objects = new List<ModelObject>();
             foreach (Part p in selectedObjects.SelectedModelParts)
             {

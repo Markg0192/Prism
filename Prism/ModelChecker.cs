@@ -26,12 +26,12 @@ namespace Prism
         public static List<ModelObject> OrderedParts = new List<ModelObject>();
         public static List<ModelObject> PartsWithoutIntumescentLoading = new List<ModelObject>();
         public static List<ModelObject> IncorrectOrientation = new List<ModelObject>();
-        private static List<BoltGroup> UnorderedShearStuds = new List<BoltGroup>();
 
         public static void BoltThrough2Ply(SelectedObjects selectedObjects)
         {
-            foreach (List<BoltGroup> ass in selectedObjects.AllBolts)
+            foreach (PrismBoltGroup pbg in selectedObjects.PrismBoltGroups)
             {
+
                 int executionClassData = 10;  //this is the number read from teklas UDA when no execution class is applied, we are defaulting to it not having one here
                                               // p.GetUserProperty(ModelUDA.ExcecutionClass(), ref executionClassData);
 
@@ -50,9 +50,6 @@ namespace Prism
                 PrismWarnings.IgnoreFittingCheck();
             }
 
-            UnorderedShearStuds.AddRange(GetShearStudBoltGroups(selectedObjects.AllBolts[0]));
-            UnorderedShearStuds.AddRange(GetShearStudBoltGroups(selectedObjects.AllBolts[1]));
-
             foreach (Assembly ass in selectedObjects.AssembliesList)
             {
                 Part myMainPart = ass.GetMainPart() as Part;
@@ -68,7 +65,7 @@ namespace Prism
                     CheckFittings.GetIncorrectFittings(mySecondaryPart, location);
                 }
             }
-            return CheckForAndActionErrors(userName);
+            return CheckForAndActionErrors(userName, selectedObjects.PrismBoltGroups);
         }
 
         private static List<BoltGroup> GetShearStudBoltGroups(List<BoltGroup> boltGroups)
@@ -319,7 +316,7 @@ namespace Prism
             return true;
         }
 
-        private static bool CheckForAndActionErrors(string userName)
+        private static bool CheckForAndActionErrors(string userName, List<PrismBoltGroup> prismBoltGroups)
         {
             if (!OrderErrors()) { return false; }
             if (!FinishErrors()) { return false; }
@@ -340,14 +337,14 @@ namespace Prism
 
             if (!IntumesecentLoadingErrors()) { return false; }
 
-            if (!ShearStudsNotOrdered(userName)) { return false; }
+            if (!ShearStudsNotOrdered(userName, prismBoltGroups)) { return false; }
 
             return CheckFittings.DisplayFittingErrors();
         }
 
-        private static bool ShearStudsNotOrdered(string userName)
+        private static bool ShearStudsNotOrdered(string userName, List<PrismBoltGroup> prismBoltGroups)
         {
-            if (UnorderedShearStuds.Count > 0)
+            if (prismBoltGroups.Any(pbg => !pbg.isOrdered && pbg.isShearStud)) // then there are shears studs that appear to not be ordered.
             {
                 bool studsOrdered = PrismWarnings.UnorderedShearStuds();
 
@@ -360,14 +357,14 @@ namespace Prism
                 // Modify attributes only if studs have been ordered
                 if (studsOrdered)
                 {
-                    foreach (BoltGroup boltGroup in UnorderedShearStuds)
+                    foreach (PrismBoltGroup boltGroup in prismBoltGroups.Where(pbg => !pbg.isOrdered && pbg.isShearStud))
                     {
                         string property = "";
-                        boltGroup.GetReportProperty(ModelUDA.BoltShearStudTag(), ref property);
+                        boltGroup.BoltGroup.GetReportProperty(ModelUDA.BoltShearStudTag(), ref property);
                         if (property == "")
                         {
-                            boltGroup.SetUserProperty(ModelUDA.BoltOrderedBy(), userName);
-                            boltGroup.SetUserProperty(ModelUDA.BoltShearStudTag(), "Ordered");
+                            boltGroup.BoltGroup.SetUserProperty(ModelUDA.BoltOrderedBy(), userName);
+                            boltGroup.BoltGroup.SetUserProperty(ModelUDA.BoltShearStudTag(), "Ordered");
                         }
                     }
                 }
@@ -498,7 +495,7 @@ namespace Prism
             if (!mainPart.Profile.ProfileString.Contains("PLT") && !mainPart.Profile.ProfileString.Contains("FLT"))
             {
                 string prelimMark = "";
-                mainPart.GetUserProperty(ModelUDA.CurrentStageName(3), ref prelimMark); //Check prism uda material order complete for data
+                mainPart.GetUserProperty(ModelUDA.CurrentStageName(3), ref prelimMark); //Check prism uda material order complete for data    
                 if (prelimMark.Length == 0)
                 {
                     NotOrderedParts.Add(mainPart);

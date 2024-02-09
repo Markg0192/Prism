@@ -31,11 +31,21 @@ namespace Prism
                         "                Tekla.Macros.Akit.IAkitScriptHost akit = runtime.Get<Tekla.Macros.Akit.IAkitScriptHost>();" + Environment.NewLine +
                         "                Tekla.Macros.Wpf.Runtime.IWpfMacroHost wpf = runtime.Get<Tekla.Macros.Wpf.Runtime.IWpfMacroHost>();" + Environment.NewLine +
                         "                wpf.InvokeCommand(\"CommandRepository\", \"Numbering.ClearPartAndAssemblyNumbers\");" + Environment.NewLine +
-                        "                akit.PushButton(\"warning_ok\", \"cleared_selected_numbering\");             " + Environment.NewLine +
-                        "                wpf.InvokeCommand(\"CommandRepository\", \"Numbering.ChangePartNumber\");    " + Environment.NewLine +
+                        "                akit.PushButton(\"warning_ok\", \"cleared_selected_numbering\");" + Environment.NewLine +
+        
+                        
+                        "                wpf.InvokeCommand(\"CommandRepository\", \"Numbering.ChangeAssemblyNumber\");" + Environment.NewLine +
+                        "                akit.PushButton(\"GetPB\", \"assign_assembly_number\");" + Environment.NewLine +
+                        "                akit.ValueChange(\"assign_assembly_number\", \"AssignToAllRadioBox\", \"0\");" + Environment.NewLine +
+                        $"               akit.ValueChange(\"assign_assembly_number\", \"Position\", \"{ prelim}\");" + Environment.NewLine +
+                        "                akit.PushButton(\"AssignPB\", \"assign_assembly_number\");" + Environment.NewLine + 
+                        "                akit.PushButton(\"CancelPB\", \"assign_assembly_number\");" + Environment.NewLine +
+
+                    /*    "                wpf.InvokeCommand(\"CommandRepository\", \"Numbering.ChangePartNumber\");    " + Environment.NewLine +
                         "                akit.ValueChange(\"assign_part_number\", \"Position\", \"" + prelim + "\");  " + Environment.NewLine +
                         "                akit.PushButton(\"AssignPB\", \"assign_part_number\");                       " + Environment.NewLine +
-                        "                akit.PushButton(\"CancelPB\", \"assign_part_number\");                       " + Environment.NewLine +
+                        "                akit.PushButton(\"CancelPB\", \"assign_part_number\");" + Environment.NewLine +*/
+
                         "            }" + Environment.NewLine +
                         "        }" + Environment.NewLine +
                         "    }";

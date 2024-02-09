@@ -55,7 +55,6 @@ namespace Prism
             //this method checks the model data folder on our server for a folder named after the users current model, if it does not exist we create it
             bool newLogExists = false;
             bool oldLogExists = false;
-            var test = WebService.GetDirectories(Constants.PrismDataLogLocation, "");
             foreach (string folder in WebService.GetDirectories(Constants.PrismDataLogLocation, ""))
             {
                 if (WebService.FileExists(folder, 8, pData.ProjNumberAndGuid))
@@ -84,6 +83,8 @@ namespace Prism
             {
                 WebService.CreateNewDirectory(Constants.PrismModelData, pData.ProjNumberAndGuid);
 
+                WebService.CreateNewDirectory(Constants.PrismModelData, pData.ProjNumberAndGuid + "\\FAB XMLs");
+
                 WriteFirstDataLog(Constants.PrismModelData, Constants.ModelProjectInforLocation(pData.ProjNumberAndGuid), pData.pInfo);
 
                 PrismWarnings.FirstTimeInTheModel();
@@ -106,6 +107,8 @@ namespace Prism
             string[] combinedArray = oldLogOverwrite.Concat(array).ToArray();
 
             WebService.WriteAllLinesWithArray(Constants.PrismDataLogLocation, combinedArray, Constants.ModelProjectInforLocation(pData.ProjNumberAndName));
+
+            WebService.CreateNewDirectory(Constants.PrismModelData, pData.ProjNumberAndGuid + "\\FAB XMLs");
         }
 
         private static string[] UpdateToNewLayout(string[] array)

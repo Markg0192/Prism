@@ -59,9 +59,9 @@
             this.label1.BackColor = System.Drawing.Color.Transparent;
             this.label1.Location = new System.Drawing.Point(17, 30);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(327, 16);
+            this.label1.Size = new System.Drawing.Size(334, 16);
             this.label1.TabIndex = 2;
-            this.label1.Text = "Please enter a valid authentication key to acces Prism";
+            this.label1.Text = "Please enter a valid authentication key to access Prism";
             // 
             // label2
             // 

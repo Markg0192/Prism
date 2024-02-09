@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Tekla.Structures;
 using Tekla.Structures.Drawing;
 using Tekla.Structures.Model;
+using static Tekla.Structures.Catalogs.AttributeConfiguration;
 
 //This class is temporarily not in use
 namespace Prism
@@ -125,6 +126,7 @@ namespace Prism
             {
                 var id = new Identifier(no);
                 var drawing = Tekla.Structures.DrawingInternal.Operation.GetDrawing(id);
+
 
                 if (!(drawing is GADrawing))
                 {

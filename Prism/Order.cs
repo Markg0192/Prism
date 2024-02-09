@@ -39,10 +39,8 @@ namespace Prism
         }
 
         public static bool FabsecCarcasses(ReportManager myReportManager, Model model, PrismProjectData projectData, string phaseNumber, string issueNumber,
-            SelectedObjects myObjects, int stageNumber, string orderType, string orderDate)
+            SelectedObjects myObjects, int stageNumber, string orderType, string orderDate, int typeOfOrder)
         {
-            int typeOfOrder = PrismWarnings.FabsecCarcassAction();
-
             if (typeOfOrder == 1)
             {
                 return FabsecProcessing.CreateFabsecCarcasses(myObjects, model);

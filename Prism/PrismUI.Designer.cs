@@ -73,6 +73,7 @@ namespace Prism
             this.btn_Detail3 = new System.Windows.Forms.Button();
             this.btn_Detail1 = new System.Windows.Forms.Button();
             this.pnl_Package = new System.Windows.Forms.Panel();
+            this.cmb_FabIssueNo = new System.Windows.Forms.ComboBox();
             this.btn_RocketPacket = new System.Windows.Forms.Button();
             this.info_Fab = new System.Windows.Forms.PictureBox();
             this.btn_HomePackage = new System.Windows.Forms.Button();
@@ -629,6 +630,7 @@ namespace Prism
             // 
             this.pnl_Package.BackColor = System.Drawing.Color.White;
             this.pnl_Package.BackgroundImage = global::Prism.Properties.Resources.watereddownlogo;
+            this.pnl_Package.Controls.Add(this.cmb_FabIssueNo);
             this.pnl_Package.Controls.Add(this.btn_RocketPacket);
             this.pnl_Package.Controls.Add(this.info_Fab);
             this.pnl_Package.Controls.Add(this.btn_HomePackage);
@@ -646,6 +648,15 @@ namespace Prism
             this.pnl_Package.Size = new System.Drawing.Size(214, 240);
             this.pnl_Package.TabIndex = 3;
             this.pnl_Package.Visible = false;
+            // 
+            // cmb_FabIssueNo
+            // 
+            this.cmb_FabIssueNo.FormattingEnabled = true;
+            this.cmb_FabIssueNo.Location = new System.Drawing.Point(103, 129);
+            this.cmb_FabIssueNo.Name = "cmb_FabIssueNo";
+            this.cmb_FabIssueNo.Size = new System.Drawing.Size(102, 21);
+            this.cmb_FabIssueNo.TabIndex = 44;
+            this.cmb_FabIssueNo.Visible = false;
             // 
             // btn_RocketPacket
             // 
@@ -724,7 +735,7 @@ namespace Prism
             this.btn_FabMisc.Enabled = false;
             this.btn_FabMisc.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_FabMisc.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btn_FabMisc.Location = new System.Drawing.Point(142, 65);
+            this.btn_FabMisc.Location = new System.Drawing.Point(153, 161);
             this.btn_FabMisc.Name = "btn_FabMisc";
             this.btn_FabMisc.Size = new System.Drawing.Size(52, 45);
             this.btn_FabMisc.TabIndex = 33;
@@ -992,5 +1003,6 @@ namespace Prism
         private System.Windows.Forms.Label label7;
         public System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Button btn_RocketPacket;
+        private System.Windows.Forms.ComboBox cmb_FabIssueNo;
     }
 }
