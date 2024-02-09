@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Tekla.Structures;
 using Tekla.Structures.Drawing;
 using Tekla.Structures.Model;
+using static Tekla.Structures.Catalogs.AttributeConfiguration;
 
 //This class is temporarily not in use
 namespace Prism
@@ -57,6 +58,7 @@ namespace Prism
                 XMLWriter.PDFPrintSettings(modelPath);
             }
         }
+
         public static void PrintDrawings(ReportManager reportManager, DrawingManager drawingManager, List<int> drawingCount)
         {
             if (drawingManager.FitDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\FIT", 0, 1, reportManager, false);
@@ -124,6 +126,7 @@ namespace Prism
             {
                 var id = new Identifier(no);
                 var drawing = Tekla.Structures.DrawingInternal.Operation.GetDrawing(id);
+
 
                 if (!(drawing is GADrawing))
                 {

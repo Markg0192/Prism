@@ -2,6 +2,8 @@
 using Tekla.Structures.Model;
 using Attachment = Microsoft.Office.Interop.Outlook.Attachment;
 using Application = Microsoft.Office.Interop.Outlook.Application;
+using System.Collections.Generic;
+using Prism.CustomDialogs;
 
 namespace Prism
 {
@@ -87,6 +89,63 @@ namespace Prism
             // Release the Outlook application object
             System.Runtime.InteropServices.Marshal.ReleaseComObject(outlookApp);
             outlookApp = null;
+        }
+
+        public static void WriteRevisedFabEmail(PrismProjectData projData, string fabPrefix, string issueNumber, string phaseNumber, string siteDate, string fabPath, bool zipFileCanBeAttached, string messageForEmail)
+        {
+            Application outlookApp = new Application();
+
+            MailItem email = (MailItem)outlookApp.CreateItem(OlItemType.olMailItem);
+            email.Subject = $"{fabPrefix} Revised Fab Issue";
+
+            // Set the body format to HTML
+            email.BodyFormat = OlBodyFormat.olFormatHTML;
+
+            // Construct the HTML body
+            email.HTMLBody = $"<html><body>" +
+                             $"Hello,<br><br>" +
+                             $"This is the revised fab package for phase {phaseNumber}, issue {issueNumber}, in {projData.ProjNumber}, {projData.ProjName}.<br>" +
+                             $"Please issue this package to the works when possible.<br><br>" +
+                             $"Site date is <u>{SiteDateNote(siteDate)}</u><br><br>" +
+                             $"The changes to the package are as follows;<br><br>" +
+                             messageForEmail +
+                             $"<br>" +
+                             $"Regards,<br><br>" +
+                             $"{projData.Full}" +
+                             $"</body></html>";
+
+            if (zipFileCanBeAttached)
+            {
+                string attachmentPath = $"{fabPath}.zip";
+                Attachment attachment = email.Attachments.Add(attachmentPath);
+            }
+
+            //email.To = "ni.fabissue@severfield.com";
+            email.CC = FormCCString(false, projData.WebService, projData.ProjNumberAndGuid);
+            email.Display();
+            //email.Send();
+
+            // Release the Outlook application object
+            System.Runtime.InteropServices.Marshal.ReleaseComObject(outlookApp);
+            outlookApp = null;
+        }
+
+        private static string AddItems(List<SteelItemBase> steelItems, string type)
+        {
+            if (steelItems.Count == 0) return "";
+            string myString = $"<b><u>{type}</u></b><br>";
+            foreach (SteelItemBase item in steelItems)
+            {
+                myString += $"<br>{item.PartMark}<br>";
+                foreach (string changeMessage in item.ChangeMessages)
+                {
+                    {
+                        myString += $"<li>{changeMessage}</li><br>";
+                    }
+                }
+            }
+
+            return myString;
         }
 
         public static void WriteBoltOrderEmail(PrismProjectData projData, string fabPrefix, string issueNumber, string phaseNumber, string siteDate, string boltPath)

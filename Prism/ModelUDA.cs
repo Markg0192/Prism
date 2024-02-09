@@ -192,7 +192,7 @@
             {
                 return "-SEV_PRELIM";
             }
-            if (stage == Enums.StageTypes.FAB)
+            if (stage == Enums.StageTypes.FAB || stage == Enums.StageTypes.RocketPacket)
             {
                 return "-SEV_FAB";
             }

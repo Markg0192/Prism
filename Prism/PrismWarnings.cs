@@ -1,6 +1,7 @@
 ﻿using Prism.CustomDialogs;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Windows.Forms;
 using Tekla.Structures.Model;
 using Tekla.Structures.Model.UI;
@@ -146,6 +147,13 @@ namespace Prism
             const string notUpToDateTitle = "Be careful";
             return CreateYesNoForm(notUpToDateMessage, notUpToDateTitle);
         }
+        
+        public static bool RunChangeManagement()
+        {
+            const string notUpToDateMessage = "Do you want to use change management on this package?";
+            const string notUpToDateTitle = "Access change management";
+            return CreateYesNoForm(notUpToDateMessage, notUpToDateTitle);
+        }
 
         public static bool KeepPartInModel()
         {
@@ -210,11 +218,11 @@ namespace Prism
             CreateOKForm(notUpToDateMessage, notUpToDateTitle);
         }
 
-        public static void FolderAlreadyExists(string existingFolder)
+        public static bool FolderAlreadyExists(string existingFolder)
         {
-            string notUpToDateMessage = $"{existingFolder} already exists in the model folder, it must be removed from the model folder before continuing";
+            string notUpToDateMessage = $"{existingFolder}, do you want to delete and continue?";
             const string notUpToDateTitle = "Folder exists.";
-            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+            return CreateYesNoForm(notUpToDateMessage, notUpToDateTitle);
         }
 
         public static void ZipFolderAlreadyExists()
@@ -474,6 +482,32 @@ namespace Prism
         {
             const string notUpToDateMessage = "Prism has detected shear studs in your selection, these should have been manually pre-ordered by now.\r\rClick yes to confirm you have pre-ordered these.";
             const string notUpToDateTitle = "Shear studs";
+            if (CreateYesNoForm(notUpToDateMessage, notUpToDateTitle))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public static void TooManyPartsForRocket(string numberOfParts, string limit)
+        {
+            string notUpToDateMessage = $"Sorry, you have selected {numberOfParts} parts, the limit for the rocket button it {limit}, " +
+                $"either reduce your selection or run the full Prism process on the selected.";
+            string notUpToDateTitle = "Over the limit.";
+            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+        }
+
+        public static bool IgnoreAndContinue()
+        {
+            const string notUpToDateMessage = "Would you like to ignore this error and continue?";
+            const string notUpToDateTitle = "Ignore";
+            return CreateYesNoForm(notUpToDateMessage, notUpToDateTitle);
+        }
+
+        public static bool RocketButtonCheck()
+        {
+            const string notUpToDateMessage = "This will give you a fab package without doing any of Prisms standard checks, are you sure you want to continue?";
+            const string notUpToDateTitle = "Careful now";
             return CreateYesNoForm(notUpToDateMessage, notUpToDateTitle);
         }
 

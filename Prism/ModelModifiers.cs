@@ -112,13 +112,13 @@ namespace Prism
             return true;
         }
 
-        public static void StampBoltUDA(List<BoltGroup> allBolts, string name, string date)
+        public static void StampBoltUDA(List<BoltGroup> allBolts, string name, string date, string phaseNumber, string issueNumber)
         {
             foreach (BoltGroup bolts in allBolts)
             {
                 bolts.SetUserProperty(ModelUDA.BoltOrderedBy(), name);
                 bolts.SetUserProperty(ModelUDA.BoltOrderedDate(), date);
-                bolts.SetUserProperty(ModelUDA.BoltOrderedAmount(), TimesBoltOrdered(bolts));
+                bolts.SetUserProperty(ModelUDA.BoltOrderedAmount(), BoltPhaseAndIssue(phaseNumber, issueNumber)) ;
             }
         }
 
@@ -135,6 +135,12 @@ namespace Prism
             }
 
             return "Times ordered =1";
+        }
+
+        public static string BoltPhaseAndIssue(string phaseNumber, string issueNumber)
+        {
+            return $"Ordered Phase-{phaseNumber} Issue{issueNumber}";
+
         }
 
         public static void StampPartFabUDA(List<Part> selectedModelParts, string phaseNumber, string issueNumber)
@@ -506,6 +512,21 @@ namespace Prism
             }
         }
 
+        public static void SelectBolts(this List<BoltGroup> partsToBeSelected)
+        {
+            ArrayList selectList = new ArrayList();
+            foreach (BoltGroup part in partsToBeSelected)
+            {
+                selectList.Add(part);
+            }
+            Tekla.Structures.Model.UI.ModelObjectSelector ms = new Tekla.Structures.Model.UI.ModelObjectSelector();
+            ms.Select(selectList);
+            foreach (BoltGroup part in selectList)
+            {
+               // part.Modify();
+            }
+        }
+
         public static void SelectAssembly(this Assembly assToBeSelected)
         {
             ArrayList selectList = new ArrayList { assToBeSelected };
@@ -648,9 +669,9 @@ namespace Prism
             ModelObjectVisualization.SetTemporaryState(myParts, color);
         }
 
-        public static int ChangeSpecialTag(string newTagString, out List<ModelObject> objects)
+        public static int ChangeSpecialTag(string newTagString, string phaseNum, string issueNum, out List<ModelObject> objects)
         {
-            SelectedObjects selectedObjects = new SelectedObjects(StageTypes.Prelim3);
+            SelectedObjects selectedObjects = new SelectedObjects(StageTypes.Prelim3, phaseNum, issueNum);
             ModifySpecialTag(newTagString, selectedObjects.SelectedModelParts);
             objects = new List<ModelObject>();
             foreach (Part p in selectedObjects.SelectedModelParts)

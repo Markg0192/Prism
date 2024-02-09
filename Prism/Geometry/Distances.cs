@@ -1,4 +1,5 @@
 ﻿using System;
+using Tekla.Structures.Geometry3d;
 
 namespace Prism.Geometry
 {
@@ -33,6 +34,13 @@ namespace Prism.Geometry
             Vector vP = new Vector(plane.Point, P);
             Vector N = plane.Normal;
             return Math.Abs(vP.Dot(N) / N.Length());
+        }
+
+        public static double Point2Point(Point p13d, Point p23d)
+        {
+            Point3D p1 = new Point3D(p13d.X, p13d.Y, p13d.Z);
+            Point3D p2 = new Point3D(p23d.X, p23d.Y, p23d.Z);
+            return new Vector(p1, p2).Length();
         }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Prism.Geometry
 {
-    public class Vector
+    public class Vector 
     {
         public double dX;
         public double dY;
@@ -13,6 +13,11 @@ namespace Prism.Geometry
             this.dX = dX;
             this.dY = dY;
             this.dZ = dZ;
+        }
+
+        public Vector()
+        {
+
         }
 
         public Vector(Point3D start, Point3D end)
@@ -35,6 +40,11 @@ namespace Prism.Geometry
             double y = Math.Round(dY, 3);
             double z = Math.Round(dZ, 3);
             return "[" + x + ", " + y + ", " + z + "]";
+        }
+
+        public bool CompareTo(Vector obj)
+        {
+            return dX == obj.dX && dY == obj.dY && dZ == obj.dZ;
         }
 
         public double Length()

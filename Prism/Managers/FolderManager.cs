@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -81,7 +82,7 @@ namespace Prism
 
         public bool CreateFabFolders()
         {
-            if (!CheckForExistingFolder(FabPath)) return false;
+            if (!CheckAndDeleteFolder(FabPath)) return false;
 
             foreach (string folder in _folderNames)
             {
@@ -107,7 +108,7 @@ namespace Prism
 
         public bool CreateMatFolder(bool fabsecsPresent, bool specialFittingsPresent = false)
         {
-            if (!CheckForExistingFolder(MatPath)) return false;
+            if (!CheckAndDeleteFolder(MatPath)) return false;
 
             Directory.CreateDirectory(MatPath);
             if (fabsecsPresent)
@@ -123,7 +124,7 @@ namespace Prism
 
         public bool CreateFabsecCarcassFolder()
         {
-            if (!CheckForExistingFolder(CarcassOrderPath)) return false;
+            if (!CheckAndDeleteFolder(CarcassOrderPath)) return false;
 
             Directory.CreateDirectory(CarcassOrderPath);
             Directory.CreateDirectory(CarcassOrderPath + "\\PGC");
@@ -132,7 +133,7 @@ namespace Prism
 
         public bool CreateBoltFolder()
         {
-            if (!CheckForExistingFolder(BoltPath)) return false;
+            if (!CheckAndDeleteFolder(BoltPath)) return false;
 
             Directory.CreateDirectory(BoltPath);
             return true;
@@ -140,7 +141,7 @@ namespace Prism
 
         public bool CreateEpoFolder()
         {
-            if (!CheckForExistingFolder(EpoPath)) return false;
+            if (!CheckAndDeleteFolder(EpoPath)) return false;
 
             Directory.CreateDirectory(EpoPath);
             return true;
@@ -150,17 +151,78 @@ namespace Prism
         {
             if (Directory.Exists(folderPath))
             {
-                PrismWarnings.FolderAlreadyExists(folderPath);
+                if(PrismWarnings.FolderAlreadyExists(folderPath))
+                {
+                   Directory.Delete(folderPath, true);
+                    return true;
+                }
                 return false;
             }
             var zip = Directory.GetFiles(PrismFileLocaton, "*.zip");
             if (zip.Contains($"{folderPath}.zip"))
             {
-                PrismWarnings.FolderAlreadyExists($"{folderPath}.zip");
+                if(PrismWarnings.FolderAlreadyExists($"{folderPath}.zip"))
+                {
+                    File.Delete($"{folderPath}.zip");
+                }
                 return false;
             }
             return true;
         }
+
+        private bool CheckAndDeleteFolder(string folderPath)
+        {
+            bool folderExists = Directory.Exists(folderPath);
+            string zipFilePath = $"{folderPath}.zip";
+            bool zipExists = File.Exists(zipFilePath);
+
+            // If neither the folder nor the zip file exists, return true indicating no conflicts
+            if (!folderExists && !zipExists)
+            {
+                return true;
+            }
+
+            // If either the folder or the zip file exists, ask the user for confirmation to delete
+            if (folderExists || zipExists)
+            {
+                // Update the message to indicate both or either one exists
+                string message = folderExists && zipExists ?
+                                 $"Both the folder '{folderPath}' and its zipped version exist." :
+                                 folderExists ?
+                                 $"The folder '{folderPath}' exists." :
+                                 $"The zipped version of the folder '{folderPath}' exists.";
+
+                // Add this to your existing confirmation method or modify it to handle this case
+                if (PrismWarnings.FolderAlreadyExists(message))
+                {
+                    try
+                    {
+                        // Delete the folder if it exists
+                        if (folderExists)
+                        {
+                            Directory.Delete(folderPath, true); // true to delete recursively
+                        }
+
+                        // Delete the zip file if it exists
+                        if (zipExists)
+                        {
+                            File.Delete(zipFilePath);
+                        }
+
+                        return true; // Indicate that the deletion was successful
+                    }
+                    catch (Exception ex)
+                    {
+                        // Handle exceptions, such as permission issues or IO errors
+                        Console.WriteLine($"Error during deletion: {ex.Message}");
+                        return false; // Indicate that there was an issue with deletion
+                    }
+                }
+            }
+
+            return false; // User chose not to delete, or there was an issue
+        }
+
 
         //This method is not used yet, it will be required when drawing printing is enabled.
         public void RemoveUnusedFolders()

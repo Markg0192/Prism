@@ -26,7 +26,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>3</ApplicationRevision>
+    <ApplicationRevision>12</ApplicationRevision>
     <ApplicationVersion>2.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -84,6 +84,7 @@
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Management" />
@@ -121,11 +122,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\TeklaStructures\2021.0\nt\bin\plugins\Tekla.Structures.Plugins.dll</HintPath>
     </Reference>
-    <Reference Include="TeklaLauncher">
-      <HintPath>..\TeklaLauncher.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PrismBoltGroup.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Convertor.cs" />
     <Compile Include="CpuCounter.cs" />
@@ -146,6 +145,12 @@
     </Compile>
     <Compile Include="CustomDialogs\BoltOrderType.Designer.cs">
       <DependentUpon>BoltOrderType.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CustomDialogs\ChangeMessage.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CustomDialogs\ChangeMessage.Designer.cs">
+      <DependentUpon>ChangeMessage.cs</DependentUpon>
     </Compile>
     <Compile Include="CustomDialogs\Division.cs">
       <SubType>Form</SubType>
@@ -237,7 +242,35 @@
     <Compile Include="Geometry\Line1D.cs" />
     <Compile Include="IFCExporter.cs" />
     <Compile Include="InitialiseProgram.cs" />
+    <Compile Include="Launcher\Launcher.cs" />
+    <Compile Include="Launcher\LauncherForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Launcher\LauncherForm.Designer.cs">
+      <DependentUpon>LauncherForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Logging.cs" />
+    <Compile Include="Managers\ChangedObject.cs" />
+    <Compile Include="Managers\ChangeManager\BoltCheck.cs" />
+    <Compile Include="Managers\ChangeManager\ChangeHelper.cs" />
+    <Compile Include="Managers\ChangeManager\Check.cs" />
+    <Compile Include="Managers\ChangeManager\Enum.cs" />
+    <Compile Include="Managers\ChangeManager\FittingMarkCount.cs" />
+    <Compile Include="Managers\ChangeManager\IModifiable.cs" />
+    <Compile Include="Managers\ChangeManager\MyAssembly.cs" />
+    <Compile Include="Managers\ChangeManager\MyBolts.cs" />
+    <Compile Include="Managers\ChangeManager\MyChamfer.cs" />
+    <Compile Include="Managers\ChangeManager\MyCut.cs" />
+    <Compile Include="Managers\ChangeManager\MyFitting.cs" />
+    <Compile Include="Managers\ChangeManager\MyICurve.cs" />
+    <Compile Include="Managers\ChangeManager\MyPlane.cs" />
+    <Compile Include="Managers\ChangeManager\MyWelds.cs" />
+    <Compile Include="Managers\ChangeManager\SerializationWrapper.cs" />
+    <Compile Include="Managers\ChangeManager\SevFace.cs" />
+    <Compile Include="Managers\ChangeManager\SteelComponentComparer.cs" />
+    <Compile Include="Managers\ChangeManager\SteelItemBase.cs" />
+    <Compile Include="Managers\ChangeManager\TeklaAttributes.cs" />
+    <Compile Include="Managers\ChangeManager\TeklaHelper.cs" />
     <Compile Include="Order.cs" />
     <Compile Include="PrismMacroBuilder.cs" />
     <Compile Include="Managers\ViewManager.cs" />
@@ -315,6 +348,9 @@
       <DependentUpon>BoltOrderType.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="CustomDialogs\ChangeMessage.resx">
+      <DependentUpon>ChangeMessage.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="CustomDialogs\Division.resx">
       <DependentUpon>Division.cs</DependentUpon>
     </EmbeddedResource>
@@ -347,6 +383,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="CustomDialogs\YesNoForm.resx">
       <DependentUpon>YesNoForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Launcher\LauncherForm.resx">
+      <DependentUpon>LauncherForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PrismUI.resx">
       <DependentUpon>PrismUI.cs</DependentUpon>
@@ -440,6 +479,11 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="ico.ico" />
+    <None Include="Resources\NewPen.png" />
+    <None Include="Resources\NewDelivery.png" />
+    <None Include="Resources\Delivery.png" />
+    <None Include="Resources\NewPackageButton.png" />
+    <None Include="Resources\Rocket.png" />
     <None Include="Web References\ExternalService\ExternalService.disco" />
     <None Include="Resources\Severfield.PNG" />
     <None Include="Resources\NewRefresh.png" />

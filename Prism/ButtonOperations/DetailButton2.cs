@@ -4,7 +4,7 @@
     {
         public static bool DetailButton2op(this SelectedObjects myObjects, PrismProjectData projectData, int stageNumber, string columnOrientationType, string flangeThickness)
         {
-            if (!myObjects.RunStage4Checks()) { return false; }
+            if (!myObjects.RunStage4Checks(projectData.Full)) { return false; }
 
             ColumnOrientation.DetailColumnOrientationHoles(myObjects, columnOrientationType, flangeThickness);
 

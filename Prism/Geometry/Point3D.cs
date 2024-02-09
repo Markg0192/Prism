@@ -9,6 +9,20 @@ namespace Prism.Geometry
         public double Y;
         public double Z;
 
+        // Override Equals method
+        public override bool Equals(object obj)
+        {
+            if (obj is Point3D other)
+                return IsEqualTo(other);
+            return false;
+        }
+
+        public bool IsEqualTo(Point3D other)
+        {
+            double tolerance = 0.5;
+            return Math.Abs(X - other.X) < tolerance && Math.Abs(Y - other.Y) < tolerance && Math.Abs(Z - other.Z) < tolerance;
+        }
+
         public Point3D(double X, double Y, double Z)
         {
             this.X = X;
@@ -21,6 +35,11 @@ namespace Prism.Geometry
             X = p.X;
             Y = p.Y;
             Z = p.Z;
+        }
+
+        public Point3D()
+        {
+
         }
 
         public override string ToString()

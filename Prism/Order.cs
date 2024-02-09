@@ -2,6 +2,7 @@
 using Microsoft.Office.Interop.Outlook;
 //using Org.BouncyCastle.Utilities;
 using System.Collections.Generic;
+using System.Windows.Forms.VisualStyles;
 using Tekla.Structures.Model;
 using Model = Tekla.Structures.Model.Model;
 
@@ -9,9 +10,9 @@ namespace Prism
 {
     public static class Order
     {
-        public static void ShearStuds()
+        public static void ShearStuds(string orderType, ReportManager myReportManager, string siteDate)
         {
-
+            OrderBolts(orderType, myReportManager, siteDate);
         }
 
         public static bool BoltsSeversafeAndHdBolts(string orderType, ReportManager myReportManager, string siteDate, Model model, SelectedObjects myObjects, PrismProjectData projectData, out bool orderRequired)
@@ -38,10 +39,8 @@ namespace Prism
         }
 
         public static bool FabsecCarcasses(ReportManager myReportManager, Model model, PrismProjectData projectData, string phaseNumber, string issueNumber,
-            SelectedObjects myObjects, int stageNumber, string orderType, string orderDate)
+            SelectedObjects myObjects, int stageNumber, string orderType, string orderDate, int typeOfOrder)
         {
-            int typeOfOrder = PrismWarnings.FabsecCarcassAction();
-
             if (typeOfOrder == 1)
             {
                 return FabsecProcessing.CreateFabsecCarcasses(myObjects, model);

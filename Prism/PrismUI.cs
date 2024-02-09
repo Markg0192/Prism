@@ -1,6 +1,7 @@
 ﻿using Prism.ButtonOperations;
 using Prism.CustomDialogs;
 using Prism.ExternalService;
+using Prism.Managers.ChangeManager;
 using Prism.Properties;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Tekla.Structures.Model;
+using Tekla.Structures.Solid;
 using static Prism.Enums;
 using Model = Tekla.Structures.Model.Model;
 using Task = System.Threading.Tasks.Task;
@@ -95,37 +97,6 @@ namespace Prism
             EndFunction(1);
         }
 
-        private bool OrderSpecials(int orderAction, string orderType, StageTypes stageType, ReportManager myReportManager)
-        {
-            bool runDrawings = PrismWarnings.RunSpecialFittingDrawings();
-            if (!myReportManager.Folders.CreateMatFolder(false, runDrawings)) return false;
-
-            if (orderAction == 2) //User wants to order using special fitting tags
-            {
-                ModelModifiers.SelectSpecialTaggedInSelection(_selectedObjects);
-                ModelModifiers.AddPrelimMarks(_selectedObjects, _projectData);
-                _selectedObjects = new SelectedObjects(stageType); // we reset selected objects here (because we just changed the selection)
-                myReportManager.CreateMaterialReports(_selectedObjects, orderType, stageType);
-            }
-            if (orderAction == 3) //User wants to order all selected
-            {
-                ModelModifiers.AddPrelimMarks(_selectedObjects, _projectData);
-                myReportManager.CreateMaterialReports(_selectedObjects, orderType, stageType);
-            }
-
-            if (runDrawings)
-            {
-                ReportManager.SelectDrawingsInDocManager(null);
-                DrawingManager dm = new DrawingManager(_model, _projectData, txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text);
-                if (dm.NotLabelledDrawings.Count != 0) { PrismWarnings.IncorrectlyAssignedDrawings(); return false; }
-
-                List<int> drawingCount = new List<int> { 0, dm.AllFittings.Count };
-                DrawingManager.PrintAndIssueDrawings(myReportManager.Folders.MatFolder, myReportManager.Folders.MatPath, drawingCount, "\\SPC", 0, 1, myReportManager, false);
-                PrismMacroBuilder.ClearPrintDialog();
-            }
-            return true;
-        }
-
         private async void btn_Detail2_Click_1(object sender, EventArgs e)
         {
             StartFunction();
@@ -156,6 +127,29 @@ namespace Prism
 
             if (!await Task.Run(() => InitialSetup(StageTypes.Bolt, false))) { EndFunction(0); return; }
 
+            var mySolid = _selectedObjects.SelectedModelParts[0].GetSolid();
+            var mySolid2 = _selectedObjects.SelectedModelParts[1].GetSolid();
+
+            var bolts = _selectedObjects.SelectedModelParts[0].GetBolts();
+            var bolt3s = _selectedObjects.SelectedModelParts[1].GetBolts();
+
+
+            FaceEnumerator faceEnum = mySolid.GetFaceEnumerator();
+
+            int solid1Faces = 0;
+            while (faceEnum.MoveNext())
+            {
+                solid1Faces++;
+            }
+
+            FaceEnumerator faceEnum2 = mySolid2.GetFaceEnumerator();
+
+            int solid2Faces = 0;
+            while (faceEnum2.MoveNext())
+            {
+                solid2Faces++;
+            }
+
             // await Task.Run(() => FabMisc.FabMiscOp(txt_SiteDate.Text, _selectedObjects, false, null));
 
             EndFunction(1);
@@ -164,71 +158,73 @@ namespace Prism
         private void btnCreatePackage1_Click_1(object sender, EventArgs e)
         {
             Logging.DebugLog("create package start", "");
-            CreatePackageAsync();
-            // CreatePackageNotAsync();
+            CreatePackageAsync(StageTypes.FAB);
         }
+
+        private async void btn_RocketPacket_Click(object sender, EventArgs e)
+        {
+            if (!PrismWarnings.RocketButtonCheck()) return;
+
+            if (!await Task.Run(() => InitialSetup(StageTypes.RocketPacket, false))) { EndFunction(0); return; }
+
+            int rocketPartLimit = 500;
+            int numberOfSelectedParts = _selectedObjects.SelectedModelParts.Count;
+            if (numberOfSelectedParts > rocketPartLimit)
+            {
+                PrismWarnings.TooManyPartsForRocket(numberOfSelectedParts.ToString(), rocketPartLimit.ToString());
+                EndFunction(0); return;
+            }
+
+            CreatePackageAsync(StageTypes.RocketPacket);
+        }
+
 
         private void btn_SpecialOperations_Click(object sender, EventArgs e)
         {
 
-           
-
-
-           // PrismWarnings.BigTi{meUsage(4000);
-            //   _webService.CreateDirectory(50, "\\\\sev-los-fs1\\application data$\\Prism\\BadFile");
-
-
-            //Logging.AddToMaterialOrderProcessedCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndName), _webService);
-            //Logging.AddToFabCompleteCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndName), _webService);
-
-            /*Logging.LogProgress(_projectData.ProjName, "1", 1, 10, _projectData.WebService);
-
-              int currentLastNumber = Logging.GetLastUsedPrelim(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndName), _projectData.WebService);
-
-              Logging.SetLastUsedPrelim(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndName), 20, _projectData.WebService);
-
-              currentLastNumber = Logging.GetLastUsedPrelim(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndName), _projectData.WebService);
-
-              Logging.UpdateFrozenDrawingCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndName), 12, 21, _projectData.WebService);*/
         }
 
-        public bool InitialSetup(StageTypes stageType, bool checkForPreviousSteps)
+        public bool InitialSetup(StageTypes stageType, bool checkForPreviousSteps, string phaseNum = "x", string issueNum = "x")
         {
             SetStatusLabels("Gathering Parts");
             ModelChecker.ClearOldLists();
-            _selectedObjects = new SelectedObjects(stageType);
+            _selectedObjects = new SelectedObjects(stageType, phaseNum, issueNum);
 
-        //    if (Environment.UserName != "mark.gibson")
+            if (Environment.UserName != "mark.gibson")
             {
                 if (checkForPreviousSteps && !ModelChecker.ArePreviousStepsComplete(_selectedObjects, (int)stageType))
                 {
                     SetStatusLabels("Previous Steps Incomplete");
                     return false;
                 }
-
-                if (_selectedObjects.NumbersUpToDate && _selectedObjects.AssembliesList.Count == 0)
-                {
-                    SetStatusLabels("No Parts Selected");
-                    PrismWarnings.NoPartsSelected();
-                    return false;
-                }
-                if (_selectedObjects.LockedParts.Count > 0)
-                {
-                    SetStatusLabels("Locked Parts Selected");
-                    PrismWarnings.LockedPartsSelected();
-                    ModelModifiers.SetPartsRed(_selectedObjects.LockedParts);
-                    return false;
-                }
             }
+
+            if (_selectedObjects.NumbersUpToDate && _selectedObjects.AssembliesList.Count == 0)
+            {
+                SetStatusLabels("No Parts Selected");
+                PrismWarnings.NoPartsSelected();
+                return false;
+            }
+
+            if (_selectedObjects.LockedParts.Count > 0)
+            {
+                SetStatusLabels("Locked Parts Selected");
+                PrismWarnings.LockedPartsSelected();
+                ModelModifiers.SetPartsRed(_selectedObjects.LockedParts);
+                return false;
+            }
+
             SetStatusLabels("Running Operation");
             return true;
         }
 
-        private async void CreatePackageAsync()
+        private async void CreatePackageAsync(StageTypes stageType)
         {
             StartFunction();
 
-            if (!await Task.Run(() => InitialSetup(StageTypes.FAB, true))) { EndFunction(0); return; }
+            GetPhaseAndIssueNumber(out string phaseNum, out string issueNum, out bool runChangeManager);
+
+            if (!await Task.Run(() => InitialSetup(StageTypes.FAB, stageType == StageTypes.FAB, phaseNum, issueNum))) { EndFunction(0); return; }
 
             if (!_selectedObjects.NumbersUpToDate) { SetStatusLabels("Numbers not up to date"); EndFunction(0); return; }
 
@@ -250,16 +246,71 @@ namespace Prism
 
             SetStatusLabels("Creating Fab Package");
 
-            Logging.DebugLog("setup complete", "");
+            ReportManager myReportManager = new ReportManager(_projectData, phaseNumber.Text, issueNum);
 
-            ReportManager myReportManager = new ReportManager(_projectData, phaseNumber.Text, issueNumber.Text);
-            if (!await Task.Run(() => _selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber.Text, issueNumber.Text, StageTypes.FAB, txt_SiteDate.Text, runSeversafe))) { EndFunction(0); return; }
+            if (!await Task.Run(() => _selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber.Text, issueNum, stageType, txt_SiteDate.Text, runSeversafe, runChangeManager))) { EndFunction(0); return; }
 
-            await Task.Run(() => FabMisc.FabMiscOp(_model, txt_SiteDate.Text, _selectedObjects, runSeversafe, myReportManager, divisionNo, _projectData));
+            await Task.Run(() => FabMisc.FabMiscOp(_model, txt_SiteDate.Text, _selectedObjects, runSeversafe, myReportManager, divisionNo, _projectData, runChangeManager));
 
             Logging.AddToFabCompleteCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndGuid));
 
             EndFunction(1);
+        }
+
+        private void GetPhaseAndIssueNumber(out string phaseNum, out string issueNum, out bool runChangeManager)
+        {
+            issueNum = issueNumber.Text;
+            phaseNum = phaseNumber.Text;
+            runChangeManager = false;
+
+            if (Constants.SpecialOperationUser())
+            {
+                runChangeManager = PrismWarnings.RunChangeManagement();
+                if (runChangeManager)
+                {
+                    issueNum = cmb_FabIssueNo.Text;
+                    // If the selectedItem contains "(new)", it implies this is a new issue, so we extract the numeric part only
+                    if (issueNum.Contains("(new)"))
+                    {
+                        issueNum = issueNum.Substring(0, 2); // or other appropriate substring logic if "(new)" is not at the end
+                    }
+                    if (issueNum != "01")
+                    {
+
+                    }
+                }
+            }
+        }
+
+        private bool OrderSpecials(int orderAction, string orderType, StageTypes stageType, ReportManager myReportManager)
+        {
+            bool runDrawings = PrismWarnings.RunSpecialFittingDrawings();
+            if (!myReportManager.Folders.CreateMatFolder(false, runDrawings)) return false;
+
+            if (orderAction == 2) //User wants to order using special fitting tags
+            {
+                ModelModifiers.SelectSpecialTaggedInSelection(_selectedObjects);
+                ModelModifiers.AddPrelimMarks(_selectedObjects, _projectData);
+                _selectedObjects = new SelectedObjects(stageType, myReportManager.PhaseNum, myReportManager.IssueNum); // we reset selected objects here (because we just changed the selection)
+                myReportManager.CreateMaterialReports(_selectedObjects, orderType, stageType);
+            }
+            if (orderAction == 3) //User wants to order all selected
+            {
+                ModelModifiers.AddPrelimMarks(_selectedObjects, _projectData);
+                myReportManager.CreateMaterialReports(_selectedObjects, orderType, stageType);
+            }
+
+            if (runDrawings)
+            {
+                ReportManager.SelectDrawingsInDocManager(null);
+                DrawingManager dm = new DrawingManager(_model, _projectData, txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text);
+                if (dm.NotLabelledDrawings.Count != 0) { PrismWarnings.IncorrectlyAssignedDrawings(); return false; }
+
+                List<int> drawingCount = new List<int> { 0, dm.AllFittings.Count };
+                DrawingManager.PrintAndIssueDrawings(myReportManager.Folders.MatFolder, myReportManager.Folders.MatPath, drawingCount, "\\SPC", 0, 1, myReportManager, false);
+                PrismMacroBuilder.ClearPrintDialog();
+            }
+            return true;
         }
 
         private void CreatePackageNotAsync()
@@ -273,7 +324,7 @@ namespace Prism
             SetStatusLabels("Creating Fab Package");
 
             bool doSeversafeOrder = false;
-            if (!_selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber.Text, issueNumber.Text, StageTypes.FAB, txt_SiteDate.Text, doSeversafeOrder)) { EndFunction(0); return; }
+            // if (!_selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber.Text, issueNumber.Text, StageTypes.FAB, txt_SiteDate.Text, doSeversafeOrder)) { EndFunction(0); return; }
             // FabMisc.FabMiscOp(phaseNumber.Text, issueNumber.Text, _projectData, txt_SiteDate.Text, _selectedObjects);
 
             EndFunction(1);
@@ -287,7 +338,7 @@ namespace Prism
 
         private void EndFunction(int cancelledOrComplete, bool isOmit = false) //0 = cancelled 1 = Complete
         {
-            if(!isOmit) _selectedObjects.SelectedModelParts.SelectParts();
+            if (!isOmit) _selectedObjects.SelectedModelParts.SelectParts();
             string message = cancelledOrComplete == 0 ? "Cancelled" : "Complete";
             flowLayoutPanel1.BackColor = cancelledOrComplete == 0 ? Color.Tomato : Color.PaleGreen;
             flowLayoutPanel1.Enabled = true;
@@ -299,7 +350,7 @@ namespace Prism
         {
             string key = Prism.Properties.Settings.Default.UniqueId;
 
-            if(key == "Default" && Environment.UserDomainName != "SFRPLC")
+            if (key == "Default" && Environment.UserDomainName != "SFRPLC")
             {
                 var form = new AuthKeyInput();
                 form.ShowDialog();
@@ -308,7 +359,7 @@ namespace Prism
             _webService = WebService.SetupWebService(key);
 
             if (!_webService.ValidUser()) { Application.Exit(); return; }
-          
+
             Prism.Properties.Settings.Default.UniqueId = key;
             Prism.Properties.Settings.Default.Save();
             //if webservice is a succes save the key
@@ -334,6 +385,7 @@ namespace Prism
             {
                 btn_SpecialOperations.BackgroundImage = Resources.Gears;
                 btn_SpecialOperations.Enabled = true;
+                cmb_FabIssueNo.Visible = true;
             }
         }
 
@@ -446,6 +498,8 @@ namespace Prism
             }
             CheckForFabButton();
             CheckForBoltOrderButton();
+
+            ChangeHelper.PopulateIssueNumbers(ref cmb_FabIssueNo, ref phaseNumber, Constants.ModelDataLogLocation(_projectData.ProjNumberAndGuid + "\\FAB XMLs"));
         }
 
         private void issueNumber_TextChanged(object sender, EventArgs e)
@@ -611,11 +665,15 @@ namespace Prism
             {
                 btnCreatePackage1.Enabled = true;
                 btnCreatePackage1.BackColor = Color.Chartreuse;
+                btn_RocketPacket.Enabled = true;
+                btn_RocketPacket.BackColor = Color.Chartreuse;
             }
             else
             {
                 btnCreatePackage1.Enabled = false;
-                btnCreatePackage1.BackColor = Color.Gainsboro;
+                btnCreatePackage1.BackColor = Color.White;
+                btn_RocketPacket.Enabled = false;
+                btn_RocketPacket.BackColor = Color.White;
             }
         }
 

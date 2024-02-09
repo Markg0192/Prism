@@ -66,7 +66,7 @@ namespace Prism
         private const string _output3OName = "-3o-HotRolledFitList-OMIT.xsr";
         private string _report3OName = $"{_output3OName.Replace("xsr", "rpt")}";
 
-        private const string _output4Name = "-4-ShopBoltList.xsr";
+        private const string _output4Name = "-4-ShopBoltList-SelectedOnly.xsr";
         private string _report4Name = $"{_output4Name.Replace("xsr", "rpt")}";
         private const string _output4AName = "-4a-ShopBoltList-ADD.xsr";
         private string _report4AName = $"{_output4AName.Replace("xsr", "rpt")}";
@@ -75,7 +75,7 @@ namespace Prism
         private const string _output4LName = "-4l-ShopBoltLocationList.xsr";
         private string _report4LName = $"{_output4LName.Replace("xsr", "rpt")}";
 
-        private const string _output5Name = "-5-SiteBoltList.xsr";
+        private const string _output5Name = "-5-SiteBoltList-SelectedOnly.xsr";
         private string _report5Name = $"{_output5Name.Replace("xsr", "rpt")}";
         private const string _output5AName = "-5a-SiteBoltList-ADD.xsr";
         private string _report5AName = $"{_output5AName.Replace("xsr", "rpt")}";
@@ -182,8 +182,11 @@ namespace Prism
 
         public void CreateBoltList(string reportPrefix, string orderType)
         {
-            string boltReportName = _reportBoltsName;
-            string boltListOutputName = _outputBolts;
+            string boltReportName = _reportSelectedBoltsName;
+            string boltListOutputName = _outputSelectedBolts;
+
+      //      string boltReportName = _reportBoltsName;
+      //      string boltListOutputName = _outputBolts;
 
             if (orderType.Contains("Omit")) { boltReportName = _report5OName; boltListOutputName = _output5OName; }
 
@@ -210,7 +213,7 @@ namespace Prism
 
         }
 
-        public async void CreateFabReports(List<Part> partsList, List<List<BoltGroup>> boltList)
+        public async void CreateFabReports(List<Part> partsList, List<PrismBoltGroup> boltList)
         {
             while (Operation.IsMacroRunning()) // Wait until macro for selecting drawings in the document manager is complete before moving on
             {
@@ -232,8 +235,11 @@ namespace Prism
             bool create4Report = false;
             string sectionSize;
 
-            bool siteBoltsPresent = boltList[0].Count > 0 ? true : false;
-            bool shopBoltsPresent = boltList[1].Count > 0 ? true : false;
+            bool shopBoltsPresent = boltList.Any(pbg => pbg.isShop && !pbg.isShearStud);   //is a shop bolt but not a shear stud
+            bool siteBoltsPresent = boltList.Any(pbg => !pbg.isShop && !pbg.isShearStud); //Is neither shop bolt or shear stud
+
+            //  bool siteBoltsPresent = boltList[0].Count > 0 ? true : false;
+            //   bool shopBoltsPresent = boltList[1].Count > 0 ? true : false;
 
             foreach (Part part in partsList)
             {
@@ -248,6 +254,8 @@ namespace Prism
             Operation.CreateReportFromSelected(qsReport, Path.Combine(Folders.DspPath, $"{FabReportPrefix}{_outputQSname}"), _title1, _title2, _title3);
             Operation.CreateReportFromSelected(assemblyReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output6Name}"), _title1, _title2, _title3);
             Operation.CreateReportFromSelected(fusionMapReport, Path.Combine(Folders.DspPath, $"{FabReportPrefix}{_output7Name}"), _title1, _title2, _title3);
+            Operation.CreateNCFilesFromSelected(_NCProfileSetting, Path.Combine(Folders.NcPath, " "));
+            Operation.CreateNCFilesFromSelected(_NCPlateSetting, Path.Combine(Folders.NcPath, " "));
 
             if (create3Report)
             {
@@ -259,19 +267,20 @@ namespace Prism
             }
             if (shopBoltsPresent || siteBoltsPresent) //then create our strumis summary report
             {
+                List<BoltGroup> test = boltList.Where(pbg => !pbg.isOrdered && !pbg.isShearStud).Select(pbg => pbg.BoltGroup).ToList();
+                ModelModifiers.SelectBolts(boltList.Where(pbg => !pbg.isOrdered && !pbg.isShearStud).Select(pbg => pbg.BoltGroup).ToList());
                 Operation.CreateReportFromSelected(_reportBolts, Path.Combine(Folders.DspPath, $"{FabReportPrefix}{_outputBolts}"), _title1, _title2, _title3);
             }
             if (shopBoltsPresent) //Then create a shop bolts summary
             {
+                ModelModifiers.SelectBolts(boltList.Where(pbg => !pbg.isOrdered && !pbg.isShearStud && pbg.isShop).Select(pbg => pbg.BoltGroup).ToList());
                 Operation.CreateReportFromSelected(shopBoltReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output4Name}"), _title1, _title2, _title3);
             }
             if (siteBoltsPresent) //Then create a site bolts summary
             {
+                ModelModifiers.SelectBolts(boltList.Where(pbg => !pbg.isOrdered && !pbg.isShearStud && !pbg.isShop).Select(pbg => pbg.BoltGroup).ToList());
                 Operation.CreateReportFromSelected(siteBoltReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output5Name}"), _title1, _title2, _title3);
             }
-
-            Operation.CreateNCFilesFromSelected(_NCProfileSetting, Path.Combine(Folders.NcPath, " "));
-            Operation.CreateNCFilesFromSelected(_NCPlateSetting, Path.Combine(Folders.NcPath, " "));
 
             TextToPDF(Folders.ReportPath);
         }

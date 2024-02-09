@@ -4,7 +4,7 @@
     {
         public static bool DetailButton1op(this SelectedObjects myObjects, PrismProjectData projectData, int stageNumber)
         {
-            if (!myObjects.RunStage4Checks()) { return false; }
+            if (!myObjects.RunStage4Checks(projectData.Full)) { return false; }
             if (!ModelChecker.NameAndClassAign(myObjects)) { return false; }
             if (!ModelChecker.PartsHaveExecutionClass(myObjects)) { return false; }
 

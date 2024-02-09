@@ -64,11 +64,14 @@ namespace Prism
         public static bool CreateFabsecCarcasses(this SelectedObjects selectedObjects, Model model)
         {
             if (!CheckForCarcass(selectedObjects.FabsecParts)) return false;
+
+            ModelModifiers.ResetWorkPlane(model);
+
             List<ModelObject> myCarcasses = selectedObjects.FabsecParts.CopyPGs(selectedObjects);
             if (!myCarcasses.AddGreenToCarcasses()) return false;
             selectedObjects.FabsecParts.ChangeNumberingFromPGToStandard();
             model.CommitChanges();
-            myCarcasses.ForceCarcassNumbering();
+            myCarcasses.ForceCarcassNumbering(model);
             myCarcasses.CreateCarcassDrawings(selectedObjects, model); //Create carcass drawings from the members in the material grave
             ModifyAttribute(selectedObjects.FabsecParts, ModelUDA.FabsecCarcassInfo(), Constants.FabsecModelShaftIndicator);
             ModifyAttribute(myCarcasses, ModelUDA.FabsecCarcassInfo(), Constants.FabsecCarcassIndicator);
@@ -98,7 +101,7 @@ namespace Prism
             }
         }
 
-        public static void ForceCarcassNumbering(this List<ModelObject> myCarcasses)
+        public static void ForceCarcassNumbering(this List<ModelObject> myCarcasses, Model model)
         {
             Tekla.Structures.Model.UI.ModelObjectSelector ms = new Tekla.Structures.Model.UI.ModelObjectSelector();
 
@@ -111,27 +114,24 @@ namespace Prism
                 {
                     string[] splitCarcassNumber = carcassPrelim.Split('-');
                     ms.Select(new ArrayList { carcass });
-                    /*       carcass.PartNumber.Prefix = splitCarcassNumber[0] + "-";
+                           carcass.PartNumber.Prefix = splitCarcassNumber[0] + "-";
                            carcass.AssemblyNumber.Prefix = splitCarcassNumber[0] + "-";
                            carcass.AssemblyNumber.StartNumber = 1;
                            carcass.PartNumber.StartNumber = 1;
-                           carcass.Modify();*/
-
+                           carcass.Modify();
+                   // model.CommitChanges();
                     //  fullSelection.Add(carcass);
                     PrismMacroBuilder.FabsecNumberForcer(splitCarcassNumber[0], splitCarcassNumber[1]);
 
                 }
             }
-            //   ms.Select(fullSelection);
-            //   ModelModifiers.PerformNumbering();
         }
 
         public static List<Part> GetMyFabsecs(this SelectedObjects selectedObjects)
         {
             List<Part> fabsecList = new List<Part>();
             string pgString = "PG";
-
-            foreach (Part part in selectedObjects.SelectedModelParts)
+                        foreach (Part part in selectedObjects.SelectedModelParts)
             {
                 if (part.Profile.ProfileString.StartsWith(pgString))
                 {
@@ -367,6 +367,7 @@ namespace Prism
 
         private static bool AddGreenToCarcasses(this List<ModelObject> fabsecCarcassList)
         {
+            double tolerance = 10;
             List<ModelObject> fabsecsFailedToAddLength = new List<ModelObject>();
             foreach (Beam carcass in fabsecCarcassList)
             {
@@ -375,7 +376,10 @@ namespace Prism
                 carcass.EndPointOffset.Dx += carcassGreen;
                 carcass.Modify();
                 double lengthAfterExtension = ModelModifiers.GetPartLength(carcass);
-                if (lengthAfterExtension != lengthBeforeExtension + carcassGreen * 2)
+
+                double val = Math.Abs(lengthAfterExtension - lengthBeforeExtension - (carcassGreen * 2));
+
+                if (val > tolerance)
                 {
                     fabsecsFailedToAddLength.Add(carcass);
                 }
@@ -393,8 +397,7 @@ namespace Prism
         {
             foreach (Beam carcass in fabsecList)
             {
-                double length = 0;
-                ModelModifiers.GetPartLength(carcass);
+                double length = ModelModifiers.GetPartLength(carcass);
                 carcass.SetUserProperty(ModelUDA.FabsecOrderLength(), Math.Round(length, 0).ToString());
 
                 carcass.StartPointOffset.Dx += carcassGreen;

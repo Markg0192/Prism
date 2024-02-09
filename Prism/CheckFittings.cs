@@ -18,7 +18,7 @@ namespace Prism
 
         public static void GetIncorrectFittings(this Part part, Factory factory)
         {
-            if (part.Profile.ProfileString.StartsWith("PLT") && !part.HasBeenOrdered(true))
+            if (factory != Factory.Unknown && part.Profile.ProfileString.StartsWith("PLT") && !part.HasBeenOrdered(true))
             {
                 GetIncorrectPlate(part, factory);
             }
