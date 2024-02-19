@@ -235,8 +235,8 @@ namespace Prism
             bool create4Report = false;
             string sectionSize;
 
-            bool shopBoltsPresent = boltList.Any(pbg => pbg.isShop && !pbg.isShearStud);   //is a shop bolt but not a shear stud
-            bool siteBoltsPresent = boltList.Any(pbg => !pbg.isShop && !pbg.isShearStud); //Is neither shop bolt or shear stud
+            bool shopBoltsPresent = boltList.Any(pbg => pbg.isShop && !pbg.isShearStud && !pbg.isOrdered);   //is a shop bolt but not a shear stud
+            bool siteBoltsPresent = boltList.Any(pbg => !pbg.isShop && !pbg.isShearStud && !pbg.isOrdered); //Is neither shop bolt or shear stud
 
             //  bool siteBoltsPresent = boltList[0].Count > 0 ? true : false;
             //   bool shopBoltsPresent = boltList[1].Count > 0 ? true : false;
@@ -254,8 +254,8 @@ namespace Prism
             Operation.CreateReportFromSelected(qsReport, Path.Combine(Folders.DspPath, $"{FabReportPrefix}{_outputQSname}"), _title1, _title2, _title3);
             Operation.CreateReportFromSelected(assemblyReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output6Name}"), _title1, _title2, _title3);
             Operation.CreateReportFromSelected(fusionMapReport, Path.Combine(Folders.DspPath, $"{FabReportPrefix}{_output7Name}"), _title1, _title2, _title3);
-            Operation.CreateNCFilesFromSelected(_NCProfileSetting, Path.Combine(Folders.NcPath, " "));
-            Operation.CreateNCFilesFromSelected(_NCPlateSetting, Path.Combine(Folders.NcPath, " "));
+            Operation.CreateNCFilesFromSelected(_NCProfileSetting, Folders.NcPath + "\\");// Path.Combine(Folders.NcPath, " "));
+            Operation.CreateNCFilesFromSelected(_NCPlateSetting, Folders.NcPath + "\\");// Path.Combine(Folders.NcPath, " "));
 
             if (create3Report)
             {

@@ -49,7 +49,7 @@ namespace Prism
         {
             List<string> specialOperationUsers = new List<string>
             {
-                "mark.gibson",
+               "mark.gibson",
                 "jourdan.taylor",
                 "conan.mulholland",
                 "Matthew.Poots"

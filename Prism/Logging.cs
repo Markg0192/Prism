@@ -320,7 +320,7 @@ namespace Prism
             }
         }
 
-        public static void UnAssignedDrawings(string modelName, List<Drawing> drawingsList)
+        public static void UnAssignedDrawings(string modelName, DrawingManager dm)
         {
             List<string> contentList = new List<string>
             {
@@ -328,10 +328,19 @@ namespace Prism
                 $"{DateTime.Now} - User: {Environment.UserName} - Model: {modelName}"
             };
 
-            foreach (Drawing drawing in drawingsList)
+            foreach (Drawing drawing in dm.NotLabelledDrawings)
             {
                 contentList.Add($"Drawing ID No: {drawing.GetIdentifier()}");
+                contentList.Add($"Drawing type: {drawing.GetType().ToString()}");
             }
+
+            if (dm.GADrawings.Count != 0) contentList.Add($"GA Drawings Found: {dm.GADrawings.Count.ToString()}");
+            if (dm.AssDrawings.Count != 0) contentList.Add($"ASS Drawings Found: {dm.AssDrawings.Count.ToString()}");
+            if (dm.FitDrawings.Count != 0) contentList.Add($"FIT Drawings Found: {dm.FitDrawings.Count.ToString()}");
+            if (dm.PrtDrawings.Count != 0) contentList.Add($"PRT Drawings Found: {dm.PrtDrawings.Count.ToString()}");
+            if (dm.ShaDrawings.Count != 0) contentList.Add($"SHA Drawings Found: {dm.ShaDrawings.Count.ToString()}");
+            if (dm.PgcDrawings.Count != 0) contentList.Add($"PGC Drawings Found: {dm.PgcDrawings.Count.ToString()}");
+            if (dm.WldDrawings.Count != 0) contentList.Add($"WLD Drawings Found: {dm.WldDrawings.Count.ToString()}");
 
             string[] content = contentList.ToArray();
 

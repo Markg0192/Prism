@@ -12,7 +12,6 @@ namespace Prism
         {
             var assemblyProcessingResult = GetFittingsInAssembly(part.GetAssembly(), model);
 
-            List<SevFace> faces = SevFace.GetAllFaces(part);
             MyAssembly myNewAssembly = new MyAssembly();
             myNewAssembly.SetCommonProperties(part, model);
 
