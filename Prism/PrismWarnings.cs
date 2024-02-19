@@ -489,6 +489,17 @@ namespace Prism
             return false;
         }
 
+        public static bool CreatePackageWithoutDrawings()
+        {
+            const string notUpToDateMessage = "Would you like to create your package anyway without drawings?";
+            const string notUpToDateTitle = "Skip Drawings";
+            if (CreateYesNoForm(notUpToDateMessage, notUpToDateTitle))
+            {
+                return true;
+            }
+            return false;
+        }
+
         public static void TooManyPartsForRocket(string numberOfParts, string limit)
         {
             string notUpToDateMessage = $"Sorry, you have selected {numberOfParts} parts, the limit for the rocket button it {limit}, " +

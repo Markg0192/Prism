@@ -181,7 +181,9 @@ namespace Prism
 
         private void btn_SpecialOperations_Click(object sender, EventArgs e)
         {
-
+            _projectData = new PrismProjectData(_model.GetProjectInfo(), _model.GetInfo().ModelPath, _webService);
+            DrawingManager dm = new DrawingManager(_model, _projectData, "10", "10");
+            dm.CreateDrawingList();
         }
 
         public bool InitialSetup(StageTypes stageType, bool checkForPreviousSteps, string phaseNum = "x", string issueNum = "x")
@@ -499,7 +501,10 @@ namespace Prism
             CheckForFabButton();
             CheckForBoltOrderButton();
 
-            ChangeHelper.PopulateIssueNumbers(ref cmb_FabIssueNo, ref phaseNumber, Constants.ModelDataLogLocation(_projectData.ProjNumberAndGuid + "\\FAB XMLs"));
+            if (Constants.SpecialOperationUser())
+            {
+                ChangeHelper.PopulateIssueNumbers(ref cmb_FabIssueNo, ref phaseNumber, Constants.ModelDataLogLocation(_projectData.ProjNumberAndGuid + "\\FAB XMLs"));
+            }
         }
 
         private void issueNumber_TextChanged(object sender, EventArgs e)

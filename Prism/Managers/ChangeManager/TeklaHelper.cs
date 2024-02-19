@@ -20,13 +20,18 @@ namespace Prism
         public static List<MyAssembly> GetSelectedSteelInfo(Model model)
         {
             var selectedComponents = new List<MyAssembly>();
-
+             
             ModelObjectEnumerator moe = new Tekla.Structures.Model.UI.ModelObjectSelector().GetSelectedObjects();
+            moe.SelectInstances = false;
 
             var allUnsupportedTypes = new HashSet<string>();
 
+            double moeCount = moe.GetSize();
+            double currentIteration = 0;
+
             foreach (var obj in moe)
             {
+                currentIteration++;
                 if (obj is Part part)
                 {
                     if (part.Identifier.GUID == part.GetAssembly().GetMainPart().Identifier.GUID)

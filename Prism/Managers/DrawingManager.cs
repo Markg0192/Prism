@@ -109,6 +109,7 @@ namespace Prism
 
         public bool CreateDrawingList()
         {
+            
             IEnumerable<int> drawingNos = Tekla.Structures.DrawingInternal.Operation.GetDrawingsBySelectedParts(true, true);
             int counter = 0;
 

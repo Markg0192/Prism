@@ -166,6 +166,7 @@ namespace Prism.ButtonOperations
 
         private static List<Part> MoveOmitMaterial(string orderType, SelectedObjects myObjects, List<ModelObject> originalFabsecs, Model model)
         {
+            ModelModifiers.ResetWorkPlane(model);
             List<Part> movedParts = new List<Part>();
             if (orderType == "Omit Material")
             {

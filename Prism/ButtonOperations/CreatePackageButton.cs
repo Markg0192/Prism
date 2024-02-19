@@ -13,126 +13,28 @@ namespace Prism.ButtonOperations
         {
             if (!runChangeManager)
             {
-                if (!CreateFirstIssue(projectData, phaseNumber, issueNumber, runSeversafe, myObjects, model, stageType, siteDate)) return false;
-                return true;
+                return CreateFirstIssue(projectData, phaseNumber, issueNumber, runSeversafe, myObjects, model, stageType, siteDate);
             }
 
-            else
-            {
-                bool isIssue01 = issueNumber == "01";
-                string fileLocation = Constants.ModelDataLogLocation(projectData.ProjNumberAndGuid + "\\Fab XMLs");
+            string fileLocation = Constants.ModelDataLogLocation(projectData.ProjNumberAndGuid + "\\Fab XMLs");
 
-                if (!ChangeHelper.RunChangeManagement(model, issueNumber, fileLocation, phaseNumber, projectData,  out List<SteelItemBase> revisedItems,
-                    out List<SteelItemBase> omitItems, out List<SteelItemBase> addItems, out string messageForEmail)) return false;
+            if (!ChangeHelper.RunChangeManagement(model, issueNumber, fileLocation, phaseNumber, projectData, out List<SteelItemBase> revisedItems,
+                out List<SteelItemBase> omitItems, out List<SteelItemBase> addItems, out string messageForEmail)) return false;
 
-                if (isIssue01)
-                {
-                    if (!CreateFirstIssue(projectData, phaseNumber, issueNumber, runSeversafe, myObjects, model, stageType, siteDate)) return false;
-                }
-                else
-                {
-                    CpuCounter cpuCounter = new CpuCounter();
-                    ReportManager reportManager = new ReportManager(projectData, phaseNumber, issueNumber);
-
-                    if (revisedItems != null && addItems != null)
-                    {
-                        if (!reportManager.Folders.CreateFabFolders()) return false;
-                        if (!reportManager.Folders.CreateBoltFolder()) return false;
-                        if (runSeversafe) { if (!reportManager.Folders.CreateEpoFolder()) return false; }
-                        if (myObjects.SeversafePresent) { myObjects.NonSeversafeParts.SelectParts(); }
-
-                        List<Part> reviseItems = revisedItems
-                            .Select(item => model.GetIdentifierByGUID(item.Guid))
-                            .Select(id => model.SelectModelObject(id))
-                            .OfType<Part>()
-                            .ToList();
-
-                        List<Part> addedItems = addItems
-                           .Select(item => model.GetIdentifierByGUID(item.Guid))
-                           .Select(id => model.SelectModelObject(id))
-                           .OfType<Part>()
-                           .ToList();
-
-                        List<Part> combinedParts = addedItems.Concat(reviseItems).ToList();
-
-                        ModelModifiers.SelectParts(combinedParts);
-
-                        CpuSpeedCheck(cpuCounter);
-                        ReportManager.SelectDrawingsInDocManager(combinedParts);
-
-                        CpuSpeedCheck(cpuCounter);
-                        DrawingManager drawingManager = new DrawingManager(model, projectData, phaseNumber, issueNumber);
-
-                        CpuSpeedCheck(cpuCounter);
-                        PrismMacroBuilder.IssueAndLockStampOff();
-
-                        if (!drawingManager.DrawingsAreUpToDate) { PrismWarnings.DrawingsNotUpToDate(); return false; }
-                        if (drawingManager.NotLabelledDrawings.Count != 0)
-                        {
-                            PrismWarnings.IncorrectlyAssignedDrawings();
-                            Logging.UnAssignedDrawings(projectData.ProjNumber, drawingManager.NotLabelledDrawings);
-                            return false;
-                        }
-
-                        List<int> drawingCount = CountDrawings(drawingManager);
-                        DrawingManager.PrintDrawings(reportManager, drawingManager, drawingCount);
-
-                        reportManager.CreateFabReports(combinedParts, myObjects.PrismBoltGroups);
-                        ModelModifiers.SelectParts(combinedParts);
-
-                        if (!Constants.IsSpecialPerson()) { myObjects.ExportBSWX(reportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType); }
-
-                        if (!combinedParts.ModifyAttributes((int)stageType, projectData)) { return false; }
-
-                        reportManager.Folders.RemoveUnusedFolders();
-
-                        bool zipFileCanBeAttached = reportManager.Folders.ZipFolder(reportManager.Folders.FabPath);
-
-                        PrismWarnings.FabPackComplete(projectData, zipFileCanBeAttached);
-
-                        EmailWriter.WriteRevisedFabEmail(projectData, reportManager.FabReportPrefix, issueNumber, phaseNumber, siteDate, reportManager.Folders.FabPath, zipFileCanBeAttached, messageForEmail);
-
-                        Logging.UpdateFrozenDrawingCount(projectData.ProjNumberAndGuid, drawingManager.FrozenDrawings.Count, drawingManager.UnFrozenDrawings.Count);
-                        Logging.LogProgress(projectData.ProjNumberAndName, stageType.ToString(), 0, myObjects.AssembliesList.Count);
-                    }
-                }
-            }
-            return true;
+            return issueNumber == "01"
+                ? CreateFirstIssue(projectData, phaseNumber, issueNumber, runSeversafe, myObjects, model, stageType, siteDate)
+                : ProcessSubsequentIssues(projectData, phaseNumber, issueNumber, revisedItems, addItems, runSeversafe, myObjects, model, siteDate, stageType, messageForEmail);
         }
 
         private static bool CreateFirstIssue(PrismProjectData projectData, string phaseNumber, string issueNumber, bool runSeversafe, SelectedObjects myObjects, Model model, StageTypes stageType, string siteDate)
         {
-            CpuCounter cpuCounter = new CpuCounter();
-            ReportManager reportManager = new ReportManager(projectData, phaseNumber, issueNumber);
+            if (!InitialisePackageAndCreateFolders(projectData, phaseNumber, issueNumber, runSeversafe, myObjects, out ReportManager reportManager, out CpuCounter cpuCounter)) return false;
 
-            if (!reportManager.Folders.CreateFabFolders()) return false;
-            if (!reportManager.Folders.CreateBoltFolder()) return false;
-            if (runSeversafe) { if (!reportManager.Folders.CreateEpoFolder()) return false; }
+            if (!ProcessAndPrintDrawings(cpuCounter, myObjects.NonSeversafeParts, model, projectData, phaseNumber, issueNumber, reportManager, out DrawingManager drawingManager)) return false;
 
-            if (myObjects.SeversafePresent) { myObjects.NonSeversafeParts.SelectParts(); }
-
-            CpuSpeedCheck(cpuCounter);
-            ReportManager.SelectDrawingsInDocManager(myObjects.NonSeversafeParts);
-
-            CpuSpeedCheck(cpuCounter);
-            DrawingManager drawingManager = new DrawingManager(model, projectData, phaseNumber, issueNumber);
-
-            CpuSpeedCheck(cpuCounter);
-            PrismMacroBuilder.IssueAndLockStampOff();
-
-            if (!drawingManager.DrawingsAreUpToDate) { PrismWarnings.DrawingsNotUpToDate(); return false; }
-            if (drawingManager.NotLabelledDrawings.Count != 0)
-            {
-                PrismWarnings.IncorrectlyAssignedDrawings();
-                Logging.UnAssignedDrawings(projectData.ProjNumber, drawingManager.NotLabelledDrawings);
-                return false;
-            }
-
-            List<int> drawingCount = CountDrawings(drawingManager);
-            DrawingManager.PrintDrawings(reportManager, drawingManager, drawingCount);
-
-            reportManager.CreateFabReports(myObjects.NonSeversafeParts, myObjects.PrismBoltGroups);
             if (!Constants.IsSpecialPerson()) { myObjects.ExportBSWX(reportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType); }
+  
+            reportManager.CreateFabReports(myObjects.NonSeversafeParts, myObjects.PrismBoltGroups);
 
             if (!myObjects.NonSeversafeParts.ModifyAttributes((int)stageType, projectData)) { return false; }
 
@@ -147,6 +49,102 @@ namespace Prism.ButtonOperations
             Logging.UpdateFrozenDrawingCount(projectData.ProjNumberAndGuid, drawingManager.FrozenDrawings.Count, drawingManager.UnFrozenDrawings.Count);
             Logging.LogProgress(projectData.ProjNumberAndName, stageType.ToString(), 0, myObjects.AssembliesList.Count);
 
+            return true;
+        }
+
+        private static bool ProcessSubsequentIssues(PrismProjectData projectData, string phaseNumber, string issueNumber, List<SteelItemBase> revisedItems, List<SteelItemBase> addItems,
+            bool runSeversafe, SelectedObjects myObjects, Model model, string siteDate, StageTypes stageType, string messageForEmail)
+        {
+            if (revisedItems != null && addItems != null)
+            {
+                if (!InitialisePackageAndCreateFolders(projectData, phaseNumber, issueNumber, runSeversafe, myObjects, out ReportManager reportManager, out CpuCounter cpuCounter)) return false;
+
+                List<Part> combinedParts = CombineAddAndOmitParts(model, revisedItems, addItems);
+
+                ModelModifiers.SelectParts(combinedParts);
+
+                if (!ProcessAndPrintDrawings(cpuCounter, combinedParts, model, projectData, phaseNumber, issueNumber, reportManager, out DrawingManager drawingManager)) return false;
+
+                reportManager.CreateFabReports(combinedParts, myObjects.PrismBoltGroups);
+                ModelModifiers.SelectParts(combinedParts);
+
+                if (!Constants.IsSpecialPerson()) { myObjects.ExportBSWX(reportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType); }
+
+                if (!combinedParts.ModifyAttributes((int)stageType, projectData)) { return false; }
+
+                reportManager.Folders.RemoveUnusedFolders();
+
+                bool zipFileCanBeAttached = reportManager.Folders.ZipFolder(reportManager.Folders.FabPath);
+
+                PrismWarnings.FabPackComplete(projectData, zipFileCanBeAttached);
+
+                EmailWriter.WriteRevisedFabEmail(projectData, reportManager.FabReportPrefix, issueNumber, phaseNumber, siteDate, reportManager.Folders.FabPath, zipFileCanBeAttached, messageForEmail);
+
+                Logging.UpdateFrozenDrawingCount(projectData.ProjNumberAndGuid, drawingManager.FrozenDrawings.Count, drawingManager.UnFrozenDrawings.Count);
+                Logging.LogProgress(projectData.ProjNumberAndName, stageType.ToString(), 0, myObjects.AssembliesList.Count);
+            }
+
+            return true;
+        }
+
+        private static bool ProcessAndPrintDrawings(CpuCounter cpuCounter, List<Part> partsToSelect, Model model, PrismProjectData projectData, string phaseNumber, string issueNumber, ReportManager reportManager, out DrawingManager drawingManager)
+        {
+            CpuSpeedCheck(cpuCounter);
+            ReportManager.SelectDrawingsInDocManager(partsToSelect);
+
+            CpuSpeedCheck(cpuCounter);
+            drawingManager = new DrawingManager(model, projectData, phaseNumber, issueNumber);
+
+            CpuSpeedCheck(cpuCounter);
+            PrismMacroBuilder.IssueAndLockStampOff();
+
+            bool createDrawings = true;
+
+            if (!drawingManager.DrawingsAreUpToDate) { PrismWarnings.DrawingsNotUpToDate(); return false; }
+            if (drawingManager.NotLabelledDrawings.Count != 0)
+            {
+                PrismWarnings.IncorrectlyAssignedDrawings();
+                Logging.UnAssignedDrawings(projectData.ProjNumber, drawingManager);
+
+                if (!PrismWarnings.CreatePackageWithoutDrawings()) return false;
+                else createDrawings = false;
+            }
+
+            if (createDrawings)
+            {
+                List<int> drawingCount = CountDrawings(drawingManager);
+                DrawingManager.PrintDrawings(reportManager, drawingManager, drawingCount);
+            }
+
+            return true;
+        }
+
+        private static List<Part> CombineAddAndOmitParts(Model model, List<SteelItemBase> revisedItems, List<SteelItemBase> addItems)
+        {
+            List<Part> reviseItems = revisedItems
+                    .Select(item => model.GetIdentifierByGUID(item.Guid))
+                    .Select(id => model.SelectModelObject(id))
+                    .OfType<Part>()
+                    .ToList();
+            List<Part> addedItems = addItems
+                    .Select(item => model.GetIdentifierByGUID(item.Guid))
+                    .Select(id => model.SelectModelObject(id))
+                    .OfType<Part>()
+                    .ToList();
+
+            return addedItems.Concat(reviseItems).ToList();
+        }
+
+        private static bool InitialisePackageAndCreateFolders(PrismProjectData projectData, string phaseNumber, string issueNumber, bool runSeversafe, SelectedObjects myObjects, out ReportManager reportManager, out CpuCounter cpuCounter)
+        {
+            cpuCounter = new CpuCounter();
+            reportManager = new ReportManager(projectData, phaseNumber, issueNumber);
+
+            if (!reportManager.Folders.CreateFabFolders()) return false;
+            if (!reportManager.Folders.CreateBoltFolder()) return false;
+            if (runSeversafe) { if (!reportManager.Folders.CreateEpoFolder()) return false; }
+
+            if (myObjects.SeversafePresent) { myObjects.NonSeversafeParts.SelectParts(); }
             return true;
         }
 
