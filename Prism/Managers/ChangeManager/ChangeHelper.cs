@@ -7,7 +7,6 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 using Tekla.Structures.Model;
-using Tekla.Structures.Model.UI;
 
 namespace Prism.Managers.ChangeManager
 {
@@ -18,13 +17,13 @@ namespace Prism.Managers.ChangeManager
         private static List<SteelItemBase> _addItems;
         private static string IssueNo;
 
-        public static bool RunChangeManagement(Model model, string currentIssueNo, string fileLocation, string phaseNumber, PrismProjectData projectData,
-            out List<SteelItemBase> revisedItems, out List<SteelItemBase> omitItems, out List<SteelItemBase> addItems, out string messageForEmail)
+        public static bool RunChangeManagement(Model model, string currentIssueNo, string fileLocation, string phaseNumber, PrismProjectData projectData, SelectedObjects selectedObjects,
+          ToolStrip toolStrip, ToolStripStatusLabel label, out List<SteelItemBase> revisedItems, out List<SteelItemBase> omitItems, out List<SteelItemBase> addItems, out string messageForEmail)
         {
             _revisedItems = new List<SteelItemBase>();
             _omitItems = new List<SteelItemBase>();
             _addItems = new List<SteelItemBase>();
-            WriteNewXML(model, currentIssueNo, fileLocation, phaseNumber);
+            WriteNewXML(model, currentIssueNo, fileLocation, phaseNumber, selectedObjects, toolStrip, label);
             if (currentIssueNo.Contains("01"))
             {
                 revisedItems = null;
@@ -38,29 +37,63 @@ namespace Prism.Managers.ChangeManager
                 string xmlPath = ReturnXmlPath(currentIssueNo, fileLocation, phaseNumber);
 
                 var previousSelection = LoadFromXml(xmlPath);
-
                 var oldFittingDictionary = previousSelection.FittingMarkCounts.ToDictionary(fmc => fmc.Mark, fmc => fmc.Count);
 
                 Console.WriteLine("Fetching new steel info for comparison...");
-                var currentSelection = TeklaHelper.GetSelectedSteelInfo(model);
 
-                var newFittingDictionary = CreateFittingDictionary(currentSelection);
+                var assemblyCounts = new Dictionary<string, int>();
 
-                var omittedMembers = TeklaHelper.CompareSteelLists(previousSelection.Assemblies, currentSelection, oldFittingDictionary, newFittingDictionary);
+                foreach (Assembly ass in selectedObjects.AssembliesList)
+                {
+                    MyAssembly myAssembly = CheckForAndGetExistingData(xmlPath + "\\", ass, model);
+                    FormChangeLists(myAssembly);
 
-                FormChangeLists(currentSelection, omittedMembers);
+                   
+                }
+
+                //  TeklaHelper.GetSelectedSteelInfo(model, fileLocation, selectedObjects);
+
+                //   var newFittingDictionary = CreateFittingDictionary(currentSelection);
+//
+             //   var omittedMembers = TeklaHelper.CompareSteelLists(previousSelection.Assemblies, currentSelection, oldFittingDictionary, newFittingDictionary);
+
+
 
                 revisedItems = _revisedItems;
                 omitItems = _omitItems;
                 addItems = _addItems;
 
                 return WriteMyChangeMessage(fileLocation, phaseNumber, projectData, out messageForEmail);
-
-
-
                 //  Logging.LogProgress(model.GetProjectInfo().Name, currentSelection.Count(), differenceMessages.Count());
             }
         }
+
+        private static MyAssembly CheckForAndGetExistingData(string filePath, Assembly myAssembly, Model model)
+        {
+            //  we need to check this method works, it should return the list of xmls and do a basic comparison of assemlies.
+            //    var xmlFiles = Directory.GetFiles(filePath, "*.xml");
+            // Use LINQ to find the matching XML file
+
+            MyAssembly newAssembly = MyAssembly.CreateMyAssembly(myAssembly, model);
+
+            var matchingFile = Directory
+                .EnumerateFiles(filePath, "*.xml") // Get all XML files in the directory
+                .Select(file => new FileInfo(file)) // Convert file paths to FileInfo objects for easier manipulation
+                .FirstOrDefault(fileInfo => fileInfo.Name.Equals(myAssembly.GetMainPart().Identifier.GUID + ".xml", StringComparison.OrdinalIgnoreCase)); // Find the first file that matches the assembly GUID
+
+            if (matchingFile != null)
+            {
+                // A matching file is found, load and return the XML document
+                TeklaHelper.CompareSimilarItems(newAssembly, matchingFile.FullName);
+            }
+            else
+            {
+                // No matching XML found meaning this part is new
+
+            }
+            return newAssembly;
+        }
+
 
         private static string ReturnXmlPath(string issueNumber, string fileLocation, string phaseNumber)
         {
@@ -77,8 +110,10 @@ namespace Prism.Managers.ChangeManager
             }
 
 
-            return $"{fileLocation}\\Phase {phaseNumber} - Issue {issueNo:D2}.xml";
+            return $"{fileLocation}\\Phase {phaseNumber} - Issue {issueNo:D2}";
         }
+
+
 
         private static bool WriteMyChangeMessage(string fileLocation, string phaseNumber, PrismProjectData projectData, out string finalHtmlMessage)
         {
@@ -184,7 +219,7 @@ namespace Prism.Managers.ChangeManager
                 messageForm.SetMessage(finalMessage);
                 messageForm.ShowDialog();
                 int stopReportContinue = messageForm.ContinueProgram;
-             
+
                 finalHtmlMessage = string.Join("", htmlMessages);
                 if (stopReportContinue == 0)
                 {
@@ -214,34 +249,25 @@ namespace Prism.Managers.ChangeManager
             }
         }
 
-        private static void WriteNewXML(Model model, string issueNumber, string fileLocation, string phaseNumber)
+        private static void WriteNewXML(Model model, string issueNumber, string fileLocation, string phaseNumber, SelectedObjects selectedObjects, ToolStrip toolStrip, ToolStripStatusLabel label)
         {
-            var currentSelection = TeklaHelper.GetSelectedSteelInfo(model);
+            string filetoWrite = fileLocation + "\\" + "Phase " + phaseNumber + " - Issue " + issueNumber.Substring(0, 2);
 
-            var fittingDictionary = CreateFittingDictionary(currentSelection);
+            Directory.CreateDirectory(filetoWrite);
 
-            var wrapper = new SerializationWrapper
-            {
-                Assemblies = currentSelection,
-                FittingMarkCounts = fittingDictionary.Select(kvp => new FittingMarkCount { Mark = kvp.Key, Count = kvp.Value }).ToList()
-            };
-
-            string filetoWrite = fileLocation + "\\" + "Phase " + phaseNumber + " - Issue " + issueNumber.Substring(0, 2) + ".xml";
-            SaveToXml(wrapper, filetoWrite);
+            TeklaHelper.CreateAssemblyXmls(model, filetoWrite, selectedObjects, toolStrip, label);
         }
 
-
-        private static void FormChangeLists(List<MyAssembly> myAssemblies, List<SteelItemBase> omittedAssemblies)
+        private static void FormChangeLists(MyAssembly myAssembly)//, SteelItemBase omittedAssembly)
         {
-            _omitItems.AddRange(omittedAssemblies);
-            foreach (MyAssembly assembly in myAssemblies)
+         //   _omitItems.Add(omittedAssembly);
+
+            AddItemToList(myAssembly);
+            foreach (MyFitting fitting in myAssembly.Fittings)
             {
-                AddItemToList(assembly);
-                foreach (MyFitting fitting in assembly.Fittings)
-                {
-                    AddItemToList(fitting);
-                }
+                AddItemToList(fitting);
             }
+
         }
 
         private static void AddItemToList(SteelItemBase item)
@@ -315,12 +341,12 @@ namespace Prism.Managers.ChangeManager
             if (string.IsNullOrWhiteSpace(phaseNumber) || string.IsNullOrWhiteSpace(fileLocation))
                 return; // do nothing if either phase number or file location is empty
 
-            var xmlFiles = Directory.GetFiles(fileLocation, $"*Phase {phaseNumber}*.xml");
+            var phaseDirectories = Directory.GetDirectories(fileLocation, $"*Phase {phaseNumber}*");
 
             var issueNumbers = new List<int>();
-            foreach (var file in xmlFiles)
+            foreach (var directory in phaseDirectories)
             {
-                var match = Regex.Match(Path.GetFileName(file), $"Phase {phaseNumber} - Issue (\\d+).xml");
+                var match = Regex.Match(Path.GetFileName(directory), $"Phase {phaseNumber} - Issue (\\d+)");
                 if (match.Success)
                 {
                     if (int.TryParse(match.Groups[1].Value, out var issueNumber))

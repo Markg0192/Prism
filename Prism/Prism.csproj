@@ -124,6 +124,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Managers\ChangeManager\StringIntDictionaryWrapper.cs" />
     <Compile Include="PrismBoltGroup.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Convertor.cs" />

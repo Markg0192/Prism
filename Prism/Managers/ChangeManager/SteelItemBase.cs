@@ -86,7 +86,6 @@ namespace Prism
         {
             SetCommonUDAs(part);
             SetBasicProperties(part);
-
             Welds = GetMyWelds(part);
             //Cuts = GetMyCuts(part);
             SetPositionProperties(part);

@@ -9,11 +9,13 @@ using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Tekla.Structures.Model;
+using Tekla.Structures.Model.History;
 using Tekla.Structures.Solid;
 using static Prism.Enums;
 using Model = Tekla.Structures.Model.Model;
 using Task = System.Threading.Tasks.Task;
 using TextBox = System.Windows.Forms.TextBox;
+using Point = Tekla.Structures.Geometry3d.Point;
 
 namespace Prism
 {
@@ -178,12 +180,11 @@ namespace Prism
             CreatePackageAsync(StageTypes.RocketPacket);
         }
 
-
         private void btn_SpecialOperations_Click(object sender, EventArgs e)
-        {
-            _projectData = new PrismProjectData(_model.GetProjectInfo(), _model.GetInfo().ModelPath, _webService);
+        { 
+         /*   _projectData = new PrismProjectData(_model.GetProjectInfo(), _model.GetInfo().ModelPath, _webService);
             DrawingManager dm = new DrawingManager(_model, _projectData, "10", "10");
-            dm.CreateDrawingList();
+            dm.CreateDrawingList();*/
         }
 
         public bool InitialSetup(StageTypes stageType, bool checkForPreviousSteps, string phaseNum = "x", string issueNum = "x")
@@ -250,7 +251,7 @@ namespace Prism
 
             ReportManager myReportManager = new ReportManager(_projectData, phaseNumber.Text, issueNum);
 
-            if (!await Task.Run(() => _selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber.Text, issueNum, stageType, txt_SiteDate.Text, runSeversafe, runChangeManager))) { EndFunction(0); return; }
+            if (!await Task.Run(() => _selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber.Text, issueNum, stageType, txt_SiteDate.Text, runSeversafe, runChangeManager, statusStrip6, StatusLabel))) { EndFunction(0); return; }
 
             await Task.Run(() => FabMisc.FabMiscOp(_model, txt_SiteDate.Text, _selectedObjects, runSeversafe, myReportManager, divisionNo, _projectData, runChangeManager));
 
@@ -365,7 +366,7 @@ namespace Prism
             Prism.Properties.Settings.Default.UniqueId = key;
             Prism.Properties.Settings.Default.Save();
             //if webservice is a succes save the key
-            CheckModelConnection();
+            if(!CheckModelConnection()) return;
 
             CheckSpecialUser();
 
@@ -391,7 +392,7 @@ namespace Prism
             }
         }
 
-        private void CheckModelConnection()
+        private bool CheckModelConnection()
         {
             _model = new Model();
             if (!_model.GetConnectionStatus())
@@ -399,8 +400,10 @@ namespace Prism
                 MessageBox.Show("Failed to connect to a correct version of Tekla Model");
                 Logging.LoginMessage("", "Login Failed");
                 Application.Exit();
+                return false;
             }
             _projectData = new PrismProjectData(_model.GetProjectInfo(), _model.GetInfo().ModelPath, _webService);
+            return true;
         }
 
         private async Task<bool> ProcessSpecialFittings(string orderType)
