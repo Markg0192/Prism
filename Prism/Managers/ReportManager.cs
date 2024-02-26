@@ -221,6 +221,11 @@ namespace Prism
             }
             _NCPlateSetting = "-SNI-PLATES";
             _NCProfileSetting = "-SNI-PROFILES";
+
+            string NC2023Setting1 = "-SEV-PLATES-SEC";
+            string NC2023Setting2 = "-SEV-PROFILES-SEC";
+            string NC2023Setting3 = "-SEV-PROFILES-MAIN";
+
             string qsReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _reportQSname);
             string hrMemberReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report2Name);
             string hrFittingReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report3Name);
@@ -254,9 +259,14 @@ namespace Prism
             Operation.CreateReportFromSelected(qsReport, Path.Combine(Folders.DspPath, $"{FabReportPrefix}{_outputQSname}"), _title1, _title2, _title3);
             Operation.CreateReportFromSelected(assemblyReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output6Name}"), _title1, _title2, _title3);
             Operation.CreateReportFromSelected(fusionMapReport, Path.Combine(Folders.DspPath, $"{FabReportPrefix}{_output7Name}"), _title1, _title2, _title3);
+           
             Operation.CreateNCFilesFromSelected(_NCProfileSetting, Folders.NcPath + "\\");// Path.Combine(Folders.NcPath, " "));
             Operation.CreateNCFilesFromSelected(_NCPlateSetting, Folders.NcPath + "\\");// Path.Combine(Folders.NcPath, " "));
 
+            Operation.CreateNCFilesFromSelected(NC2023Setting1, Folders.NcPath + "\\");// Path.Combine(Folders.NcPath, " "));
+            Operation.CreateNCFilesFromSelected(NC2023Setting2, Folders.NcPath + "\\");// Path.Combine(Folders.NcPath, " "));
+            Operation.CreateNCFilesFromSelected(NC2023Setting3, Folders.NcPath + "\\");// Path.Combine(Folders.NcPath, " "));
+            sort out he branches before moving on
             if (create3Report)
             {
                 Operation.CreateReportFromSelected(hrMemberReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output2Name}"), _title1, _title2, _title3);
