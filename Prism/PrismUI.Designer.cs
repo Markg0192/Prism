@@ -48,7 +48,7 @@ namespace Prism
             this.label4 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.btn_HomeMaterial = new System.Windows.Forms.Button();
-            this.statusStrip4 = new System.Windows.Forms.StatusStrip();
+            this.statusStrip_Mat = new System.Windows.Forms.StatusStrip();
             this.MaterialStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.txt_StartNumber = new System.Windows.Forms.TextBox();
             this.cmb_OrderMaterial = new System.Windows.Forms.ComboBox();
@@ -67,7 +67,7 @@ namespace Prism
             this.cmb_ColumnOrientationType = new System.Windows.Forms.ComboBox();
             this.info_Detail = new System.Windows.Forms.PictureBox();
             this.btn_HomeDetail = new System.Windows.Forms.Button();
-            this.statusStrip5 = new System.Windows.Forms.StatusStrip();
+            this.statusStrip_Det = new System.Windows.Forms.StatusStrip();
             this.DetailingStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.btn_Detail2 = new System.Windows.Forms.Button();
             this.btn_Detail3 = new System.Windows.Forms.Button();
@@ -77,7 +77,7 @@ namespace Prism
             this.btn_RocketPacket = new System.Windows.Forms.Button();
             this.info_Fab = new System.Windows.Forms.PictureBox();
             this.btn_HomePackage = new System.Windows.Forms.Button();
-            this.statusStrip6 = new System.Windows.Forms.StatusStrip();
+            this.statusStrip_Fab = new System.Windows.Forms.StatusStrip();
             this.StatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.txt_SiteDate = new System.Windows.Forms.TextBox();
             this.btn_FabMisc = new System.Windows.Forms.Button();
@@ -103,13 +103,13 @@ namespace Prism
             ((System.ComponentModel.ISupportInitialize)(this.info_Home)).BeginInit();
             this.pnl_Material.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.info_Mat)).BeginInit();
-            this.statusStrip4.SuspendLayout();
+            this.statusStrip_Mat.SuspendLayout();
             this.pnl_Detail.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.info_Detail)).BeginInit();
-            this.statusStrip5.SuspendLayout();
+            this.statusStrip_Det.SuspendLayout();
             this.pnl_Package.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.info_Fab)).BeginInit();
-            this.statusStrip6.SuspendLayout();
+            this.statusStrip_Fab.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -222,7 +222,7 @@ namespace Prism
             this.pnl_Material.Controls.Add(this.label4);
             this.pnl_Material.Controls.Add(this.label1);
             this.pnl_Material.Controls.Add(this.btn_HomeMaterial);
-            this.pnl_Material.Controls.Add(this.statusStrip4);
+            this.pnl_Material.Controls.Add(this.statusStrip_Mat);
             this.pnl_Material.Controls.Add(this.txt_StartNumber);
             this.pnl_Material.Controls.Add(this.cmb_OrderMaterial);
             this.pnl_Material.Controls.Add(this.label3);
@@ -340,16 +340,16 @@ namespace Prism
             this.btn_HomeMaterial.UseVisualStyleBackColor = false;
             this.btn_HomeMaterial.Click += new System.EventHandler(this.btn_HomeMaterial_Click_1);
             // 
-            // statusStrip4
+            // statusStrip_Mat
             // 
-            this.statusStrip4.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.statusStrip4.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.statusStrip_Mat.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.statusStrip_Mat.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MaterialStatusLabel});
-            this.statusStrip4.Location = new System.Drawing.Point(0, 293);
-            this.statusStrip4.Name = "statusStrip4";
-            this.statusStrip4.Size = new System.Drawing.Size(258, 22);
-            this.statusStrip4.TabIndex = 38;
-            this.statusStrip4.Text = "statusStrip4";
+            this.statusStrip_Mat.Location = new System.Drawing.Point(0, 293);
+            this.statusStrip_Mat.Name = "statusStrip_Mat";
+            this.statusStrip_Mat.Size = new System.Drawing.Size(258, 22);
+            this.statusStrip_Mat.TabIndex = 38;
+            this.statusStrip_Mat.Text = "statusStrip4";
             // 
             // MaterialStatusLabel
             // 
@@ -486,7 +486,7 @@ namespace Prism
             this.pnl_Detail.Controls.Add(this.cmb_ColumnOrientationType);
             this.pnl_Detail.Controls.Add(this.info_Detail);
             this.pnl_Detail.Controls.Add(this.btn_HomeDetail);
-            this.pnl_Detail.Controls.Add(this.statusStrip5);
+            this.pnl_Detail.Controls.Add(this.statusStrip_Det);
             this.pnl_Detail.Controls.Add(this.btn_Detail2);
             this.pnl_Detail.Controls.Add(this.btn_Detail3);
             this.pnl_Detail.Controls.Add(this.btn_Detail1);
@@ -568,16 +568,16 @@ namespace Prism
             this.btn_HomeDetail.UseVisualStyleBackColor = false;
             this.btn_HomeDetail.Click += new System.EventHandler(this.btn_HomeDetail_Click_1);
             // 
-            // statusStrip5
+            // statusStrip_Det
             // 
-            this.statusStrip5.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.statusStrip5.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.statusStrip_Det.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.statusStrip_Det.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.DetailingStatusLabel});
-            this.statusStrip5.Location = new System.Drawing.Point(0, 214);
-            this.statusStrip5.Name = "statusStrip5";
-            this.statusStrip5.Size = new System.Drawing.Size(228, 22);
-            this.statusStrip5.TabIndex = 23;
-            this.statusStrip5.Text = "statusStrip5";
+            this.statusStrip_Det.Location = new System.Drawing.Point(0, 214);
+            this.statusStrip_Det.Name = "statusStrip_Det";
+            this.statusStrip_Det.Size = new System.Drawing.Size(228, 22);
+            this.statusStrip_Det.TabIndex = 23;
+            this.statusStrip_Det.Text = "statusStrip5";
             // 
             // DetailingStatusLabel
             // 
@@ -634,7 +634,7 @@ namespace Prism
             this.pnl_Package.Controls.Add(this.btn_RocketPacket);
             this.pnl_Package.Controls.Add(this.info_Fab);
             this.pnl_Package.Controls.Add(this.btn_HomePackage);
-            this.pnl_Package.Controls.Add(this.statusStrip6);
+            this.pnl_Package.Controls.Add(this.statusStrip_Fab);
             this.pnl_Package.Controls.Add(this.txt_SiteDate);
             this.pnl_Package.Controls.Add(this.btn_FabMisc);
             this.pnl_Package.Controls.Add(this.btnCreatePackage1);
@@ -699,21 +699,21 @@ namespace Prism
             this.btn_HomePackage.UseVisualStyleBackColor = false;
             this.btn_HomePackage.Click += new System.EventHandler(this.btn_HomePackage_Click_1);
             // 
-            // statusStrip6
+            // statusStrip_Fab
             // 
-            this.statusStrip6.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.statusStrip6.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.statusStrip_Fab.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.statusStrip_Fab.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.StatusLabel});
-            this.statusStrip6.Location = new System.Drawing.Point(0, 218);
-            this.statusStrip6.Name = "statusStrip6";
-            this.statusStrip6.Size = new System.Drawing.Size(214, 22);
-            this.statusStrip6.TabIndex = 36;
-            this.statusStrip6.Text = "statusStrip6";
+            this.statusStrip_Fab.Location = new System.Drawing.Point(0, 218);
+            this.statusStrip_Fab.Name = "statusStrip_Fab";
+            this.statusStrip_Fab.Size = new System.Drawing.Size(214, 22);
+            this.statusStrip_Fab.TabIndex = 36;
+            this.statusStrip_Fab.Text = "statusStrip6";
             // 
             // StatusLabel
             // 
             this.StatusLabel.Name = "StatusLabel";
-            this.StatusLabel.Size = new System.Drawing.Size(199, 17);
+            this.StatusLabel.Size = new System.Drawing.Size(168, 17);
             this.StatusLabel.Spring = true;
             this.StatusLabel.Text = "Status";
             this.StatusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -916,18 +916,18 @@ namespace Prism
             this.pnl_Material.ResumeLayout(false);
             this.pnl_Material.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.info_Mat)).EndInit();
-            this.statusStrip4.ResumeLayout(false);
-            this.statusStrip4.PerformLayout();
+            this.statusStrip_Mat.ResumeLayout(false);
+            this.statusStrip_Mat.PerformLayout();
             this.pnl_Detail.ResumeLayout(false);
             this.pnl_Detail.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.info_Detail)).EndInit();
-            this.statusStrip5.ResumeLayout(false);
-            this.statusStrip5.PerformLayout();
+            this.statusStrip_Det.ResumeLayout(false);
+            this.statusStrip_Det.PerformLayout();
             this.pnl_Package.ResumeLayout(false);
             this.pnl_Package.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.info_Fab)).EndInit();
-            this.statusStrip6.ResumeLayout(false);
-            this.statusStrip6.PerformLayout();
+            this.statusStrip_Fab.ResumeLayout(false);
+            this.statusStrip_Fab.PerformLayout();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -946,7 +946,7 @@ namespace Prism
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button btn_HomeMaterial;
-        private System.Windows.Forms.StatusStrip statusStrip4;
+        private System.Windows.Forms.StatusStrip statusStrip_Mat;
         private System.Windows.Forms.ToolStripStatusLabel MaterialStatusLabel;
         public System.Windows.Forms.TextBox txt_StartNumber;
         private System.Windows.Forms.ComboBox cmb_OrderMaterial;
@@ -958,14 +958,14 @@ namespace Prism
         private System.Windows.Forms.Button btn_Material1;
         private System.Windows.Forms.Panel pnl_Detail;
         private System.Windows.Forms.Button btn_HomeDetail;
-        private System.Windows.Forms.StatusStrip statusStrip5;
+        private System.Windows.Forms.StatusStrip statusStrip_Det;
         private System.Windows.Forms.ToolStripStatusLabel DetailingStatusLabel;
         private System.Windows.Forms.Button btn_Detail2;
         private System.Windows.Forms.Button btn_Detail3;
         private System.Windows.Forms.Button btn_Detail1;
         private System.Windows.Forms.Panel pnl_Package;
         private System.Windows.Forms.Button btn_HomePackage;
-        private System.Windows.Forms.StatusStrip statusStrip6;
+        private System.Windows.Forms.StatusStrip statusStrip_Fab;
         private System.Windows.Forms.ToolStripStatusLabel StatusLabel;
         private System.Windows.Forms.TextBox txt_SiteDate;
         private System.Windows.Forms.Button btn_FabMisc;

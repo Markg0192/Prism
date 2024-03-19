@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Windows.Forms;
 using Tekla.Structures.Drawing;
 using Tekla.Structures.Model;
 using static Prism.Enums;
@@ -19,7 +21,7 @@ namespace Prism
         private ModelObjectEnumerator Moe;
         public DrawingHandler MyDrawingHandler;
 
-        public SelectedObjects(StageTypes stageType, string phaseNum, string issueNum)
+        public SelectedObjects(StageTypes stageType, string phaseNum, string issueNum, ToolStrip toolStrip = null, ToolStripStatusLabel statusLabel = null)
         {
             NumbersUpToDate = true;
             AssembliesList = new List<Assembly>();
@@ -32,7 +34,7 @@ namespace Prism
             MyMarks = new List<string>();
 
             Moe = new Tekla.Structures.Model.UI.ModelObjectSelector().GetSelectedObjects();
-            ProcessModelObjects(stageType, phaseNum, issueNum);
+            ProcessModelObjects(stageType, phaseNum, issueNum, toolStrip, statusLabel);
 
             PartWeight = Math.Round(PartWeight / 1000, 3);
         }
@@ -73,10 +75,14 @@ namespace Prism
             }
         }
 
-        private void ProcessModelObjects(StageTypes stageType, string phaseNum, string issueNum)
+        private void ProcessModelObjects(StageTypes stageType, string phaseNum, string issueNum, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
         {
+            int currentCount = 0;
+            int totalCount = toolStrip == null ? -1 : Moe.GetSize();
+
             foreach (var myObject in Moe)
             {
+                if(totalCount > 0) UpdateStatusLabelWithProcessCount(ref currentCount, toolStrip, statusLabel, totalCount);
                 if (!NumbersUpToDate) return;
 
                 // Process directly if RocketPacket or not a BaseComponent
@@ -88,6 +94,24 @@ namespace Prism
                 {
                     ProcessChildren(myComponent, stageType, phaseNum, issueNum);
                 }
+            }
+        }
+
+        private static void UpdateStatusLabelWithProcessCount(ref int processedCount, ToolStrip toolStrip, ToolStripStatusLabel statusLabel, int totalCount)
+        {
+            int currentCount = Interlocked.Increment(ref processedCount);
+            double progressPercentage = (double)currentCount / totalCount * 100;
+
+            // Throttle UI updates to maintain responsiveness
+            if (currentCount % 5 == 0 || currentCount == totalCount)
+            {
+                toolStrip.Invoke(new System.Action(() =>
+                {
+                    if (currentCount < totalCount)
+                    {
+                        statusLabel.Text = $"Processing part: {currentCount} of {totalCount} ({progressPercentage:N1}%)";
+                    }
+                }));
             }
         }
 
