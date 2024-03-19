@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Tekla.Structures.Model;
+using Task = System.Threading.Tasks.Task;
 
 namespace Prism
 {
@@ -8,20 +10,18 @@ namespace Prism
         public List<MyFitting> Fittings = new List<MyFitting>();
 
         //Because the MyAssembly is being written to xml it cannot have a constructor that takes variables, this factory method is the work around for that
-        public static AssemblyCreationResult CreateMyAssembly(Part part, Model model)
+        public static MyAssembly CreateMyAssembly(Assembly assembly, Model model)
         {
-            var assemblyProcessingResult = GetFittingsInAssembly(part.GetAssembly(), model);
+            // Await the task to get the result of the asynchronous operation
+            AssemblyProcessingResult assemblyProcessingResult = GetFittingsInAssembly(assembly, model);
 
             MyAssembly myNewAssembly = new MyAssembly();
-            myNewAssembly.SetCommonProperties(part, model);
+            myNewAssembly.SetCommonProperties(assembly.GetMainPart() as Part, model);
 
+            // Now that assemblyProcessingResult is the result of the awaited task, you can access its properties
             myNewAssembly.Fittings = assemblyProcessingResult.Fittings;
 
-            return new AssemblyCreationResult
-            {
-                Assembly = myNewAssembly,
-                UnsupportedTypes = assemblyProcessingResult.UnsupportedTypes
-            };
+            return myNewAssembly;
         }
 
         private static AssemblyProcessingResult GetFittingsInAssembly(Assembly beam, Model model)
@@ -32,14 +32,19 @@ namespace Prism
 
             foreach (object secondary in secondaryObjects)
             {
-                MyFitting newFitting = CastObjectAndCreateFitting(secondary, model);
-                if (newFitting != null)
+                Part secondaryPart = secondary as Part;
+
+                if (secondaryPart != null && beam.GetMainPart().Identifier.GUID != secondaryPart.Identifier.GUID)
                 {
-                    result.Fittings.Add(newFitting);
-                }
-                else
-                {
-                    result.UnsupportedTypes.Add(secondary.GetType().Name);
+                    MyFitting newFitting = CastObjectAndCreateFitting(secondary, model);
+                    if (newFitting != null)
+                    {
+                        result.Fittings.Add(newFitting);
+                    }
+                    else
+                    {
+                        result.UnsupportedTypes.Add(secondary.GetType().Name);
+                    }
                 }
             }
 

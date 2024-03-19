@@ -123,7 +123,6 @@ namespace Prism
             }
         }
 
-
         private void ProcessObject(object myObject, StageTypes stageType, string phaseNum, string issueNum)
         {
             if (!(myObject is Part myPart) || !IsValidPart(myPart)) return;
@@ -189,8 +188,8 @@ namespace Prism
                     if (boltsFromAssembly != null)
                     {
                         var prismBoltGroupsForAssembly = boltsFromAssembly
-                            .Where(boltGroup => boltGroup.Bolt) // Filter out BoltGroup objects where Bolt is false
-                            .Select(boltGroup => new PrismBoltGroup(boltGroup, phaseNum, issueNum))
+                            .Where(boltGroup => boltGroup.Bolt) // Filter out BoltGroup objects where Bolt is false (Holes)
+                            .Select(boltGroup => new PrismBoltGroup(boltGroup, phaseNum, issueNum)) //Cast those bolGroups as PrismBoltGroups
                             .ToList();
 
                         PrismBoltGroups.AddRange(prismBoltGroupsForAssembly);

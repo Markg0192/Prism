@@ -1,6 +1,7 @@
 ﻿using Prism.Managers.ChangeManager;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms;
 using Tekla.Structures.Model;
 using static Prism.Enums;
 using Model = Tekla.Structures.Model.Model;
@@ -9,7 +10,8 @@ namespace Prism.ButtonOperations
 {
     public static class CreatePackageButton
     {
-        public static bool CreateFabPackage(this SelectedObjects myObjects, Model model, PrismProjectData projectData, string phaseNumber, string issueNumber, StageTypes stageType, string siteDate, bool runSeversafe, bool runChangeManager)
+        public static bool CreateFabPackage(this SelectedObjects myObjects, Model model, PrismProjectData projectData, string phaseNumber, string issueNumber, StageTypes stageType, string siteDate, bool runSeversafe, bool runChangeManager,
+           ToolStrip toolStrip, ToolStripStatusLabel label)
         {
             if (!runChangeManager)
             {
@@ -18,7 +20,7 @@ namespace Prism.ButtonOperations
 
             string fileLocation = Constants.ModelDataLogLocation(projectData.ProjNumberAndGuid + "\\Fab XMLs");
 
-            if (!ChangeHelper.RunChangeManagement(model, issueNumber, fileLocation, phaseNumber, projectData, out List<SteelItemBase> revisedItems,
+            if (!ChangeHelper.RunChangeManagement(model, issueNumber, fileLocation, phaseNumber, projectData, myObjects, toolStrip, label, out List<SteelItemBase> revisedItems,
                 out List<SteelItemBase> omitItems, out List<SteelItemBase> addItems, out string messageForEmail)) return false;
 
             return issueNumber == "01"

@@ -19,7 +19,6 @@ namespace Prism
         private string _title1;
         private string _title2;
         private string _title3;
-        private string _reportBolts;
 
         #region group accepted reports
         //Material Procurement
@@ -93,8 +92,6 @@ namespace Prism
         private const string _output7Name = "-FusionMap.csv";
         #endregion
 
-        private string _NCPlateSetting;
-        private string _NCProfileSetting;
         private bool create3PGReport = false;
         public PrismProjectData ProjectData;
         public string PhaseNum;
@@ -134,14 +131,14 @@ namespace Prism
                 {
                     selectedObjects.ExportBSWX(Folders.MatPath, ProjectData, PhaseNum, IssueNum, stageType);
                     ModelModifiers.RemoveLog(Folders.MatPath);
-                    materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report1Pname);                   
+                    materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report1Pname);
                     outputName = _output1Pname;
                 }
                 if (orderType == "Add Material")
                 {
                     selectedObjects.ExportBSWX(Folders.MatPath, ProjectData, PhaseNum, IssueNum, stageType);
                     ModelModifiers.RemoveLog(Folders.MatPath);
-                    materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report1PAname);                   
+                    materialReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report1PAname);
                     outputName = _output1PAname;
                 }
                 if (orderType == "Omit Material")
@@ -169,7 +166,7 @@ namespace Prism
                     outputName = _output1PFOname;
                 }
                 Operation.CreateReportFromSelected(materialReport, Path.Combine(Folders.MatPath, $"{MatReportPrefix}{outputName}"), _title1, _title2, _title3);
-                
+
                 TextToPDF(Folders.MatPath);
             }
         }
@@ -182,17 +179,14 @@ namespace Prism
 
         public void CreateBoltList(string reportPrefix, string orderType)
         {
-            string boltReportName = _reportSelectedBoltsName;
-            string boltListOutputName = _outputSelectedBolts;
-
-      //      string boltReportName = _reportBoltsName;
-      //      string boltListOutputName = _outputBolts;
+            string boltReportName = _reportBoltsName;
+            string boltListOutputName = _outputBolts;
 
             if (orderType.Contains("Omit")) { boltReportName = _report5OName; boltListOutputName = _output5OName; }
 
-            _reportBolts = Path.Combine(FirmFolderLoc.ReportTemplates(), boltReportName);
-            Operation.CreateReportFromSelected(_reportBolts, Path.Combine(Folders.BoltPath, $"{reportPrefix}{boltListOutputName}"), _title1, _title2, _title3);
-          //  TextToPDF(Folders.BoltPath);
+            string boltReport = Path.Combine(FirmFolderLoc.ReportTemplates(), boltReportName);
+            Operation.CreateReportFromSelected(boltReport, Path.Combine(Folders.BoltPath, $"{reportPrefix}{boltListOutputName}"), _title1, _title2, _title3);
+            //  TextToPDF(Folders.BoltPath);
         }
 
         public void CreateSelectedBoltList(string reportPrefix, string orderType)
@@ -204,7 +198,7 @@ namespace Prism
 
             string reportBolts = Path.Combine(FirmFolderLoc.ReportTemplates(), boltReportName);
             Operation.CreateReportFromSelected(reportBolts, Path.Combine(Folders.BoltPath, $"{reportPrefix}{boltListOutputName}"), _title1, _title2, _title3);
-           // TextToPDF(Folders.BoltPath);
+            // TextToPDF(Folders.BoltPath);
         }
 
 
@@ -219,23 +213,8 @@ namespace Prism
             {
                 await System.Threading.Tasks.Task.Delay(10);
             }
-            _NCPlateSetting = "-SNI-PLATES";
-            _NCProfileSetting = "-SNI-PROFILES";
 
-            string NC2023Setting1 = "-SEV-PLATES-SEC";
-            string NC2023Setting2 = "-SEV-PROFILES-SEC";
-            string NC2023Setting3 = "-SEV-PROFILES-MAIN";
-
-            string qsReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _reportQSname);
-            string hrMemberReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report2Name);
-            string hrFittingReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report3Name);
-            string shopBoltReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report4Name);
-            string siteBoltReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report5Name);
-            string assemblyReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report6Name);
-            string fusionMapReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report7Name);
-
-            _reportBolts = Path.Combine(FirmFolderLoc.ReportTemplates(), _reportBoltsName);
-            string report9 = Path.Combine(FirmFolderLoc.ReportTemplates(), _report6Name);
+            
             bool create3Report = false;
             bool create4Report = false;
             string sectionSize;
@@ -256,12 +235,27 @@ namespace Prism
                 if (isFitting) create4Report = true;
             }
 
+            CreateReports(boltList, create3Report, create4Report, shopBoltsPresent, siteBoltsPresent);
+
+            CreateNC();
+
+            TextToPDF(Folders.ReportPath);
+        }
+
+        private void CreateReports(List<PrismBoltGroup> boltList, bool create3Report, bool create4Report, bool shopBoltsPresent, bool siteBoltsPresent)
+        {
+            string qsReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _reportQSname);
+            string hrMemberReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report2Name);
+            string hrFittingReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report3Name);
+            string shopBoltReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report4Name);
+            string siteBoltReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report5Name);
+            string assemblyReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report6Name);
+            string fusionMapReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _report7Name);
+            string boltReport = Path.Combine(FirmFolderLoc.ReportTemplates(), _outputSelectedBolts);
+
             Operation.CreateReportFromSelected(qsReport, Path.Combine(Folders.DspPath, $"{FabReportPrefix}{_outputQSname}"), _title1, _title2, _title3);
             Operation.CreateReportFromSelected(assemblyReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output6Name}"), _title1, _title2, _title3);
             Operation.CreateReportFromSelected(fusionMapReport, Path.Combine(Folders.DspPath, $"{FabReportPrefix}{_output7Name}"), _title1, _title2, _title3);
-           
-            Operation.CreateNCFilesFromSelected(_NCProfileSetting, Folders.NcPath + "\\");// Path.Combine(Folders.NcPath, " "));
-            Operation.CreateNCFilesFromSelected(_NCPlateSetting, Folders.NcPath + "\\");// Path.Combine(Folders.NcPath, " "));
 
             Operation.CreateNCFilesFromSelected(NC2023Setting1, Folders.NcPath + "\\");// Path.Combine(Folders.NcPath, " "));
             Operation.CreateNCFilesFromSelected(NC2023Setting2, Folders.NcPath + "\\");// Path.Combine(Folders.NcPath, " "));
@@ -277,9 +271,8 @@ namespace Prism
             }
             if (shopBoltsPresent || siteBoltsPresent) //then create our strumis summary report
             {
-                List<BoltGroup> test = boltList.Where(pbg => !pbg.isOrdered && !pbg.isShearStud).Select(pbg => pbg.BoltGroup).ToList();
                 ModelModifiers.SelectBolts(boltList.Where(pbg => !pbg.isOrdered && !pbg.isShearStud).Select(pbg => pbg.BoltGroup).ToList());
-                Operation.CreateReportFromSelected(_reportBolts, Path.Combine(Folders.DspPath, $"{FabReportPrefix}{_outputBolts}"), _title1, _title2, _title3);
+                Operation.CreateReportFromSelected(boltReport, Path.Combine(Folders.DspPath, $"{FabReportPrefix}{_outputSelectedBolts}"), _title1, _title2, _title3);
             }
             if (shopBoltsPresent) //Then create a shop bolts summary
             {
@@ -291,20 +284,38 @@ namespace Prism
                 ModelModifiers.SelectBolts(boltList.Where(pbg => !pbg.isOrdered && !pbg.isShearStud && !pbg.isShop).Select(pbg => pbg.BoltGroup).ToList());
                 Operation.CreateReportFromSelected(siteBoltReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output5Name}"), _title1, _title2, _title3);
             }
+        }
 
-            TextToPDF(Folders.ReportPath);
+        private void CreateNC()
+        {
+            //The name of the settings used changed from tekla 2021 -> 2023, so, we set up and ruth both here, 
+            //No need to filter versions, it will attempt and fail to run 2023 type files if in 2021 and vice versa at no real cost
+
+            //2021 NC
+            string plateSetting2021 = "-SNI-PLATES";
+            string profileSetting2021 = "-SNI-PROFILES";
+            Operation.CreateNCFilesFromSelected(plateSetting2021, Folders.NcPath + "\\");
+            Operation.CreateNCFilesFromSelected(profileSetting2021, Folders.NcPath + "\\");
+
+            //2023 NC
+            string platesSec2023 = "-SEV-PLATES-SEC";
+            string profilesMain2023 = "-SEV-PROFILES-MAIN";
+            string profilesSec2023 = "-SEV-PROFILES-SEC";
+            Operation.CreateNCFilesFromSelected(platesSec2023, Folders.NcPath + "\\");
+            Operation.CreateNCFilesFromSelected(profilesMain2023, Folders.NcPath + "\\");
+            Operation.CreateNCFilesFromSelected(profilesSec2023, Folders.NcPath + "\\");
         }
 
         public static async void SelectDrawingsInDocManager(List<Part> selectedParts)
         {
             if (PrismMacroBuilder.DrawingOperations())
-          /*  {
-               Logging.DebugLog("Macro Built", "");
-            }
-            else { Logging.DebugLog("Macro not built", ""); }*/
+                /*  {
+                     Logging.DebugLog("Macro Built", "");
+                  }
+                  else { Logging.DebugLog("Macro not built", ""); }*/
 
-            if (selectedParts != null) selectedParts.SelectParts();
-          //  Logging.DebugLog("Selected parts", "");
+                if (selectedParts != null) selectedParts.SelectParts();
+            //  Logging.DebugLog("Selected parts", "");
 
             Operation.RunMacro(Constants.DrawingOperation);
             //Logging.DebugLog("Drawing operation complete", "");
@@ -312,7 +323,7 @@ namespace Prism
             while (Operation.IsMacroRunning()) // Wait until macro for selecting drawings in the document manager is complete before moving on
             {
                 await System.Threading.Tasks.Task.Delay(10);
-              //  Logging.DebugLog("Drawing operation wait", "");
+                //  Logging.DebugLog("Drawing operation wait", "");
             }
         }
 

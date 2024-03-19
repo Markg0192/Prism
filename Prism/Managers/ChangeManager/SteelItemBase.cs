@@ -10,8 +10,11 @@ using Vector = Prism.Geometry.Vector;
 using Microsoft.Office.Interop.Excel;
 using Model = Tekla.Structures.Model.Model;
 using Point = Tekla.Structures.Geometry3d.Point;
-using Tekla.Structures.RemotingHelper;
-using System.Diagnostics.Eventing.Reader;
+using System.Threading.Tasks;
+using Parallel = System.Threading.Tasks.Parallel;
+using System.Collections.Concurrent;
+using System.Linq;
+using System.Windows.Forms;
 
 namespace Prism
 {
@@ -84,16 +87,15 @@ namespace Prism
 
         protected void SetCommonProperties(Part part, Model model)
         {
+            GetMyBoltsCutsAndWelds(part, model);
             SetCommonUDAs(part);
             SetBasicProperties(part);
 
-            Welds = GetMyWelds(part);
-            //Cuts = GetMyCuts(part);
             SetPositionProperties(part);
             SetDeformingDataProperties(part);
             GetObjectSpecificProperties(part, false, null);
-            Bolts = GetMyBolts(part, model);
-            ModelModifiers.ResetWorkPlane(model);
+           
+          //  ModelModifiers.ResetWorkPlane(model);
         }
 
         private void SetCommonUDAs(Part part)
@@ -200,7 +202,7 @@ namespace Prism
         {
             ArrayList contourPoints = pb.Contour.ContourPoints;
             ContourPoints = new List<Point3D>();
-            myCut.CutContourPoints = new List<Point3D>();
+            if (isCut) myCut.CutContourPoints = new List<Point3D>();
 
             foreach (Point p in contourPoints)
             {
@@ -232,7 +234,7 @@ namespace Prism
         {
             ArrayList contourPoints = cp.Contour.ContourPoints;
             ContourPoints = new List<Point3D>();
-            if(isCut) myCut.CutContourPoints = new List<Point3D>();
+            if (isCut) myCut.CutContourPoints = new List<Point3D>();
 
             foreach (Point p in contourPoints)
             {
@@ -289,56 +291,104 @@ namespace Prism
             return Math.Round(Distances.Point2Point(beam.StartPoint, beam.EndPoint), 2);
         }
 
-        private List<MyBolts> GetMyBolts(Part part, Model model)
+        private void GetMyBoltsCutsAndWelds(Part part, Model model)
         {
-            List<MyBolts> myBoltsList = new List<MyBolts>();
+          /*  model.GetWorkPlaneHandler().SetCurrentTransformationPlane(new TransformationPlane(part.GetCoordinateSystem()));
+            model.CommitChanges();*/
 
-            model.GetWorkPlaneHandler().SetCurrentTransformationPlane(new TransformationPlane(part.GetCoordinateSystem()));
-            model.CommitChanges();
+            CoordinateSystem coord = part.GetCoordinateSystem();
 
+            Matrix matrix = MatrixFactory.FromCoordinateSystem(coord);
+            Vector offsetVector = new Vector(coord.Origin.X, coord.Origin.Y, coord.Origin.Z);
+            Bolts = GetMyBolts(part, matrix, offsetVector);
+            Cuts = GetMyCuts(part);
+            Welds = GetMyWelds(part);
+        }
+
+        private List<MyBolts> GetMyBolts(Part part, Matrix matrix, Vector offsetVector)
+        {
+            List<BoltGroup> boltGroups = new List<BoltGroup>();
+
+            // Collect all BoltGroup objects
             ModelObjectEnumerator boltMoe = part.GetBolts();
-            foreach (var setOfBolts in boltMoe)
+            foreach (ModelObject modelObject in boltMoe)
             {
-                BoltGroup bolt = setOfBolts as BoltGroup;
-                if (bolt != null)
+                if (modelObject is BoltGroup boltGroup)
                 {
-                    //if (part.Identifier.GUID == bolt.PartToBeBolted.Identifier.GUID) //prevents getting the same bolt twice
-                    { myBoltsList.Add(CreateMyBoltsFromBoltGroup(bolt)); }
+                    boltGroups.Add(boltGroup);
                 }
             }
 
-            Cuts = GetMyCuts(part);
-            return myBoltsList;
+            // Use ConcurrentBag for thread-safe collection in parallel processing
+            ConcurrentBag<MyBolts> myBoltsList = new ConcurrentBag<MyBolts>();
+
+            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
+
+            // Process BoltGroups in parallel
+            Parallel.ForEach(boltGroups, parallelOptions, (boltGroup) =>
+            {
+                {
+                    myBoltsList.Add(CreateMyBoltsFromBoltGroup(boltGroup, matrix, offsetVector));
+                }
+            });
+
+            return myBoltsList.ToList();
         }
 
         private List<MyWelds> GetMyWelds(Part part)
         {
-            List<MyWelds> myWeldsList = new List<MyWelds>();
+            ConcurrentBag<MyWelds> myWeldsList = new ConcurrentBag<MyWelds>();
+            List<Weld> welds = new List<Weld>();
 
             ModelObjectEnumerator weldMoe = part.GetWelds();
-            foreach (var weld in weldMoe)
+
+            foreach (ModelObject modelObject in weldMoe)
             {
-                Weld wld = weld as Weld;
-                if (wld != null)
+                if (modelObject is Weld weld)
                 {
-                    if (part.Identifier.GUID == wld.MainObject.Identifier.GUID) //then the part we are checking is the mainobject of this weld (doing this stops us getting the same weld twice)
-                    { myWeldsList.Add(CreateMyWeldFromTeklaWeld(wld)); }
+                    welds.Add(weld);
                 }
             }
-            return myWeldsList;
+
+            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }; // Or any other limit
+          
+            // Process in parallel
+            Parallel.ForEach(welds, parallelOptions, (wld) =>
+            {
+                if (part.Identifier.GUID == wld.MainObject.Identifier.GUID)
+                {
+                    myWeldsList.Add(CreateMyWeldFromTeklaWeld(wld));
+                }
+            });
+
+            return myWeldsList.ToList();
         }
 
         private List<MyCut> GetMyCuts(Part part)
         {
-            List<MyCut> myCutsList = new List<MyCut>();
+            ConcurrentBag<object> cuts = new ConcurrentBag<object>();
 
+            // Collect all cuts
             ModelObjectEnumerator cutMoe = part.GetBooleans();
             foreach (var cut in cutMoe)
             {
-                myCutsList.Add(CreateNewCut(cut));
+                cuts.Add(cut);
             }
-            return myCutsList;
+
+            // Use ConcurrentBag to hold MyCut objects since it's thread-safe
+            ConcurrentBag<MyCut> myCutsList = new ConcurrentBag<MyCut>();
+
+            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }; // Or any other limit
+
+            // Process in parallel
+            Parallel.ForEach(cuts, parallelOptions, (cut) =>
+            {
+                myCutsList.Add(CreateNewCut(cut));
+            });
+
+            return myCutsList.ToList();
         }
+
 
         private MyCut CreateNewCut(object obj)
         {
@@ -456,10 +506,10 @@ namespace Prism
             };
         }
 
-        private static MyBolts CreateMyBoltsFromBoltGroup(BoltGroup bolt)
+        private static MyBolts CreateMyBoltsFromBoltGroup(BoltGroup bolt, Matrix matrix, Vector offsetVector)
         {
             BoltCircle circle = bolt as BoltCircle;
-            return new MyBolts
+            var myBolts = new MyBolts()
             {
                 // BoltDiameter = bolt.BoltSize,
                 Diameter = bolt.BoltSize + bolt.Tolerance,
@@ -497,9 +547,24 @@ namespace Prism
                 OnPlane = bolt.Position.PlaneOffset,
                 Rotation = bolt.Position.Rotation.ToString(),
                 RotationDegree = bolt.Position.RotationOffset,
-                StartPoint = new Point3D(Math.Round(bolt.FirstPosition.X, 2), Math.Round(bolt.FirstPosition.Y, 2), Math.Round(bolt.FirstPosition.Z, 2)),
-                EndPoint = new Point3D(Math.Round(bolt.SecondPosition.X, 2), Math.Round(bolt.SecondPosition.Y, 2), Math.Round(bolt.SecondPosition.Z, 2))
+               
+               
+
+                //StartPoint = new Point3D(Math.Round(bolt.FirstPosition.X, 2), Math.Round(bolt.FirstPosition.Y, 2), Math.Round(bolt.FirstPosition.Z, 2)),
+              
+                
+             //   EndPoint = new Point3D(Math.Round(bolt.SecondPosition.X, 2), Math.Round(bolt.SecondPosition.Y, 2), Math.Round(bolt.SecondPosition.Z, 2))
+          
+            
+            
             };
+          
+            Point start = matrix.Transform(new Point(bolt.FirstPosition.X, bolt.FirstPosition.Y, bolt.FirstPosition.Z));
+            myBolts.StartPoint = new Point3D(Math.Round(start.X, 2), Math.Round(start.Y, 2), Math.Round(start.Z, 2));
+            Point end = matrix.Transform(new Point(bolt.SecondPosition.X, bolt.SecondPosition.Y, bolt.SecondPosition.Z));
+            myBolts.EndPoint = new Point3D(Math.Round(end.X, 2), Math.Round(end.Y, 2), Math.Round(end.Z, 2));
+
+            return myBolts;
         }
 
         private static int CalculateBoltQuantity(BoltGroup boltArray)

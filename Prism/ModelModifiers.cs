@@ -118,7 +118,7 @@ namespace Prism
             {
                 bolts.SetUserProperty(ModelUDA.BoltOrderedBy(), name);
                 bolts.SetUserProperty(ModelUDA.BoltOrderedDate(), date);
-                bolts.SetUserProperty(ModelUDA.BoltOrderedAmount(), BoltPhaseAndIssue(phaseNumber, issueNumber)) ;
+                bolts.SetUserProperty(ModelUDA.BoltOrderedAmount(), BoltPhaseAndIssue(phaseNumber, issueNumber));
             }
         }
 
@@ -217,8 +217,9 @@ namespace Prism
                         Console.WriteLine("Last number read" + currentLastNumber);
                     }
                     p.SetUserProperty(ModelUDA.PrelimMark(), currentLastNumber.ToString());
+
+                    currentLastNumber++;
                 }
-                currentLastNumber++;
             }
 
             Logging.SetLastUsedPrelim(pData.ProjNumberAndGuid, currentLastNumber);
@@ -523,7 +524,7 @@ namespace Prism
             ms.Select(selectList);
             foreach (BoltGroup part in selectList)
             {
-               // part.Modify();
+                // part.Modify();
             }
         }
 
