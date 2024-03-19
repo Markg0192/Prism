@@ -1,13 +1,16 @@
 ﻿using Prism.CustomDialogs;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 using Tekla.Structures.Model;
-using Tekla.Structures.Model.UI;
 
 namespace Prism.Managers.ChangeManager
 {
@@ -18,13 +21,13 @@ namespace Prism.Managers.ChangeManager
         private static List<SteelItemBase> _addItems;
         private static string IssueNo;
 
-        public static bool RunChangeManagement(Model model, string currentIssueNo, string fileLocation, string phaseNumber, PrismProjectData projectData,
-            out List<SteelItemBase> revisedItems, out List<SteelItemBase> omitItems, out List<SteelItemBase> addItems, out string messageForEmail)
+        public static bool RunChangeManagement(Model model, string currentIssueNo, string fileLocation, string phaseNumber, PrismProjectData projectData, SelectedObjects selectedObjects,
+          ToolStrip toolStrip, ToolStripStatusLabel label, out List<SteelItemBase> revisedItems, out List<SteelItemBase> omitItems, out List<SteelItemBase> addItems, out string messageForEmail)
         {
             _revisedItems = new List<SteelItemBase>();
             _omitItems = new List<SteelItemBase>();
             _addItems = new List<SteelItemBase>();
-            WriteNewXML(model, currentIssueNo, fileLocation, phaseNumber);
+            WriteNewXML(model, currentIssueNo, fileLocation, phaseNumber, selectedObjects, toolStrip, label);
             if (currentIssueNo.Contains("01"))
             {
                 revisedItems = null;
@@ -35,34 +38,100 @@ namespace Prism.Managers.ChangeManager
             }
             else
             {
-                string xmlPath = ReturnXmlPath(currentIssueNo, fileLocation, phaseNumber);
-
-                var previousSelection = LoadFromXml(xmlPath);
-
-                var oldFittingDictionary = previousSelection.FittingMarkCounts.ToDictionary(fmc => fmc.Mark, fmc => fmc.Count);
+                ReturnXmlPath(currentIssueNo, fileLocation, phaseNumber, out string previousIssuePath, out string currentIssuePath);
 
                 Console.WriteLine("Fetching new steel info for comparison...");
-                var currentSelection = TeklaHelper.GetSelectedSteelInfo(model);
 
-                var newFittingDictionary = CreateFittingDictionary(currentSelection);
+                //  List<MyAssembly> newAssemblyList = new List<MyAssembly>();
 
-                var omittedMembers = TeklaHelper.CompareSteelLists(previousSelection.Assemblies, currentSelection, oldFittingDictionary, newFittingDictionary);
+                // Ensure newAssemblyList is a ConcurrentBag to safely add items in parallel
+                ConcurrentBag<MyAssembly> newAssemblyList = new ConcurrentBag<MyAssembly>();
 
-                FormChangeLists(currentSelection, omittedMembers);
+                var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
+                int processedCount = 0;
+
+                Parallel.ForEach(selectedObjects.AssembliesList, parallelOptions, ass =>
+                {
+                    MyAssembly myAssembly = CheckForAndGetExistingData(previousIssuePath + "\\", ass, model);
+                    //  FormChangeLists(myAssembly); // Ensure this operation is thread-safe if uncommented
+                    newAssemblyList.Add(myAssembly);
+
+                    int currentCount = Interlocked.Increment(ref processedCount);
+
+                    // Throttle UI updates to avoid overwhelming the UI thread
+                    //   if (currentCount % 5 == 0 || currentCount == totalCount)
+                    toolStrip.Invoke(new System.Action(() =>
+                    {
+                        label.Text = $"Comparing Objects: {currentCount} of {selectedObjects.AssembliesList.Count}";
+                    }));
+                });
+
+
+                /*      foreach (Assembly ass in selectedObjects.AssembliesList)
+                      {
+                          MyAssembly myAssembly = CheckForAndGetExistingData(previousIssuePath + "\\", ass, model);
+                       //   FormChangeLists(myAssembly);
+                          newAssemblyList.Add(myAssembly);
+                      }*/
+
+                Dictionary<string, int> oldFittingCounter = LoadDictionaryFromXml(previousIssuePath + "\\Fitting Count.xml");
+                Dictionary<string, int> newFittingCount = LoadDictionaryFromXml(currentIssuePath + "\\Fitting Count.xml");
+                Dictionary<string, int> oldAssemblyCounter = LoadDictionaryFromXml(previousIssuePath + "\\Assembly Count.xml");
+                Dictionary<string, int> newAssemblyCounter = LoadDictionaryFromXml(currentIssuePath + "\\Assembly Count.xml");
+
+                List<MyFitting> fittingCompairsonResult = TeklaHelper.IdentifyDifferencesInLists(oldFittingCounter, newFittingCount);
+                (List<string> messages, List<MyAssembly> omittedAssemblies) = TeklaHelper.IdentifyDifferencesInLists(oldAssemblyCounter, newAssemblyCounter, newAssemblyList.ToList(), fittingCompairsonResult);
+
+                FormChangeLists(newAssemblyList, fittingCompairsonResult, omittedAssemblies);
+
+                //  TeklaHelper.GetSelectedSteelInfo(model, fileLocation, selectedObjects);
+                //
+                //   var newFittingDictionary = CreateFittingDictionary(currentSelection);
+                //
+                //   var omittedMembers = TeklaHelper.CompareSteelLists(previousSelection.Assemblies, currentSelection, oldFittingDictionary, newFittingDictionary);
 
                 revisedItems = _revisedItems;
                 omitItems = _omitItems;
                 addItems = _addItems;
 
                 return WriteMyChangeMessage(fileLocation, phaseNumber, projectData, out messageForEmail);
-
-
-
                 //  Logging.LogProgress(model.GetProjectInfo().Name, currentSelection.Count(), differenceMessages.Count());
             }
         }
 
-        private static string ReturnXmlPath(string issueNumber, string fileLocation, string phaseNumber)
+        private static Dictionary<string, int> DeserializeOldCounter(string fileToDeserialize)
+        {
+            return LoadDictionaryFromXml(fileToDeserialize);
+        }
+
+        private static MyAssembly CheckForAndGetExistingData(string filePath, Assembly myAssembly, Model model)
+        {
+            //  we need to check this method works, it should return the list of xmls and do a basic comparison of assemlies.
+            //    var xmlFiles = Directory.GetFiles(filePath, "*.xml");
+            // Use LINQ to find the matching XML file
+
+            MyAssembly newAssembly = MyAssembly.CreateMyAssembly(myAssembly, model);
+
+            var matchingFile = Directory
+                .EnumerateFiles(filePath, "*.xml") // Get all XML files in the directory
+                .Select(file => new FileInfo(file)) // Convert file paths to FileInfo objects for easier manipulation
+                .FirstOrDefault(fileInfo => fileInfo.Name.Equals(myAssembly.GetMainPart().Identifier.GUID + ".xml", StringComparison.OrdinalIgnoreCase)); // Find the first file that matches the assembly GUID
+
+            if (matchingFile != null)
+            {
+                // A matching file is found, load and return the XML document
+                TeklaHelper.CompareSimilarItems(newAssembly, matchingFile.FullName);
+            }
+            else
+            {
+                // No matching XML found meaning this part is new
+
+            }
+            return newAssembly;
+        }
+
+
+        private static void ReturnXmlPath(string issueNumber, string fileLocation, string phaseNumber, out string previousIssuePath, out string currentIssuePath)
         {
             // If the selectedItem contains "(new)", it implies this is a new issue, so we extract the numeric part only
             if (issueNumber.Contains("(new)"))
@@ -73,12 +142,15 @@ namespace Prism.Managers.ChangeManager
             if (int.TryParse(issueNumber, out int issueNo))
             {
                 IssueNo = $"{issueNo:D2}";
-                issueNo--; // Decrease the issueNo by 1
+
             }
 
-
-            return $"{fileLocation}\\Phase {phaseNumber} - Issue {issueNo:D2}.xml";
+            currentIssuePath = $"{fileLocation}\\Phase {phaseNumber} - Issue {issueNo:D2}";
+            issueNo--; // Decrease the issueNo by 1
+            previousIssuePath = $"{fileLocation}\\Phase {phaseNumber} - Issue {issueNo:D2}";
         }
+
+
 
         private static bool WriteMyChangeMessage(string fileLocation, string phaseNumber, PrismProjectData projectData, out string finalHtmlMessage)
         {
@@ -184,7 +256,7 @@ namespace Prism.Managers.ChangeManager
                 messageForm.SetMessage(finalMessage);
                 messageForm.ShowDialog();
                 int stopReportContinue = messageForm.ContinueProgram;
-             
+
                 finalHtmlMessage = string.Join("", htmlMessages);
                 if (stopReportContinue == 0)
                 {
@@ -214,33 +286,45 @@ namespace Prism.Managers.ChangeManager
             }
         }
 
-        private static void WriteNewXML(Model model, string issueNumber, string fileLocation, string phaseNumber)
+        private static void WriteNewXML(Model model, string issueNumber, string fileLocation, string phaseNumber, SelectedObjects selectedObjects, ToolStrip toolStrip, ToolStripStatusLabel label)
         {
-            var currentSelection = TeklaHelper.GetSelectedSteelInfo(model);
+            string filetoWrite = fileLocation + "\\" + "Phase " + phaseNumber + " - Issue " + issueNumber.Substring(0, 2);
 
-            var fittingDictionary = CreateFittingDictionary(currentSelection);
+            Directory.CreateDirectory(filetoWrite);
 
-            var wrapper = new SerializationWrapper
-            {
-                Assemblies = currentSelection,
-                FittingMarkCounts = fittingDictionary.Select(kvp => new FittingMarkCount { Mark = kvp.Key, Count = kvp.Value }).ToList()
-            };
-
-            string filetoWrite = fileLocation + "\\" + "Phase " + phaseNumber + " - Issue " + issueNumber.Substring(0, 2) + ".xml";
-            SaveToXml(wrapper, filetoWrite);
+            TeklaHelper.CreateAssemblyXmls(model, filetoWrite, selectedObjects, toolStrip, label);
         }
 
-
-        private static void FormChangeLists(List<MyAssembly> myAssemblies, List<SteelItemBase> omittedAssemblies)
+        private static void FormChangeLists(MyAssembly myAssembly)
         {
-            _omitItems.AddRange(omittedAssemblies);
-            foreach (MyAssembly assembly in myAssemblies)
+            //   _omitItems.Add(omittedAssembly);
+
+            AddItemToList(myAssembly);
+            foreach (MyFitting fitting in myAssembly.Fittings)
             {
-                AddItemToList(assembly);
-                foreach (MyFitting fitting in assembly.Fittings)
+                AddItemToList(fitting);
+            }
+
+        }
+
+        private static void FormChangeLists(ConcurrentBag<MyAssembly> myAssemblies, List<MyFitting> comparisonResult, List<MyAssembly> omittedAssemblies)//, SteelItemBase omittedAssembly)
+        {
+            //   _omitItems.Add(omittedAssembly);
+            foreach (MyAssembly myAssembly in myAssemblies)
+            {
+                AddItemToList(myAssembly);
+                foreach (MyFitting fitting in myAssembly.Fittings)
                 {
                     AddItemToList(fitting);
                 }
+            }
+            foreach (MyFitting f in comparisonResult)
+            {
+                AddItemToList(f);
+            }
+            foreach (MyAssembly f in omittedAssemblies)
+            {
+                AddItemToList(f);
             }
         }
 
@@ -283,29 +367,60 @@ namespace Prism.Managers.ChangeManager
             return fittingMarkCounts;
         }
 
-        private static SerializationWrapper LoadFromXml(string filePath)
+        /*   private static SerializationWrapper LoadFromXml(string filePath)
+          {
+               if (!File.Exists(filePath))
+               {
+                   return new SerializationWrapper();
+               }
+
+               var serializer = new XmlSerializer(typeof(SerializationWrapper));
+               using (var reader = new StreamReader(filePath))
+               {
+                   return (SerializationWrapper)serializer.Deserialize(reader);
+
+               }
+           }*/
+
+        private static Dictionary<string, int> LoadDictionaryFromXml(string filePath)
         {
             if (!File.Exists(filePath))
             {
-                return new SerializationWrapper();
+                return new Dictionary<string, int>();
             }
 
-            var serializer = new XmlSerializer(typeof(SerializationWrapper));
+            var serializer = new XmlSerializer(typeof(KeyValueListWrapper));
             using (var reader = new StreamReader(filePath))
             {
-                return (SerializationWrapper)serializer.Deserialize(reader);
-
+                var result = (KeyValueListWrapper)serializer.Deserialize(reader);
+                // Convert List<KeyValueItem> to Dictionary<string, int>
+                return result.Items.ToDictionary(item => item.Key, item => item.Value);
             }
         }
 
-        private static void SaveToXml(SerializationWrapper wrapper, string filePath)
-        {
-            var serializer = new XmlSerializer(typeof(SerializationWrapper));
-            using (var writer = new StreamWriter(filePath))
-            {
-                serializer.Serialize(writer, wrapper);
-            }
-        }
+        /* private static Dictionary<string, int> LoadDictionaryFromXml(string filePath)
+         {
+             if (!File.Exists(filePath))
+             {
+                 return new Dictionary<string, int>();
+             }
+
+             var serializer = new XmlSerializer(typeof(SerializationWrapper));
+             using (var reader = new StreamReader(filePath))
+             {
+                 return (Dictionary<string, int>)serializer.Deserialize(reader);
+
+             }
+         }*/
+
+        /*  private static void SaveToXml(SerializationWrapper wrapper, string filePath)
+          {
+              var serializer = new XmlSerializer(typeof(SerializationWrapper));
+              using (var writer = new StreamWriter(filePath))
+              {
+                  serializer.Serialize(writer, wrapper);
+              }
+          }*/
 
         public static void PopulateIssueNumbers(ref ComboBox cmb_IssueNo, ref TextBox txt_PhaseNo, string fileLocation)
         {
@@ -315,12 +430,16 @@ namespace Prism.Managers.ChangeManager
             if (string.IsNullOrWhiteSpace(phaseNumber) || string.IsNullOrWhiteSpace(fileLocation))
                 return; // do nothing if either phase number or file location is empty
 
-            var xmlFiles = Directory.GetFiles(fileLocation, $"*Phase {phaseNumber}*.xml");
+            if(!Directory.Exists(fileLocation))
+            {
+                Directory.CreateDirectory(fileLocation);
+            }
+            var phaseDirectories = Directory.GetDirectories(fileLocation, $"*Phase {phaseNumber}*");
 
             var issueNumbers = new List<int>();
-            foreach (var file in xmlFiles)
+            foreach (var directory in phaseDirectories)
             {
-                var match = Regex.Match(Path.GetFileName(file), $"Phase {phaseNumber} - Issue (\\d+).xml");
+                var match = Regex.Match(Path.GetFileName(directory), $"Phase {phaseNumber} - Issue (\\d+)");
                 if (match.Success)
                 {
                     if (int.TryParse(match.Groups[1].Value, out var issueNumber))

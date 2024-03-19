@@ -223,7 +223,6 @@ namespace Prism
             return false; // User chose not to delete, or there was an issue
         }
 
-
         //This method is not used yet, it will be required when drawing printing is enabled.
         public void RemoveUnusedFolders()
         {

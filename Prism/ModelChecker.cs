@@ -114,11 +114,12 @@ namespace Prism
             PhasesDoNotMatchParts.Clear();
         }
 
-        public static bool MemberOrientationIsCorrect(SelectedObjects myObjects, out IgnoreType ignore)
+        public static bool MemberOrientationIsCorrect(SelectedObjects selectedObjects, out IgnoreType ignore)
         {
             IncorrectOrientation.Clear();
-            MemberOrientation(myObjects);
+            MemberOrientation(selectedObjects);
             //ModelChecker.IncorrectOrientation.Clear(); //if this line is active all orientation functionallity is disabled
+   
             ignore = PrismWarnings.DisplayOrderErrors(IncorrectOrientation, Error.Orientation);
 
             if (ignore == IgnoreType.Stop)

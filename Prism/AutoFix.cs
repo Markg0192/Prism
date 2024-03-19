@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using Tekla.Structures.Geometry3d;
 using Tekla.Structures.Model;
@@ -18,29 +19,33 @@ namespace Prism
             PrismWarnings.ErrorsFixed(ModelChecker.IncorrectNameAndClass.Count);
         }
 
-        public static void MemberOrientation()
+        public static void MemberOrientation(SelectedObjects selectedObjects)
         {
             foreach (Beam b in ModelChecker.IncorrectOrientation)
             {
+                //we need to change the beams in the selected parts list, not the incorrectorientation list, this linq sorts that out
+                Beam matchingPart = selectedObjects.SelectedModelParts.FirstOrDefault(part => part.Identifier.GUID == b.Identifier.GUID) as Beam;
+
                 if (b.Name == GdomValues.BeamName || b.Name == GdomValues.RafterName || b.Name == GdomValues.PortalRafterName || b.Name == GdomValues.BraceName)
                 {
-                    SwapHandles(b);
+                    SwapHandles(matchingPart);
+                    matchingPart.Modify();
                 }
                 if (b.Name == GdomValues.ColumnName)
                 {
-                    if (b.Position.Rotation == Position.RotationEnum.TOP)
+                    if (matchingPart.Position.Rotation == Position.RotationEnum.TOP)
                     {
-                        b.Position.Rotation = Position.RotationEnum.BELOW;
+                        matchingPart.Position.Rotation = Position.RotationEnum.BELOW;
                     }
-                    if (b.Position.Rotation == Position.RotationEnum.BACK)
+                    if (matchingPart.Position.Rotation == Position.RotationEnum.BACK)
                     {
-                        b.Position.Rotation = Position.RotationEnum.FRONT;
-                    }
-                    if (b.StartPoint.Z > b.EndPoint.Z)
+                        matchingPart.Position.Rotation = Position.RotationEnum.FRONT;
+                    }                    
+                    if (matchingPart.StartPoint.Z > matchingPart.EndPoint.Z)
                     {
-                        SwapHandles(b);
+                        SwapHandles(matchingPart);
                     }
-                    b.Modify();
+                    matchingPart.Modify();
                 }
             }
             PrismWarnings.ErrorsFixed(ModelChecker.IncorrectOrientation.Count);
@@ -48,11 +53,11 @@ namespace Prism
 
         private static void SwapHandles(Beam b)
         {
-            Point start = b.StartPoint;
+            Point startPoint = b.StartPoint;
             Point endPoint = b.EndPoint;
             b.StartPoint = endPoint;
-            b.EndPoint = start;
-            b.Modify();
+            b.EndPoint = startPoint;
+           
         }
 
         public static void ExecutionClass()

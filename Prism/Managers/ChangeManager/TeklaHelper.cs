@@ -3,66 +3,141 @@ using Prism.CustomDialogs;
 using Prism.Geometry;
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using System.Security.Policy;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml;
+using System.Xml.Serialization;
 using Tekla.Structures.Model;
 using static Prism.Enum;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using Assembly = Tekla.Structures.Model.Assembly;
+using Label = System.Windows.Forms.Label;
 using Model = Tekla.Structures.Model.Model;
+using Task = System.Threading.Tasks.Task;
 
 namespace Prism
 {
     public class TeklaHelper
     {
-        public static List<MyAssembly> GetSelectedSteelInfo(Model model)
+        public static void CreateAssemblyXmls(Model model, string filePath, SelectedObjects selectedObjects, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
         {
-            var selectedComponents = new List<MyAssembly>();
-             
-            ModelObjectEnumerator moe = new Tekla.Structures.Model.UI.ModelObjectSelector().GetSelectedObjects();
-            moe.SelectInstances = false;
+            var allUnsupportedTypes = new ConcurrentBag<string>();
+            int totalCount = selectedObjects.AssembliesList.Count;
+            int xmlProcessedCount = 0;
+            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
+            var assemblyCounts = new ConcurrentDictionary<string, int>();
+            var fittingCounts = new ConcurrentDictionary<string, int>();
 
-            var allUnsupportedTypes = new HashSet<string>();
-
-            double moeCount = moe.GetSize();
-            double currentIteration = 0;
-
-            foreach (var obj in moe)
-            {
-                currentIteration++;
-                if (obj is Part part)
+                // Process MyAssembly objects in parallel
+                Parallel.ForEach(selectedObjects.AssembliesList, parallelOptions, assembly =>
                 {
-                    if (part.Identifier.GUID == part.GetAssembly().GetMainPart().Identifier.GUID)
+                    var myAssembly = MyAssembly.CreateMyAssembly(assembly, model);
+
+                    assemblyCounts.AddOrUpdate(myAssembly.PartMark, 1, (key, oldValue) => oldValue + 1);
+                    Parallel.ForEach(myAssembly.Fittings, parallelOptions, fitting =>
                     {
-                        var result = MyAssembly.CreateMyAssembly(part, model);
-                        selectedComponents.Add(result.Assembly);
-                        foreach (var type in result.UnsupportedTypes)
-                        {
-                            allUnsupportedTypes.Add(type);
-                        }
+                        fittingCounts.AddOrUpdate(fitting.PartMark, 1, (key, oldValue) => oldValue + 1);
+                    });
+
+                    string localFileName = Path.Combine(filePath, $"{myAssembly.Guid}.xml");
+
+                    using (var xmlWriter = XmlWriter.Create(localFileName, new XmlWriterSettings { Indent = true }))
+                    {
+                        new XmlSerializer(typeof(MyAssembly)).Serialize(xmlWriter, myAssembly);
                     }
-                }
-            }
+
+                    UpdateStatusLabelWithXmlProgress(ref xmlProcessedCount, toolStrip, statusLabel, totalCount);
+                });
+
+            SerializeData(assemblyCounts, fittingCounts, filePath);
 
             if (allUnsupportedTypes.Count > 0)
             {
-                var message = "The following fitting types are unsupported and have not been processed across assemblies:\n\n" +
-                              string.Join(", ", allUnsupportedTypes) +
-                              "\n\nContact help for more information.";
+                // Handle unsupported types
+            }
+            toolStrip.Invoke(new System.Action(() =>
+            {
+                statusLabel.Text = "Data saved, creating Fab Package";
+            }));
 
-                MessageBox.Show(message);
+            // Optional: Force a garbage collection if memory usage is still high after processing
+            // GC.Collect();
+        }
+
+        private static void UpdateStatusLabelWithXmlProgress(ref int processedCount, ToolStrip toolStrip, ToolStripStatusLabel statusLabel, int totalCount)
+        {
+            int currentCount = Interlocked.Increment(ref processedCount);
+
+            // Throttle UI updates to avoid overwhelming the UI thread
+            //   if (currentCount % 5 == 0 || currentCount == totalCount)
+            toolStrip.Invoke(new System.Action(() =>
+            {
+                statusLabel.Text = $"Storing Assembly data: {currentCount} of {totalCount}";
+            }));
+        }
+
+        private static void SerializeData(ConcurrentDictionary<string, int> assemblyCounts, ConcurrentDictionary<string, int> fittingCounts, string filePath)
+        {
+            // Convert ConcurrentDictionary to KeyValueListWrapper
+            var assemblyCountsWrapper = new KeyValueListWrapper
+            {
+                Items = assemblyCounts.Select(kvp => new KeyValueItem(kvp.Key, kvp.Value)).ToList()
+            };
+
+            var fittingCountsWrapper = new KeyValueListWrapper
+            {
+                Items = fittingCounts.Select(kvp => new KeyValueItem(kvp.Key, kvp.Value)).ToList()
+            };
+
+            // Serialize the wrappers
+            var serializer = new XmlSerializer(typeof(KeyValueListWrapper));
+
+            using (var xmlWriter = XmlWriter.Create(filePath + "\\Assembly Count.xml", new XmlWriterSettings { Indent = true }))
+            {
+                serializer.Serialize(xmlWriter, assemblyCountsWrapper);
             }
 
-            return selectedComponents;
+            using (var xmlWriter = XmlWriter.Create(filePath + "\\Fitting Count.xml", new XmlWriterSettings { Indent = true }))
+            {
+                serializer.Serialize(xmlWriter, fittingCountsWrapper);
+            }
+        }
+
+        public class KeyValueItem
+        {
+            public string Key { get; set; }
+            public int Value { get; set; }
+
+            public KeyValueItem() { } // Parameterless constructor for serialization
+
+            public KeyValueItem(string key, int value)
+            {
+                Key = key;
+                Value = value;
+            }
+        }
+
+        public class KeyValueListWrapper
+        {
+            public List<KeyValueItem> Items { get; set; } = new List<KeyValueItem>();
+
+            public KeyValueListWrapper() { } // Parameterless constructor for serialization
         }
 
         public static List<SteelItemBase> CompareSteelLists(List<MyAssembly> oldList, List<MyAssembly> newList, Dictionary<string, int> oldFittingDictionary, Dictionary<string, int> newFittingDictionary)
         {
             var omittedParts = new List<SteelItemBase>();
 
-            var comparisonResult = IdentifyDifferencesInLists(oldFittingDictionary, newFittingDictionary);
+            List<MyFitting> comparisonResult = IdentifyDifferencesInLists(oldFittingDictionary, newFittingDictionary);
             omittedParts.AddRange(comparisonResult.Where(a => a.Modification == ModificationType.Omit || a.Modification == ModificationType.OmitRevise));
 
             // Filtering out modifications with ModificationType.Unassigned
@@ -70,14 +145,26 @@ namespace Prism
 
             var (differenceMessages, omittedAssemblies) = DetectPartMarkCountDifferences(oldList, newList, comparisonResult);
 
-            DetectChangesInExistingMembers(oldList, newList, comparisonResult); // this gets me all the changes not related to number of assemblies.
+            //     DetectChangesInExistingMembers(oldList, newList);//, comparisonResult); // this gets me all the changes not related to number of assemblies.
 
             omittedParts.AddRange(omittedAssemblies);
 
             return omittedParts;
         }
 
-        private static List<MyFitting> IdentifyDifferencesInLists(Dictionary<string, int> oldPartMarkCounts, Dictionary<string, int> newPartMarkCounts)
+        public static void CompareSimilarItems(MyAssembly newAssembly, string oldXml)
+        {
+            MyAssembly oldAssembly = null;
+            var serializer = new XmlSerializer(typeof(MyAssembly));
+            using (var reader = new StreamReader(oldXml))
+            {
+                oldAssembly = (MyAssembly)serializer.Deserialize(reader);
+            }
+
+            DetectChangesInExistingMembers(oldAssembly, newAssembly);//, comparisonResult); // this gets me all the changes not related to number of assemblies.
+        }
+
+        public static List<MyFitting> IdentifyDifferencesInLists(Dictionary<string, int> oldPartMarkCounts, Dictionary<string, int> newPartMarkCounts)
         {
             var modifications = new Dictionary<string, ModificationType>();
             var messages = new List<string>();
@@ -128,7 +215,6 @@ namespace Prism
             }
 
             //this area needs tidied, look at maybe need add, and a new mod type, AddRevise, similar to omit revise.
-
             foreach (var kvp in newPartMarkCounts)
             {
                 var partMark = kvp.Key;
@@ -146,8 +232,6 @@ namespace Prism
             }
 
             return modifiedParts;
-
-
         }
 
         private static List<string> IdentifyDifferencesInLists(Dictionary<string, int> oldPartMarkCounts, Dictionary<string, int> newPartMarkCounts, MyAssembly assembly)
@@ -205,7 +289,8 @@ namespace Prism
 
         }
 
-        private static (List<string> Messages, List<MyAssembly> omittedAssemblies) IdentifyDifferencesInLists(Dictionary<string, int> oldPartMarkCounts, Dictionary<string, int> newPartMarkCounts, List<MyAssembly> newList, List<MyFitting> comparisonResult)
+        public static (List<string> Messages, List<MyAssembly> omittedAssemblies) IdentifyDifferencesInLists(Dictionary<string, int> oldPartMarkCounts,
+            Dictionary<string, int> newPartMarkCounts, List<MyAssembly> newList, List<MyFitting> comparisonResult)
         {
             List<MyAssembly> omittedAssemblies = new List<MyAssembly>();
             var messages = new List<string>();
@@ -220,9 +305,10 @@ namespace Prism
                 if (!oldPartMarkCounts.ContainsKey(partMark))
                 {
                     var assembliesToUpdate = newList.Where(x => x.PartMark == partMark);
+
                     foreach (MyAssembly assembly in assembliesToUpdate)
                     {
-                        if(assembly.Fittings.Count > 0) assembly.ChangeMessages.Add($"{newCount} No. added each containing:");
+                        if (assembly.Fittings.Count > 0) assembly.ChangeMessages.Add($"{newCount} No. added each containing:");
                         foreach (var fitting in assembly.Fittings)
                         {
                             assembly.ChangeMessages.Add($"Fitting - {fitting.PartMark} - {fitting.ProfileString}");
@@ -258,6 +344,7 @@ namespace Prism
                     {
                         MyAssembly ass = new MyAssembly();
                         ass.PartMark = partMark;
+                        ass.Modification = ModificationType.Omit;
                         ass.ChangeMessages.Add("This member has been completly removed.");
                         omittedAssemblies.Add(ass);
 
@@ -271,12 +358,12 @@ namespace Prism
                             int numberOfChange = Math.Abs(newCount - oldCount);
                             if (newCount < oldCount) //The number of pieces has been reduced but not fully removed, an omit that requires a revised drawing
                             {
-                                assembly.Modification = ModificationType.Revise;
+                                assembly.Modification = ModificationType.OmitRevise;
                                 messages.Add($"Beam number {assembly.PartMark} has reduced in number by {numberOfChange}.");
 
                                 MyAssembly ass = new MyAssembly();
                                 ass.PartMark = partMark;
-                                ass.ChangeMessages.Add($"Member has reduced in number by {numberOfChange}.");                                
+                                ass.ChangeMessages.Add($"Member has reduced in number by {numberOfChange}.");
                                 omittedAssemblies.Add(ass);
                                 assembly.ChangeMessages.Add($"Member has reduced in number by {numberOfChange}.");
                             }
@@ -308,41 +395,34 @@ namespace Prism
             return IdentifyDifferencesInLists(oldPartMarkCounts, newPartMarkCounts, assembly);
         }
 
-        private static IEnumerable<string> DetectChangesInExistingMembers(List<MyAssembly> oldList, List<MyAssembly> newList, List<MyFitting> fittingCollection)
+        private static IEnumerable<string> DetectChangesInExistingMembers(MyAssembly oldAssembly, MyAssembly newAssembly)//, List<MyFitting> fittingCollection)
         {
             var messages = new List<string>();
 
-            foreach (var oldAssembly in oldList)
-            {
-                var matchingNewAssembly = newList.FirstOrDefault(x => x.Guid == oldAssembly.Guid);
-                if (matchingNewAssembly != null) //then there is an assembly number in the new list that matches on from the old list.
-                {
-                    DetectPartMarkCountDifferences(oldAssembly.Fittings, matchingNewAssembly.Fittings, matchingNewAssembly);
-                    messages.AddRange(CompareProperties(oldAssembly, matchingNewAssembly, matchingNewAssembly)); //Compare all myAssembly properties
+            DetectPartMarkCountDifferences(oldAssembly.Fittings, newAssembly.Fittings, newAssembly);
+            messages.AddRange(CompareProperties(oldAssembly, newAssembly, newAssembly)); //Compare all myAssembly properties
 
-                    messages.AddRange(CompareBoltsWeldsAndCuts(oldAssembly, matchingNewAssembly, matchingNewAssembly));
+            messages.AddRange(CompareBoltsWeldsAndCuts(oldAssembly, newAssembly, newAssembly));
 
-                    messages.AddRange(DetectChangesInExistingFittings(oldAssembly.Fittings, matchingNewAssembly.Fittings, matchingNewAssembly, fittingCollection));
-                }
-            }
+            messages.AddRange(DetectChangesInExistingFittings(oldAssembly.Fittings, newAssembly.Fittings, newAssembly));//, fittingCollection));
 
             return messages;
         }
 
-        private static IEnumerable<string> DetectChangesInExistingFittings(List<MyFitting> oldList, List<MyFitting> newList, MyAssembly newAssembly, List<MyFitting> modifications)
+        private static IEnumerable<string> DetectChangesInExistingFittings(List<MyFitting> oldList, List<MyFitting> newList, MyAssembly newAssembly)//, List<MyFitting> modifications)
         {
             var messages = new List<string>();
 
-            foreach (var newFitting in newList) // Iterating over newList to check every new fitting against modifications dictionary.
-            {
-                MyFitting matchingFitting = modifications.FirstOrDefault(x => x.PartMark == newFitting.PartMark);
+            /*   foreach (var newFitting in newList) // Iterating over newList to check every new fitting against modifications dictionary.
+               {
+                   MyFitting matchingFitting = modifications.FirstOrDefault(x => x.PartMark == newFitting.PartMark);
 
-                if (matchingFitting != null) // Check if the PartMark is in the modifications dictionary
-                {
-                    newFitting.Modification = matchingFitting.Modification;
-                    newFitting.ChangeMessages = matchingFitting.ChangeMessages;// If it is, update the fitting's Modification property with the value from the dictionary
-                }
-            }
+                   if (matchingFitting != null) // Check if the PartMark is in the modifications dictionary
+                   {
+                       newFitting.Modification = matchingFitting.Modification;
+                       newFitting.ChangeMessages = matchingFitting.ChangeMessages;// If it is, update the fitting's Modification property with the value from the dictionary
+                   }
+               }*/
 
             foreach (var oldFitting in oldList)
             {
@@ -422,7 +502,7 @@ namespace Prism
                 if (property.Name == "Modification")
                     continue;
 
-                if(property.Name.Contains("ContourPoint"))
+                if (property.Name.Contains("ContourPoint"))
                 {
                     Console.WriteLine("");
                 }
@@ -439,7 +519,7 @@ namespace Prism
                 if (property.PropertyType != typeof(string) && typeof(IEnumerable).IsAssignableFrom(property.PropertyType))
                 {
                     string test = oldObject.GetType().Name;
-                    if(oldObject.GetType().FullName == "")
+                    if (oldObject.GetType().FullName == "")
                     { }
                     var oldEnumerable = oldValue as IEnumerable;
                     var newEnumerable = newValue as IEnumerable;
@@ -447,7 +527,7 @@ namespace Prism
 
                     var oldList = oldEnumerable?.Cast<object>().ToList() ?? new List<object>();
                     var newList = newEnumerable?.Cast<object>().ToList() ?? new List<object>();
-                     
+
                     // Determine the type of the elements in the IEnumerable
                     Type elementType = property.PropertyType.IsGenericType
                                         ? property.PropertyType.GetGenericArguments()[0]
@@ -459,7 +539,7 @@ namespace Prism
 
                         // Logic for handling differences in collections
                         string changeMessage = GetMyChangeMessage(property, oldValue, newValue, ref pointMove, type); //$"{type} {property.Name} collection has changed";
-                        
+
                         if (newFitting == null)
                         {
                             newAssembly.ChangeMessages.Add(changeMessage);
@@ -527,11 +607,11 @@ namespace Prism
             {
                 changeMessage = HandleBoltPropertyChange(property.Name, oldValue, newValue, ref pointMove, type, measurement);
             }
-            else if(type.Contains("Cut"))
+            else if (type.Contains("Cut"))
             {
                 changeMessage = HandleCutChangeProperty(property.Name);
             }
-            else 
+            else
             {
                 changeMessage = $"{type} {property.Name} has changed from {oldValue ?? "null"}{measurement} to {newValue ?? "null"}{measurement}";
             }

@@ -28,7 +28,7 @@ namespace Prism
         public static void CreateBoltOrder(ReportManager reportManager, string siteDate, List<BoltGroup> unorderedBoltGroups)
         {
             ModelModifiers.SelectBolts(unorderedBoltGroups);
-            reportManager.CreateBoltList(reportManager.FabReportPrefix, "Order Bolts");
+            reportManager.CreateSelectedBoltList(reportManager.FabReportPrefix, "Order Bolts");
             reportManager.Folders.ZipFolder(reportManager.Folders.BoltPath);
             EmailWriter.WriteBoltOrderEmail(reportManager.ProjectData, reportManager.FabReportPrefix, reportManager.IssueNum, reportManager.PhaseNum, siteDate, reportManager.Folders.BoltPath);
         }
