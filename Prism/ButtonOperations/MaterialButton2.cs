@@ -19,9 +19,10 @@ namespace Prism.ButtonOperations
 
                 if (ignore == IgnoreType.AutoFix)
                 {
-                    AutoFix.MemberOrientation();
+                    AutoFix.MemberOrientation(myObjects);
                 }
 
+                model.CommitChanges();
                 Logging.LogProgress(projectData.ProjNumberAndName, "Material 2", 0, myObjects.AssembliesList.Count);
                 return true;
             }

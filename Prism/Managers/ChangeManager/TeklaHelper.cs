@@ -18,6 +18,7 @@ using System.Xml;
 using System.Xml.Serialization;
 using Tekla.Structures.Model;
 using static Prism.Enum;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Assembly = Tekla.Structures.Model.Assembly;
 using Label = System.Windows.Forms.Label;
 using Model = Tekla.Structures.Model.Model;
@@ -27,46 +28,65 @@ namespace Prism
 {
     public class TeklaHelper
     {
-        // Add a parameter for the form or status label control if this method is not part of the form class
         public static void CreateAssemblyXmls(Model model, string filePath, SelectedObjects selectedObjects, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
         {
             var allUnsupportedTypes = new ConcurrentBag<string>();
             int totalCount = selectedObjects.AssembliesList.Count;
-            int processedCount = 0;
-
+            int xmlProcessedCount = 0;
             var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
-
             var assemblyCounts = new ConcurrentDictionary<string, int>();
             var fittingCounts = new ConcurrentDictionary<string, int>();
 
-            Parallel.ForEach(selectedObjects.AssembliesList, parallelOptions, assembly =>
-            {
-                var myAssembly = MyAssembly.CreateMyAssembly(assembly, model);
-
-                assemblyCounts.AddOrUpdate(myAssembly.PartMark, 1, (key, oldValue) => oldValue + 1);
-                Parallel.ForEach(myAssembly.Fittings, parallelOptions, fitting =>
+                // Process MyAssembly objects in parallel
+                Parallel.ForEach(selectedObjects.AssembliesList, parallelOptions, assembly =>
                 {
-                    fittingCounts.AddOrUpdate(fitting.PartMark, 1, (key, oldValue) => +1);
+                    var myAssembly = MyAssembly.CreateMyAssembly(assembly, model);
+
+                    assemblyCounts.AddOrUpdate(myAssembly.PartMark, 1, (key, oldValue) => oldValue + 1);
+                    Parallel.ForEach(myAssembly.Fittings, parallelOptions, fitting =>
+                    {
+                        fittingCounts.AddOrUpdate(fitting.PartMark, 1, (key, oldValue) => oldValue + 1);
+                    });
+
+                    string localFileName = Path.Combine(filePath, $"{myAssembly.Guid}.xml");
+
+                    using (var xmlWriter = XmlWriter.Create(localFileName, new XmlWriterSettings { Indent = true }))
+                    {
+                        new XmlSerializer(typeof(MyAssembly)).Serialize(xmlWriter, myAssembly);
+                    }
+
+                    UpdateStatusLabelWithXmlProgress(ref xmlProcessedCount, toolStrip, statusLabel, totalCount);
                 });
 
-                string localFileName = Path.Combine(filePath, $"{myAssembly.Guid}.xml");
+            SerializeData(assemblyCounts, fittingCounts, filePath);
 
-                using (var xmlWriter = XmlWriter.Create(localFileName, new XmlWriterSettings { Indent = true }))
-                {
-                    new XmlSerializer(typeof(MyAssembly)).Serialize(xmlWriter, myAssembly);
-                }
+            if (allUnsupportedTypes.Count > 0)
+            {
+                // Handle unsupported types
+            }
+            toolStrip.Invoke(new System.Action(() =>
+            {
+                statusLabel.Text = "Data saved, creating Fab Package";
+            }));
 
-                int currentCount = Interlocked.Increment(ref processedCount);
+            // Optional: Force a garbage collection if memory usage is still high after processing
+            // GC.Collect();
+        }
 
-                // Throttle UI updates to avoid overwhelming the UI thread
-                //   if (currentCount % 5 == 0 || currentCount == totalCount)
-                toolStrip.Invoke(new System.Action(() =>
-                {
-                    statusLabel.Text = $"Storing Assembly data: {currentCount} of {totalCount}";
-                }));
-            });
+        private static void UpdateStatusLabelWithXmlProgress(ref int processedCount, ToolStrip toolStrip, ToolStripStatusLabel statusLabel, int totalCount)
+        {
+            int currentCount = Interlocked.Increment(ref processedCount);
 
+            // Throttle UI updates to avoid overwhelming the UI thread
+            //   if (currentCount % 5 == 0 || currentCount == totalCount)
+            toolStrip.Invoke(new System.Action(() =>
+            {
+                statusLabel.Text = $"Storing Assembly data: {currentCount} of {totalCount}";
+            }));
+        }
 
+        private static void SerializeData(ConcurrentDictionary<string, int> assemblyCounts, ConcurrentDictionary<string, int> fittingCounts, string filePath)
+        {
             // Convert ConcurrentDictionary to KeyValueListWrapper
             var assemblyCountsWrapper = new KeyValueListWrapper
             {
@@ -90,18 +110,6 @@ namespace Prism
             {
                 serializer.Serialize(xmlWriter, fittingCountsWrapper);
             }
-
-            if (allUnsupportedTypes.Count > 0)
-            {
-                // Handle unsupported types
-            }
-            toolStrip.Invoke(new System.Action(() =>
-                               {
-                                   statusLabel.Text = "Data saved, creating Fab Package";
-                               }));
-
-            // Optional: Force a garbage collection if memory usage is still high after processing
-            GC.Collect();
         }
 
         public class KeyValueItem
@@ -125,42 +133,11 @@ namespace Prism
             public KeyValueListWrapper() { } // Parameterless constructor for serialization
         }
 
-
-
-
-        /*
-         * public static void GetSelectedSteelInfo(Model model, string filePath, SelectedObjects selectedObjects)
-                {
-                    var allUnsupportedTypes = new HashSet<string>();
-
-                    foreach (Assembly ass in selectedObjects.AssembliesList)
-                    {
-                        var result = MyAssembly.CreateMyAssembly(ass, model);
-
-                        string localFileName = filePath + $"\\{result.Guid}.xml";
-
-                        var serializer = new XmlSerializer(typeof(MyAssembly));
-                        using (var writer = new StreamWriter(localFileName))
-                        {
-                            serializer.Serialize(writer, result);
-                        }
-                    }
-
-                    if (allUnsupportedTypes.Count > 0)
-                    {
-                        var message = "The following fitting types are unsupported and have not been processed across assemblies:\n\n" +
-                                      string.Join(", ", allUnsupportedTypes) +
-                                      "\n\nContact help for more information.";
-
-                        MessageBox.Show(message);
-                    }
-                }*/
-
         public static List<SteelItemBase> CompareSteelLists(List<MyAssembly> oldList, List<MyAssembly> newList, Dictionary<string, int> oldFittingDictionary, Dictionary<string, int> newFittingDictionary)
         {
             var omittedParts = new List<SteelItemBase>();
 
-            var comparisonResult = IdentifyDifferencesInLists(oldFittingDictionary, newFittingDictionary);
+            List<MyFitting> comparisonResult = IdentifyDifferencesInLists(oldFittingDictionary, newFittingDictionary);
             omittedParts.AddRange(comparisonResult.Where(a => a.Modification == ModificationType.Omit || a.Modification == ModificationType.OmitRevise));
 
             // Filtering out modifications with ModificationType.Unassigned
@@ -187,7 +164,7 @@ namespace Prism
             DetectChangesInExistingMembers(oldAssembly, newAssembly);//, comparisonResult); // this gets me all the changes not related to number of assemblies.
         }
 
-        private static List<MyFitting> IdentifyDifferencesInLists(Dictionary<string, int> oldPartMarkCounts, Dictionary<string, int> newPartMarkCounts)
+        public static List<MyFitting> IdentifyDifferencesInLists(Dictionary<string, int> oldPartMarkCounts, Dictionary<string, int> newPartMarkCounts)
         {
             var modifications = new Dictionary<string, ModificationType>();
             var messages = new List<string>();
@@ -238,7 +215,6 @@ namespace Prism
             }
 
             //this area needs tidied, look at maybe need add, and a new mod type, AddRevise, similar to omit revise.
-
             foreach (var kvp in newPartMarkCounts)
             {
                 var partMark = kvp.Key;
@@ -256,8 +232,6 @@ namespace Prism
             }
 
             return modifiedParts;
-
-
         }
 
         private static List<string> IdentifyDifferencesInLists(Dictionary<string, int> oldPartMarkCounts, Dictionary<string, int> newPartMarkCounts, MyAssembly assembly)
@@ -315,7 +289,8 @@ namespace Prism
 
         }
 
-        private static (List<string> Messages, List<MyAssembly> omittedAssemblies) IdentifyDifferencesInLists(Dictionary<string, int> oldPartMarkCounts, Dictionary<string, int> newPartMarkCounts, List<MyAssembly> newList, List<MyFitting> comparisonResult)
+        public static (List<string> Messages, List<MyAssembly> omittedAssemblies) IdentifyDifferencesInLists(Dictionary<string, int> oldPartMarkCounts,
+            Dictionary<string, int> newPartMarkCounts, List<MyAssembly> newList, List<MyFitting> comparisonResult)
         {
             List<MyAssembly> omittedAssemblies = new List<MyAssembly>();
             var messages = new List<string>();
@@ -330,6 +305,7 @@ namespace Prism
                 if (!oldPartMarkCounts.ContainsKey(partMark))
                 {
                     var assembliesToUpdate = newList.Where(x => x.PartMark == partMark);
+
                     foreach (MyAssembly assembly in assembliesToUpdate)
                     {
                         if (assembly.Fittings.Count > 0) assembly.ChangeMessages.Add($"{newCount} No. added each containing:");
@@ -368,6 +344,7 @@ namespace Prism
                     {
                         MyAssembly ass = new MyAssembly();
                         ass.PartMark = partMark;
+                        ass.Modification = ModificationType.Omit;
                         ass.ChangeMessages.Add("This member has been completly removed.");
                         omittedAssemblies.Add(ass);
 
@@ -381,7 +358,7 @@ namespace Prism
                             int numberOfChange = Math.Abs(newCount - oldCount);
                             if (newCount < oldCount) //The number of pieces has been reduced but not fully removed, an omit that requires a revised drawing
                             {
-                                assembly.Modification = ModificationType.Revise;
+                                assembly.Modification = ModificationType.OmitRevise;
                                 messages.Add($"Beam number {assembly.PartMark} has reduced in number by {numberOfChange}.");
 
                                 MyAssembly ass = new MyAssembly();

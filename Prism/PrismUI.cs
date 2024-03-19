@@ -169,7 +169,7 @@ namespace Prism
 
             if (!await Task.Run(() => InitialSetup(StageTypes.RocketPacket, false))) { EndFunction(0); return; }
 
-            int rocketPartLimit = 500;
+            int rocketPartLimit = 100;
             int numberOfSelectedParts = _selectedObjects.SelectedModelParts.Count;
             if (numberOfSelectedParts > rocketPartLimit)
             {
@@ -193,7 +193,7 @@ namespace Prism
             ModelChecker.ClearOldLists();
             _selectedObjects = new SelectedObjects(stageType, phaseNum, issueNum);
 
-            if (Environment.UserName != "mark.gibson")
+            //if (Environment.UserName != "mark.gibson")
             {
                 if (checkForPreviousSteps && !ModelChecker.ArePreviousStepsComplete(_selectedObjects, (int)stageType))
                 {
@@ -341,7 +341,7 @@ namespace Prism
 
         private void EndFunction(int cancelledOrComplete, bool isOmit = false) //0 = cancelled 1 = Complete
         {
-            if (!isOmit) _selectedObjects.SelectedModelParts.SelectParts();
+            if (!isOmit && _selectedObjects != null && _selectedObjects.SelectedModelParts != null) _selectedObjects.SelectedModelParts.SelectParts();
             string message = cancelledOrComplete == 0 ? "Cancelled" : "Complete";
             flowLayoutPanel1.BackColor = cancelledOrComplete == 0 ? Color.Tomato : Color.PaleGreen;
             flowLayoutPanel1.Enabled = true;
@@ -421,7 +421,7 @@ namespace Prism
             {
                 int orderAction = PrismWarnings.SpecialFittingOrder();
 
-                if (!await Task.Run(() => InitialSetup(StageTypes.Prelim3, true))) { EndFunction(0); return false; };
+                if (!await Task.Run(() => InitialSetup(StageTypes.Prelim3, false))) { EndFunction(0); return false; };
                 if (orderAction == 2 || orderAction == 3) //then user wants to create a material order
                 {
                     if (!OrderSpecials(orderAction, orderType, StageTypes.Prelim3, myReportManager)) { EndFunction(0); return false; }
