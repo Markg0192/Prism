@@ -1,15 +1,6 @@
-﻿using System.Collections;
-using static Prism.Enums;
-using Tekla.Structures.Model;
+﻿using Tekla.Structures.Model;
 using System.Collections.Generic;
-using System.Configuration.Assemblies;
-using System.Diagnostics;
-using System;
-using RenderData;
-using System.CodeDom;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using Task = System.Threading.Tasks.Task;
 
 namespace Prism
@@ -18,7 +9,6 @@ namespace Prism
     {
         public static async void ExportIndividualIFC(this SelectedObjects selectedObjects, string myFolder, string vaultContractNumber)
         {
-            //To run the bswx exporter we need to give it an input, this input can be an ArrayList, only 1 part is required, the exporter will then create a bswx of all parts selected in the model
             await Task.Run(() => RunIFCExport(selectedObjects.AssembliesList, myFolder, vaultContractNumber));
 
             selectedObjects.SelectedModelParts.SelectParts();
@@ -26,12 +16,13 @@ namespace Prism
 
         private static void RunIFCExport(List<Assembly> assemblyList, string localFolder, string vaultContractNumber)
         {
-           // string myFolder = $@"\\sfrplc.local\\public\\DrawingVault\\TestContracts\\{vaultContractNumber}\\IFC";
+            // string myFolder = $@"\\sfrplc.local\\public\\DrawingVault\\TestContracts\\{vaultContractNumber}\\IFC";
             string myFolder = localFolder;
             foreach (Assembly assembly in assemblyList)
             {
-               ExportIFC(assembly, myFolder);
+                ExportIFC(assembly, myFolder);
             }
+            CleanFolder(myFolder);
         }
 
         private static void ExportIFC(Assembly assembly, string myFolder)
@@ -47,7 +38,18 @@ namespace Prism
             component.LoadAttributesFromFile("-SEV-IFC");
             component.SetAttribute("OutputFile", $"{myFolder}/{assembly.Identifier}");
             component.Insert();
-            File.Delete($"{myFolder}/{assembly.Identifier}.log");
+          //  File.Delete($"{myFolder}/{assembly.Identifier}.log");
+        }
+
+        static void CleanFolder(string folderPath)
+        {
+            // Get all .log files in the folder
+            string[] logFiles = Directory.GetFiles(folderPath + "\\", "*.log");
+
+            foreach (string file in logFiles)
+            {
+                File.Delete(file);
+            }
         }
     }
 }

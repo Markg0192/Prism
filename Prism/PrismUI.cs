@@ -16,6 +16,7 @@ using Model = Tekla.Structures.Model.Model;
 using Task = System.Threading.Tasks.Task;
 using TextBox = System.Windows.Forms.TextBox;
 using Point = Tekla.Structures.Geometry3d.Point;
+using System.IO;
 
 namespace Prism
 {
@@ -35,7 +36,7 @@ namespace Prism
         {
             StartFunction();
 
-            if (!await Task.Run(() => InitialSetup(StageTypes.Prelim1, false))) { EndFunction(0); return; }
+            if (!await Task.Run(() => InitialSetup(StageTypes.Prelim1, false, "x", "x", statusStrip_Mat, MaterialStatusLabel))) { EndFunction(0); return; }
 
             if (!await Task.Run(() => _selectedObjects.MaterialButton1op(_projectData, (int)StageTypes.Prelim1))) { EndFunction(0); return; }
 
@@ -48,7 +49,7 @@ namespace Prism
         {
             StartFunction();
 
-            if (!await Task.Run(() => InitialSetup(StageTypes.Prelim2, true))) { EndFunction(0); return; };
+            if (!await Task.Run(() => InitialSetup(StageTypes.Prelim2, true, "x", "x", statusStrip_Mat, MaterialStatusLabel))) { EndFunction(0); return; };
 
             if (!await Task.Run(() => _selectedObjects.MaterialButton2op(txt_StartNumber.Text, (int)StageTypes.Prelim2, _projectData, _model))) { EndFunction(0); return; }
 
@@ -71,7 +72,7 @@ namespace Prism
             {
                 if (!orderType.Contains("Bolts"))
                 {
-                    if (!await Task.Run(() => InitialSetup(StageTypes.Prelim3, true))) { EndFunction(0); return; };
+                    if (!await Task.Run(() => InitialSetup(StageTypes.Prelim3, true, "x", "x", statusStrip_Mat, MaterialStatusLabel))) { EndFunction(0); return; };
                 }
                 else { ModelChecker.ClearOldLists(); }
 
@@ -92,7 +93,7 @@ namespace Prism
         {
             StartFunction();
 
-            if (!await Task.Run(() => InitialSetup(StageTypes.Check1, false))) { EndFunction(0); return; }
+            if (!await Task.Run(() => InitialSetup(StageTypes.Check1, false, "x", "x", statusStrip_Det, DetailingStatusLabel))) { EndFunction(0); return; }
 
             if (!await Task.Run(() => _selectedObjects.DetailButton1op(_projectData, (int)StageTypes.Check1))) { EndFunction(0); return; }
 
@@ -104,7 +105,7 @@ namespace Prism
             StartFunction();
 
             ModelModifiers.ResetWorkPlane(_model);
-            if (!await Task.Run(() => InitialSetup(StageTypes.Check2, true))) { EndFunction(0); return; }
+            if (!await Task.Run(() => InitialSetup(StageTypes.Check2, true, "x", "x", statusStrip_Det, DetailingStatusLabel))) { EndFunction(0); return; }
 
             string orientationType = cmb_ColumnOrientationType.Text; //we need this to avoid cross threading. (unsure why...)
             if (!await Task.Run(() => _selectedObjects.DetailButton2op(_projectData, (int)StageTypes.Check2, orientationType, txt_PlateOnFlange.Text))) { return; }
@@ -116,7 +117,7 @@ namespace Prism
         {
             StartFunction();
 
-            if (!await Task.Run(() => InitialSetup(StageTypes.Check3, true))) { EndFunction(0); return; }
+            if (!await Task.Run(() => InitialSetup(StageTypes.Check3, true, "x", "x", statusStrip_Det, DetailingStatusLabel))) { EndFunction(0); return; }
 
             if (!_selectedObjects.DetailButton3op(_projectData, (int)StageTypes.Check3)) { EndFunction(0); return; }
 
@@ -181,17 +182,24 @@ namespace Prism
         }
 
         private void btn_SpecialOperations_Click(object sender, EventArgs e)
-        { 
+        {
+            Logging.NCFailed("TeST");
+
+           // SelectedObjects onbjects = new SelectedObjects(StageTypes.FAB, "1", "1");
+           // IFCExporter.ExportIndividualIFC(onbjects, $@"{_model.GetInfo().ModelPath}\PrismIFCExportTest", "");
+
+
+
          /*   _projectData = new PrismProjectData(_model.GetProjectInfo(), _model.GetInfo().ModelPath, _webService);
             DrawingManager dm = new DrawingManager(_model, _projectData, "10", "10");
             dm.CreateDrawingList();*/
         }
 
-        public bool InitialSetup(StageTypes stageType, bool checkForPreviousSteps, string phaseNum = "x", string issueNum = "x")
+        public bool InitialSetup(StageTypes stageType, bool checkForPreviousSteps, string phaseNum = "x", string issueNum = "x", ToolStrip toolStrip = null, ToolStripStatusLabel statusLabel = null)
         {
             SetStatusLabels("Gathering Parts");
             ModelChecker.ClearOldLists();
-            _selectedObjects = new SelectedObjects(stageType, phaseNum, issueNum);
+            _selectedObjects = new SelectedObjects(stageType, phaseNum, issueNum, toolStrip, statusLabel);
 
             //if (Environment.UserName != "mark.gibson")
             {
@@ -227,7 +235,7 @@ namespace Prism
 
             GetPhaseAndIssueNumber(out string phaseNum, out string issueNum, out bool runChangeManager);
 
-            if (!await Task.Run(() => InitialSetup(StageTypes.FAB, stageType == StageTypes.FAB, phaseNum, issueNum))) { EndFunction(0); return; }
+            if (!await Task.Run(() => InitialSetup(StageTypes.FAB, stageType == StageTypes.FAB, phaseNum, issueNum, statusStrip_Fab, StatusLabel))) { EndFunction(0); return; }
 
             if (!_selectedObjects.NumbersUpToDate) { SetStatusLabels("Numbers not up to date"); EndFunction(0); return; }
 
@@ -251,13 +259,31 @@ namespace Prism
 
             ReportManager myReportManager = new ReportManager(_projectData, phaseNumber.Text, issueNum);
 
-            if (!await Task.Run(() => _selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber.Text, issueNum, stageType, txt_SiteDate.Text, runSeversafe, runChangeManager, statusStrip6, StatusLabel))) { EndFunction(0); return; }
+            if (!await Task.Run(() => _selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber.Text, issueNum, stageType, txt_SiteDate.Text, runSeversafe, runChangeManager, statusStrip_Fab, StatusLabel))) { EndFunction(0); return; }
 
             await Task.Run(() => FabMisc.FabMiscOp(_model, txt_SiteDate.Text, _selectedObjects, runSeversafe, myReportManager, divisionNo, _projectData, runChangeManager));
+
+            if(!CheckNcCreation(myReportManager))
+            {
+                PrismWarnings.NcDataCreationFailed();
+                Logging.NCFailed(_projectData.ProjNumberAndName);
+            }
 
             Logging.AddToFabCompleteCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndGuid));
 
             EndFunction(1);
+        }
+
+        private bool CheckNcCreation(ReportManager reportManager)
+        {
+            // Get the location of the folder to search
+            string fabPackageLocation = reportManager.Folders.FabPath;
+
+            // Path of the file to check
+            string fileToCheck = fabPackageLocation+ "\\NC";
+
+            // Check if the file exists in the specified directory
+            return Directory.Exists(fileToCheck);
         }
 
         private void GetPhaseAndIssueNumber(out string phaseNum, out string issueNum, out bool runChangeManager)

@@ -66,6 +66,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
+            this.label2.BackColor = System.Drawing.Color.Transparent;
             this.label2.Location = new System.Drawing.Point(17, 67);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(33, 16);
@@ -87,7 +88,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImage = global::Prism.Properties.Resources.watereddownlogo;
-            this.ClientSize = new System.Drawing.Size(363, 151);
+            this.ClientSize = new System.Drawing.Size(365, 159);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.btn_Close);

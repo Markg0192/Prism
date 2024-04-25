@@ -214,16 +214,12 @@ namespace Prism
                 await System.Threading.Tasks.Task.Delay(10);
             }
 
-            
             bool create3Report = false;
             bool create4Report = false;
             string sectionSize;
 
             bool shopBoltsPresent = boltList.Any(pbg => pbg.isShop && !pbg.isShearStud && !pbg.isOrdered);   //is a shop bolt but not a shear stud
             bool siteBoltsPresent = boltList.Any(pbg => !pbg.isShop && !pbg.isShearStud && !pbg.isOrdered); //Is neither shop bolt or shear stud
-
-            //  bool siteBoltsPresent = boltList[0].Count > 0 ? true : false;
-            //   bool shopBoltsPresent = boltList[1].Count > 0 ? true : false;
 
             foreach (Part part in partsList)
             {
@@ -257,10 +253,6 @@ namespace Prism
             Operation.CreateReportFromSelected(assemblyReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output6Name}"), _title1, _title2, _title3);
             Operation.CreateReportFromSelected(fusionMapReport, Path.Combine(Folders.DspPath, $"{FabReportPrefix}{_output7Name}"), _title1, _title2, _title3);
 
-            Operation.CreateNCFilesFromSelected(NC2023Setting1, Folders.NcPath + "\\");// Path.Combine(Folders.NcPath, " "));
-            Operation.CreateNCFilesFromSelected(NC2023Setting2, Folders.NcPath + "\\");// Path.Combine(Folders.NcPath, " "));
-            Operation.CreateNCFilesFromSelected(NC2023Setting3, Folders.NcPath + "\\");// Path.Combine(Folders.NcPath, " "));
-            sort out he branches before moving on
             if (create3Report)
             {
                 Operation.CreateReportFromSelected(hrMemberReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output2Name}"), _title1, _title2, _title3);
@@ -304,26 +296,21 @@ namespace Prism
             Operation.CreateNCFilesFromSelected(platesSec2023, Folders.NcPath + "\\");
             Operation.CreateNCFilesFromSelected(profilesMain2023, Folders.NcPath + "\\");
             Operation.CreateNCFilesFromSelected(profilesSec2023, Folders.NcPath + "\\");
+
+
         }
 
         public static async void SelectDrawingsInDocManager(List<Part> selectedParts)
         {
-            if (PrismMacroBuilder.DrawingOperations())
-                /*  {
-                     Logging.DebugLog("Macro Built", "");
-                  }
-                  else { Logging.DebugLog("Macro not built", ""); }*/
+            PrismMacroBuilder.DrawingOperations();
 
-                if (selectedParts != null) selectedParts.SelectParts();
-            //  Logging.DebugLog("Selected parts", "");
+            if (selectedParts != null) selectedParts.SelectParts();
 
             Operation.RunMacro(Constants.DrawingOperation);
-            //Logging.DebugLog("Drawing operation complete", "");
 
             while (Operation.IsMacroRunning()) // Wait until macro for selecting drawings in the document manager is complete before moving on
             {
                 await System.Threading.Tasks.Task.Delay(10);
-                //  Logging.DebugLog("Drawing operation wait", "");
             }
         }
 

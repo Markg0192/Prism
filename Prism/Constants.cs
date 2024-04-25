@@ -21,6 +21,7 @@ namespace Prism
         public static int PrismUnassignedDrawingsLocation = 6;
         public static int PrismUserUserLogLocation = 7;
         public static int PrismModelData = 8;
+        public static int PrismNCFailed = 9;
 
         public static string FabsecCarcassIndicator = "Fabsec Carcass";
         public static string FabsecModelShaftIndicator = "Carcass Created From Member";
@@ -49,7 +50,8 @@ namespace Prism
         {
             List<string> specialOperationUsers = new List<string>
             {
-               "mark.gibson",
+                "Ian.Partridge",
+                "mark.gibson",
                 "jourdan.taylor",
                 "conan.mulholland",
                 "Matthew.Poots"
