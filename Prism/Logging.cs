@@ -292,16 +292,35 @@ namespace Prism
 
         public static void LoginMessage(string modelName, string message)
         {
-            if (Environment.UserName != "mark. gibson")
+            if (Environment.UserName != "mark.gibson")
             {
+                string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
                 string[] content = new string[]
                 {
+                    
                     "--------------------------------------------------------------------------------------------------",
                     $"{DateTime.Now} - User: {Environment.UserName} - Model: {modelName}",
-                    $"{message}"
+                    $"Version {version} - {message}"
                 };
 
                 WebService.WriteAppendStringsToFile(Constants.PrismLoginLogLocation, content, "");
+            }
+        }
+
+        public static void NCFailed(string modelName)
+        {
+            if (Environment.UserName != "mark.gibson")
+            {
+                string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+                string[] content = new string[]
+                {
+
+                    "--------------------------------------------------------------------------------------------------",
+                    $"{DateTime.Now} - User: {Environment.UserName} - Model: {modelName}",
+                    $"NC Failed - Prism {version}"
+                };
+
+                WebService.WriteAppendStringsToFile(Constants.PrismDebugLogLoction, content, "");
             }
         }
 

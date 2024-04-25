@@ -85,6 +85,13 @@ namespace Prism
             CreateOKForm(notUpToDateMessage, notUpToDateTitle);
         }
 
+        public static void NcDataCreationFailed()
+        {
+            string notUpToDateMessage = $"NC Data creation failed:\r\rNo NC has been created, if this was not the intention please create this manually and add to your package.";
+            const string notUpToDateTitle = "No NC found";
+            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+        }
+
         public static void IgnoreFittingCheck()
         {
             const string notUpToDateMessage = "Without selecting a location Prism cannot filter abnormal fittings.";

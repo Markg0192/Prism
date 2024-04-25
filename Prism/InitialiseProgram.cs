@@ -15,7 +15,7 @@ namespace Prism
             Application.SetCompatibleTextRenderingDefault(false);
 
            // Application.Run(new PrismUI());
-            Launcher.Launch(new PrismUI());
+           Launcher.Launch(new PrismUI());
         }
     }
 }

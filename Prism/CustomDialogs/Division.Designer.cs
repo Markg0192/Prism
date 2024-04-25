@@ -122,6 +122,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Division";
             this.Text = "Division";
+            this.TopMost = true;
             this.ResumeLayout(false);
             this.PerformLayout();
 

@@ -296,6 +296,8 @@ namespace Prism
             Operation.CreateNCFilesFromSelected(platesSec2023, Folders.NcPath + "\\");
             Operation.CreateNCFilesFromSelected(profilesMain2023, Folders.NcPath + "\\");
             Operation.CreateNCFilesFromSelected(profilesSec2023, Folders.NcPath + "\\");
+
+
         }
 
         public static async void SelectDrawingsInDocManager(List<Part> selectedParts)

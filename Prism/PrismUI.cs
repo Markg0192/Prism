@@ -16,6 +16,7 @@ using Model = Tekla.Structures.Model.Model;
 using Task = System.Threading.Tasks.Task;
 using TextBox = System.Windows.Forms.TextBox;
 using Point = Tekla.Structures.Geometry3d.Point;
+using System.IO;
 
 namespace Prism
 {
@@ -181,7 +182,14 @@ namespace Prism
         }
 
         private void btn_SpecialOperations_Click(object sender, EventArgs e)
-        { 
+        {
+            Logging.NCFailed("TeST");
+
+           // SelectedObjects onbjects = new SelectedObjects(StageTypes.FAB, "1", "1");
+           // IFCExporter.ExportIndividualIFC(onbjects, $@"{_model.GetInfo().ModelPath}\PrismIFCExportTest", "");
+
+
+
          /*   _projectData = new PrismProjectData(_model.GetProjectInfo(), _model.GetInfo().ModelPath, _webService);
             DrawingManager dm = new DrawingManager(_model, _projectData, "10", "10");
             dm.CreateDrawingList();*/
@@ -255,9 +263,27 @@ namespace Prism
 
             await Task.Run(() => FabMisc.FabMiscOp(_model, txt_SiteDate.Text, _selectedObjects, runSeversafe, myReportManager, divisionNo, _projectData, runChangeManager));
 
+            if(!CheckNcCreation(myReportManager))
+            {
+                PrismWarnings.NcDataCreationFailed();
+                Logging.NCFailed(_projectData.ProjNumberAndName);
+            }
+
             Logging.AddToFabCompleteCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndGuid));
 
             EndFunction(1);
+        }
+
+        private bool CheckNcCreation(ReportManager reportManager)
+        {
+            // Get the location of the folder to search
+            string fabPackageLocation = reportManager.Folders.FabPath;
+
+            // Path of the file to check
+            string fileToCheck = fabPackageLocation+ "\\NC";
+
+            // Check if the file exists in the specified directory
+            return Directory.Exists(fileToCheck);
         }
 
         private void GetPhaseAndIssueNumber(out string phaseNum, out string issueNum, out bool runChangeManager)
