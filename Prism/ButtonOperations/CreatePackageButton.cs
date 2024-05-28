@@ -36,7 +36,7 @@ namespace Prism.ButtonOperations
 
             if (!Constants.IsSpecialPerson()) { myObjects.ExportBSWX(reportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType); }
   
-            reportManager.CreateFabReports(myObjects.NonSeversafeParts, myObjects.PrismBoltGroups);
+            reportManager.CreateFabReports(myObjects.NonSeversafeParts, myObjects.PrismBoltGroups, teklaVersion);
 
             if (!myObjects.NonSeversafeParts.ModifyAttributes((int)stageType, projectData)) { return false; }
 
