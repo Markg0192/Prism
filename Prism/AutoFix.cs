@@ -10,28 +10,28 @@ namespace Prism
     {
         public static void PartNameAndClass()
         {
-            foreach (Part p in ModelChecker.IncorrectNameAndClass)
+            foreach (PrismPart p in ModelChecker.IncorrectNameAndClass)
             {
-                List<string> myClass = GdomValues.PartClass()[p.Name] as List<string>;
-                p.Class = myClass[0];
-                p.Modify();
+                List<string> myClass = GdomValues.PartClass()[p.Part.Name] as List<string>;
+                p.Part.Class = myClass[0];
+                p.Part.Modify();
             }
             PrismWarnings.ErrorsFixed(ModelChecker.IncorrectNameAndClass.Count);
         }
 
         public static void MemberOrientation(SelectedObjects selectedObjects)
         {
-            foreach (Beam b in ModelChecker.IncorrectOrientation)
+            foreach (PrismPart b in ModelChecker.IncorrectOrientation)
             {
                 //we need to change the beams in the selected parts list, not the incorrectorientation list, this linq sorts that out
-                Beam matchingPart = selectedObjects.SelectedModelParts.FirstOrDefault(part => part.Identifier.GUID == b.Identifier.GUID) as Beam;
+                Beam matchingPart = selectedObjects.SelectedModelParts.FirstOrDefault(part => part.Identifier.GUID == b.Part.Identifier.GUID) as Beam;
 
-                if (b.Name == GdomValues.BeamName || b.Name == GdomValues.RafterName || b.Name == GdomValues.PortalRafterName || b.Name == GdomValues.BraceName)
+                if (b.Part.Name == GdomValues.BeamName || b.Part.Name == GdomValues.RafterName || b.Part.Name == GdomValues.PortalRafterName || b.Part.Name == GdomValues.BraceName)
                 {
                     SwapHandles(matchingPart);
                     matchingPart.Modify();
                 }
-                if (b.Name == GdomValues.ColumnName)
+                if (b.Part.Name == GdomValues.ColumnName)
                 {
                     if (matchingPart.Position.Rotation == Position.RotationEnum.TOP)
                     {
@@ -63,17 +63,17 @@ namespace Prism
         public static void ExecutionClass()
         {
             int myExcClass = PrismWarnings.ExecutionClassWarning();
-            foreach (Part p in ModelChecker.MissingExecutionClass)
+            foreach (PrismPart p in ModelChecker.MissingExecutionClass)
             {
-                p.SetUserProperty(ModelUDA.ExcecutionClass(), myExcClass);
-                p.Modify();
+                p.Part.SetUserProperty(ModelUDA.ExcecutionClass(), myExcClass);
+                p.Part.Modify();
             }
             PrismWarnings.ErrorsFixed(ModelChecker.MissingExecutionClass.Count);
         }
 
         public static void AssemblyAndStartNumbers()
         {
-            foreach (ModelPart p in ModelChecker.StartNumbersDoNotMatch)
+            foreach (PrismPart p in ModelChecker.StartNumbersDoNotMatch)
             {
                 p.Part.AssemblyNumber.StartNumber = p.StartNumber;
                 p.Part.PartNumber.StartNumber = p.StartNumber;
@@ -84,7 +84,7 @@ namespace Prism
 
         public static void PartPhasing()
         {
-            foreach (ModelPart p in ModelChecker.PhasesDoNotMatch)
+            foreach (PrismPart p in ModelChecker.PhasesDoNotMatch)
             {
                 p.Part.SetPhase(p.Phase);
                 p.Part.Modify();

@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using Tekla.Structures;
 using Tekla.Structures.Drawing;
 using Tekla.Structures.Model;
-using static Tekla.Structures.Catalogs.AttributeConfiguration;
 
 //This class is temporarily not in use
 namespace Prism
@@ -81,29 +80,58 @@ namespace Prism
 
         private static void WaitForPrinting(string printFolder, int drawingCount)
         {
-            string folderPath = printFolder; // Replace with the actual folder path
-            int desiredFileCount = drawingCount; // Replace with the desired file count
+            string folderPath = printFolder;
+            int desiredFileCount = drawingCount;
 
             FileSystemWatcher watcher = new FileSystemWatcher(folderPath);
             watcher.EnableRaisingEvents = true;
             watcher.IncludeSubdirectories = false;
 
-            int currentFileCount = 0;
+            int currentFileCount = Directory.GetFiles(folderPath).Length;
+            int previousFileCount = currentFileCount;
+            bool countIncreased = false;
 
             watcher.Created += (sender, e) =>
             {
                 currentFileCount++;
-                Console.WriteLine("New file created. Current count: " + currentFileCount);
 
                 if (currentFileCount >= desiredFileCount)
                 {
                     watcher.EnableRaisingEvents = false; // Stop watching the folder
                 }
+
+                countIncreased = true; // File created, set flag to true
             };
 
             while (currentFileCount < desiredFileCount)
             {
-                Thread.Sleep(1000); // Delay for 1 second before checking again
+                Thread.Sleep(5000); // Delay for 5 seconds before checking again
+
+                if (!countIncreased)
+                {
+                    PrismWarnings.DrawingPrintFailed();
+                    watcher.EnableRaisingEvents = false;
+                    break;
+                }
+
+                int fileCountAfterCheck = Directory.GetFiles(folderPath).Length;
+
+                if (fileCountAfterCheck > previousFileCount)
+                {
+                    previousFileCount = fileCountAfterCheck;
+                    countIncreased = true; // Files increased, set flag to true
+                }
+                else
+                {
+                    countIncreased = false; // No new files found, set flag to false
+                }
+
+                currentFileCount = fileCountAfterCheck;
+            }
+
+            if (currentFileCount >= desiredFileCount)
+            {
+                Console.WriteLine("Desired file count reached.");
             }
         }
 

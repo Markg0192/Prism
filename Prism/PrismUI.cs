@@ -9,14 +9,18 @@ using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Tekla.Structures.Model;
-using Tekla.Structures.Model.History;
 using Tekla.Structures.Solid;
 using static Prism.Enums;
 using Model = Tekla.Structures.Model.Model;
 using Task = System.Threading.Tasks.Task;
 using TextBox = System.Windows.Forms.TextBox;
-using Point = Tekla.Structures.Geometry3d.Point;
 using System.IO;
+using Microsoft.Office.Interop.Excel;
+using Application = System.Windows.Forms.Application;
+using Microsoft.Win32;
+using System.Runtime.InteropServices;
+using Microsoft.Office.Interop.Outlook;
+using Tekla.Structures.Model.Operations;
 
 namespace Prism
 {
@@ -26,6 +30,7 @@ namespace Prism
         private PrismProjectData _projectData;
         public static SelectedObjects _selectedObjects;
         private WebService1 _webService;
+        private string _teklaVersion;
 
         public PrismUI()
         {
@@ -183,16 +188,7 @@ namespace Prism
 
         private void btn_SpecialOperations_Click(object sender, EventArgs e)
         {
-            Logging.NCFailed("TeST");
-
-           // SelectedObjects onbjects = new SelectedObjects(StageTypes.FAB, "1", "1");
-           // IFCExporter.ExportIndividualIFC(onbjects, $@"{_model.GetInfo().ModelPath}\PrismIFCExportTest", "");
-
-
-
-         /*   _projectData = new PrismProjectData(_model.GetProjectInfo(), _model.GetInfo().ModelPath, _webService);
-            DrawingManager dm = new DrawingManager(_model, _projectData, "10", "10");
-            dm.CreateDrawingList();*/
+            EmailWriter.WriteHelpEmail("2021");  
         }
 
         public bool InitialSetup(StageTypes stageType, bool checkForPreviousSteps, string phaseNum = "x", string issueNum = "x", ToolStrip toolStrip = null, ToolStripStatusLabel statusLabel = null)
@@ -220,8 +216,8 @@ namespace Prism
             if (_selectedObjects.LockedParts.Count > 0)
             {
                 SetStatusLabels("Locked Parts Selected");
-                PrismWarnings.LockedPartsSelected();
-                ModelModifiers.SetPartsRed(_selectedObjects.LockedParts);
+                PrismWarnings.LockedPartsSelected(_selectedObjects.LockedParts);
+                ModelModifiers.SetPartsRed(Convertor.PrismPartsToModelObjects(_selectedObjects.LockedParts));
                 return false;
             }
 
@@ -259,14 +255,18 @@ namespace Prism
 
             ReportManager myReportManager = new ReportManager(_projectData, phaseNumber.Text, issueNum);
 
-            if (!await Task.Run(() => _selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber.Text, issueNum, stageType, txt_SiteDate.Text, runSeversafe, runChangeManager, statusStrip_Fab, StatusLabel))) { EndFunction(0); return; }
+            if (!await Task.Run(() => _selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber.Text, issueNum, stageType, txt_SiteDate.Text, runSeversafe, runChangeManager, statusStrip_Fab, StatusLabel, _teklaVersion))) { EndFunction(0); return; }
 
             await Task.Run(() => FabMisc.FabMiscOp(_model, txt_SiteDate.Text, _selectedObjects, runSeversafe, myReportManager, divisionNo, _projectData, runChangeManager));
 
             if(!CheckNcCreation(myReportManager))
             {
                 PrismWarnings.NcDataCreationFailed();
-                Logging.NCFailed(_projectData.ProjNumberAndName);
+                Logging.NCFailed(_projectData.ProjNumberAndName, phaseNumber.Text, issueNum, Tekla.Structures.TeklaStructuresInfo.GetCurrentProgramVersion(), myReportManager.Folders.NcPath);
+            }
+            else
+            {
+                Logging.NCCreated(_projectData.ProjNumberAndName, phaseNumber.Text, issueNum, Tekla.Structures.TeklaStructuresInfo.GetCurrentProgramVersion(), myReportManager.Folders.NcPath);
             }
 
             Logging.AddToFabCompleteCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndGuid));
@@ -367,7 +367,7 @@ namespace Prism
 
         private void EndFunction(int cancelledOrComplete, bool isOmit = false) //0 = cancelled 1 = Complete
         {
-            if (!isOmit && _selectedObjects != null && _selectedObjects.SelectedModelParts != null) _selectedObjects.SelectedModelParts.SelectParts();
+            if (!isOmit && _selectedObjects != null && _selectedObjects.SelectedModelParts != null && cancelledOrComplete != 0) _selectedObjects.SelectedModelParts.SelectParts();
             string message = cancelledOrComplete == 0 ? "Cancelled" : "Complete";
             flowLayoutPanel1.BackColor = cancelledOrComplete == 0 ? Color.Tomato : Color.PaleGreen;
             flowLayoutPanel1.Enabled = true;
@@ -399,10 +399,37 @@ namespace Prism
             CompleteSetup();
         }
 
+        private static string ReadTeklaVersion()
+        {
+            var version = "2021.0";
+
+            try
+            {
+                var name = System.Reflection.Assembly.GetCallingAssembly().GetName();
+                using (var key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Severfield\\" + name.Name + "\\"))
+                {
+                    if (key != null)
+                    {
+                        var o = key.GetValue("TeklaVersion");
+                        if (o != null)
+                        {
+                            version = o as string;
+                        }
+                    }
+                }
+            }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
+            return version;
+        }
+
         private void CompleteSetup()
         {
             Logging.LoginMessage(_projectData.ProjName, "Login Succesful");
-
+            _teklaVersion = ReadTeklaVersion();
             Logging.CreateModelLog(_projectData);
             SetNextPrelimToUseLabel();
             SetStatusLabels($"Connected to: {_projectData.ProjNumber}-{_projectData.ProjName}");

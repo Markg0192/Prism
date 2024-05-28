@@ -207,7 +207,7 @@ namespace Prism
 
         }
 
-        public async void CreateFabReports(List<Part> partsList, List<PrismBoltGroup> boltList)
+        public async void CreateFabReports(List<Part> partsList, List<PrismBoltGroup> boltList, string teklaVersion)
         {
             while (Operation.IsMacroRunning()) // Wait until macro for selecting drawings in the document manager is complete before moving on
             {
@@ -233,7 +233,7 @@ namespace Prism
 
             CreateReports(boltList, create3Report, create4Report, shopBoltsPresent, siteBoltsPresent);
 
-            CreateNC();
+            CreateNC(teklaVersion);
 
             TextToPDF(Folders.ReportPath);
         }
@@ -278,26 +278,48 @@ namespace Prism
             }
         }
 
-        private void CreateNC()
+        private void CreateNC(string version)
         {
-            //The name of the settings used changed from tekla 2021 -> 2023, so, we set up and ruth both here, 
-            //No need to filter versions, it will attempt and fail to run 2023 type files if in 2021 and vice versa at no real cost
+            //The name of the settings used changed from tekla 2021 -> 2023, so, we set up and run both here,
+            if (version.Contains("2021"))
+            {
+                //2021 NC
+                string plateSetting2021 = "-SNI-PLATES";
+                string profileSetting2021 = "-SNI-PROFILES";
+                string shpRolePlates = "DSTV for plates";
+                string shpRoleForProfiles = "DSTV for profiles";
+                Operation.CreateNCFilesFromSelected(plateSetting2021, Folders.NcPath + "\\", true);
+                Operation.CreateNCFilesFromSelected(profileSetting2021, Folders.NcPath + "\\", true);
+                Operation.CreateNCFilesFromSelected(shpRolePlates, Folders.NcPath + "\\", false, "", true);
+                Operation.CreateNCFilesFromSelected(shpRoleForProfiles, Folders.NcPath + "\\", false, "", true);
+            }
+            else
+            {
+                //2023 NC
+                string platesSec2023 = "-SEV-PLATES-SEC";
+                string profilesMain2023 = "-SEV-PROFILES-MAIN";
+                string profilesSec2023 = "-SEV-PROFILES-SEC";
+                string profilesHollow2023 = "-SEV-PROFILES-MAIN-HOLLOW";
+                Operation.CreateNCFilesFromSelected(platesSec2023, Folders.NcPath + "\\", false, "", true);
+                Operation.CreateNCFilesFromSelected(profilesMain2023, Folders.NcPath + "\\", true, "", true);
+                Operation.CreateNCFilesFromSelected(profilesHollow2023, Folders.NcPath + "\\", true, "", true);
+                Operation.CreateNCFilesFromSelected(profilesSec2023, Folders.NcPath + "\\", false, "", true);
+            }
+            // Wait for the folder to have contents or timeout after 10 seconds
+            WaitForFolderContents(Folders.NcPath, TimeSpan.FromSeconds(10));
+        }
 
-            //2021 NC
-            string plateSetting2021 = "-SNI-PLATES";
-            string profileSetting2021 = "-SNI-PROFILES";
-            Operation.CreateNCFilesFromSelected(plateSetting2021, Folders.NcPath + "\\");
-            Operation.CreateNCFilesFromSelected(profileSetting2021, Folders.NcPath + "\\");
-
-            //2023 NC
-            string platesSec2023 = "-SEV-PLATES-SEC";
-            string profilesMain2023 = "-SEV-PROFILES-MAIN";
-            string profilesSec2023 = "-SEV-PROFILES-SEC";
-            Operation.CreateNCFilesFromSelected(platesSec2023, Folders.NcPath + "\\");
-            Operation.CreateNCFilesFromSelected(profilesMain2023, Folders.NcPath + "\\");
-            Operation.CreateNCFilesFromSelected(profilesSec2023, Folders.NcPath + "\\");
-
-
+        private void WaitForFolderContents(string folderPath, TimeSpan timeout)
+        {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            while (stopwatch.Elapsed < timeout)
+            {
+                if (Directory.GetFiles(folderPath).Length > 0)
+                {
+                    break;
+                }
+                System.Threading.Tasks.Task.Delay(500).Wait(); // Wait for 500 milliseconds before checking again
+            }
         }
 
         public static async void SelectDrawingsInDocManager(List<Part> selectedParts)

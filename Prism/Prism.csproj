@@ -26,7 +26,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>27</ApplicationRevision>
+    <ApplicationRevision>46</ApplicationRevision>
     <ApplicationVersion>2.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -124,6 +124,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CustomDialogs\OkWithReportForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CustomDialogs\OkWithReportForm.Designer.cs">
+      <DependentUpon>OkWithReportForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Managers\ChangeManager\StringIntDictionaryWrapper.cs" />
     <Compile Include="PrismBoltGroup.cs" />
     <Compile Include="Constants.cs" />
@@ -275,7 +281,6 @@
     <Compile Include="Order.cs" />
     <Compile Include="PrismMacroBuilder.cs" />
     <Compile Include="Managers\ViewManager.cs" />
-    <Compile Include="ModelPart.cs" />
     <Compile Include="ModelUDA.cs" />
     <Compile Include="Geometry\Plane2D.cs" />
     <Compile Include="Geometry\Point3D.cs" />
@@ -284,6 +289,7 @@
     <Compile Include="Managers\FolderManager.cs" />
     <Compile Include="ModelModifiers.cs" />
     <Compile Include="ModelChecker.cs" />
+    <Compile Include="PrismPart.cs" />
     <Compile Include="PrismUI.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -369,6 +375,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="CustomDialogs\OkForm.resx">
       <DependentUpon>OkForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CustomDialogs\OkWithReportForm.resx">
+      <DependentUpon>OkWithReportForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="CustomDialogs\ProjectControllers.resx">
       <DependentUpon>ProjectControllers.cs</DependentUpon>

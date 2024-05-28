@@ -1,6 +1,4 @@
-﻿//using Org.BouncyCastle.Utilities;
-using Microsoft.Office.Interop.Excel;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -30,7 +28,7 @@ namespace Prism
                 if (!skipMainFabsecProcessing)
                 {
                     myFabsecs.AddUniqueNumbering(model.GetProjectInfo());
-                    if (!myFabsecs.AddGreenToCarcasses()) return false;
+                    if (!myFabsecs.AddGreenToCarcasses(model, Enums.StageTypes.PrelimPG)) return false;
                     myFabsecs.SelectParts();
                     ModelModifiers.PerformNumbering();
                 }
@@ -69,7 +67,10 @@ namespace Prism
             ModelModifiers.ResetWorkPlane(model);
 
             List<ModelObject> myCarcasses = selectedObjects.FabsecParts.CopyPGs(selectedObjects);
-            if (!myCarcasses.AddGreenToCarcasses()) return false;
+
+            RemoveComponentsFromCopiedFabsecs(myCarcasses);
+
+            if (!myCarcasses.AddGreenToCarcasses(model, Enums.StageTypes.Unassigned)) return false;
             selectedObjects.FabsecParts.ChangeNumberingFromPGToStandard();
             model.CommitChanges();
             myCarcasses.ForceCarcassNumbering(model);
@@ -77,6 +78,29 @@ namespace Prism
             ModifyAttribute(selectedObjects.FabsecParts, ModelUDA.FabsecCarcassInfo(), Constants.FabsecModelShaftIndicator);
             ModifyAttribute(myCarcasses, ModelUDA.FabsecCarcassInfo(), Constants.FabsecCarcassIndicator);
             return true;
+        }
+
+        private static void RemoveComponentsFromCopiedFabsecs(List<ModelObject> copiedFabsecs)
+        {
+            foreach (ModelObject fabsec in copiedFabsecs)
+            {
+                var children = fabsec.GetChildren();
+                foreach (ModelObject child in children)
+                {
+                    if (child is Fitting)
+                    {
+                       var father = child.GetFatherComponent(); 
+                        if(father != null)
+                        {
+                            father.Delete();
+                        }
+                        else
+                        {
+                            child.Delete();
+                        }
+                    }      
+                }               
+            }
         }
 
         private static void ChangeNumberingFromPGToStandard(this List<ModelObject> fabsecs)
@@ -115,12 +139,12 @@ namespace Prism
                 {
                     string[] splitCarcassNumber = carcassPrelim.Split('-');
                     ms.Select(new ArrayList { carcass });
-                           carcass.PartNumber.Prefix = splitCarcassNumber[0] + "-";
-                           carcass.AssemblyNumber.Prefix = splitCarcassNumber[0] + "-";
-                           carcass.AssemblyNumber.StartNumber = 1;
-                           carcass.PartNumber.StartNumber = 1;
-                           carcass.Modify();
-                   // model.CommitChanges();
+                    carcass.PartNumber.Prefix = splitCarcassNumber[0] + "-";
+                    carcass.AssemblyNumber.Prefix = splitCarcassNumber[0] + "-";
+                    carcass.AssemblyNumber.StartNumber = 1;
+                    carcass.PartNumber.StartNumber = 1;
+                    carcass.Modify();
+                    // model.CommitChanges();
                     //  fullSelection.Add(carcass);
                     PrismMacroBuilder.FabsecNumberForcer(splitCarcassNumber[0], splitCarcassNumber[1]);
 
@@ -132,7 +156,7 @@ namespace Prism
         {
             List<Part> fabsecList = new List<Part>();
             string pgString = "PG";
-                        foreach (Part part in selectedObjects.SelectedModelParts)
+            foreach (Part part in selectedObjects.SelectedModelParts)
             {
                 if (part.Profile.ProfileString.StartsWith(pgString))
                 {
@@ -269,7 +293,7 @@ namespace Prism
             }
             return allFabsecs;
         }
-      
+
         private static void AddUniqueNumbering(this List<ModelObject> fabsecList, ProjectInfo pInfo)
         {
             List<Part> myParts = fabsecList.OfType<Part>().ToList();
@@ -366,7 +390,7 @@ namespace Prism
             }
         }
 
-        private static bool AddGreenToCarcasses(this List<ModelObject> fabsecCarcassList)
+        private static bool AddGreenToCarcasses(this List<ModelObject> fabsecCarcassList, Model model, Enums.StageTypes stageType)
         {
             double tolerance = 10;
             List<ModelObject> fabsecsFailedToAddLength = new List<ModelObject>();
@@ -385,10 +409,31 @@ namespace Prism
                     fabsecsFailedToAddLength.Add(carcass);
                 }
             }
-            if(fabsecsFailedToAddLength.Count > 0)
+            if (fabsecsFailedToAddLength.Count > 0)
             {
                 PrismWarnings.AddedLengthToFabsecFailed(fabsecsFailedToAddLength.Count);
-                return false;
+                if (!PrismWarnings.ContinueAnyway())
+                {
+                    if (stageType == Enums.StageTypes.PrelimPG)
+                    {
+                        foreach (Beam carcass in fabsecCarcassList)
+                        {
+                            carcass.StartPointOffset.Dx += carcassGreen;
+                            carcass.EndPointOffset.Dx -= carcassGreen;
+                            carcass.Modify();
+                        }
+                    }
+                    else
+                    {
+                        foreach (Beam carcass in fabsecCarcassList)
+                        {
+                            carcass.Delete();
+                        }
+                    }
+                    model.CommitChanges();
+                    return false;
+                }
+                return true;
             }
 
             return true;

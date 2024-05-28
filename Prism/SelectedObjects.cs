@@ -26,7 +26,7 @@ namespace Prism
             NumbersUpToDate = true;
             AssembliesList = new List<Assembly>();
             SelectedModelParts = new List<Part>();
-            LockedParts = new List<ModelObject>();
+            LockedParts = new List<PrismPart>();
             SeversafeParts = new List<Part>();
             NonSeversafeParts = new List<Part>();
             MyDrawingHandler = new DrawingHandler();
@@ -48,13 +48,14 @@ namespace Prism
 
         public List<PrismBoltGroup> PrismBoltGroups = new List<PrismBoltGroup>();
 
+        public string ErrorMessage { get; set; }
         public double PartWeight { get; set; }
         public bool NumbersUpToDate { get; set; }
         public bool SeversafePresent = false;
         public List<Assembly> AssembliesList { get; set; }
         public List<Part> SelectedModelParts { get; set; }
         public List<string> MyMarks { get; set; }
-        public List<ModelObject> LockedParts { get; set; }
+        public List<PrismPart> LockedParts { get; set; }
         public List<ModelObject> FabsecParts = new List<ModelObject>();
         public List<ModelObject> NonFabsecParts = new List<ModelObject>();
         public List<Part> SeversafeParts { get; set; }
@@ -179,7 +180,7 @@ namespace Prism
             }
             else
             {
-                if (IsLocked(myPart)) LockedParts.Add(myPart);
+                if (IsLocked(myPart)) LockedParts.Add(new PrismPart(myPart));
                 NonSeversafeParts.Add(myPart);
                 ProcessFabsecPart(myPart);
             }

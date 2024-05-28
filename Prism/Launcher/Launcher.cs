@@ -32,6 +32,7 @@ namespace Prism
 
         public static void CheckTekla()
         {
+            if (!Environment.Is64BitProcess) MessageBox.Show("You dingle, you need to have a x64 bit program for this to work!");
             // Find which versions of Tekla are installed
             // and check which of those are running
             FindTeklaVersions();

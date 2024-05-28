@@ -24,6 +24,8 @@ namespace Prism.Managers.ChangeManager
         public static bool RunChangeManagement(Model model, string currentIssueNo, string fileLocation, string phaseNumber, PrismProjectData projectData, SelectedObjects selectedObjects,
           ToolStrip toolStrip, ToolStripStatusLabel label, out List<SteelItemBase> revisedItems, out List<SteelItemBase> omitItems, out List<SteelItemBase> addItems, out string messageForEmail)
         {
+            ModelModifiers.ResetWorkPlane(model);
+
             _revisedItems = new List<SteelItemBase>();
             _omitItems = new List<SteelItemBase>();
             _addItems = new List<SteelItemBase>();

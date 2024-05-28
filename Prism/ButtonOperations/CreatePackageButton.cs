@@ -11,11 +11,11 @@ namespace Prism.ButtonOperations
     public static class CreatePackageButton
     {
         public static bool CreateFabPackage(this SelectedObjects myObjects, Model model, PrismProjectData projectData, string phaseNumber, string issueNumber, StageTypes stageType, string siteDate, bool runSeversafe, bool runChangeManager,
-           ToolStrip toolStrip, ToolStripStatusLabel label)
+           ToolStrip toolStrip, ToolStripStatusLabel label, string teklaVersion)
         {
             if (!runChangeManager)
             {
-                return CreateFirstIssue(projectData, phaseNumber, issueNumber, runSeversafe, myObjects, model, stageType, siteDate);
+                return CreateFirstIssue(projectData, phaseNumber, issueNumber, runSeversafe, myObjects, model, stageType, siteDate, teklaVersion);
             }
 
             string fileLocation = Constants.ModelDataLogLocation(projectData.ProjNumberAndGuid + "\\Fab XMLs");
@@ -24,11 +24,11 @@ namespace Prism.ButtonOperations
                 out List<SteelItemBase> omitItems, out List<SteelItemBase> addItems, out string messageForEmail)) return false;
 
             return issueNumber == "01"
-                ? CreateFirstIssue(projectData, phaseNumber, issueNumber, runSeversafe, myObjects, model, stageType, siteDate)
-                : ProcessSubsequentIssues(projectData, phaseNumber, issueNumber, revisedItems, addItems, runSeversafe, myObjects, model, siteDate, stageType, messageForEmail);
+                ? CreateFirstIssue(projectData, phaseNumber, issueNumber, runSeversafe, myObjects, model, stageType, siteDate, teklaVersion)
+                : ProcessSubsequentIssues(projectData, phaseNumber, issueNumber, revisedItems, addItems, runSeversafe, myObjects, model, siteDate, stageType, messageForEmail, teklaVersion);
         }
 
-        private static bool CreateFirstIssue(PrismProjectData projectData, string phaseNumber, string issueNumber, bool runSeversafe, SelectedObjects myObjects, Model model, StageTypes stageType, string siteDate)
+        private static bool CreateFirstIssue(PrismProjectData projectData, string phaseNumber, string issueNumber, bool runSeversafe, SelectedObjects myObjects, Model model, StageTypes stageType, string siteDate,string teklaVersion)
         {
             if (!InitialisePackageAndCreateFolders(projectData, phaseNumber, issueNumber, runSeversafe, myObjects, out ReportManager reportManager, out CpuCounter cpuCounter)) return false;
 
@@ -55,7 +55,7 @@ namespace Prism.ButtonOperations
         }
 
         private static bool ProcessSubsequentIssues(PrismProjectData projectData, string phaseNumber, string issueNumber, List<SteelItemBase> revisedItems, List<SteelItemBase> addItems,
-            bool runSeversafe, SelectedObjects myObjects, Model model, string siteDate, StageTypes stageType, string messageForEmail)
+            bool runSeversafe, SelectedObjects myObjects, Model model, string siteDate, StageTypes stageType, string messageForEmail, string teklaVersion)
         {
             if (revisedItems != null && addItems != null)
             {
@@ -67,7 +67,7 @@ namespace Prism.ButtonOperations
 
                 if (!ProcessAndPrintDrawings(cpuCounter, combinedParts, model, projectData, phaseNumber, issueNumber, reportManager, out DrawingManager drawingManager)) return false;
 
-                reportManager.CreateFabReports(combinedParts, myObjects.PrismBoltGroups);
+                reportManager.CreateFabReports(combinedParts, myObjects.PrismBoltGroups, teklaVersion);
                 ModelModifiers.SelectParts(combinedParts);
 
                 if (!Constants.IsSpecialPerson()) { myObjects.ExportBSWX(reportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType); }

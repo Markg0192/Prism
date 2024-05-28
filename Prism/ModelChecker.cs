@@ -15,17 +15,16 @@ namespace Prism
     /// </summary>
     public static class ModelChecker
     {
-        public static List<ModelObject> IncorrectNameAndClass = new List<ModelObject>();
-        public static List<ModelObject> MissingExecutionClass = new List<ModelObject>();
-        public static List<ModelObject> HasNoFinish = new List<ModelObject>();
-        public static List<ModelPart> StartNumbersDoNotMatch = new List<ModelPart>();
-        public static List<ModelObject> StartNumbersDoNotMatchParts = new List<ModelObject>();
-        public static List<ModelPart> PhasesDoNotMatch = new List<ModelPart>();
-        public static List<ModelObject> PhasesDoNotMatchParts = new List<ModelObject>();
+        public static List<PrismPart> IncorrectNameAndClass = new List<PrismPart>();
+        public static List<PrismPart> MissingExecutionClass = new List<PrismPart>();
+        public static List<PrismPart> HasNoFinish = new List<PrismPart>();
+        public static List<PrismPart> StartNumbersDoNotMatch = new List<PrismPart>();
+        public static List<PrismPart> PhasesDoNotMatch = new List<PrismPart>();
+        public static List<PrismPart> PhasesDoNotMatchParts = new List<PrismPart>();
         public static List<ModelObject> NotOrderedParts = new List<ModelObject>();
         public static List<ModelObject> OrderedParts = new List<ModelObject>();
-        public static List<ModelObject> PartsWithoutIntumescentLoading = new List<ModelObject>();
-        public static List<ModelObject> IncorrectOrientation = new List<ModelObject>();
+        public static List<PrismPart> PartsWithoutIntumescentLoading = new List<PrismPart>();
+        public static List<PrismPart> IncorrectOrientation = new List<PrismPart>();
 
         public static void BoltThrough2Ply(SelectedObjects selectedObjects)
         {
@@ -109,7 +108,6 @@ namespace Prism
             OrderedParts.Clear();
             NotOrderedParts.Clear();
             StartNumbersDoNotMatch.Clear();
-            StartNumbersDoNotMatchParts.Clear();
             PhasesDoNotMatch.Clear();
             PhasesDoNotMatchParts.Clear();
         }
@@ -139,7 +137,7 @@ namespace Prism
 
                 if (executionClassData == 10)
                 {
-                    MissingExecutionClass.Add(p);
+                    MissingExecutionClass.Add(new PrismPart(p));
                 }
             }
         }
@@ -196,7 +194,7 @@ namespace Prism
             {
                 if (b.StartPoint.Z > b.EndPoint.Z)
                 {
-                    IncorrectOrientation.Add(b);
+                    IncorrectOrientation.Add(new PrismPart(b));
                 }
             }
             else
@@ -237,7 +235,7 @@ namespace Prism
 
                 if (check2)
                 {
-                    IncorrectOrientation.Add(b);
+                    IncorrectOrientation.Add(new PrismPart(b));
                 }
             }
 
@@ -248,7 +246,7 @@ namespace Prism
             //All rafters must be detailed with start point at the apex, so a simple check to make sure start point is higher than end point will do here
             if (b.StartPoint.Z < b.EndPoint.Z)
             {
-                IncorrectOrientation.Add(b);
+                IncorrectOrientation.Add(new PrismPart(b));
             }
         }
 
@@ -257,7 +255,7 @@ namespace Prism
             //Column rotation must be "FRONT" or "BELOW", therefore "BACK" and "TOP" are wrong, start point must also be lower than end point.
             if (b.Position.Rotation == Position.RotationEnum.BACK || b.Position.Rotation == Position.RotationEnum.TOP || b.StartPoint.Z > b.EndPoint.Z)
             {
-                IncorrectOrientation.Add(b);
+                IncorrectOrientation.Add(new PrismPart(b));
             }
         }
 
@@ -281,7 +279,7 @@ namespace Prism
 
             if (check1 || check2)
             {
-                IncorrectOrientation.Add(b);
+                IncorrectOrientation.Add(new PrismPart(b));
             }
         }
 
@@ -292,12 +290,36 @@ namespace Prism
                 List<string> meantToBeClass = GdomValues.PartClass()[p.Name] as List<string>;
                 if (meantToBeClass != null && !meantToBeClass.Contains(p.Class))
                 {
-                    IncorrectNameAndClass.Add(p);
+                    IncorrectNameAndClass.Add(new PrismPart(p));
                 }
             }
         }
 
         public static bool ArePreviousStepsComplete(SelectedObjects selectedObjects, int stageNumber)
+        {
+          //  if (!Constants.IsSpecialPerson())
+            {
+                List<ModelObject> incompleteParts = selectedObjects.NonSeversafeParts
+                    .Where(p =>
+                    {
+                        string userProperty = "";
+                        p.GetUserProperty(ModelUDA.PreviousStageName(stageNumber), ref userProperty);
+                        return userProperty == "";
+                    })
+                    .Select(p => p as ModelObject) // Cast each Part to ModelObject
+                    .ToList();
+
+                if (incompleteParts.Any())
+                {
+                    PrismWarnings.PreviousStepIncomplete(incompleteParts);
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+  /*      public static bool ArePreviousStepsComplete(SelectedObjects selectedObjects, int stageNumber)
         {
             if (!Constants.IsSpecialPerson())
             {
@@ -315,7 +337,7 @@ namespace Prism
             }
 
             return true;
-        }
+        }*/
 
         private static bool CheckForAndActionErrors(string userName, List<PrismBoltGroup> prismBoltGroups)
         {
@@ -380,9 +402,9 @@ namespace Prism
             {
                 PrismWarnings.Warning = PhasesDoNotMatch.Count.ToString();
 
-                PrismWarnings.PhasesDontMatch();
+                PrismWarnings.PhasesDontMatch(PhasesDoNotMatch);
 
-                ModelModifiers.SetPartsRed(PhasesDoNotMatchParts);
+                ModelModifiers.SetPartsRed(Convertor.PrismPartsToModelObjects(PhasesDoNotMatchParts));
 
                 return PrismWarnings.NewIgnoreWarning();
             }
@@ -395,9 +417,9 @@ namespace Prism
             {
                 PrismWarnings.Warning = StartNumbersDoNotMatch.Count.ToString();
 
-                PrismWarnings.StartNumbersDontMatch();
+                PrismWarnings.StartNumbersDontMatch(StartNumbersDoNotMatch);
 
-                ModelModifiers.SetPartsRed(StartNumbersDoNotMatchParts);
+                ModelModifiers.SetPartsRed(Convertor.PrismPartsToModelObjects(StartNumbersDoNotMatch));
 
                 return PrismWarnings.NewIgnoreWarning();
             }
@@ -425,9 +447,9 @@ namespace Prism
             {
                 PrismWarnings.Warning = PartsWithoutIntumescentLoading.Count.ToString();
 
-                PrismWarnings.IntumescentLoadingMissing();
+                PrismWarnings.IntumescentLoadingMissing(PartsWithoutIntumescentLoading);
 
-                ModelModifiers.SetPartsRed(PartsWithoutIntumescentLoading);
+                ModelModifiers.SetPartsRed(Convertor.PrismPartsToModelObjects(PartsWithoutIntumescentLoading));
 
                 return PrismWarnings.IgnoreIntumescentLoading();
             }
@@ -440,9 +462,9 @@ namespace Prism
             {
                 PrismWarnings.Warning = HasNoFinish.Count.ToString();
 
-                PrismWarnings.HasNoFinish();
+                PrismWarnings.HasNoFinish(HasNoFinish);
 
-                ModelModifiers.SetPartsRed(HasNoFinish);
+                ModelModifiers.SetPartsRed(Convertor.PrismPartsToModelObjects(HasNoFinish));
 
                 return PrismWarnings.IgnoreWarning();
             }
@@ -453,8 +475,8 @@ namespace Prism
         {
             if (mainPart.AssemblyNumber.StartNumber != secondaryPart.PartNumber.StartNumber)
             {
-                ModelPart newPart = new ModelPart(secondaryPart, mainPart.AssemblyNumber.StartNumber);
-                StartNumbersDoNotMatchParts.Add(secondaryPart);
+                //ModelPart newPart = new ModelPart(secondaryPart, mainPart.AssemblyNumber.StartNumber);
+                PrismPart newPart = new PrismPart(secondaryPart) { StartNumber = mainPart.AssemblyNumber.StartNumber };
                 StartNumbersDoNotMatch.Add(newPart);
             }
         }
@@ -466,9 +488,9 @@ namespace Prism
 
             if (mainPartPhase.PhaseNumber != secondaryPhase.PhaseNumber)
             {
-                ModelPart p = new ModelPart(secondaryPart, mainPartPhase);
+                PrismPart p = new PrismPart(secondaryPart) { Phase = mainPartPhase };
                 PhasesDoNotMatch.Add(p);
-                PhasesDoNotMatchParts.Add(secondaryPart);
+                PhasesDoNotMatchParts.Add(new PrismPart(secondaryPart));
             }
         }
 
@@ -476,7 +498,7 @@ namespace Prism
         {
             if (mainPart.Finish.Length == 0)
             {
-                HasNoFinish.Add(mainPart);
+                HasNoFinish.Add(new PrismPart(mainPart));
             }
         }
 
@@ -522,7 +544,7 @@ namespace Prism
                 mainPart.GetUserProperty(ModelUDA.FireWFT(), ref wftNum);
                 if ((dft == "" && dftNum == 0) || (wft == "" && wftNum == 0))
                 {
-                    PartsWithoutIntumescentLoading.Add(mainPart);
+                    PartsWithoutIntumescentLoading.Add(new PrismPart(mainPart));
                 }
             }
         }

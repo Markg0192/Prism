@@ -38,7 +38,6 @@ namespace Prism
                 userCounts[userName] = 1;
             }
 
-
             // Prepare data for writing
             List<string> newContent = new List<string> { "---------------------------This log was started on 21/08/23-------" };
             foreach (var entry in userCounts)
@@ -296,8 +295,7 @@ namespace Prism
             {
                 string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
                 string[] content = new string[]
-                {
-                    
+                {                    
                     "--------------------------------------------------------------------------------------------------",
                     $"{DateTime.Now} - User: {Environment.UserName} - Model: {modelName}",
                     $"Version {version} - {message}"
@@ -307,20 +305,41 @@ namespace Prism
             }
         }
 
-        public static void NCFailed(string modelName)
+        public static void NCFailed(string modelName, string phaseNumber, string issueNumber, string teklaVersion, string ncLocation)
         {
             if (Environment.UserName != "mark.gibson")
             {
                 string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
                 string[] content = new string[]
                 {
-
                     "--------------------------------------------------------------------------------------------------",
                     $"{DateTime.Now} - User: {Environment.UserName} - Model: {modelName}",
-                    $"NC Failed - Prism {version}"
+                    $"Tekla version {teklaVersion}",
+                    $"Phase - {phaseNumber} Issue - {issueNumber}",
+                    $"NC Failed - Prism {version}",
+                    $"NC Location - {ncLocation}"
                 };
 
-                WebService.WriteAppendStringsToFile(Constants.PrismDebugLogLoction, content, "");
+                WebService.WriteAppendStringsToFile(11, content, "");
+            }
+        }
+
+        public static void NCCreated(string modelName, string phaseNumber, string issueNumber, string teklaVersion, string ncLocation)
+        {
+            if (Environment.UserName != "mark.gibson")
+            {
+                string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+                string[] content = new string[]
+                {
+                    "--------------------------------------------------------------------------------------------------",
+                    $"{DateTime.Now} - User: {Environment.UserName} - Model: {modelName}",
+                    $"Tekla version {teklaVersion}",
+                    $"Phase - {phaseNumber} Issue - {issueNumber}",
+                    $"NC Created - Prism {version}",
+                    $"NC Location - {ncLocation}"
+                };
+
+                WebService.WriteAppendStringsToFile(10, content, "");
             }
         }
 
