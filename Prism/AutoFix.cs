@@ -24,28 +24,29 @@ namespace Prism
             foreach (PrismPart b in ModelChecker.IncorrectOrientation)
             {
                 //we need to change the beams in the selected parts list, not the incorrectorientation list, this linq sorts that out
-                Beam matchingPart = selectedObjects.SelectedModelParts.FirstOrDefault(part => part.Identifier.GUID == b.Part.Identifier.GUID) as Beam;
+                PrismPart matchingPart = selectedObjects.PrismParts.FirstOrDefault(part => part.Guid == b.Guid);
 
+                Beam beam = matchingPart.Part as Beam;
                 if (b.Part.Name == GdomValues.BeamName || b.Part.Name == GdomValues.RafterName || b.Part.Name == GdomValues.PortalRafterName || b.Part.Name == GdomValues.BraceName)
                 {
-                    SwapHandles(matchingPart);
-                    matchingPart.Modify();
+                    SwapHandles(beam);
+                    matchingPart.Part.Modify();
                 }
                 if (b.Part.Name == GdomValues.ColumnName)
                 {
-                    if (matchingPart.Position.Rotation == Position.RotationEnum.TOP)
+                    if (beam.Position.Rotation == Position.RotationEnum.TOP)
                     {
-                        matchingPart.Position.Rotation = Position.RotationEnum.BELOW;
+                        beam.Position.Rotation = Position.RotationEnum.BELOW;
                     }
-                    if (matchingPart.Position.Rotation == Position.RotationEnum.BACK)
+                    if (beam.Position.Rotation == Position.RotationEnum.BACK)
                     {
-                        matchingPart.Position.Rotation = Position.RotationEnum.FRONT;
+                        beam.Position.Rotation = Position.RotationEnum.FRONT;
                     }                    
-                    if (matchingPart.StartPoint.Z > matchingPart.EndPoint.Z)
+                    if (beam.StartPoint.Z > beam.EndPoint.Z)
                     {
-                        SwapHandles(matchingPart);
+                        SwapHandles(beam);
                     }
-                    matchingPart.Modify();
+                    beam.Modify();
                 }
             }
             PrismWarnings.ErrorsFixed(ModelChecker.IncorrectOrientation.Count);

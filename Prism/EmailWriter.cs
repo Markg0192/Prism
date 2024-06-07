@@ -105,8 +105,8 @@ namespace Prism
                                 $"Site date is {SiteDateNote(siteDate)}{_mailNewLine}" +
                                 $"{_mailNewLine}" +
                                 $"This fab package contains the following;{_mailNewLine}" +
-                                $"{objects.AssembliesList.Count} Assemblies.{_mailNewLine}" +
-                                $"{objects.SelectedModelParts.Count} Parts.{_mailNewLine}" +
+                                $"{objects.GetMainParts().Count} Assemblies.{_mailNewLine}" +
+                                $"{objects.PrismParts.Count} Parts.{_mailNewLine}" +
                                 $"{objects.PartWeight} T. {_mailNewLine}" +
                                 $"{_mailNewLine}" +
                                 $"Regards,{_mailNewLine}{_mailNewLine}" +
@@ -245,7 +245,7 @@ namespace Prism
                                 $"{RemoveOrAddText(orderType)} as soon as possible.{_mailNewLine}" +
                                 $"{_mailNewLine}" +
                                 $"{RemoveOrAddMaterial(orderType)}{_mailNewLine}" +
-                                $"{objects.SelectedModelParts.Count} Parts.{_mailNewLine}" +
+                                $"{objects.PrismParts.Count} Parts.{_mailNewLine}" +
                                 $"{objects.PartWeight} T. {_mailNewLine}" +
                                 $"{_mailNewLine}" +
                                 $"{DateRequired(orderType, siteDate)}" +

@@ -183,6 +183,20 @@ namespace Prism
             return Convert.ToInt32(lastusedPrelim);
         }
 
+        public static string GetPrelimPrefix(string jobName)
+        {
+            string lastUsedPrelimLine = WebService.ReadSpecificLine(Constants.PrismModelData, 1, Constants.ModelProjectAdvancedSettingLocation(jobName));
+            string lastusedPrelim = lastUsedPrelimLine.Split(':')[1].Trim();
+            return lastusedPrelim;
+        }
+
+        public static string GetFabPackType(string jobName)
+        {
+            string lastUsedPrelimLine = WebService.ReadSpecificLine(Constants.PrismModelData, 2, Constants.ModelProjectAdvancedSettingLocation(jobName));
+            string lastusedPrelim = lastUsedPrelimLine.Split(':')[1].Trim();
+            return lastusedPrelim;
+        }
+
         public static void SetLastUsedPrelim(string jobName, int lastUsedPrelim)
         {
             string content = $"Next prelim to use: {lastUsedPrelim}";

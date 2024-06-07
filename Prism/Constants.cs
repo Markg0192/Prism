@@ -37,6 +37,12 @@ namespace Prism
           //  return $@"\\sev-los-fs1\application data$\Prism\Model Data\{jobName}\Project Info.txt";
         }
 
+        public static string ModelProjectAdvancedSettingLocation(string jobName)
+        {
+            return $@"{jobName}\Advanced Settings.txt";
+            //  return $@"\\sev-los-fs1\application data$\Prism\Model Data\{jobName}\Project Info.txt";
+        }
+
         public static bool IsSpecialPerson()
         {
             if (Environment.UserName == "mar k.gibson")

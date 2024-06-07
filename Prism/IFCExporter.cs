@@ -9,18 +9,18 @@ namespace Prism
     {
         public static async void ExportIndividualIFC(this SelectedObjects selectedObjects, string myFolder, string vaultContractNumber)
         {
-            await Task.Run(() => RunIFCExport(selectedObjects.AssembliesList, myFolder, vaultContractNumber));
+            await Task.Run(() => RunIFCExport(selectedObjects.GetMainParts(), myFolder, vaultContractNumber));
 
-            selectedObjects.SelectedModelParts.SelectParts();
+            selectedObjects.PrismParts.SelectParts();
         }
 
-        private static void RunIFCExport(List<Assembly> assemblyList, string localFolder, string vaultContractNumber)
+        private static void RunIFCExport(List<PrismPart> prismParts, string localFolder, string vaultContractNumber)
         {
             // string myFolder = $@"\\sfrplc.local\\public\\DrawingVault\\TestContracts\\{vaultContractNumber}\\IFC";
             string myFolder = localFolder;
-            foreach (Assembly assembly in assemblyList)
+            foreach (PrismPart prismPart in prismParts)
             {
-                ExportIFC(assembly, myFolder);
+                ExportIFC(prismPart.Part.GetAssembly(), myFolder);
             }
             CleanFolder(myFolder);
         }

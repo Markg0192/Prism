@@ -31,16 +31,16 @@ namespace Prism
         public static void CreateAssemblyXmls(Model model, string filePath, SelectedObjects selectedObjects, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
         {
             var allUnsupportedTypes = new ConcurrentBag<string>();
-            int totalCount = selectedObjects.AssembliesList.Count;
+            int totalCount = selectedObjects.GetMainParts().Count;
             int xmlProcessedCount = 0;
             var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
             var assemblyCounts = new ConcurrentDictionary<string, int>();
             var fittingCounts = new ConcurrentDictionary<string, int>();
 
                 // Process MyAssembly objects in parallel
-                Parallel.ForEach(selectedObjects.AssembliesList, parallelOptions, assembly =>
+                Parallel.ForEach(selectedObjects.GetMainParts(), parallelOptions, assembly =>
                 {
-                    var myAssembly = MyAssembly.CreateMyAssembly(assembly, model);
+                    var myAssembly = MyAssembly.CreateMyAssembly(assembly.Part.GetAssembly(), model);
 
                     assemblyCounts.AddOrUpdate(myAssembly.PartMark, 1, (key, oldValue) => oldValue + 1);
                     Parallel.ForEach(myAssembly.Fittings, parallelOptions, fitting =>
@@ -205,8 +205,8 @@ namespace Prism
                         fitting.PartMark = partMark;
                         fitting.ChangeMessages.Add($"Fitting number {partMark} has increased in number by {numberOfChanged}.");
                         fitting.Modification = ModificationType.AddRevise;
-                        modifiedParts.Add(fitting);
 
+                        modifiedParts.Add(fitting);
                         addedFittings.Add(fitting);
                         modifications[partMark] = ModificationType.Add;
                         messages.Add($"Fitting number {partMark} has increased in number by {numberOfChanged}.");
@@ -224,6 +224,7 @@ namespace Prism
                     fitting.PartMark = partMark;
                     fitting.ChangeMessages.Add($"Fitting number {partMark} is new.");
                     fitting.Modification = ModificationType.Add;
+
                     modifiedParts.Add(fitting);
 
                     messages.Add($"Fitting number {partMark} is new.");
@@ -412,17 +413,6 @@ namespace Prism
         private static IEnumerable<string> DetectChangesInExistingFittings(List<MyFitting> oldList, List<MyFitting> newList, MyAssembly newAssembly)//, List<MyFitting> modifications)
         {
             var messages = new List<string>();
-
-            /*   foreach (var newFitting in newList) // Iterating over newList to check every new fitting against modifications dictionary.
-               {
-                   MyFitting matchingFitting = modifications.FirstOrDefault(x => x.PartMark == newFitting.PartMark);
-
-                   if (matchingFitting != null) // Check if the PartMark is in the modifications dictionary
-                   {
-                       newFitting.Modification = matchingFitting.Modification;
-                       newFitting.ChangeMessages = matchingFitting.ChangeMessages;// If it is, update the fitting's Modification property with the value from the dictionary
-                   }
-               }*/
 
             foreach (var oldFitting in oldList)
             {

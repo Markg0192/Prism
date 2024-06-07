@@ -13,32 +13,54 @@ namespace Prism.ButtonOperations
         public static bool CreateFabPackage(this SelectedObjects myObjects, Model model, PrismProjectData projectData, string phaseNumber, string issueNumber, StageTypes stageType, string siteDate, bool runSeversafe, bool runChangeManager,
            ToolStrip toolStrip, ToolStripStatusLabel label, string teklaVersion)
         {
-            if (!runChangeManager)
+            string packagingType = Logging.GetFabPackType(projectData.ProjNumberAndGuid).ToString();
+
+            if (packagingType.Contains("Lot"))
             {
-                return CreateFirstIssue(projectData, phaseNumber, issueNumber, runSeversafe, myObjects, model, stageType, siteDate, teklaVersion);
+                var groupedBeams = myObjects
+                    .GetNonSeversafeParts()
+                    .GroupBy(beam => beam.LotName)
+                    .Select(group => group.ToList())
+                    .ToList();
+
+                foreach (var listOfMembers in groupedBeams)
+                {
+
+
+                }
+
+                return true;
             }
+            else
+            {
+                if (!runChangeManager)
+                {
+                    return CreateFirstIssue(projectData, phaseNumber, issueNumber, runSeversafe, myObjects, model, stageType, siteDate, teklaVersion, toolStrip, label);
+                }
 
-            string fileLocation = Constants.ModelDataLogLocation(projectData.ProjNumberAndGuid + "\\Fab XMLs");
+                string fileLocation = Constants.ModelDataLogLocation(projectData.ProjNumberAndGuid + "\\Fab XMLs");
 
-            if (!ChangeHelper.RunChangeManagement(model, issueNumber, fileLocation, phaseNumber, projectData, myObjects, toolStrip, label, out List<SteelItemBase> revisedItems,
-                out List<SteelItemBase> omitItems, out List<SteelItemBase> addItems, out string messageForEmail)) return false;
+                if (!ChangeHelper.RunChangeManagement(model, issueNumber, fileLocation, phaseNumber, projectData, myObjects, toolStrip, label, out List<SteelItemBase> revisedItems,
+                    out List<SteelItemBase> omitItems, out List<SteelItemBase> addItems, out string messageForEmail)) return false;
 
-            return issueNumber == "01"
-                ? CreateFirstIssue(projectData, phaseNumber, issueNumber, runSeversafe, myObjects, model, stageType, siteDate, teklaVersion)
-                : ProcessSubsequentIssues(projectData, phaseNumber, issueNumber, revisedItems, addItems, runSeversafe, myObjects, model, siteDate, stageType, messageForEmail, teklaVersion);
+                return issueNumber == "01"
+                    ? CreateFirstIssue(projectData, phaseNumber, issueNumber, runSeversafe, myObjects, model, stageType, siteDate, teklaVersion, toolStrip, label)
+                    : ProcessSubsequentIssues(projectData, phaseNumber, issueNumber, revisedItems, addItems, runSeversafe, myObjects, model, siteDate, stageType, messageForEmail, teklaVersion, toolStrip, label);
+            }
         }
 
-        private static bool CreateFirstIssue(PrismProjectData projectData, string phaseNumber, string issueNumber, bool runSeversafe, SelectedObjects myObjects, Model model, StageTypes stageType, string siteDate,string teklaVersion)
+        private static bool CreateFirstIssue(PrismProjectData projectData, string phaseNumber, string issueNumber, bool runSeversafe, SelectedObjects myObjects, Model model, StageTypes stageType, string siteDate, string teklaVersion,
+            ToolStrip toolStrip, ToolStripStatusLabel tssl)
         {
             if (!InitialisePackageAndCreateFolders(projectData, phaseNumber, issueNumber, runSeversafe, myObjects, out ReportManager reportManager, out CpuCounter cpuCounter)) return false;
 
-            if (!ProcessAndPrintDrawings(cpuCounter, myObjects.NonSeversafeParts, model, projectData, phaseNumber, issueNumber, reportManager, out DrawingManager drawingManager)) return false;
+            if (!ProcessAndPrintDrawings(cpuCounter, myObjects.GetNonSeversafeParts(), model, projectData, phaseNumber, issueNumber, reportManager, toolStrip, tssl, out DrawingManager drawingManager)) return false;
 
             if (!Constants.IsSpecialPerson()) { myObjects.ExportBSWX(reportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType); }
-  
-            reportManager.CreateFabReports(myObjects.NonSeversafeParts, myObjects.PrismBoltGroups, teklaVersion);
 
-            if (!myObjects.NonSeversafeParts.ModifyAttributes((int)stageType, projectData)) { return false; }
+            reportManager.CreateFabReports(myObjects.GetNonSeversafeParts(), myObjects.PrismBoltGroups, teklaVersion, toolStrip, tssl);
+
+            if (!myObjects.GetNonSeversafeParts().ModifyAttributes((int)stageType, projectData, toolStrip, tssl)) { return false; }
 
             reportManager.Folders.RemoveUnusedFolders();
 
@@ -49,30 +71,35 @@ namespace Prism.ButtonOperations
             EmailWriter.WriteFabEmail(projectData, myObjects, reportManager.FabReportPrefix, issueNumber, phaseNumber, siteDate, reportManager.Folders.FabPath, zipFileCanBeAttached);
 
             Logging.UpdateFrozenDrawingCount(projectData.ProjNumberAndGuid, drawingManager.FrozenDrawings.Count, drawingManager.UnFrozenDrawings.Count);
-            Logging.LogProgress(projectData.ProjNumberAndName, stageType.ToString(), 0, myObjects.AssembliesList.Count);
+            Logging.LogProgress(projectData.ProjNumberAndName, stageType.ToString(), 0, myObjects.GetMainParts().Count);
 
             return true;
         }
 
         private static bool ProcessSubsequentIssues(PrismProjectData projectData, string phaseNumber, string issueNumber, List<SteelItemBase> revisedItems, List<SteelItemBase> addItems,
-            bool runSeversafe, SelectedObjects myObjects, Model model, string siteDate, StageTypes stageType, string messageForEmail, string teklaVersion)
+            bool runSeversafe, SelectedObjects myObjects, Model model, string siteDate, StageTypes stageType, string messageForEmail, string teklaVersion, ToolStrip ts, ToolStripStatusLabel tssl)
         {
             if (revisedItems != null && addItems != null)
             {
                 if (!InitialisePackageAndCreateFolders(projectData, phaseNumber, issueNumber, runSeversafe, myObjects, out ReportManager reportManager, out CpuCounter cpuCounter)) return false;
 
-                List<Part> combinedParts = CombineAddAndOmitParts(model, revisedItems, addItems);
+                List<Part> teklaParts = CombineAddAndOmitParts(model, revisedItems, addItems);
 
+                List<PrismPart> combinedParts = new List<PrismPart>();
+                foreach(Part p in teklaParts)
+                {
+                    combinedParts.Add(new PrismPart(p));
+                }
                 ModelModifiers.SelectParts(combinedParts);
 
-                if (!ProcessAndPrintDrawings(cpuCounter, combinedParts, model, projectData, phaseNumber, issueNumber, reportManager, out DrawingManager drawingManager)) return false;
+                if (!ProcessAndPrintDrawings(cpuCounter, combinedParts, model, projectData, phaseNumber, issueNumber, reportManager, ts, tssl, out DrawingManager drawingManager)) return false;
 
-                reportManager.CreateFabReports(combinedParts, myObjects.PrismBoltGroups, teklaVersion);
+                reportManager.CreateFabReports(combinedParts, myObjects.PrismBoltGroups, teklaVersion, ts, tssl);
                 ModelModifiers.SelectParts(combinedParts);
 
                 if (!Constants.IsSpecialPerson()) { myObjects.ExportBSWX(reportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType); }
 
-                if (!combinedParts.ModifyAttributes((int)stageType, projectData)) { return false; }
+                if (!combinedParts.ModifyAttributes((int)stageType, projectData, ts, tssl)) { return false; }
 
                 reportManager.Folders.RemoveUnusedFolders();
 
@@ -83,13 +110,13 @@ namespace Prism.ButtonOperations
                 EmailWriter.WriteRevisedFabEmail(projectData, reportManager.FabReportPrefix, issueNumber, phaseNumber, siteDate, reportManager.Folders.FabPath, zipFileCanBeAttached, messageForEmail);
 
                 Logging.UpdateFrozenDrawingCount(projectData.ProjNumberAndGuid, drawingManager.FrozenDrawings.Count, drawingManager.UnFrozenDrawings.Count);
-                Logging.LogProgress(projectData.ProjNumberAndName, stageType.ToString(), 0, myObjects.AssembliesList.Count);
+                Logging.LogProgress(projectData.ProjNumberAndName, stageType.ToString(), 0, myObjects.GetMainParts().Count);
             }
 
             return true;
         }
 
-        private static bool ProcessAndPrintDrawings(CpuCounter cpuCounter, List<Part> partsToSelect, Model model, PrismProjectData projectData, string phaseNumber, string issueNumber, ReportManager reportManager, out DrawingManager drawingManager)
+        private static bool ProcessAndPrintDrawings(CpuCounter cpuCounter, List<PrismPart> partsToSelect, Model model, PrismProjectData projectData, string phaseNumber, string issueNumber, ReportManager reportManager, ToolStrip toolStrip, ToolStripStatusLabel statusLabel, out DrawingManager drawingManager)
         {
             CpuSpeedCheck(cpuCounter);
             ReportManager.SelectDrawingsInDocManager(partsToSelect);
@@ -115,7 +142,7 @@ namespace Prism.ButtonOperations
             if (createDrawings)
             {
                 List<int> drawingCount = CountDrawings(drawingManager);
-                DrawingManager.PrintDrawings(reportManager, drawingManager, drawingCount);
+                DrawingManager.PrintDrawings(reportManager, drawingManager, drawingCount, toolStrip, statusLabel);
             }
 
             return true;
@@ -124,15 +151,15 @@ namespace Prism.ButtonOperations
         private static List<Part> CombineAddAndOmitParts(Model model, List<SteelItemBase> revisedItems, List<SteelItemBase> addItems)
         {
             List<Part> reviseItems = revisedItems
-                    .Select(item => model.GetIdentifierByGUID(item.Guid))
-                    .Select(id => model.SelectModelObject(id))
-                    .OfType<Part>()
-                    .ToList();
+                           .Select(item => model.GetIdentifierByGUID(item.Guid))
+                           .Select(id => model.SelectModelObject(id))
+                           .OfType<Part>()
+                           .ToList();
             List<Part> addedItems = addItems
-                    .Select(item => model.GetIdentifierByGUID(item.Guid))
-                    .Select(id => model.SelectModelObject(id))
-                    .OfType<Part>()
-                    .ToList();
+                           .Select(item => model.GetIdentifierByGUID(item.Guid))
+                           .Select(id => model.SelectModelObject(id))
+                           .OfType<Part>()
+                           .ToList();
 
             return addedItems.Concat(reviseItems).ToList();
         }
@@ -146,7 +173,7 @@ namespace Prism.ButtonOperations
             if (!reportManager.Folders.CreateBoltFolder()) return false;
             if (runSeversafe) { if (!reportManager.Folders.CreateEpoFolder()) return false; }
 
-            if (myObjects.SeversafePresent) { myObjects.NonSeversafeParts.SelectParts(); }
+            if (myObjects.SeversafePresent) { myObjects.GetNonSeversafeParts().SelectParts(); }
             return true;
         }
 

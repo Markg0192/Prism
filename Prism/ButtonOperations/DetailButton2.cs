@@ -1,17 +1,20 @@
-﻿namespace Prism.ButtonOperations
+﻿using System.Windows.Forms;
+
+namespace Prism.ButtonOperations
 {
     public static class DetailButton2
     {
-        public static bool DetailButton2op(this SelectedObjects myObjects, PrismProjectData projectData, int stageNumber, string columnOrientationType, string flangeThickness)
+        public static bool DetailButton2op(this SelectedObjects myObjects, PrismProjectData projectData, int stageNumber, string columnOrientationType, string flangeThickness,
+            ToolStrip toolStrip, ToolStripStatusLabel tssl)
         {
             if (!myObjects.RunStage4Checks(projectData.Full)) { return false; }
 
             ColumnOrientation.DetailColumnOrientationHoles(myObjects, columnOrientationType, flangeThickness);
 
-            if(!myObjects.SelectedModelParts.ModifyAttributes(stageNumber, projectData)) { return false; }
+            if(!myObjects.PrismParts.ModifyAttributes(stageNumber, projectData, toolStrip, tssl)) { return false; }
             ModelModifiers.RedrawViews();
             int autoFixCount = ModelChecker.PhasesDoNotMatch.Count + ModelChecker.StartNumbersDoNotMatch.Count;
-            Logging.LogProgress(projectData.ProjNumberAndName, "Detail 2", autoFixCount, myObjects.AssembliesList.Count);
+            Logging.LogProgress(projectData.ProjNumberAndName, "Detail 2", autoFixCount, myObjects.GetMainParts().Count);
             return true;
         }
     }

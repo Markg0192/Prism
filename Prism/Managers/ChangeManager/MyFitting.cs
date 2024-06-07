@@ -9,7 +9,7 @@ namespace Prism
         {
             MyFitting myNewFitting = new MyFitting();
             myNewFitting.SetCommonProperties(part, model);
-
+            myNewFitting.Guid = part.Identifier.GUID.ToString();
             return myNewFitting;
         }
     }

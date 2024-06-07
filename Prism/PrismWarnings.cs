@@ -89,6 +89,13 @@ namespace Prism
             CreateOKForm(notUpToDateMessage, notUpToDateTitle);
         }
 
+        public static void CantFindAdvancedSettings()
+        {
+            string notUpToDateMessage = $"Prism cannot find the advanced settings file for this project, contact help to fix this.";
+            const string notUpToDateTitle = "No settings file found";
+            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+        }
+
         public static void IgnoreFittingCheck()
         {
             const string notUpToDateMessage = "Without selecting a location Prism cannot filter abnormal fittings.";
@@ -201,7 +208,7 @@ namespace Prism
             CreateOkWithReportForm(notUpToDateMessage, notUpToDateTitle, failedParts, "Orientation is wrong");
         }
 
-        public static void PreviousStepIncomplete(List<ModelObject> failedParts)
+        public static void PreviousStepIncomplete(List<PrismPart> failedParts)
         {
             const string notUpToDateMessage = "You have not completed all the required steps before this action, please correct this to continue.";
             const string notUpToDateTitle = "Incomplete stages";

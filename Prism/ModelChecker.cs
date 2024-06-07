@@ -49,18 +49,17 @@ namespace Prism
                 PrismWarnings.IgnoreFittingCheck();
             }
 
-            foreach (Assembly ass in selectedObjects.AssembliesList)
+            foreach (PrismPart myMainPart in selectedObjects.GetMainParts())
             {
-                Part myMainPart = ass.GetMainPart() as Part;
-                GetUnorderedParts(myMainPart);
-                GetPartsWithoutAFinish(myMainPart);
-                CheckForIntumescentLoading(myMainPart);
+                GetUnorderedParts(myMainPart.Part);
+                GetPartsWithoutAFinish(myMainPart.Part);
+                CheckForIntumescentLoading(myMainPart.Part);
 
-                ArrayList mySecondaries = ass.GetSecondaries();
+                ArrayList mySecondaries = myMainPart.Part.GetAssembly().GetSecondaries();
                 foreach (Part mySecondaryPart in mySecondaries)
                 {
-                    GetPartsThatStartNumbersDontMatch(myMainPart, mySecondaryPart);
-                    GetPartsWherePhasesDontMatch(myMainPart, mySecondaryPart);
+                    GetPartsThatStartNumbersDontMatch(myMainPart.Part, mySecondaryPart);
+                    GetPartsWherePhasesDontMatch(myMainPart.Part, mySecondaryPart);
                     CheckFittings.GetIncorrectFittings(mySecondaryPart, location);
                 }
             }
@@ -117,7 +116,7 @@ namespace Prism
             IncorrectOrientation.Clear();
             MemberOrientation(selectedObjects);
             //ModelChecker.IncorrectOrientation.Clear(); //if this line is active all orientation functionallity is disabled
-   
+
             ignore = PrismWarnings.DisplayOrderErrors(IncorrectOrientation, Error.Orientation);
 
             if (ignore == IgnoreType.Stop)
@@ -129,15 +128,14 @@ namespace Prism
 
         public static void HasExecutionClass(SelectedObjects selectedObjects)
         {
-            foreach (Assembly ass in selectedObjects.AssembliesList)
+            foreach (PrismPart p in selectedObjects.GetMainParts())
             {
-                Part p = ass.GetMainPart() as Part;
                 int executionClassData = 10;  //this is the number read from teklas UDA when no execution class is applied, we are defaulting to it not having one here
-                p.GetUserProperty(ModelUDA.ExcecutionClass(), ref executionClassData);
+                p.Part.GetUserProperty(ModelUDA.ExcecutionClass(), ref executionClassData);
 
                 if (executionClassData == 10)
                 {
-                    MissingExecutionClass.Add(new PrismPart(p));
+                    MissingExecutionClass.Add(p);
                 }
             }
         }
@@ -145,9 +143,9 @@ namespace Prism
         public static void MemberOrientation(SelectedObjects selectedObjects)
         {
             int tolerance = 5;
-            foreach (Assembly ass in selectedObjects.AssembliesList)
+            foreach (PrismPart pPart in selectedObjects.GetMainParts())
             {
-                Beam b = ass.GetMainPart() as Beam;
+                Beam b = pPart.Part as Beam;
                 if (b != null && (b.Profile.ProfileString.StartsWith("UB") || b.Profile.ProfileString.StartsWith("UKB") || b.Profile.ProfileString.StartsWith("UC") || b.Profile.ProfileString.StartsWith("UKC")))
                 {
                     if (b.Name == GdomValues.BeamName && Math.Abs(b.StartPoint.Z - b.EndPoint.Z) < tolerance)
@@ -285,59 +283,36 @@ namespace Prism
 
         public static void NameAndClassAligned(SelectedObjects selectedObjects)
         {
-            foreach (Part p in selectedObjects.SelectedModelParts)
+            foreach (PrismPart p in selectedObjects.PrismParts)
             {
-                List<string> meantToBeClass = GdomValues.PartClass()[p.Name] as List<string>;
-                if (meantToBeClass != null && !meantToBeClass.Contains(p.Class))
+                List<string> meantToBeClass = GdomValues.PartClass()[p.Part.Name] as List<string>;
+                if (meantToBeClass != null && !meantToBeClass.Contains(p.Part.Class))
                 {
-                    IncorrectNameAndClass.Add(new PrismPart(p));
+                    IncorrectNameAndClass.Add(p);
                 }
             }
         }
 
         public static bool ArePreviousStepsComplete(SelectedObjects selectedObjects, int stageNumber)
         {
-          //  if (!Constants.IsSpecialPerson())
-            {
-                List<ModelObject> incompleteParts = selectedObjects.NonSeversafeParts
-                    .Where(p =>
-                    {
-                        string userProperty = "";
-                        p.GetUserProperty(ModelUDA.PreviousStageName(stageNumber), ref userProperty);
-                        return userProperty == "";
-                    })
-                    .Select(p => p as ModelObject) // Cast each Part to ModelObject
-                    .ToList();
-
-                if (incompleteParts.Any())
+            List<PrismPart> incompleteParts = selectedObjects.GetNonSeversafeParts()
+                .Where(p =>
                 {
-                    PrismWarnings.PreviousStepIncomplete(incompleteParts);
-                    return false;
-                }
+                    string userProperty = "";
+                    p.Part.GetUserProperty(ModelUDA.PreviousStageName(stageNumber), ref userProperty);
+                    return userProperty == "";
+                })
+                .Select(p => p)
+                .ToList();
+
+            if (incompleteParts.Any())
+            {
+                PrismWarnings.PreviousStepIncomplete(incompleteParts);
+                return false;
             }
 
             return true;
         }
-
-  /*      public static bool ArePreviousStepsComplete(SelectedObjects selectedObjects, int stageNumber)
-        {
-            if (!Constants.IsSpecialPerson())
-            {
-                foreach (Part p in selectedObjects.NonSeversafeParts)
-                {
-                    string userProperty = "";
-                    p.GetUserProperty(ModelUDA.PreviousStageName(stageNumber), ref userProperty);
-
-                    if (userProperty == "")
-                    {
-                        PrismWarnings.PreviousStepIncomplete();
-                        return false;
-                    }
-                }
-            }
-
-            return true;
-        }*/
 
         private static bool CheckForAndActionErrors(string userName, List<PrismBoltGroup> prismBoltGroups)
         {

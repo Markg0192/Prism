@@ -52,9 +52,9 @@ namespace Prism.Managers.ChangeManager
                 var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
                 int processedCount = 0;
 
-                Parallel.ForEach(selectedObjects.AssembliesList, parallelOptions, ass =>
+                Parallel.ForEach(selectedObjects.GetMainParts(), parallelOptions, ass =>
                 {
-                    MyAssembly myAssembly = CheckForAndGetExistingData(previousIssuePath + "\\", ass, model);
+                    MyAssembly myAssembly = CheckForAndGetExistingData(previousIssuePath + "\\", ass.Part.GetAssembly(), model); ;
                     //  FormChangeLists(myAssembly); // Ensure this operation is thread-safe if uncommented
                     newAssemblyList.Add(myAssembly);
 
@@ -64,27 +64,34 @@ namespace Prism.Managers.ChangeManager
                     //   if (currentCount % 5 == 0 || currentCount == totalCount)
                     toolStrip.Invoke(new System.Action(() =>
                     {
-                        label.Text = $"Comparing Objects: {currentCount} of {selectedObjects.AssembliesList.Count}";
+                        label.Text = $"Comparing Objects: {currentCount} of {selectedObjects.GetMainParts().Count}";
                     }));
                 });
-
-
-                /*      foreach (Assembly ass in selectedObjects.AssembliesList)
-                      {
-                          MyAssembly myAssembly = CheckForAndGetExistingData(previousIssuePath + "\\", ass, model);
-                       //   FormChangeLists(myAssembly);
-                          newAssemblyList.Add(myAssembly);
-                      }*/
 
                 Dictionary<string, int> oldFittingCounter = LoadDictionaryFromXml(previousIssuePath + "\\Fitting Count.xml");
                 Dictionary<string, int> newFittingCount = LoadDictionaryFromXml(currentIssuePath + "\\Fitting Count.xml");
                 Dictionary<string, int> oldAssemblyCounter = LoadDictionaryFromXml(previousIssuePath + "\\Assembly Count.xml");
                 Dictionary<string, int> newAssemblyCounter = LoadDictionaryFromXml(currentIssuePath + "\\Assembly Count.xml");
 
-                List<MyFitting> fittingCompairsonResult = TeklaHelper.IdentifyDifferencesInLists(oldFittingCounter, newFittingCount);
-                (List<string> messages, List<MyAssembly> omittedAssemblies) = TeklaHelper.IdentifyDifferencesInLists(oldAssemblyCounter, newAssemblyCounter, newAssemblyList.ToList(), fittingCompairsonResult);
+                List<MyFitting> fittingComparisonResult = TeklaHelper.IdentifyDifferencesInLists(oldFittingCounter, newFittingCount);
 
-                FormChangeLists(newAssemblyList, fittingCompairsonResult, omittedAssemblies);
+                // Create a dictionary to keep track of assigned GUIDs
+                Dictionary<string, Queue<string>> partMarkToGuidsMap = selectedObjects.PrismParts
+                    .GroupBy(p => p.Part.GetPartMark())
+                    .ToDictionary(g => g.Key, g => new Queue<string>(g.Select(p => p.Guid)));
+
+                // Match and update Guid
+                foreach (var fitting in fittingComparisonResult)
+                {
+                    if (partMarkToGuidsMap.TryGetValue(fitting.PartMark, out var guidQueue) && guidQueue.Count > 0)
+                    {
+                        fitting.Guid = guidQueue.Dequeue();
+                    }
+                }
+
+                (List<string> messages, List<MyAssembly> omittedAssemblies) = TeklaHelper.IdentifyDifferencesInLists(oldAssemblyCounter, newAssemblyCounter, newAssemblyList.ToList(), fittingComparisonResult);
+
+                FormChangeLists(newAssemblyList, fittingComparisonResult, omittedAssemblies);
 
                 //  TeklaHelper.GetSelectedSteelInfo(model, fileLocation, selectedObjects);
                 //
@@ -99,11 +106,6 @@ namespace Prism.Managers.ChangeManager
                 return WriteMyChangeMessage(fileLocation, phaseNumber, projectData, out messageForEmail);
                 //  Logging.LogProgress(model.GetProjectInfo().Name, currentSelection.Count(), differenceMessages.Count());
             }
-        }
-
-        private static Dictionary<string, int> DeserializeOldCounter(string fileToDeserialize)
-        {
-            return LoadDictionaryFromXml(fileToDeserialize);
         }
 
         private static MyAssembly CheckForAndGetExistingData(string filePath, Assembly myAssembly, Model model)
@@ -132,7 +134,6 @@ namespace Prism.Managers.ChangeManager
             return newAssembly;
         }
 
-
         private static void ReturnXmlPath(string issueNumber, string fileLocation, string phaseNumber, out string previousIssuePath, out string currentIssuePath)
         {
             // If the selectedItem contains "(new)", it implies this is a new issue, so we extract the numeric part only
@@ -151,8 +152,6 @@ namespace Prism.Managers.ChangeManager
             issueNo--; // Decrease the issueNo by 1
             previousIssuePath = $"{fileLocation}\\Phase {phaseNumber} - Issue {issueNo:D2}";
         }
-
-
 
         private static bool WriteMyChangeMessage(string fileLocation, string phaseNumber, PrismProjectData projectData, out string finalHtmlMessage)
         {
@@ -399,30 +398,6 @@ namespace Prism.Managers.ChangeManager
                 return result.Items.ToDictionary(item => item.Key, item => item.Value);
             }
         }
-
-        /* private static Dictionary<string, int> LoadDictionaryFromXml(string filePath)
-         {
-             if (!File.Exists(filePath))
-             {
-                 return new Dictionary<string, int>();
-             }
-
-             var serializer = new XmlSerializer(typeof(SerializationWrapper));
-             using (var reader = new StreamReader(filePath))
-             {
-                 return (Dictionary<string, int>)serializer.Deserialize(reader);
-
-             }
-         }*/
-
-        /*  private static void SaveToXml(SerializationWrapper wrapper, string filePath)
-          {
-              var serializer = new XmlSerializer(typeof(SerializationWrapper));
-              using (var writer = new StreamWriter(filePath))
-              {
-                  serializer.Serialize(writer, wrapper);
-              }
-          }*/
 
         public static void PopulateIssueNumbers(ref ComboBox cmb_IssueNo, ref TextBox txt_PhaseNo, string fileLocation)
         {

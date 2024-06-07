@@ -7,6 +7,7 @@ using System.Drawing.Printing;
 using System.Drawing;
 using System;
 using System.Linq;
+using System.Windows.Forms;
 
 namespace Prism
 {
@@ -207,7 +208,7 @@ namespace Prism
 
         }
 
-        public async void CreateFabReports(List<Part> partsList, List<PrismBoltGroup> boltList, string teklaVersion)
+        public async void CreateFabReports(List<PrismPart> partsList, List<PrismBoltGroup> boltList, string teklaVersion, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
         {
             while (Operation.IsMacroRunning()) // Wait until macro for selecting drawings in the document manager is complete before moving on
             {
@@ -221,9 +222,9 @@ namespace Prism
             bool shopBoltsPresent = boltList.Any(pbg => pbg.isShop && !pbg.isShearStud && !pbg.isOrdered);   //is a shop bolt but not a shear stud
             bool siteBoltsPresent = boltList.Any(pbg => !pbg.isShop && !pbg.isShearStud && !pbg.isOrdered); //Is neither shop bolt or shear stud
 
-            foreach (Part part in partsList)
+            foreach (PrismPart part in partsList)
             {
-                sectionSize = part.Profile.ProfileString.Substring(0, 2);
+                sectionSize = part.Part.Profile.ProfileString.Substring(0, 2);
                 bool isFitting = sectionSize == "PL" || sectionSize == "RS" || sectionSize == "FL";
                 bool isPlateGirder = sectionSize == "PG";
                 if (!isFitting && !isPlateGirder) create3Report = true;
@@ -231,11 +232,26 @@ namespace Prism
                 if (isFitting) create4Report = true;
             }
 
-            CreateReports(boltList, create3Report, create4Report, shopBoltsPresent, siteBoltsPresent);
+            UpdateStatusLabel(toolStrip, statusLabel, "Creating NC Data");
 
             CreateNC(teklaVersion);
 
+            UpdateStatusLabel(toolStrip, statusLabel, "Creating Reports");
+
+            CreateReports(boltList, create3Report, create4Report, shopBoltsPresent, siteBoltsPresent);
+
+            UpdateStatusLabel(toolStrip, statusLabel, "Converting Reports To PDF");
+
             TextToPDF(Folders.ReportPath);
+        }
+
+        private void UpdateStatusLabel(ToolStrip toolStrip, ToolStripStatusLabel statusLabel, string labelMessage)
+        {
+            toolStrip.Invoke(new System.Action(() =>
+            {
+                statusLabel.Text = $"{labelMessage}";
+
+            }));
         }
 
         private void CreateReports(List<PrismBoltGroup> boltList, bool create3Report, bool create4Report, bool shopBoltsPresent, bool siteBoltsPresent)
@@ -286,12 +302,12 @@ namespace Prism
                 //2021 NC
                 string plateSetting2021 = "-SNI-PLATES";
                 string profileSetting2021 = "-SNI-PROFILES";
-                string shpRolePlates = "DSTV for plates";
-                string shpRoleForProfiles = "DSTV for profiles";
+                // string shpRolePlates = "DSTV for plates";
+                //  string shpRoleForProfiles = "DSTV for profiles";
                 Operation.CreateNCFilesFromSelected(plateSetting2021, Folders.NcPath + "\\", true);
                 Operation.CreateNCFilesFromSelected(profileSetting2021, Folders.NcPath + "\\", true);
-                Operation.CreateNCFilesFromSelected(shpRolePlates, Folders.NcPath + "\\", false, "", true);
-                Operation.CreateNCFilesFromSelected(shpRoleForProfiles, Folders.NcPath + "\\", false, "", true);
+                //   Operation.CreateNCFilesFromSelected(shpRolePlates, Folders.NcPath + "\\", false, "", true);
+                //   Operation.CreateNCFilesFromSelected(shpRoleForProfiles, Folders.NcPath + "\\", false, "", true);
             }
             else
             {
@@ -306,7 +322,7 @@ namespace Prism
                 Operation.CreateNCFilesFromSelected(profilesSec2023, Folders.NcPath + "\\", false, "", true);
             }
             // Wait for the folder to have contents or timeout after 10 seconds
-            WaitForFolderContents(Folders.NcPath, TimeSpan.FromSeconds(10));
+            WaitForFolderContents(Folders.NcPath, TimeSpan.FromSeconds(30));
         }
 
         private void WaitForFolderContents(string folderPath, TimeSpan timeout)
@@ -322,7 +338,7 @@ namespace Prism
             }
         }
 
-        public static async void SelectDrawingsInDocManager(List<Part> selectedParts)
+        public static async void SelectDrawingsInDocManager(List<PrismPart> selectedParts)
         {
             PrismMacroBuilder.DrawingOperations();
 

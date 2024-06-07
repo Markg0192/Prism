@@ -16,6 +16,10 @@ using Tekla.Structures.Drawing;
 using Part = Tekla.Structures.Model.Part;
 using ModelObject = Tekla.Structures.Model.ModelObject;
 using System;
+using System.Threading;
+using System.Windows.Forms;
+using Microsoft.Office.Interop.Outlook;
+using Prism.CustomDialogs;
 //using Org.BouncyCastle.Tls;
 
 namespace Prism
@@ -52,63 +56,91 @@ namespace Prism
 
         private static void SetVariationAttribute(string phaseNumber, SelectedObjects myObjects)
         {
-            foreach (Part p in myObjects.SelectedModelParts)
+            foreach (PrismPart p in myObjects.PrismParts)
             {
                 string firstVNo = "";
                 string secondVNo = "";
-                p.GetUserProperty(ModelUDA.FirstVariationNumber(), ref firstVNo);
+                p.Part.GetUserProperty(ModelUDA.FirstVariationNumber(), ref firstVNo);
                 if (firstVNo == "")
                 {
-                    p.SetUserProperty(ModelUDA.FirstVariationNumber(), phaseNumber);
+                    p.Part.SetUserProperty(ModelUDA.FirstVariationNumber(), phaseNumber);
                 }
                 else
                 {
-                    p.GetUserProperty(ModelUDA.SecondVariationNumber(), ref secondVNo);
+                    p.Part.GetUserProperty(ModelUDA.SecondVariationNumber(), ref secondVNo);
                     if (secondVNo == "")
                     {
-                        p.SetUserProperty(ModelUDA.SecondVariationNumber(), phaseNumber);
+                        p.Part.SetUserProperty(ModelUDA.SecondVariationNumber(), phaseNumber);
                     }
                     else
                     {
-                        p.SetUserProperty(ModelUDA.FirstVariationNumber(), phaseNumber);
+                        p.Part.SetUserProperty(ModelUDA.FirstVariationNumber(), phaseNumber);
                     }
                 }
             }
         }
 
-        public static bool ModifyAttributes(this List<Part> selectedObjects, int stageNumber, PrismProjectData projectData, bool isSpecialFittingOrder = false, bool isSeversafe = false)
+        public static bool ModifyAttributes(this List<PrismPart> selectedObjects, int stageNumber, PrismProjectData projectData,
+     ToolStrip toolStrip, ToolStripStatusLabel statusLabel, bool isSpecialFittingOrder = false, bool isSeversafe = false)
         {
-            foreach (Part part in selectedObjects)
+            int currentCount = 0;
+            int totalCount = selectedObjects.Count;
+
+            TableData td = stageNumber == 3 ? UniClass_Codes.ReadTableData(Constants.ModelProjectInforLocation(projectData.ProjNumberAndGuid)) : null;
+
+            foreach (PrismPart part in selectedObjects)
             {
-                if (!ModifyAttribute(part, stageNumber, projectData, isSpecialFittingOrder, isSeversafe)) return false;
+                if (totalCount > 0) UpdateStatusLabelWithProcessCount(ref currentCount, toolStrip, statusLabel, totalCount);
+
+                if (!ModifyAttribute(part.Part, stageNumber, projectData, td, isSpecialFittingOrder, isSeversafe))
+                {
+                    return false;
+                }
             }
             return true;
         }
 
-        public static bool ModifyAttribute(Part part, int stageNumber, PrismProjectData projectData, bool isSpecialFittingOrder = false, bool isSeversafe = false)
+        private static void UpdateStatusLabelWithProcessCount(ref int processedCount, ToolStrip toolStrip, ToolStripStatusLabel statusLabel, int totalCount)
         {
-            part.Select();
+            int currentCount = Interlocked.Increment(ref processedCount);
+            double progressPercentage = (double)currentCount / totalCount * 100;
+
+            // Throttle UI updates to maintain responsiveness
+            if (currentCount % 5 == 0 || currentCount == totalCount)
+            {
+                toolStrip.Invoke(new System.Action(() =>
+                {
+                    if (currentCount < totalCount)
+                    {
+                        statusLabel.Text = $"Updating Prism Attributes: {currentCount} of {totalCount} ({progressPercentage:N1}%)";
+                    }
+                }));
+            }
+        }
+
+        public static bool ModifyAttribute(Part part, int stageNumber, PrismProjectData projectData, TableData uniClassTable, bool isSpecialFittingOrder = false, bool isSeversafe = false)
+        {
             if (isSpecialFittingOrder) part.SetUserProperty(ModelUDA.Pre_Ordered(), 1);
             part.SetUserProperty(ModelUDA.CurrentStageName(stageNumber), projectData.Full);
             part.SetUserProperty(ModelUDA.CurrentStageDate(stageNumber), projectData.Date);
             if (stageNumber == 3 && !isSeversafe)
             {
-                TableRow row = UniClassCodes.GetUniClassDetailForPart(projectData.ProjNumberAndGuid, part);
+                TableRow row = UniClassCodes.GetUniClassDetailForPart(projectData.ProjNumberAndGuid, part, uniClassTable);
                 if (row != null)
                 {
-                    ModifyUDA(part, "SEV-UDA-130", row.Code);
-                    ModifyUDA(part, "SEV-UDA-131", row.Title);
+                    part.SetUserProperty("SEV-UDA-130", row.Code);
+                    part.SetUserProperty("SEV-UDA-131", row.Title);                    
                 }
             }
             if (stageNumber == 7)
             {
                 part.SetUserProperty(ModelUDA.PartMarkAtFab(), part.GetPartMark());
             }
-            part.Modify();
             if (stageNumber == 7 && !Operation.IsNumberingUpToDate(part))
             {
                 return PrismWarnings.NumbersNoLongerUpToDate();
             }
+
             return true;
         }
 
@@ -143,68 +175,33 @@ namespace Prism
 
         }
 
-        public static void StampPartFabUDA(List<Part> selectedModelParts, string phaseNumber, string issueNumber)
+        public static void StampPartFabUDA(List<PrismPart> selectedModelParts, string phaseNumber, string issueNumber)
         {
-            foreach (Part part in selectedModelParts)
+            foreach (PrismPart part in selectedModelParts)
             {
-                part.SetUserProperty(ModelUDA.FabStampUDA(), ModelUDA.FabStamp(phaseNumber, issueNumber));
-                part.Modify();
+                part.Part.SetUserProperty(ModelUDA.FabStampUDA(), ModelUDA.FabStamp(phaseNumber, issueNumber));
+                part.Part.Modify();
             }
         }
 
-        public static void AddStartNumbers(this List<ModelObject> parts, string startNumber)
+        public static void AddStartNumbers(this List<PrismPart> parts, string startNumber)
         {
-            foreach (Part p in parts)
+            foreach (PrismPart pPart in parts)
             {
-                p.PartNumber.StartNumber = Convert.ToInt32(startNumber);
-                p.AssemblyNumber.StartNumber = Convert.ToInt32(startNumber);
-                p.Modify();
-            }
-        }
-
-        public static void AddPrelimMarksOldMethod(this SelectedObjects selectedObjects, ProjectInfo pInfo)
-        {
-            //This method adds prelim marks 'the old fashioned way' it rationalises members by profile, grade and length and adds numbers based on phase.
-            //We have moved to numbering each piece individually but keeping this method incase we change our mind again.
-            var allParts = selectedObjects.SelectedModelParts.Cast<Part>().ToList();
-            var groupedParts = allParts.GroupBy(p => new { profile = p.Profile.ProfileString, length = GetPartLength(p), material = p.Material.MaterialString });
-
-            foreach (var gp in groupedParts)
-            {
-                int currentLastNumber = 0;
-                string prismLastNumberAttributeName = "";
-
-                foreach (Part p in gp)
-                {
-                    if (p.GetPrelimMark().Length < 1)
-                    {
-                        prismLastNumberAttributeName = "PRISM" + p.AssemblyNumber.StartNumber;
-                        pInfo.GetUserProperty(prismLastNumberAttributeName, ref currentLastNumber);
-                        if (currentLastNumber == 0)
-                        {
-                            Console.WriteLine("Failed to read last number");
-                            currentLastNumber = 1;
-                            pInfo.SetUserProperty(prismLastNumberAttributeName, currentLastNumber);
-                        }
-                        else
-                        {
-                            Console.WriteLine("Last number read" + currentLastNumber);
-                        }
-                        p.SetUserProperty(ModelUDA.PrelimMark(), (currentLastNumber + p.AssemblyNumber.StartNumber - 1).ToString());
-                    }
-                }
-                currentLastNumber++;
-                pInfo.SetUserProperty(prismLastNumberAttributeName, currentLastNumber);
+                pPart.Part.PartNumber.StartNumber = Convert.ToInt32(startNumber);
+                pPart.Part.AssemblyNumber.StartNumber = Convert.ToInt32(startNumber);
+                pPart.Part.Modify();
             }
         }
 
         public static void AddPrelimMarks(this SelectedObjects selectedObjects, PrismProjectData pData)
         {
             int currentLastNumber = Logging.GetLastUsedPrelim(pData.ProjNumberAndGuid);
+            string prelimPrefix = Logging.GetPrelimPrefix(pData.ProjNumberAndGuid).ToString();
 
-            foreach (Part p in selectedObjects.SelectedModelParts)
+            foreach (PrismPart p in selectedObjects.PrismParts)
             {
-                if (p.GetPrelimMark().Length == 0)
+                if (p.Part.GetPrelimMark().Length == 0)
                 {
                     if (currentLastNumber == 0)
                     {
@@ -216,7 +213,7 @@ namespace Prism
                     {
                         Console.WriteLine("Last number read" + currentLastNumber);
                     }
-                    p.SetUserProperty(ModelUDA.PrelimMark(), currentLastNumber.ToString());
+                    p.Part.SetUserProperty(ModelUDA.PrelimMark(), prelimPrefix + currentLastNumber.ToString());
 
                     currentLastNumber++;
                 }
@@ -225,13 +222,13 @@ namespace Prism
             Logging.SetLastUsedPrelim(pData.ProjNumberAndGuid, currentLastNumber);
         }
 
-        public static List<Part> SelectSpecialTaggedInSelection(SelectedObjects selectedObjects)
+        public static List<PrismPart> SelectSpecialTaggedInSelection(SelectedObjects selectedObjects)
         {
-            List<Part> specialTaggedParts = new List<Part>();
-            foreach (Part part in selectedObjects.SelectedModelParts)
+            List<PrismPart> specialTaggedParts = new List<PrismPart>();
+            foreach (PrismPart part in selectedObjects.PrismParts)
             {
                 string specialTag = "";  //this is the number read from teklas UDA when no execution class is applied, we are defaulting to it not having one here
-                part.GetUserProperty(ModelUDA.SpecialFittingTag(), ref specialTag);
+                part.Part.GetUserProperty(ModelUDA.SpecialFittingTag(), ref specialTag);
 
                 if (specialTag != "")
                 {
@@ -336,7 +333,7 @@ namespace Prism
             return movedParts;
         }
 
-        public static void CopyAndOmitPart(double distanceToMoveInZ, Part p, List<Part> movedParts)
+        public static void CopyAndOmitPart(double distanceToMoveInZ, Part p, List<PrismPart> movedParts)
         {
             Vector newVector = new Vector(0, 0, distanceToMoveInZ);
             Part copiedMember = Operation.CopyObject(p, newVector) as Part;
@@ -371,10 +368,10 @@ namespace Prism
 
             p.Modify();
 
-            movedParts.Add(copiedMember);
+            movedParts.Add(new PrismPart(copiedMember));
         }
 
-        private static void MoveAndOmitPart(Part p, double distanceToMoveInZ, List<Part> movedParts)
+        private static void MoveAndOmitPart(Part p, double distanceToMoveInZ, List<PrismPart> movedParts)
         {
             p.Name = "OMIT";
             p.AssemblyNumber.Prefix = "OMIT";
@@ -388,19 +385,19 @@ namespace Prism
             Vector myVector = new Vector(0, 0, distanceToMoveInZ);
             Operation.MoveObject(p, myVector);
             p.Select();
-            movedParts.Add(p);
+            movedParts.Add(new PrismPart(p));
         }
 
-        public static List<Part> MoveAndRenameOmittedMembers2(List<ModelObject> partsToBeMoved, double distanceToMoveInZ, bool keepOriginal, Model model, bool isFabsec = false)
+        public static List<PrismPart> MoveAndRenameOmittedMembers2(List<PrismPart> partsToBeMoved, double distanceToMoveInZ, bool keepOriginal, Model model)
         {
-            List<Part> movedParts = new List<Part>();
+            List<PrismPart> movedParts = new List<PrismPart>();
             string isCarcassCreated = "";
 
-            foreach (Part p in partsToBeMoved)
+            foreach (PrismPart p in partsToBeMoved)
             {
-                if (isFabsec)
+                if (p.IsFabsec)
                 {
-                    p.GetUserProperty(ModelUDA.FabsecCarcassOrdered(), ref isCarcassCreated);
+                    p.Part.GetUserProperty(ModelUDA.FabsecCarcassOrdered(), ref isCarcassCreated);
                 }
 
                 HandleMember(p, distanceToMoveInZ, keepOriginal, model, movedParts, isCarcassCreated != "");
@@ -409,27 +406,27 @@ namespace Prism
             return movedParts;
         }
 
-        private static void HandleMember(Part fabsec, double distanceToMoveInZ, bool keepOriginal, Model model, List<Part> movedParts, bool isFabsecWithCarcassCreated)
+        private static void HandleMember(PrismPart fabsec, double distanceToMoveInZ, bool keepOriginal, Model model, List<PrismPart> movedParts, bool isFabsecWithCarcassCreated)
         {
             if (isFabsecWithCarcassCreated)
             {
-                Part carcass = FabsecProcessing.GetCarcassFromSelected(model, fabsec) as Part;
+                PrismPart carcass = FabsecProcessing.GetCarcassFromSelected(model, fabsec);
 
-                MoveAndOmitPart(carcass, distanceToMoveInZ * 2, movedParts);
+                MoveAndOmitPart(carcass.Part, distanceToMoveInZ * 2, movedParts);
                 if (keepOriginal)
                 {
-                    ClearFabsecAttributes(fabsec);
+                    ClearFabsecAttributes(fabsec.Part);
                 }
-                else { fabsec.Delete(); }
+                else { fabsec.Part.Delete(); }
             }
             else
             {
                 if (keepOriginal)
                 {
-                    CopyAndOmitPart(distanceToMoveInZ, fabsec, movedParts);
-                    ClearFabsecAttributes(fabsec);
+                    CopyAndOmitPart(distanceToMoveInZ, fabsec.Part, movedParts);
+                    ClearFabsecAttributes(fabsec.Part);
                 }
-                else { MoveAndOmitPart(fabsec, distanceToMoveInZ, movedParts); }
+                else { MoveAndOmitPart(fabsec.Part, distanceToMoveInZ, movedParts); }
             }
         }
 
@@ -465,30 +462,32 @@ namespace Prism
             return stageString;
         }
 
-        public static void PerformNumbering()
+        public static bool PerformNumbering()
         {
             new MacroBuilder().Callback("acmd_partnumbers_selected", string.Empty, "main_frame").Run();
+
+            return PrismWarnings.AreYouHappyWithNumbering();
         }
 
-        public static void CreateDrawings(this List<Part> selectedObjects)
+        public static void CreateDrawings(this List<PrismPart> selectedObjects)
         {
             FileInfo file = new FileInfo(FirmFolderLoc.DrawingWizard());
             AutoDrawingRule rule = new AutoDrawingRule(file.FullName);
             AutoDrawingsStatusEnum status;
             List<Identifier> idList = new List<Identifier>();
-            foreach (Part part in selectedObjects)
+            foreach (PrismPart part in selectedObjects)
             {
-                idList.Add(part.Identifier);
+                idList.Add(part.Part.Identifier);
             }
             DrawingCreator.CreateDrawings(rule, idList, out status);
         }
 
-        public static void SelectParts(this List<Part> partsToBeSelected)
+        public static void SelectParts(this List<PrismPart> partsToBeSelected)
         {
             ArrayList selectList = new ArrayList();
-            foreach (Part part in partsToBeSelected)
+            foreach (PrismPart part in partsToBeSelected)
             {
-                selectList.Add(part);
+                selectList.Add(part.Part);
             }
             Tekla.Structures.Model.UI.ModelObjectSelector ms = new Tekla.Structures.Model.UI.ModelObjectSelector();
             ms.Select(selectList);
@@ -673,21 +672,21 @@ namespace Prism
         public static int ChangeSpecialTag(string newTagString, string phaseNum, string issueNum, out List<ModelObject> objects)
         {
             SelectedObjects selectedObjects = new SelectedObjects(StageTypes.Prelim3, phaseNum, issueNum);
-            ModifySpecialTag(newTagString, selectedObjects.SelectedModelParts);
+            ModifySpecialTag(newTagString, selectedObjects.PrismParts);
             objects = new List<ModelObject>();
-            foreach (Part p in selectedObjects.SelectedModelParts)
+            foreach (PrismPart p in selectedObjects.PrismParts)
             {
-                objects.Add(p);
+                objects.Add(p.Part);
             }
             return 0;
         }
 
-        public static void ModifySpecialTag(string modifyTo, List<Part> selectedModelParts)
+        public static void ModifySpecialTag(string modifyTo, List<PrismPart> selectedModelParts)
         {
-            foreach (Part part in selectedModelParts)
+            foreach (PrismPart part in selectedModelParts)
             {
-                part.SetUserProperty(ModelUDA.SpecialFittingTag(), modifyTo);
-                part.Modify();
+                part.Part.SetUserProperty(ModelUDA.SpecialFittingTag(), modifyTo);
+                part.Part.Modify();
             }
         }
 
@@ -703,7 +702,7 @@ namespace Prism
         public static void ModifyUDA(Part part, string Uda, string changeTo)
         {
             part.SetUserProperty(Uda, changeTo);
-            part.Modify();
+            //part.Modify();
         }
     }
 }

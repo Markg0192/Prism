@@ -19,9 +19,9 @@ namespace Prism
                 ModelModifiers.StampBoltUDA(unorderedBoltGroups, reportManager.ProjectData.Full, reportManager.ProjectData.Date, reportManager.PhaseNum, reportManager.IssueNum);
             }
 
-            if (runSeversafe) { SeversafeOrder.CreateSeversafeOrder(model, selectedObjects.SeversafeParts, siteDate, reportManager, divisionNo, reportManager.EpoReportPrefix, projData); }
+            if (runSeversafe) { SeversafeOrder.CreateSeversafeOrder(model, selectedObjects.GetSeversafeParts(), siteDate, reportManager, divisionNo, reportManager.EpoReportPrefix, projData); }
 
-            ModelModifiers.StampPartFabUDA(selectedObjects.SelectedModelParts, reportManager.PhaseNum, reportManager.IssueNum);
+            ModelModifiers.StampPartFabUDA(selectedObjects.PrismParts, reportManager.PhaseNum, reportManager.IssueNum);
             ViewManager.CreateFabView(reportManager.PhaseNum, reportManager.IssueNum, reportManager.ProjectData, selectedObjects);
         }
 

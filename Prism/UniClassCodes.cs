@@ -1,16 +1,12 @@
-﻿//using Aspose.Words.Lists;
-using Prism.CustomDialogs;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Tekla.Structures.Model;
 
 namespace Prism
 {
     public static class UniClassCodes
     {
-        public static TableRow GetUniClassDetailForPart(string jobName, Part part)
+        public static TableRow GetUniClassDetailForPart(string jobName, Part part, TableData td)
         {
-            TableData td = UniClass_Codes.ReadTableData(Constants.ModelProjectInforLocation(jobName));
-
             foreach (TableRow row in td.Rows)
             {
                 if (row.Filter != " ")
