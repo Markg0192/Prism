@@ -50,7 +50,7 @@ namespace Prism
             bimRevExp.SetAttribute("selected_parts_only", 1);
 
             // Start ActionPopUps in a new thread before calling Insert
-         //   Task.Run(() => ActionPopUps());
+            Task.Run(() => ActionPopUps());
 
             bimRevExp.Insert();
 
@@ -105,13 +105,6 @@ namespace Prism
                 {
                     Console.WriteLine($"Exception while searching for first popup: {ex.Message}");
                 }
-            }
-
-            if (!firstPopupHandled)
-            {
-                Console.WriteLine("First pop-up with 'No' button not found within the time limit.");
-                // Optionally, you can throw an exception or handle it differently
-                // throw new Exception("First pop-up with 'No' button not found.");
             }
 
             // Second pop-up with "OK" button

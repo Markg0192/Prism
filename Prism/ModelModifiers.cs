@@ -11,14 +11,11 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Tekla.Structures.Model.UI;
 using static Prism.Enums;
-using Tekla.Structures.RemotingHelper;
-using Tekla.Structures.Drawing;
 using Part = Tekla.Structures.Model.Part;
 using ModelObject = Tekla.Structures.Model.ModelObject;
 using System;
 using System.Threading;
 using System.Windows.Forms;
-using Microsoft.Office.Interop.Outlook;
 using Prism.CustomDialogs;
 //using Org.BouncyCastle.Tls;
 
@@ -464,8 +461,9 @@ namespace Prism
 
         public static bool PerformNumbering()
         {
-            new MacroBuilder().Callback("acmd_partnumbers_selected", string.Empty, "main_frame").Run();
-
+            // new MacroBuilder().Callback("acmd_partnumbers_selected", string.Empty, "main_frame").Run(); 
+            TeklaStructures.Connect();
+            TeklaStructures.CommonTasks.PerformNumbering(false);
             return PrismWarnings.AreYouHappyWithNumbering();
         }
 

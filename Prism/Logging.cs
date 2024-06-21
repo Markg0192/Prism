@@ -1,5 +1,4 @@
-﻿using Microsoft.Office.Interop.Outlook;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Tekla.Structures.Drawing;
@@ -86,8 +85,30 @@ namespace Prism
 
                 WriteFirstDataLog(Constants.PrismModelData, Constants.ModelProjectInforLocation(pData.ProjNumberAndGuid), pData.pInfo);
 
+                WriteAdvancedSettings(Constants.PrismModelData, Constants.ModelProjectAdvancedSettingLocation(pData.ProjNumberAndGuid));
+                
                 PrismWarnings.FirstTimeInTheModel();
             }
+        }
+
+        public static void WriteAdvancedSettings(int filePathLine, string additonalString)
+        {
+            string[] content = new string[]
+            {
+                $"Prelim Mark Prefix: ",
+                "Fab Pack Type: By Phase",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                ""
+            };
+
+            WebService.WriteAllLinesWithArray(filePathLine, content, additonalString);
         }
 
         private static void CreateNewLogUsingOldLog(PrismProjectData pData)

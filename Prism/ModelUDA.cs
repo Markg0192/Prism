@@ -28,10 +28,32 @@
         {
             return "FIRE_DFT";
         }
+
         public static string FireWFT()
         {
             return "FIRE_WFT";
         }
+
+        public static string HempelFireWFT()
+        {
+            return "Heet.WFT";
+        }
+
+        public static string HempelFireDFT()
+        {
+            return "Heet.DFT";
+        }
+
+        public static string HempelOldFireWFT()
+        {
+            return "Heet.Results.WFT";
+        }
+
+        public static string HempelOldFireDFT()
+        {
+            return "Heet.Results.DFT";
+        }
+
 
         public static string FabStamp(string phaseNum, string issueNum)
         {

@@ -509,20 +509,39 @@ namespace Prism
         {
             if (mainPart.Finish.StartsWith(GdomValues.IntumescentCode))
             {
-                string dft = "";
-                string wft = "";
-                double dftNum = 0;
-                double wftNum = 0;
-                mainPart.GetUserProperty(ModelUDA.FireDFT(), ref dft);
-                mainPart.GetUserProperty(ModelUDA.FireWFT(), ref wft);
-                mainPart.GetUserProperty(ModelUDA.FireDFT(), ref dftNum);
-                mainPart.GetUserProperty(ModelUDA.FireWFT(), ref wftNum);
-                if ((dft == "" && dftNum == 0) || (wft == "" && wftNum == 0))
+                RetrieveDftAndWft(mainPart, ModelUDA.FireDFT(), ModelUDA.FireWFT(), out string dft, out string wft, out double dftNum, out double wftNum);
+                if (IsMissingProperties(dft, dftNum, wft, wftNum))
                 {
-                    PartsWithoutIntumescentLoading.Add(new PrismPart(mainPart));
+                    RetrieveDftAndWft(mainPart, ModelUDA.HempelFireDFT(), ModelUDA.HempelFireWFT(), out string hempDft, out string hempWft, out double hempDftNum, out double hempWftNum);
+                    if (IsMissingProperties(hempDft, hempDftNum, hempWft, hempWftNum))
+                    {
+                        RetrieveDftAndWft(mainPart, ModelUDA.HempelOldFireDFT(), ModelUDA.HempelOldFireWFT(), out string oldHempDft, out string oldHempWft, out double oldHempDftNum, out double oldHempWftNum);
+                        if (IsMissingProperties(oldHempDft, oldHempDftNum, oldHempWft, oldHempWftNum))
+                        {
+                            PartsWithoutIntumescentLoading.Add(new PrismPart(mainPart));
+                        }
+                    }
                 }
             }
         }
+
+        private static void RetrieveDftAndWft(Part part, string dftUda, string wftUda, out string dftString, out string wftString, out double dftDouble, out double wftDouble)
+        {
+            dftString = "";
+            wftString = "";
+            dftDouble = 0;
+            wftDouble = 0;
+            part.GetUserProperty(dftUda, ref dftString);
+            part.GetUserProperty(dftUda, ref dftDouble);
+            part.GetUserProperty(wftUda, ref wftString);
+            part.GetUserProperty(wftUda, ref wftDouble);
+        }
+
+        private static bool IsMissingProperties(string dft, double dftNum, string wft, double wftNum)
+        {
+            return string.IsNullOrEmpty(dft) && dftNum == 0 && string.IsNullOrEmpty(wft) && wftNum == 0;
+        }
+
         public static bool NameAndClassAign(SelectedObjects myObjects)
         {
             IncorrectNameAndClass.Clear();

@@ -139,7 +139,7 @@ namespace Prism
                 if (carcassPrelim != "")
                 {
                     string[] splitCarcassNumber = carcassPrelim.Split('-');
-                    ms.Select(new ArrayList { carcass });
+                    ms.Select(new ArrayList { carcass.Part });
                     carcass.Part.PartNumber.Prefix = splitCarcassNumber[0] + "-";
                     carcass.Part.AssemblyNumber.Prefix = splitCarcassNumber[0] + "-";
                     carcass.Part.AssemblyNumber.StartNumber = 1;

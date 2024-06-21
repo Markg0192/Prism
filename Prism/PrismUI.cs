@@ -8,21 +8,15 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Tekla.Structures.Model;
-using Tekla.Structures.Solid;
 using static Prism.Enums;
 using Model = Tekla.Structures.Model.Model;
 using Task = System.Threading.Tasks.Task;
 using TextBox = System.Windows.Forms.TextBox;
 using System.IO;
-using Microsoft.Office.Interop.Excel;
 using Application = System.Windows.Forms.Application;
 using Microsoft.Win32;
-using System.Runtime.InteropServices;
-using Microsoft.Office.Interop.Outlook;
-using Tekla.Structures.Model.Operations;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Linq;
+using Tekla.Structures;
 
 namespace Prism
 {
@@ -137,29 +131,29 @@ namespace Prism
 
             if (!await Task.Run(() => InitialSetup(StageTypes.Bolt, false))) { EndFunction(0); return; }
 
-         /*   var mySolid = _selectedObjects.SelectedModelParts[0].GetSolid();
-            var mySolid2 = _selectedObjects.SelectedModelParts[1].GetSolid();
+            /*   var mySolid = _selectedObjects.SelectedModelParts[0].GetSolid();
+               var mySolid2 = _selectedObjects.SelectedModelParts[1].GetSolid();
 
-            var bolts = _selectedObjects.SelectedModelParts[0].GetBolts();
-            var bolt3s = _selectedObjects.SelectedModelParts[1].GetBolts();
+               var bolts = _selectedObjects.SelectedModelParts[0].GetBolts();
+               var bolt3s = _selectedObjects.SelectedModelParts[1].GetBolts();
 
 
-            FaceEnumerator faceEnum = mySolid.GetFaceEnumerator();
+               FaceEnumerator faceEnum = mySolid.GetFaceEnumerator();
 
-            int solid1Faces = 0;
-            while (faceEnum.MoveNext())
-            {
-                solid1Faces++;
-            }
+               int solid1Faces = 0;
+               while (faceEnum.MoveNext())
+               {
+                   solid1Faces++;
+               }
 
-            FaceEnumerator faceEnum2 = mySolid2.GetFaceEnumerator();
+               FaceEnumerator faceEnum2 = mySolid2.GetFaceEnumerator();
 
-            int solid2Faces = 0;
-            while (faceEnum2.MoveNext())
-            {
-                solid2Faces++;
-            }
-         */
+               int solid2Faces = 0;
+               while (faceEnum2.MoveNext())
+               {
+                   solid2Faces++;
+               }
+            */
             // await Task.Run(() => FabMisc.FabMiscOp(txt_SiteDate.Text, _selectedObjects, false, null));
 
             EndFunction(1);
@@ -190,8 +184,27 @@ namespace Prism
 
         private void btn_SpecialOperations_Click(object sender, EventArgs e)
         {
-            EmailWriter.WriteHelpEmail("2021");
+           // MaiksMacro("C:\\TeklaStructuresModels2023\\Sandbox\\PlotFiles");
+ 
         }
+
+      /*  public void MaiksMacro(string fileLocation)
+        {
+            if (TeklaStructures.Connect())
+            {
+                MacroBuilder macBuilder = new MacroBuilder();
+                macBuilder.WpfCommandRepositoryCommand("Drawing.DrawingList");
+                macBuilder.PushWpfButton("DocumentManager.MainWindow", "AID_DOCMAN_ButtonSelectDrawings");
+                macBuilder.PushWpfContextMenuButton("DocumentManager.MainWindow", "AID_DOCMAN_DataGridControl", "AID_DocMgr_Print");
+                macBuilder.WpfCommandRepositoryCommand("Common.PrintDrawings");
+                macBuilder.SetWpfTextBoxText("DPMPrinterFeature.DPMPrinterViewWindow", new string[] { "AID_PDFPD_SettingsTabControl", "AID_PDFPD_ParentStackPanel", "AID_PDFPD_FileLocationPanel", "AID_PDFPD_FileLocation" }, fileLocation);//@"C:\\Temp"
+                macBuilder.PushWpfButton("DPMPrinterFeature.DPMPrinterViewWindow", "AID_PDFPD_PrintButton");
+                macBuilder.CloseWpfView("DPMPrinterFeature.DPMPrinterViewWindow");
+                macBuilder.SetWpfToggleButtonChecked("DocumentManager.MainWindow", new string[] { "AID_DOCMAN_ToggleButtonShowSelected" });
+                macBuilder.CloseWpfView("DocumentManager.MainWindow");
+                macBuilder.Run();
+            }
+        }*/
 
         public bool InitialSetup(StageTypes stageType, bool checkForPreviousSteps, string phaseNum = "x", string issueNum = "x", ToolStrip toolStrip = null, ToolStripStatusLabel statusLabel = null)
         {
@@ -208,7 +221,7 @@ namespace Prism
                 }
             }
 
-            if (_selectedObjects.NumbersUpToDate && _selectedObjects.GetMainParts().Count == 0)
+            if (_selectedObjects.NumbersUpToDate && _selectedObjects.PrismParts.Count == 0)
             {
                 SetStatusLabels("No Parts Selected");
                 PrismWarnings.NoPartsSelected();
@@ -408,7 +421,7 @@ namespace Prism
             try
             {
                 var name = System.Reflection.Assembly.GetCallingAssembly().GetName();
-                using (var key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Severfield\\" + name.Name + "\\"))
+                using (var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\Severfield\\" + name.Name + "\\"))
                 {
                     if (key != null)
                     {
