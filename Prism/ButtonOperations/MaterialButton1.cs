@@ -1,17 +1,18 @@
-﻿using static Prism.Enums;
+﻿using System.Windows.Forms;
+using static Prism.Enums;
 
 namespace Prism.ButtonOperations
 {
     public static class MaterialButton1
     {
-        public static bool MaterialButton1op(this SelectedObjects myObjects, PrismProjectData projectData, int stageNumber)
+        public static bool MaterialButton1op(this SelectedObjects myObjects, PrismProjectData projectData, int stageNumber, ToolStrip toolStrip, ToolStripStatusLabel tssl)
         {
             if (!ModelChecker.NameAndClassAign(myObjects)) { return false; }
             if (!ModelChecker.PartsHaveExecutionClass(myObjects)) { return false; }
 
-            ModelModifiers.SelectParts(myObjects.SelectedModelParts);
-            if (!myObjects.SelectedModelParts.ModifyAttributes(stageNumber, projectData)) { return false; }
-            Logging.LogProgress(projectData.ProjNumberAndName, "Material 1", ModelChecker.IncorrectNameAndClass.Count + ModelChecker.MissingExecutionClass.Count, myObjects.AssembliesList.Count);
+            myObjects.PrismParts.SelectParts();
+            if (!myObjects.PrismParts.ModifyAttributes(stageNumber, projectData, toolStrip, tssl)) { return false; }
+            Logging.LogProgress(projectData.ProjNumberAndName, "Material 1", ModelChecker.IncorrectNameAndClass.Count + ModelChecker.MissingExecutionClass.Count, myObjects.GetMainParts().Count);
             return true;
 
         }

@@ -7,8 +7,9 @@ namespace Prism
     {
         public static void StampConnectionCodeOnMainMember(SelectedObjects selectedObjects)
         {
-            foreach (Beam b in selectedObjects.SelectedModelParts)
+            foreach (PrismPart prismPart in selectedObjects.PrismParts)
             {
+                Beam b = prismPart.Part as Beam;
                 ModelObjectEnumerator partConnections = b.GetComponents();
                 foreach (var connection in partConnections)
                 {
@@ -23,11 +24,12 @@ namespace Prism
             }
         }
 
-        public static List<Part> GetHdBoltItems(SelectedObjects selectedObjects, bool getBolt)
+        public static List<PrismPart> GetHdBoltItems(SelectedObjects selectedObjects, bool getBolt)
         {
-            List<Part> HdBolts = new List<Part>();
-            foreach (Beam b in selectedObjects.SelectedModelParts)
+            List<PrismPart> HdBolts = new List<PrismPart>();
+            foreach (PrismPart prismPart in selectedObjects.PrismParts)
             {
+                Beam b = prismPart.Part as Beam;
                 ModelObjectEnumerator partConnections = b.GetComponents();
                 foreach (var connection in partConnections)
                 {
@@ -47,7 +49,7 @@ namespace Prism
                               
                                 if (item is Part part && part.Class == myClass)
                                 {
-                                    HdBolts.Add(part);
+                                    HdBolts.Add(new PrismPart(part));
                                 }
                             }
                         }

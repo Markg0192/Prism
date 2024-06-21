@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
@@ -10,10 +11,10 @@ namespace Prism
 {
     public static class CheckFittings
     {
-        public static List<ModelObject> IncorrectGrade = new List<ModelObject>();
-        public static List<ModelObject> IncorrectThickness = new List<ModelObject>();
-        public static List<ModelObject> IncorrectLength = new List<ModelObject>();
-        public static List<ModelObject> UnOrderedObjects = new List<ModelObject>();
+        public static List<PrismPart> IncorrectGrade = new List<PrismPart>();
+        public static List<PrismPart> IncorrectThickness = new List<PrismPart>();
+        public static List<PrismPart> IncorrectLength = new List<PrismPart>();
+        public static List<PrismPart> UnOrderedObjects = new List<PrismPart>();
         public static List<Part> AllIncorrectPlate = new List<Part>();
 
         public static void GetIncorrectFittings(this Part part, Factory factory)
@@ -24,7 +25,7 @@ namespace Prism
             }
             if (IsAPartThatShouldBeOrdered(part) && !part.HasBeenOrdered(true))
             {
-                UnOrderedObjects.Add(part);
+                UnOrderedObjects.Add(new PrismPart(part) { ErrorString = "Part not Ordered"});
             }
         }
 
@@ -95,7 +96,7 @@ namespace Prism
             if (approvedGrade == null)
             {
                 AllIncorrectPlate.Add(myPart);
-                IncorrectGrade.Add(myPart);
+                IncorrectGrade.Add(new PrismPart(myPart) { ErrorString = "Non-Standard Grade"});
             }
         }
 
@@ -106,7 +107,7 @@ namespace Prism
             if (thickness == 0)
             {
                 AllIncorrectPlate.Add(myPart);
-                IncorrectThickness.Add(myPart);
+                IncorrectThickness.Add(new PrismPart(myPart) { ErrorString = "Non-Standard Thickness"});
             }
         }
 
@@ -115,7 +116,7 @@ namespace Prism
             if (length > GdomValues.MaxFittingLength(factory, plateThickness, isFlat))
             {
                 AllIncorrectPlate.Add(myPart);
-                IncorrectLength.Add(myPart);
+                IncorrectLength.Add(new PrismPart(myPart) { ErrorString = "Non-Standard Length" });
             }
         }
 
@@ -168,19 +169,26 @@ namespace Prism
             {
                 PrismWarnings.Warning = FormErrorMessage();
 
-                ModelModifiers.SetPartsRed(IncorrectGrade);
-                ModelModifiers.SetPartsGreen(IncorrectLength, false);
-                ModelModifiers.SetPartsBlue(IncorrectThickness, false);
-                ModelModifiers.SetPartsYellow(UnOrderedObjects, false);
+                ModelModifiers.SetPartsRed(Convertor.PrismPartsToModelObjects(IncorrectGrade));
+                ModelModifiers.SetPartsGreen(Convertor.PrismPartsToModelObjects(IncorrectLength), false);
+                ModelModifiers.SetPartsBlue(Convertor.PrismPartsToModelObjects(IncorrectThickness), false);
+                ModelModifiers.SetPartsYellow(Convertor.PrismPartsToModelObjects(UnOrderedObjects), false);
 
-                PrismWarnings.AbnormalFittings();
+                // Combine lists into a single list
+                List<PrismPart> combinedList = new List<PrismPart>();
+                combinedList.AddRange(IncorrectThickness);
+                combinedList.AddRange(IncorrectLength);
+                combinedList.AddRange(IncorrectGrade);
+                combinedList.AddRange(UnOrderedObjects);
+
+                PrismWarnings.AbnormalFittings(combinedList);
                 bool tagFittings = PrismWarnings.TagAbnormalFittings();
                 if (tagFittings)
                 {
-                    ModelModifiers.ModifySpecialTag("Special", IncorrectLength);
-                    ModelModifiers.ModifySpecialTag("Special", IncorrectThickness);
-                    ModelModifiers.ModifySpecialTag("Special", IncorrectGrade);
-                    ModelModifiers.ModifySpecialTag("Special", UnOrderedObjects);
+                    ModelModifiers.ModifySpecialTag("Special", Convertor.PrismPartsToModelObjects(IncorrectLength));
+                    ModelModifiers.ModifySpecialTag("Special", Convertor.PrismPartsToModelObjects(IncorrectThickness));
+                    ModelModifiers.ModifySpecialTag("Special", Convertor.PrismPartsToModelObjects(IncorrectGrade));
+                    ModelModifiers.ModifySpecialTag("Special", Convertor.PrismPartsToModelObjects(UnOrderedObjects));
                 }
                 return PrismWarnings.IgnoreWarning();
             }

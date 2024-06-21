@@ -32,19 +32,19 @@ namespace Prism
                         "                Tekla.Macros.Wpf.Runtime.IWpfMacroHost wpf = runtime.Get<Tekla.Macros.Wpf.Runtime.IWpfMacroHost>();" + Environment.NewLine +
                         "                wpf.InvokeCommand(\"CommandRepository\", \"Numbering.ClearPartAndAssemblyNumbers\");" + Environment.NewLine +
                         "                akit.PushButton(\"warning_ok\", \"cleared_selected_numbering\");" + Environment.NewLine +
-        
-                        
+
+
                         "                wpf.InvokeCommand(\"CommandRepository\", \"Numbering.ChangeAssemblyNumber\");" + Environment.NewLine +
                         "                akit.PushButton(\"GetPB\", \"assign_assembly_number\");" + Environment.NewLine +
                         "                akit.ValueChange(\"assign_assembly_number\", \"AssignToAllRadioBox\", \"0\");" + Environment.NewLine +
-                        $"               akit.ValueChange(\"assign_assembly_number\", \"Position\", \"{ prelim}\");" + Environment.NewLine +
-                        "                akit.PushButton(\"AssignPB\", \"assign_assembly_number\");" + Environment.NewLine + 
+                        $"               akit.ValueChange(\"assign_assembly_number\", \"Position\", \"{prelim}\");" + Environment.NewLine +
+                        "                akit.PushButton(\"AssignPB\", \"assign_assembly_number\");" + Environment.NewLine +
                         "                akit.PushButton(\"CancelPB\", \"assign_assembly_number\");" + Environment.NewLine +
 
-                    /*    "                wpf.InvokeCommand(\"CommandRepository\", \"Numbering.ChangePartNumber\");    " + Environment.NewLine +
-                        "                akit.ValueChange(\"assign_part_number\", \"Position\", \"" + prelim + "\");  " + Environment.NewLine +
-                        "                akit.PushButton(\"AssignPB\", \"assign_part_number\");                       " + Environment.NewLine +
-                        "                akit.PushButton(\"CancelPB\", \"assign_part_number\");" + Environment.NewLine +*/
+                        /*    "                wpf.InvokeCommand(\"CommandRepository\", \"Numbering.ChangePartNumber\");    " + Environment.NewLine +
+                            "                akit.ValueChange(\"assign_part_number\", \"Position\", \"" + prelim + "\");  " + Environment.NewLine +
+                            "                akit.PushButton(\"AssignPB\", \"assign_part_number\");                       " + Environment.NewLine +
+                            "                akit.PushButton(\"CancelPB\", \"assign_part_number\");" + Environment.NewLine +*/
 
                         "            }" + Environment.NewLine +
                         "        }" + Environment.NewLine +
@@ -58,6 +58,33 @@ namespace Prism
             {
                 System.Threading.Tasks.Task.Delay(10);
             }
+        }
+
+        public static void NumberSelected()
+        {
+            var macrodir = "";
+            TeklaStructuresSettings.GetAdvancedOption("XS_MACRO_DIRECTORY", ref macrodir);
+            var dir = macrodir.Split(';')[0];
+
+            var writer = new StreamWriter(dir + $@"\modeling\{Constants.ForceFabsecNumber}");
+            var macro =
+                        "#pragma warning disable 1633 // Unrecognized #pragma directive" + Environment.NewLine +
+                        "#pragma reference \"Tekla.Macros.Wpf.Runtime\"" + Environment.NewLine +
+                        "#pragma reference \"Tekla.Macros.Runtime\"" + Environment.NewLine +
+                        "#pragma warning restore 1633 // Unrecognized #pragma directive" + Environment.NewLine +
+                        "" + Environment.NewLine +
+                        "namespace UserMacros" + Environment.NewLine +
+                        "    {" + Environment.NewLine +
+                        "        public sealed class Macro" + Environment.NewLine +
+                        "        {" + Environment.NewLine +
+                        "            [Tekla.Macros.Runtime.MacroEntryPointAttribute()]" + Environment.NewLine +
+                        "            public static void Run(Tekla.Macros.Runtime.IMacroRuntime runtime)" + Environment.NewLine +
+                        "            {" + Environment.NewLine +
+                        "                Tekla.Macros.Wpf.Runtime.IWpfMacroHost wpf = runtime.Get<Tekla.Macros.Wpf.Runtime.IWpfMacroHost>();" + Environment.NewLine +
+                        "                wpf.InvokeCommand(\"CommandRepository\", \"Numbering.NumberSeriesOfSelectedObjects\");" + Environment.NewLine +
+                        "            }" + Environment.NewLine +
+                        "        }" + Environment.NewLine +
+                        "    }";
         }
 
         public static void FabsecAssignNumber(string prefix, string prelim)
@@ -84,8 +111,8 @@ namespace Prism
                         "                Tekla.Macros.Akit.IAkitScriptHost akit = runtime.Get<Tekla.Macros.Akit.IAkitScriptHost>();" + Environment.NewLine +
                         "                Tekla.Macros.Wpf.Runtime.IWpfMacroHost wpf = runtime.Get<Tekla.Macros.Wpf.Runtime.IWpfMacroHost>();" + Environment.NewLine +
                         "                akit.ValueChange(\"assign_part_number\", \"Position\", \"" + prelim + "\");  " + Environment.NewLine +
-                      //  "                akit.PushButton(\"AssignPB\", \"assign_part_number\");                       " + Environment.NewLine +
-                      //  "                akit.PushButton(\"CancelPB\", \"assign_part_number\");                       " + Environment.NewLine +
+                        //  "                akit.PushButton(\"AssignPB\", \"assign_part_number\");                       " + Environment.NewLine +
+                        //  "                akit.PushButton(\"CancelPB\", \"assign_part_number\");                       " + Environment.NewLine +
                         "            }" + Environment.NewLine +
                         "        }" + Environment.NewLine +
                         "    }";
@@ -122,9 +149,9 @@ namespace Prism
                         "            {" + Environment.NewLine +
                         "                Tekla.Macros.Akit.IAkitScriptHost akit = runtime.Get<Tekla.Macros.Akit.IAkitScriptHost>();" + Environment.NewLine +
                         "                Tekla.Macros.Wpf.Runtime.IWpfMacroHost wpf = runtime.Get<Tekla.Macros.Wpf.Runtime.IWpfMacroHost>();" + Environment.NewLine +
-                       // "                akit.ValueChange(\"assign_part_number\", \"Position\", \"" + prelim + "\");  " + Environment.NewLine +
+                        // "                akit.ValueChange(\"assign_part_number\", \"Position\", \"" + prelim + "\");  " + Environment.NewLine +
                         "                akit.PushButton(\"AssignPB\", \"assign_part_number\");                       " + Environment.NewLine +
-                       // "                akit.PushButton(\"CancelPB\", \"assign_part_number\");                       " + Environment.NewLine +
+                        // "                akit.PushButton(\"CancelPB\", \"assign_part_number\");                       " + Environment.NewLine +
                         "            }" + Environment.NewLine +
                         "        }" + Environment.NewLine +
                         "    }";
@@ -163,8 +190,8 @@ namespace Prism
                         "            {" + Environment.NewLine +
                         "                Tekla.Macros.Akit.IAkitScriptHost akit = runtime.Get<Tekla.Macros.Akit.IAkitScriptHost>();" + Environment.NewLine +
                         "                Tekla.Macros.Wpf.Runtime.IWpfMacroHost wpf = runtime.Get<Tekla.Macros.Wpf.Runtime.IWpfMacroHost>();" + Environment.NewLine +
-                      //  "                akit.ValueChange(\"assign_part_number\", \"Position\", \"" + prelim + "\");  " + Environment.NewLine +
-                       // "                akit.PushButton(\"AssignPB\", \"assign_part_number\");                       " + Environment.NewLine +
+                        //  "                akit.ValueChange(\"assign_part_number\", \"Position\", \"" + prelim + "\");  " + Environment.NewLine +
+                        // "                akit.PushButton(\"AssignPB\", \"assign_part_number\");                       " + Environment.NewLine +
                         "                akit.PushButton(\"CancelPB\", \"assign_part_number\");                       " + Environment.NewLine +
                         "            }" + Environment.NewLine +
                         "        }" + Environment.NewLine +

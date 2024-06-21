@@ -7,6 +7,7 @@ using System.Drawing.Printing;
 using System.Drawing;
 using System;
 using System.Linq;
+using System.Windows.Forms;
 
 namespace Prism
 {
@@ -207,7 +208,7 @@ namespace Prism
 
         }
 
-        public async void CreateFabReports(List<Part> partsList, List<PrismBoltGroup> boltList)
+        public async void CreateFabReports(List<PrismPart> partsList, List<PrismBoltGroup> boltList, string teklaVersion, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
         {
             while (Operation.IsMacroRunning()) // Wait until macro for selecting drawings in the document manager is complete before moving on
             {
@@ -221,9 +222,9 @@ namespace Prism
             bool shopBoltsPresent = boltList.Any(pbg => pbg.isShop && !pbg.isShearStud && !pbg.isOrdered);   //is a shop bolt but not a shear stud
             bool siteBoltsPresent = boltList.Any(pbg => !pbg.isShop && !pbg.isShearStud && !pbg.isOrdered); //Is neither shop bolt or shear stud
 
-            foreach (Part part in partsList)
+            foreach (PrismPart part in partsList)
             {
-                sectionSize = part.Profile.ProfileString.Substring(0, 2);
+                sectionSize = part.Part.Profile.ProfileString.Substring(0, 2);
                 bool isFitting = sectionSize == "PL" || sectionSize == "RS" || sectionSize == "FL";
                 bool isPlateGirder = sectionSize == "PG";
                 if (!isFitting && !isPlateGirder) create3Report = true;
@@ -231,11 +232,26 @@ namespace Prism
                 if (isFitting) create4Report = true;
             }
 
+            UpdateStatusLabel(toolStrip, statusLabel, "Creating NC Data");
+
+            CreateNC(teklaVersion);
+
+            UpdateStatusLabel(toolStrip, statusLabel, "Creating Reports");
+
             CreateReports(boltList, create3Report, create4Report, shopBoltsPresent, siteBoltsPresent);
 
-            CreateNC();
+            UpdateStatusLabel(toolStrip, statusLabel, "Converting Reports To PDF");
 
             TextToPDF(Folders.ReportPath);
+        }
+
+        private void UpdateStatusLabel(ToolStrip toolStrip, ToolStripStatusLabel statusLabel, string labelMessage)
+        {
+            toolStrip.Invoke(new System.Action(() =>
+            {
+                statusLabel.Text = $"{labelMessage}";
+
+            }));
         }
 
         private void CreateReports(List<PrismBoltGroup> boltList, bool create3Report, bool create4Report, bool shopBoltsPresent, bool siteBoltsPresent)
@@ -278,29 +294,51 @@ namespace Prism
             }
         }
 
-        private void CreateNC()
+        private void CreateNC(string version)
         {
-            //The name of the settings used changed from tekla 2021 -> 2023, so, we set up and ruth both here, 
-            //No need to filter versions, it will attempt and fail to run 2023 type files if in 2021 and vice versa at no real cost
-
-            //2021 NC
-            string plateSetting2021 = "-SNI-PLATES";
-            string profileSetting2021 = "-SNI-PROFILES";
-            Operation.CreateNCFilesFromSelected(plateSetting2021, Folders.NcPath + "\\");
-            Operation.CreateNCFilesFromSelected(profileSetting2021, Folders.NcPath + "\\");
-
-            //2023 NC
-            string platesSec2023 = "-SEV-PLATES-SEC";
-            string profilesMain2023 = "-SEV-PROFILES-MAIN";
-            string profilesSec2023 = "-SEV-PROFILES-SEC";
-            Operation.CreateNCFilesFromSelected(platesSec2023, Folders.NcPath + "\\");
-            Operation.CreateNCFilesFromSelected(profilesMain2023, Folders.NcPath + "\\");
-            Operation.CreateNCFilesFromSelected(profilesSec2023, Folders.NcPath + "\\");
-
-
+            //The name of the settings used changed from tekla 2021 -> 2023, so, we set up and run both here,
+            if (version.Contains("2021"))
+            {
+                //2021 NC
+                string plateSetting2021 = "-SNI-PLATES";
+                string profileSetting2021 = "-SNI-PROFILES";
+                // string shpRolePlates = "DSTV for plates";
+                //  string shpRoleForProfiles = "DSTV for profiles";
+                Operation.CreateNCFilesFromSelected(plateSetting2021, Folders.NcPath + "\\", true);
+                Operation.CreateNCFilesFromSelected(profileSetting2021, Folders.NcPath + "\\", true);
+                //   Operation.CreateNCFilesFromSelected(shpRolePlates, Folders.NcPath + "\\", false, "", true);
+                //   Operation.CreateNCFilesFromSelected(shpRoleForProfiles, Folders.NcPath + "\\", false, "", true);
+            }
+            else
+            {
+                //2023 NC
+                string platesSec2023 = "-SEV-PLATES-SEC";
+                string profilesMain2023 = "-SEV-PROFILES-MAIN";
+                string profilesSec2023 = "-SEV-PROFILES-SEC";
+                string profilesHollow2023 = "-SEV-PROFILES-MAIN-HOLLOW";
+                Operation.CreateNCFilesFromSelected(platesSec2023, Folders.NcPath + "\\", false, "", true);
+                Operation.CreateNCFilesFromSelected(profilesMain2023, Folders.NcPath + "\\", true, "", true);
+                Operation.CreateNCFilesFromSelected(profilesHollow2023, Folders.NcPath + "\\", true, "", true);
+                Operation.CreateNCFilesFromSelected(profilesSec2023, Folders.NcPath + "\\", false, "", true);
+            }
+            // Wait for the folder to have contents or timeout after 10 seconds
+            WaitForFolderContents(Folders.NcPath, TimeSpan.FromSeconds(30));
         }
 
-        public static async void SelectDrawingsInDocManager(List<Part> selectedParts)
+        private void WaitForFolderContents(string folderPath, TimeSpan timeout)
+        {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            while (stopwatch.Elapsed < timeout)
+            {
+                if (Directory.GetFiles(folderPath).Length > 0)
+                {
+                    break;
+                }
+                System.Threading.Tasks.Task.Delay(500).Wait(); // Wait for 500 milliseconds before checking again
+            }
+        }
+
+        public static async void SelectDrawingsInDocManager(List<PrismPart> selectedParts)
         {
             PrismMacroBuilder.DrawingOperations();
 

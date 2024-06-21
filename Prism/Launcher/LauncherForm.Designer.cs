@@ -42,6 +42,7 @@
             this.TeklaVersionComboBox.Name = "TeklaVersionComboBox";
             this.TeklaVersionComboBox.Size = new System.Drawing.Size(121, 21);
             this.TeklaVersionComboBox.TabIndex = 0;
+            this.TeklaVersionComboBox.SelectedIndexChanged += new System.EventHandler(this.TeklaVersionComboBox_SelectedIndexChanged);
             // 
             // SelectButton
             // 
@@ -71,6 +72,7 @@
             this.label1.Size = new System.Drawing.Size(137, 13);
             this.label1.TabIndex = 3;
             this.label1.Text = "Please select Tekla version";
+            this.label1.Click += new System.EventHandler(this.label1_Click);
             // 
             // LauncherForm
             // 

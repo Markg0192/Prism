@@ -37,7 +37,7 @@ namespace Prism
         private static double RunningHandrailLength = 0;
         private static double KickFlatLength = 0;
 
-        public static void CreateSeversafeOrder(Model model, List<Part> selectedObjects, string siteDate, ReportManager reportManager, int divisionNo, string reportPrefix, PrismProjectData projData)
+        public static void CreateSeversafeOrder(Model model, List<PrismPart> selectedObjects, string siteDate, ReportManager reportManager, int divisionNo, string reportPrefix, PrismProjectData projData)
         {
             ResetAllNumbers();
 
@@ -209,11 +209,11 @@ namespace Prism
         }
 
 
-        public static void CollateOrderableParts(Model model, List<Part> selectedObjects, PrismProjectData projData)
+        public static void CollateOrderableParts(Model model, List<PrismPart> selectedObjects, PrismProjectData projData)
         {
-            foreach (Part p in selectedObjects)
+            foreach (PrismPart p in selectedObjects)
             {
-                if(p is Brep post)
+                if(p.Part is Brep post)
                 {
                     switch (post.Name)
                     {
@@ -228,18 +228,18 @@ namespace Prism
                             break;
                     }
                 }
-                if (p is Beam b)
+                if (p.Part is Beam b)
                 {
-                    switch (p.Name)
+                    switch (p.Part.Name)
                     {
                         case string name when name.Contains("HANDRAIL"):
-                            AddToHandrail(model, p);
+                            AddToHandrail(model, p.Part);
                             break;
                         case string name when name.Contains("PANEL"):
                             AddToPanels(b);
                             break; 
                         case string name when name.Contains("KICKFLAT"):
-                            CountKickFlat(p);
+                            CountKickFlat(p.Part);
                             break;
                         case string name when name.Contains("SS-KK-TYPE-14-6"):
                             AddExternalKlamp();
@@ -248,12 +248,12 @@ namespace Prism
                             AddCornerKlamp();
                             break;
                         case string name when name.Contains("SS-KK-TYPE-18-6"):
-                            AddInternalKlamp(p);
+                            AddInternalKlamp(p.Part);
                             break;
                         default:
                             break;
                     }
-                    ModelModifiers.ModifyAttribute(p, 3, projData, false, true);
+                    ModelModifiers.ModifyAttribute(p.Part, 3, projData, null, false, true);
                 }
             }
             RoundHandrailMeters();

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Tekla.Structures.Drawing;
 using Tekla.Structures.Model;
@@ -10,6 +12,7 @@ using static Prism.Enums;
 using ModelObject = Tekla.Structures.Model.ModelObject;
 using Operation = Tekla.Structures.Model.Operations.Operation;
 using Part = Tekla.Structures.Model.Part;
+using Task = System.Threading.Tasks.Task;
 
 namespace Prism
 {
@@ -24,12 +27,9 @@ namespace Prism
         public SelectedObjects(StageTypes stageType, string phaseNum, string issueNum, ToolStrip toolStrip = null, ToolStripStatusLabel statusLabel = null)
         {
             NumbersUpToDate = true;
-            AssembliesList = new List<Assembly>();
-            SelectedModelParts = new List<Part>();
-            LockedParts = new List<ModelObject>();
-            SeversafeParts = new List<Part>();
-            NonSeversafeParts = new List<Part>();
             MyDrawingHandler = new DrawingHandler();
+
+            PrismParts = new List<PrismPart>();
 
             MyMarks = new List<string>();
 
@@ -46,20 +46,50 @@ namespace Prism
         public double BiggestY = -100000000;
         public double BiggestZ = -100000000;
 
+        public List<PrismPart> PrismParts { get; set; }
         public List<PrismBoltGroup> PrismBoltGroups = new List<PrismBoltGroup>();
 
+        public string ErrorMessage { get; set; }
         public double PartWeight { get; set; }
         public bool NumbersUpToDate { get; set; }
         public bool SeversafePresent = false;
-        public List<Assembly> AssembliesList { get; set; }
-        public List<Part> SelectedModelParts { get; set; }
         public List<string> MyMarks { get; set; }
-        public List<ModelObject> LockedParts { get; set; }
-        public List<ModelObject> FabsecParts = new List<ModelObject>();
-        public List<ModelObject> NonFabsecParts = new List<ModelObject>();
-        public List<Part> SeversafeParts { get; set; }
-        public List<Part> NonSeversafeParts { get; set; }
-        public List<Part> OmittedParts = new List<Part>();
+        public List<PrismPart> OmittedParts = new List<PrismPart>();
+
+        public List<PrismPart> GetNonSeversafeParts()
+        {
+            return PrismParts.Where(part => !part.IsSeversafe).ToList();
+        }
+
+        public List<PrismPart> GetSeversafeParts()
+        {
+            return PrismParts.Where(part => part.IsSeversafe).ToList();
+        }
+
+        public List<PrismPart> GetNonLockedParts()
+        {
+            return PrismParts.Where(part => !part.IsLocked).ToList();
+        }
+
+        public List<PrismPart> GetLockedParts()
+        {
+            return PrismParts.Where(part => part.IsLocked).ToList();
+        }
+
+        public List<PrismPart> GetFabsecParts()
+        {
+            return PrismParts.Where(part => part.IsFabsec).ToList();
+        }
+
+        public List<PrismPart> GetNonFabsecParts()
+        {
+            return PrismParts.Where(part => !part.IsFabsec).ToList();
+        }
+
+        public List<PrismPart> GetMainParts()
+        {
+            return PrismParts.Where(part => part.IsMainPart).ToList();
+        }
 
         private void CheckXYZSize(Part myPart)
         {
@@ -82,7 +112,7 @@ namespace Prism
 
             foreach (var myObject in Moe)
             {
-                if(totalCount > 0) UpdateStatusLabelWithProcessCount(ref currentCount, toolStrip, statusLabel, totalCount);
+                if (totalCount > 0) UpdateStatusLabelWithProcessCount(ref currentCount, toolStrip, statusLabel, totalCount);
                 if (!NumbersUpToDate) return;
 
                 // Process directly if RocketPacket or not a BaseComponent
@@ -163,26 +193,31 @@ namespace Prism
                 }
             }
 
-            CategorizeAndProcessPart(myPart, isSeversafe);
+            PrismPart myPrismPart = CategorizeAndProcessPart(myPart, isSeversafe);
+
             UpdatePartWeight(myPart);
+
             AddPartMark(myPart);
-            ProcessAssembly(myPart, phaseNum, issueNum);
+
+            ProcessAssembly(myPrismPart, phaseNum, issueNum);
+
+            PrismParts.Add(myPrismPart);
         }
 
-        private void CategorizeAndProcessPart(Part myPart, bool isSeversafe)
+        private PrismPart CategorizeAndProcessPart(Part myPart, bool isSeversafe)
         {
-            SelectedModelParts.Add(myPart);
+            PrismPart myPrismPart = new PrismPart(myPart) { IsSeversafe = isSeversafe };
+
             if (isSeversafe)
             {
-                SeversafeParts.Add(myPart);
                 SeversafePresent = true;
             }
             else
             {
-                if (IsLocked(myPart)) LockedParts.Add(myPart);
-                NonSeversafeParts.Add(myPart);
-                ProcessFabsecPart(myPart);
+                if (IsLocked(myPart)) myPrismPart.IsLocked = true;
+                myPrismPart.IsFabsec = myPart.Profile.ProfileString.StartsWith("PG");
             }
+            return myPrismPart;
         }
 
         private void UpdatePartWeight(Part myPart)
@@ -199,38 +234,22 @@ namespace Prism
             MyMarks.Add(myPart.GetPartMark());
         }
 
-        private void ProcessAssembly(Part myPart, string phaseNum, string issueNum)
+        private async void ProcessAssembly(PrismPart myPart, string phaseNum, string issueNum)
         {
-            if (myPart.GetAssembly() is Assembly assembly)
+            Assembly assembly = myPart.Part.GetAssembly();
+            if (assembly.GetMainPart().Identifier.GUID == myPart.Part.Identifier.GUID)
             {
-                string assemblyId = assembly.Identifier.ToString();
-                if (!AssembliesList.Any(x => x.Identifier.ToString() == assemblyId))
+                myPart.IsMainPart = true;
+                var boltsFromAssembly = await GetBoltsFromAssemblyAsync(assembly);
+                if (boltsFromAssembly != null)
                 {
-                    AssembliesList.Add(assembly);
+                    var prismBoltGroupsForAssembly = boltsFromAssembly
+                        .Where(boltGroup => boltGroup.Bolt) // Filter out BoltGroup objects where Bolt is false (Holes)
+                        .Select(boltGroup => new PrismBoltGroup(boltGroup, phaseNum, issueNum)) //Cast those bolGroups as PrismBoltGroups
+                        .ToList();
 
-                    var boltsFromAssembly = GetBoltsFromAssembly(assembly);
-                    if (boltsFromAssembly != null)
-                    {
-                        var prismBoltGroupsForAssembly = boltsFromAssembly
-                            .Where(boltGroup => boltGroup.Bolt) // Filter out BoltGroup objects where Bolt is false (Holes)
-                            .Select(boltGroup => new PrismBoltGroup(boltGroup, phaseNum, issueNum)) //Cast those bolGroups as PrismBoltGroups
-                            .ToList();
-
-                        PrismBoltGroups.AddRange(prismBoltGroupsForAssembly);
-                    }
+                    PrismBoltGroups.AddRange(prismBoltGroupsForAssembly);
                 }
-            }
-        }
-
-        private void ProcessFabsecPart(Part myPart)
-        {
-            if (myPart.Profile.ProfileString.StartsWith("PG"))
-            {
-                FabsecParts.Add(myPart);
-            }
-            else
-            {
-                NonFabsecParts.Add(myPart);
             }
         }
 
@@ -278,12 +297,52 @@ namespace Prism
         public void GetCorrectModelSelection()
         {
             ArrayList selectList = new ArrayList();
-            foreach (Part part in SelectedModelParts)
+            foreach (PrismPart part in PrismParts)
             {
-                selectList.Add(part);
+                selectList.Add(part.Part);
             }
             Tekla.Structures.Model.UI.ModelObjectSelector ms = new Tekla.Structures.Model.UI.ModelObjectSelector();
             ms.Select(selectList);
+        }
+
+        private static async Task<List<BoltGroup>> GetBoltsFromAssemblyAsync(Assembly assembly)
+        {
+            List<BoltGroup> myBoltsList = new List<BoltGroup>();
+            ArrayList secondaries = assembly.GetSecondaries();
+            secondaries.Add(assembly.GetMainPart());
+
+            ConcurrentBag<BoltGroup> myBoltsBag = new ConcurrentBag<BoltGroup>();
+
+            List<Task> tasks = new List<Task>();
+
+            foreach (ModelObject item in secondaries)
+            {
+                if (item is Part part)
+                {
+                    tasks.Add(Task.Run(() =>
+                    {
+                        ModelObjectEnumerator bolts = part.GetBolts();
+                        foreach (var setOfBolts in bolts)
+                        {
+                            if (setOfBolts is BoltGroup bolt)
+                            {
+                                if (bolt.PartToBeBolted.Identifier.GUID == part.Identifier.GUID)
+                                {
+                                    if (!myBoltsBag.Any(x => x.Identifier.GUID == bolt.Identifier.GUID))
+                                    {
+                                        myBoltsBag.Add(bolt);
+                                    }
+                                }
+                            }
+                        }
+                    }));
+                }
+            }
+
+            await Task.WhenAll(tasks);
+
+            // If you need a List instead of ConcurrentBag
+            return myBoltsBag.ToList();
         }
 
         private static List<BoltGroup> GetBoltsFromAssembly(Assembly assembly)

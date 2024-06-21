@@ -1,5 +1,4 @@
-﻿using Microsoft.Office.Interop.Outlook;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Tekla.Structures.Drawing;
@@ -37,7 +36,6 @@ namespace Prism
             {
                 userCounts[userName] = 1;
             }
-
 
             // Prepare data for writing
             List<string> newContent = new List<string> { "---------------------------This log was started on 21/08/23-------" };
@@ -87,8 +85,30 @@ namespace Prism
 
                 WriteFirstDataLog(Constants.PrismModelData, Constants.ModelProjectInforLocation(pData.ProjNumberAndGuid), pData.pInfo);
 
+                WriteAdvancedSettings(Constants.PrismModelData, Constants.ModelProjectAdvancedSettingLocation(pData.ProjNumberAndGuid));
+                
                 PrismWarnings.FirstTimeInTheModel();
             }
+        }
+
+        public static void WriteAdvancedSettings(int filePathLine, string additonalString)
+        {
+            string[] content = new string[]
+            {
+                $"Prelim Mark Prefix: ",
+                "Fab Pack Type: By Phase",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                ""
+            };
+
+            WebService.WriteAllLinesWithArray(filePathLine, content, additonalString);
         }
 
         private static void CreateNewLogUsingOldLog(PrismProjectData pData)
@@ -182,6 +202,20 @@ namespace Prism
             string lastUsedPrelimLine = WebService.ReadSpecificLine(Constants.PrismModelData, 1, Constants.ModelProjectInforLocation(jobName));
             string lastusedPrelim = lastUsedPrelimLine.Split(':')[1].Trim();
             return Convert.ToInt32(lastusedPrelim);
+        }
+
+        public static string GetPrelimPrefix(string jobName)
+        {
+            string lastUsedPrelimLine = WebService.ReadSpecificLine(Constants.PrismModelData, 1, Constants.ModelProjectAdvancedSettingLocation(jobName));
+            string lastusedPrelim = lastUsedPrelimLine.Split(':')[1].Trim();
+            return lastusedPrelim;
+        }
+
+        public static string GetFabPackType(string jobName)
+        {
+            string lastUsedPrelimLine = WebService.ReadSpecificLine(Constants.PrismModelData, 2, Constants.ModelProjectAdvancedSettingLocation(jobName));
+            string lastusedPrelim = lastUsedPrelimLine.Split(':')[1].Trim();
+            return lastusedPrelim;
         }
 
         public static void SetLastUsedPrelim(string jobName, int lastUsedPrelim)
@@ -296,8 +330,7 @@ namespace Prism
             {
                 string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
                 string[] content = new string[]
-                {
-                    
+                {                    
                     "--------------------------------------------------------------------------------------------------",
                     $"{DateTime.Now} - User: {Environment.UserName} - Model: {modelName}",
                     $"Version {version} - {message}"
@@ -307,20 +340,41 @@ namespace Prism
             }
         }
 
-        public static void NCFailed(string modelName)
+        public static void NCFailed(string modelName, string phaseNumber, string issueNumber, string teklaVersion, string ncLocation)
         {
             if (Environment.UserName != "mark.gibson")
             {
                 string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
                 string[] content = new string[]
                 {
-
                     "--------------------------------------------------------------------------------------------------",
                     $"{DateTime.Now} - User: {Environment.UserName} - Model: {modelName}",
-                    $"NC Failed - Prism {version}"
+                    $"Tekla version {teklaVersion}",
+                    $"Phase - {phaseNumber} Issue - {issueNumber}",
+                    $"NC Failed - Prism {version}",
+                    $"NC Location - {ncLocation}"
                 };
 
-                WebService.WriteAppendStringsToFile(Constants.PrismDebugLogLoction, content, "");
+                WebService.WriteAppendStringsToFile(11, content, "");
+            }
+        }
+
+        public static void NCCreated(string modelName, string phaseNumber, string issueNumber, string teklaVersion, string ncLocation)
+        {
+            if (Environment.UserName != "mark.gibson")
+            {
+                string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+                string[] content = new string[]
+                {
+                    "--------------------------------------------------------------------------------------------------",
+                    $"{DateTime.Now} - User: {Environment.UserName} - Model: {modelName}",
+                    $"Tekla version {teklaVersion}",
+                    $"Phase - {phaseNumber} Issue - {issueNumber}",
+                    $"NC Created - Prism {version}",
+                    $"NC Location - {ncLocation}"
+                };
+
+                WebService.WriteAppendStringsToFile(10, content, "");
             }
         }
 

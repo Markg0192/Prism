@@ -19,9 +19,9 @@ namespace Prism
             {
                 List<Beam> columns = new List<Beam>();
 
-                foreach (ModelObject mO in myObjects.SelectedModelParts)
+                foreach (PrismPart prismPart in myObjects.PrismParts)
                 {
-                    Beam b = mO as Beam;
+                    Beam b = prismPart.Part as Beam;
                     if (b != null)
                     {
                         if (b.Name == "COLUMN" && /*!b.Profile.ProfileString.Contains("SHS") && !b.Profile.ProfileString.Contains("CHS") &&*/ !b.Profile.ProfileString.Contains("PFC") && !b.Profile.ProfileString.Contains("RSA"))

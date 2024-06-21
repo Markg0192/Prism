@@ -59,13 +59,13 @@ namespace Prism.CustomDialogs
         {
             SelectedObjects selectedObjects = new SelectedObjects(StageTypes.Prelim3, phaseNum, issueNum);
             List<ModelObject> objects = new List<ModelObject>();
-            foreach (Part p in selectedObjects.SelectedModelParts)
+            foreach (PrismPart p in selectedObjects.PrismParts)
             {
                 string tagInfo = "";
-                p.GetUserProperty(ModelUDA.SpecialFittingTag(), ref tagInfo);
+                p.Part.GetUserProperty(ModelUDA.SpecialFittingTag(), ref tagInfo);
                 if (tagInfo != "")
                 {
-                    objects.Add(p);
+                    objects.Add(p.Part);
                 }
             }
             ModelModifiers.SetPartsBlue(objects);

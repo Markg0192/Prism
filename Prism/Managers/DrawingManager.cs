@@ -5,10 +5,10 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using Tekla.Structures;
 using Tekla.Structures.Drawing;
 using Tekla.Structures.Model;
-using static Tekla.Structures.Catalogs.AttributeConfiguration;
 
 //This class is temporarily not in use
 namespace Prism
@@ -59,52 +59,90 @@ namespace Prism
             }
         }
 
-        public static void PrintDrawings(ReportManager reportManager, DrawingManager drawingManager, List<int> drawingCount)
+        public static void PrintDrawings(ReportManager reportManager, DrawingManager drawingManager, List<int> drawingCount, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
         {
-            if (drawingManager.FitDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\FIT", 0, 1, reportManager, false);
-            if (drawingManager.PgcDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\PGC", 4, 5, reportManager, false);
-            if (drawingManager.PrtDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\PRT", 6, 7, reportManager, false);
-            if (drawingManager.ShaDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\SHA", 8, 9, reportManager, false);
-            if (drawingManager.AssDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\ASS", 10, 11, reportManager, true);
-            if (drawingManager.WldDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\WLD", 12, 13, reportManager, true);
+            if (drawingManager.FitDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\FIT", 0, 1, reportManager, false, toolStrip, statusLabel);
+            if (drawingManager.PgcDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\PGC", 4, 5, reportManager, false, toolStrip, statusLabel);
+            if (drawingManager.PrtDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\PRT", 6, 7, reportManager, false, toolStrip, statusLabel);
+            if (drawingManager.ShaDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\SHA", 8, 9, reportManager, false, toolStrip, statusLabel);
+            if (drawingManager.AssDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\ASS", 10, 11, reportManager, true, toolStrip, statusLabel);
+            if (drawingManager.WldDrawings.Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\WLD", 12, 13, reportManager, true, toolStrip, statusLabel);
 
             PrismMacroBuilder.ClearPrintDialog();
         }
 
-        public static void PrintAndIssueDrawings(string issueFolder, string issuePath, List<int> drawingCount, string folderPath, int countIndex1, int countIndex2, ReportManager reportManager, bool isAss)
+        public static void PrintAndIssueDrawings(string issueFolder, string issuePath, List<int> drawingCount, string folderPath, int countIndex1, int countIndex2, ReportManager reportManager, bool isAss, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
         {
             Thread.Sleep(2000);
             PrismMacroBuilder.PrintSelectedDrawings(Constants.PrismPackageFolderName + "\\\\" + issueFolder, folderPath, drawingCount[countIndex1], drawingCount[countIndex2], isAss);
-            WaitForPrinting(issuePath + folderPath, drawingCount[countIndex2]);
+            WaitForPrinting(issuePath + folderPath, drawingCount[countIndex2], toolStrip, statusLabel, folderPath);
             PrismMacroBuilder.IssueAndLockStampOn();
         }
 
-        private static void WaitForPrinting(string printFolder, int drawingCount)
+        private static void WaitForPrinting(string printFolder, int desiredFileCount, ToolStrip toolStrip, ToolStripStatusLabel statusLabel, string drawingType)
         {
-            string folderPath = printFolder; // Replace with the actual folder path
-            int desiredFileCount = drawingCount; // Replace with the desired file count
+            string folderPath = printFolder;
 
             FileSystemWatcher watcher = new FileSystemWatcher(folderPath);
             watcher.EnableRaisingEvents = true;
             watcher.IncludeSubdirectories = false;
 
-            int currentFileCount = 0;
+            int currentFileCount = Directory.GetFiles(folderPath).Length;
+            int previousFileCount = currentFileCount;
+            bool countIncreased = false;
 
             watcher.Created += (sender, e) =>
             {
                 currentFileCount++;
-                Console.WriteLine("New file created. Current count: " + currentFileCount);
+                UpdateStatusLabel(toolStrip, statusLabel, currentFileCount, desiredFileCount, drawingType.Substring(1));
 
                 if (currentFileCount >= desiredFileCount)
                 {
                     watcher.EnableRaisingEvents = false; // Stop watching the folder
                 }
+
+                countIncreased = true; // File created, set flag to true
             };
 
             while (currentFileCount < desiredFileCount)
             {
-                Thread.Sleep(1000); // Delay for 1 second before checking again
+                Thread.Sleep(10000); // Delay for 10 seconds before checking again
+
+                if (!countIncreased)
+                {
+                    PrismWarnings.DrawingPrintFailed();
+                    watcher.EnableRaisingEvents = false;
+                    break;
+                }
+
+                int fileCountAfterCheck = Directory.GetFiles(folderPath).Length;
+
+                if (fileCountAfterCheck > previousFileCount)
+                {
+                    previousFileCount = fileCountAfterCheck;
+                    countIncreased = true; // Files increased, set flag to true
+                }
+                else
+                {
+                    countIncreased = false; // No new files found, set flag to false
+                }
+
+                currentFileCount = fileCountAfterCheck;
+                UpdateStatusLabel(toolStrip, statusLabel, currentFileCount, desiredFileCount, drawingType.Substring(1));
             }
+
+            if (currentFileCount >= desiredFileCount)
+            {
+                Console.WriteLine("Desired file count reached.");
+            }
+        }
+
+        private static void UpdateStatusLabel(ToolStrip toolStrip, ToolStripStatusLabel statusLabel, int currentFileCount, int desiredFileCount, string drawingType)
+        {
+            toolStrip.Invoke(new System.Action(() =>
+            {
+                statusLabel.Text = $"Printing {drawingType} drawings: {currentFileCount} of {desiredFileCount}";
+            }));
         }
 
         public bool CreateDrawingList()
@@ -126,7 +164,6 @@ namespace Prism
             {
                 var id = new Identifier(no);
                 var drawing = Tekla.Structures.DrawingInternal.Operation.GetDrawing(id);
-
 
                 if (!(drawing is GADrawing))
                 {

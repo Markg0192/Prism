@@ -1,8 +1,5 @@
 ﻿using Prism.CustomDialogs;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Windows.Forms;
 using Tekla.Structures.Model;
 using Tekla.Structures.Model.UI;
 using static Prism.Enums;
@@ -62,11 +59,11 @@ namespace Prism
             return form.OrderAction;
         }
 
-        public static void LockedPartsSelected()
+        public static void LockedPartsSelected(List<PrismPart> failedParts)
         {
             const string notUpToDateMessage = "You have selected some parts that are locked, please de-select or unlock these to continue.";
             const string notUpToDateTitle = "Locked parts selected";
-            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+            CreateOkWithReportForm(notUpToDateTitle, notUpToDateMessage, failedParts, "Part locked");
         }
 
         public static void FirstTimeInTheModel()
@@ -92,6 +89,13 @@ namespace Prism
             CreateOKForm(notUpToDateMessage, notUpToDateTitle);
         }
 
+        public static void CantFindAdvancedSettings()
+        {
+            string notUpToDateMessage = $"Prism cannot find the advanced settings file for this project, contact help to fix this.";
+            const string notUpToDateTitle = "No settings file found";
+            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+        }
+
         public static void IgnoreFittingCheck()
         {
             const string notUpToDateMessage = "Without selecting a location Prism cannot filter abnormal fittings.";
@@ -106,18 +110,11 @@ namespace Prism
             CreateOKForm(notUpToDateMessage, notUpToDateTitle);
         }
 
-        public static void AreFittingsDone(string type)
-        {
-            string notUpToDateMessage = $"When {type} are done printing hit OK to continue";
-            string notUpToDateTitle = "Check folder";
-            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
-        }
-
-        public static void AbnormalFittings()
+        public static void AbnormalFittings(List<PrismPart> failedParts)
         {
             string notUpToDateMessage = $"You have selected some abnormal fittings that should either be bought out items or changed to something standard.\r\r{Warning}";
             const string notUpToDateTitle = "Abnormal Fittings";
-            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+            CreateOkWithReportForm(notUpToDateMessage, notUpToDateTitle, failedParts, "");
         }
 
         public static void PrelimNumberStartReset(int old, int newP)
@@ -134,11 +131,11 @@ namespace Prism
             return CreateYesNoForm(notUpToDateMessage, notUpToDateTitle);
         }
 
-        public static void IntumescentLoadingMissing()
+        public static void IntumescentLoadingMissing(List<PrismPart> failedParts)
         {
             const string notUpToDateMessage = "You have selected intumescent members that have no loading.";
             const string notUpToDateTitle = "Intumescent loadings";
-            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+            CreateOkWithReportForm(notUpToDateMessage, notUpToDateTitle, failedParts, "DFT/WFT loading missing");
         }
 
         public static bool IgnoreIntumescentLoading()
@@ -197,25 +194,25 @@ namespace Prism
             CreateOKForm(notUpToDateMessage, notUpToDateTitle);
         }
 
-        public static void NameAndClassDontMatch()
+        public static void NameAndClassDontMatch(List<PrismPart> failedParts)
         {
             const string notUpToDateMessage = "You have selected something thats name and class do not align with GDOM convention, please correct this to continue.";
             const string notUpToDateTitle = "Part name and class misalignment";
-            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+            CreateOkWithReportForm(notUpToDateMessage, notUpToDateTitle, failedParts, "Name and Class do not match");
         }
 
-        public static void MemberOrientationIsWrong()
+        public static void MemberOrientationIsWrong(List<PrismPart> failedParts)
         {
             const string notUpToDateMessage = "You have selected a member that has been input in the wrong orientation, please correct this to continue.";
             const string notUpToDateTitle = "Incorrect member orientation";
-            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+            CreateOkWithReportForm(notUpToDateMessage, notUpToDateTitle, failedParts, "Orientation is wrong");
         }
 
-        public static void PreviousStepIncomplete()
+        public static void PreviousStepIncomplete(List<PrismPart> failedParts)
         {
             const string notUpToDateMessage = "You have not completed all the required steps before this action, please correct this to continue.";
             const string notUpToDateTitle = "Incomplete stages";
-            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+            CreateOkWithReportForm(notUpToDateMessage, notUpToDateTitle, failedParts, "Previous step incomplete");
         }
 
         public static void HasNotBeenOrderedOMIT()
@@ -276,32 +273,32 @@ namespace Prism
             CreateOKForm(notUpToDateMessage, notUpToDateTitle);
         }
 
-        public static void ExecutionClassMissing()
+        public static void ExecutionClassMissing(List<PrismPart> failedParts)
         {
             const string notUpToDateMessage = "You have selected items that do not have an execution class specified, please correct this to continue";
             const string notUpToDateTitle = "Execution class missing";
-            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+            CreateOkWithReportForm(notUpToDateMessage, notUpToDateTitle, failedParts, "Execution class missing");
         }
 
-        public static void StartNumbersDontMatch()
+        public static void StartNumbersDontMatch(List<PrismPart> failedParts)
         {
             const string notUpToDateMessage = "You have primary members and secondary parts of the same assembly with mismatching start numbers, please correct this to continue.";
             const string notUpToDateTitle = "Mismatching numbers";
-            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+            CreateOkWithReportForm(notUpToDateMessage, notUpToDateTitle, failedParts, "Fitting start number does not match main part start number");
         }
 
-        public static void PhasesDontMatch()
+        public static void PhasesDontMatch(List<PrismPart> failedParts)
         {
             const string notUpToDateMessage = "You have primary members and secondary parts of the same assembly with mismatching phasing, please correct this to continue.";
             const string notUpToDateTitle = "Mismatching phasing";
-            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+            CreateOkWithReportForm(notUpToDateMessage, notUpToDateTitle, failedParts, "Fitting phase does not match main part phase");
         }
 
-        public static void HasNoFinish()
+        public static void HasNoFinish(List<PrismPart> failedParts)
         {
             const string notUpToDateMessage = "You have main parts without a finish, please correct this to continue.";
             const string notUpToDateTitle = "Missing finishes";
-            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+            CreateOkWithReportForm(notUpToDateMessage, notUpToDateTitle, failedParts, "Part has no finish");
         }
 
         public static void NoPartsSelected()
@@ -385,6 +382,14 @@ namespace Prism
             CreateOKForm(notUpToDateMessage, notUpToDateTitle);
         }
 
+        public static void DrawingPrintFailed()
+        {
+            string message = "Warning: The Tekla PDF printer has failed to print all drawings expected of the currrent type, please check drawing numbers at the end.";
+            const string notUpToDateTitle = "Drawing print failure";
+            CreateOKForm(message, notUpToDateTitle);
+
+        }
+
         public static void IncorrectlyAssignedDrawings()
         {
             string notUpToDateMessage = "You have drawings that are not assigned to correctly, in the Title 1 field of each drawing the folder to print to must be asssigned. Title 1 must contain one of the following: \r\"ASS\", \"FIT\", \"PRT\", \"SHA\", \"PGC\", \"WLD\", \"Not Required\" \r\rIf this issue persists seek help from the development team.";
@@ -395,6 +400,13 @@ namespace Prism
         public static bool NumbersNoLongerUpToDate()
         {
             string notUpToDateMessage = "Numbers that were up to date before running Prism are now modified, this should be reviewed, do you want to ignroe this warning?";
+            const string notUpToDateTitle = "Error";
+            return CreateYesNoForm(notUpToDateMessage, notUpToDateTitle);
+        }
+
+        public static bool ContinueAnyway()
+        {
+            string notUpToDateMessage = "Do you want to ignore this warning?";
             const string notUpToDateTitle = "Error";
             return CreateYesNoForm(notUpToDateMessage, notUpToDateTitle);
         }
@@ -460,26 +472,26 @@ namespace Prism
             CreateOKForm(notUpToDateMessage, notUpToDateTitle);
         }
 
-        public static IgnoreType DisplayOrderErrors(List<ModelObject> errorList, Error warning)
+        public static IgnoreType DisplayOrderErrors(List<PrismPart> errorList, Error warning)
         {
             if (errorList.Count != 0)
             {
                 if (warning == Error.NameAndClass)
                 {
-                    NameAndClassDontMatch();
+                    NameAndClassDontMatch(errorList);
                 }
                 if (warning == Error.Execution)
                 {
-                    ExecutionClassMissing();
+                    ExecutionClassMissing(errorList);
                 }
                 if (warning == Error.Orientation)
                 {
-                    MemberOrientationIsWrong();
+                    MemberOrientationIsWrong(errorList);
                 }
 
                 ModelObjectVisualization.SetTransparencyForAll(TemporaryTransparency.SEMITRANSPARENT);
                 ModelObjectVisualization.SetTemporaryStateForAll(new Color(0.5, 0.5, 0.5));
-                ModelObjectVisualization.SetTemporaryState(errorList, new Color(1, 0, 0));
+                ModelObjectVisualization.SetTemporaryState(Convertor.PrismPartsToModelObjects(errorList), new Color(1, 0, 0));
                 return NewIgnoreWarning();
             }
             return IgnoreType.Unspecified;
@@ -543,6 +555,20 @@ namespace Prism
             okForm.ShowDialog();
         }
 
+        private static void CreateOkWithReportForm(string message, string title, List<PrismPart> failedParts, string standardPartMessage)
+        {
+            OkWithReportForm okForm = new OkWithReportForm(message, title, failedParts, standardPartMessage);
+            okForm.TopMost = true;
+            okForm.ShowDialog();
+        }
+
+        private static void CreateOkWithReportForm(string message, string title, List<ModelObject> failedParts, string standardPartMessage)
+        {
+            OkWithReportForm okForm = new OkWithReportForm(message, title, failedParts, standardPartMessage);
+            okForm.TopMost = true;
+            okForm.ShowDialog();
+        }
+
         private static bool CreateYesNoForm(string message, string title)
         {
             YesNoForm yesNo = new YesNoForm(message, title);
@@ -550,7 +576,5 @@ namespace Prism
             yesNo.ShowDialog();
             return yesNo.Yes;
         }
-
-
     }
 }
