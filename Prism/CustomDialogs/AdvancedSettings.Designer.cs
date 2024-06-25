@@ -84,6 +84,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
+            this.label2.Enabled = false;
             this.label2.Location = new System.Drawing.Point(12, 56);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(98, 13);
@@ -92,6 +93,7 @@
             // 
             // cmb_FaPackType
             // 
+            this.cmb_FaPackType.Enabled = false;
             this.cmb_FaPackType.FormattingEnabled = true;
             this.cmb_FaPackType.Items.AddRange(new object[] {
             "By Phase",
