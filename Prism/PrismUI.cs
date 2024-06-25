@@ -182,29 +182,17 @@ namespace Prism
             CreatePackageAsync(StageTypes.RocketPacket);
         }
 
-        private void btn_SpecialOperations_Click(object sender, EventArgs e)
+        private async void btn_SpecialOperations_Click(object sender, EventArgs e)
         {
-           // MaiksMacro("C:\\TeklaStructuresModels2023\\Sandbox\\PlotFiles");
- 
-        }
+            StartFunction();
 
-      /*  public void MaiksMacro(string fileLocation)
-        {
-            if (TeklaStructures.Connect())
-            {
-                MacroBuilder macBuilder = new MacroBuilder();
-                macBuilder.WpfCommandRepositoryCommand("Drawing.DrawingList");
-                macBuilder.PushWpfButton("DocumentManager.MainWindow", "AID_DOCMAN_ButtonSelectDrawings");
-                macBuilder.PushWpfContextMenuButton("DocumentManager.MainWindow", "AID_DOCMAN_DataGridControl", "AID_DocMgr_Print");
-                macBuilder.WpfCommandRepositoryCommand("Common.PrintDrawings");
-                macBuilder.SetWpfTextBoxText("DPMPrinterFeature.DPMPrinterViewWindow", new string[] { "AID_PDFPD_SettingsTabControl", "AID_PDFPD_ParentStackPanel", "AID_PDFPD_FileLocationPanel", "AID_PDFPD_FileLocation" }, fileLocation);//@"C:\\Temp"
-                macBuilder.PushWpfButton("DPMPrinterFeature.DPMPrinterViewWindow", "AID_PDFPD_PrintButton");
-                macBuilder.CloseWpfView("DPMPrinterFeature.DPMPrinterViewWindow");
-                macBuilder.SetWpfToggleButtonChecked("DocumentManager.MainWindow", new string[] { "AID_DOCMAN_ToggleButtonShowSelected" });
-                macBuilder.CloseWpfView("DocumentManager.MainWindow");
-                macBuilder.Run();
-            }
-        }*/
+            if (!await Task.Run(() => InitialSetup(StageTypes.Check1, false, "x", "x", statusStrip_Det, DetailingStatusLabel))) { EndFunction(0); return; }
+
+            FolderManager fm = new FolderManager(_projectData, "100", "01");
+            QrCodeGenerator.ApplyQrCode(_selectedObjects.PrismParts, _projectData, fm.IfcPath);
+
+            EndFunction(1);
+        }
 
         public bool InitialSetup(StageTypes stageType, bool checkForPreviousSteps, string phaseNum = "x", string issueNum = "x", ToolStrip toolStrip = null, ToolStripStatusLabel statusLabel = null)
         {
