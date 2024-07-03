@@ -236,6 +236,20 @@ namespace Prism
             CreateOKForm(notUpToDateMessage, notUpToDateTitle);
         }
 
+        public static void DirectoryCannotBeReached(string directory)
+        {
+            string notUpToDateMessage = $"The directory {directory} cannot be reached, package moving will be cancelled";
+            string notUpToDateTitle = "Directory not found.";
+            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+        }
+
+        public static void DirectoryCannotBeCopied(string message)
+        {
+            string notUpToDateMessage = $"The file cannot be moved, package moving will be cancelled, {message}";
+            string notUpToDateTitle = "Copying failed.";
+            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+        }
+
         public static void KeepExistingPackage()
         {
             const string notUpToDateMessage = "You have decided to keep the existing package, action cancelled.";
@@ -263,6 +277,18 @@ namespace Prism
         {
             const string notUpToDateMessage = "You have Seversafe in your selection, would you like to create an order for this?";
             const string notUpToDateTitle = "Seversafe found";
+            return CreateYesNoForm(notUpToDateMessage, notUpToDateTitle);
+        }
+
+        public static bool MoveToFabDirectory(string directory, string variationDirectory, bool isVariation)
+        {
+            string directoryString = directory == "" ? directory : $"You have specified location {directory} in advanced settings as an alternate location for this type of package.";
+            string also = directory == "" ? "" : "also ";
+            string s = variationDirectory == "" && directory == "" && isVariation ? "" : "s";
+            string variationString = variationDirectory == "" ? variationDirectory : $"\r\rYou have {also}specified location {directory} in advanced settings as an alternate location for all variation packages";
+            string notUpToDateMessage = $"{directoryString}{variationString}\r\rWould you like to move your package{s} here?";
+                        
+            string notUpToDateTitle = "Alternate Package directory";
             return CreateYesNoForm(notUpToDateMessage, notUpToDateTitle);
         }
 

@@ -20,14 +20,14 @@ namespace Prism
             string myFolder = localFolder;
             foreach (PrismPart prismPart in prismParts)
             {
-                ExportIFC(prismPart.Part.GetAssembly(), myFolder);
+                ExportIFC(prismPart.Part, myFolder);
             }
             CleanFolder(myFolder);
         }
 
-        private static void ExportIFC(Assembly assembly, string myFolder)
+        private static void ExportIFC(Part part, string myFolder)
         {
-            assembly.SelectAssembly();
+            part.GetAssembly().SelectAssembly();
             ComponentInput componentInput = new ComponentInput();
             componentInput.AddOneInputPosition(new Tekla.Structures.Geometry3d.Point(0.0, 0.0, 0.0));
             Component component = new Component(componentInput)
@@ -36,7 +36,7 @@ namespace Prism
                 Number = -100000
             };
             component.LoadAttributesFromFile("-SEV-IFC");
-            component.SetAttribute("OutputFile", $"{myFolder}/{assembly.Identifier}");
+            component.SetAttribute("OutputFile", $"{myFolder}/{part.GetPartMark()}");
             component.Insert();
           //  File.Delete($"{myFolder}/{assembly.Identifier}.log");
         }

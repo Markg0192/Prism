@@ -6,10 +6,11 @@ namespace Prism
 {
     public static class FabMisc
     {
-        public static void FabMiscOp(Model model, string siteDate, SelectedObjects selectedObjects, bool runSeversafe, ReportManager reportManager, int divisionNo, PrismProjectData projData, bool runChangeManager)
+        public static void FabMiscOp(Model model, string siteDate, SelectedObjects selectedObjects, bool runSeversafe, ReportManager reportManager, int divisionNo, PrismProjectData projData, bool runChangeManager, out bool boltOrderAdded)
         {
+            boltOrderAdded = false;
             if (selectedObjects.PrismBoltGroups.Any(b => b.isOrdered == false))
-            {       
+            {
                 List<BoltGroup> unorderedBoltGroups = selectedObjects.PrismBoltGroups
                                         .Where(pbg => !pbg.isOrdered) // Filter PrismBoltGroup objects where IsOrdered is false
                                         .Select(pbg => pbg.BoltGroup) // Select the BoltGroup property from those filtered PrismBoltGroup objects
@@ -17,6 +18,7 @@ namespace Prism
 
                 CreateBoltOrder(reportManager, siteDate, unorderedBoltGroups);
                 ModelModifiers.StampBoltUDA(unorderedBoltGroups, reportManager.ProjectData.Full, reportManager.ProjectData.Date, reportManager.PhaseNum, reportManager.IssueNum);
+                boltOrderAdded = true;
             }
 
             if (runSeversafe) { SeversafeOrder.CreateSeversafeOrder(model, selectedObjects.GetSeversafeParts(), siteDate, reportManager, divisionNo, reportManager.EpoReportPrefix, projData); }

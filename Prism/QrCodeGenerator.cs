@@ -19,14 +19,14 @@ namespace Prism
         private const string ImageSavePath = "C:\\Users\\mark.gibson\\OneDrive - Severfield plc\\Desktop\\Desktop\\Pdf\\IFCs\\QRCodeImage2.png";
         private const string modelFolderPath = @"C:\TeklaStructuresModels2023\Sandbox\QR Code Generator";
 
-        public static void ApplyQrCode(List<PrismPart> selectedParts, PrismProjectData data, string ifcPath)
+        public static void ApplyQrCode(List<PrismPart> selectedParts, PrismProjectData data, string ifcPath, string qrCodeFolderPath)
         {
             foreach (PrismPart part in selectedParts)
             {
-                CreateQrCode(part.Part.GetPartMark(), data, ifcPath);
+                CreateQrCode(part.Part.GetPartMark(), data, qrCodeFolderPath);
             }
 
-            GetDrawingsAndInsertQrCodes();
+            GetDrawingsAndInsertQrCodes(qrCodeFolderPath);
         }
 
         private static string CreateUrlPathFromPart(string partMark, PrismProjectData data)
@@ -54,18 +54,6 @@ namespace Prism
             QRCodeData qrCodeData = qrGenerator.CreateQrCode(url, QRCodeGenerator.ECCLevel.Q);
             QRCode qrCode = new QRCode(qrCodeData);
             qrCode.GetGraphic(20).Save(filePath, ImageFormat.Png);
-        }
-
-        private static List<Drawing> GetDrawingList()
-        {
-            List<Drawing> drawings = new List<Drawing>();
-            IEnumerable<int> drawingNos = Tekla.Structures.DrawingInternal.Operation.GetDrawingsBySelectedParts(true, true);
-            foreach (var no in drawingNos)
-            {
-                var id = new Identifier(no);
-                drawings.Add(Tekla.Structures.DrawingInternal.Operation.GetDrawing(id));
-            }
-            return drawings;
         }
 
         private static (Point, Size) GetImageProperties(Drawing drawing)
@@ -96,7 +84,7 @@ namespace Prism
             }
             else if (width == 410 && height == 287) // A3
             {
-                insertionPoint = new Point(243, 55, 0);
+                insertionPoint = new Point(243, 61, 0);
                 imageSize = new Size(33, 33);
             }
 
@@ -104,23 +92,25 @@ namespace Prism
             return (insertionPoint, imageSize);
         }
 
-        private static void InsertCode(Drawing drawing)
-        {
-            // Define the image path
-            string imagePath = "C:\\Users\\mark.gibson\\OneDrive - Severfield plc\\Desktop\\Desktop\\Pdf\\IFCs\\QRCodeImage2.png";
+        private static void InsertCode(Drawing drawing, string qrCodeFolderPath, string partMark)
+        {            
+            string codePath = Path.Combine(qrCodeFolderPath, partMark + ".png");
+            string shortCodePath = Path.Combine(".\\Prism Packages\\QR Codes" , partMark + ".png");
+
+            if (!File.Exists(codePath)) return;
 
             // Get the image size and insertion point based on drawing
             (Point insertionPoint, Size imageSize) = GetImageProperties(drawing);
-
+                       
             // Create an image object
-            Image qrImage = new Image(drawing.GetSheet(), insertionPoint, imageSize, imagePath);
+            Image qrImage = new Image(drawing.GetSheet(), insertionPoint, imageSize, shortCodePath);
             qrImage.Attributes.Scaling = EmbeddedObjectScalingOptions.ScaleToFit;
             // Insert the image into the drawing
             if (qrImage.Insert())
                 drawing.CommitChanges();
         }
 
-        public static void GetDrawingsAndInsertQrCodes()
+        public static void GetDrawingsAndInsertQrCodes(string qrCodeFolderPath)
         {
             DrawingHandler drawingHandler = new DrawingHandler();
 
@@ -128,31 +118,28 @@ namespace Prism
             {
                 //Drawing drawing = drawingHandler.GetActiveDrawing();
 
-                foreach (Drawing drawing in GetDrawingList())
+                var lsi = GetDrawingList();
+                foreach (Drawing drawing in lsi)
                 {
-                    var drawings = drawingHandler.GetDrawingSelector();
-
-                    if (drawing != null)
+                    if(drawing is AssemblyDrawing assDrawing)
                     {
-                        InsertCode(drawing);
-
-                       /* var sheet = drawing.GetSheet();
-                        var objects = sheet.GetAllObjects();
-
-                        foreach (var item in objects)
-                        {
-                            if (item is Image image)
-                            {
-                            }
-                        }*/
-                    }
-
-                    else
-                    {
-                        Console.WriteLine("No active drawing found!");
-                    }
+                        drawing.Select();
+                        InsertCode(drawing, qrCodeFolderPath, drawing.Mark.Replace(".", "").Replace("[", "").Replace("]", "")); 
+                    }           
                 }
             }
+        }
+
+        private static List<Drawing> GetDrawingList()
+        {
+            List<Drawing> drawings = new List<Drawing>();
+            IEnumerable<int> drawingNos = Tekla.Structures.DrawingInternal.Operation.GetDrawingsBySelectedParts(true, true);
+            foreach (var no in drawingNos)
+            {
+                var id = new Identifier(no);
+                drawings.Add(Tekla.Structures.DrawingInternal.Operation.GetDrawing(id));
+            }
+            return drawings;
         }
     }
 }

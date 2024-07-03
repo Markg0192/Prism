@@ -13,7 +13,7 @@ namespace Prism.ButtonOperations
         public static bool CreateFabPackage(this SelectedObjects myObjects, Model model, PrismProjectData projectData, string phaseNumber, string issueNumber, StageTypes stageType, string siteDate, bool runSeversafe, bool runChangeManager,
            ToolStrip toolStrip, ToolStripStatusLabel label, string teklaVersion)
         {
-            string packagingType = Logging.GetFabPackType(projectData.ProjNumberAndGuid).ToString();
+            string packagingType = Logging.GetAdvancedSetting(projectData.ProjNumberAndGuid, AdvancedSettingType.FabPackType);
 
             if (packagingType.Contains("Lot"))
             {

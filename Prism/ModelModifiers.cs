@@ -27,14 +27,14 @@ namespace Prism
     /// </summary>
     public static class ModelModifiers
     {
-        public static void VariationCheck(string phaseNumber, SelectedObjects myObjects, PrismProjectData projData)
+        public static void VariationCheck(string phaseNumber, PrismProjectData projData)
         {
             if (phaseNumber.Contains("V") || phaseNumber.Contains("v"))
             {
                 if (PrismWarnings.IsVariation())
                 {
-                    SetVariationAttribute(phaseNumber, myObjects);
                     projData.IsVariation = true;
+                    projData.VariationNumber = phaseNumber;
                 }
             }
             else { projData.IsVariation = false; }
@@ -51,30 +51,28 @@ namespace Prism
             model.CommitChanges();
         }
 
-        private static void SetVariationAttribute(string phaseNumber, SelectedObjects myObjects)
+        private static void SetVariationAttribute(string variationNumber, Part p)
         {
-            foreach (PrismPart p in myObjects.PrismParts)
+            string firstVNo = "";
+            string secondVNo = "";
+            p.GetUserProperty(ModelUDA.FirstVariationNumber(), ref firstVNo);
+            if (firstVNo == "")
             {
-                string firstVNo = "";
-                string secondVNo = "";
-                p.Part.GetUserProperty(ModelUDA.FirstVariationNumber(), ref firstVNo);
-                if (firstVNo == "")
+                p.SetUserProperty(ModelUDA.FirstVariationNumber(), variationNumber);
+            }
+            else
+            {
+                p.GetUserProperty(ModelUDA.SecondVariationNumber(), ref secondVNo);
+                if (secondVNo == "")
                 {
-                    p.Part.SetUserProperty(ModelUDA.FirstVariationNumber(), phaseNumber);
+                    p.SetUserProperty(ModelUDA.SecondVariationNumber(), variationNumber);
                 }
                 else
                 {
-                    p.Part.GetUserProperty(ModelUDA.SecondVariationNumber(), ref secondVNo);
-                    if (secondVNo == "")
-                    {
-                        p.Part.SetUserProperty(ModelUDA.SecondVariationNumber(), phaseNumber);
-                    }
-                    else
-                    {
-                        p.Part.SetUserProperty(ModelUDA.FirstVariationNumber(), phaseNumber);
-                    }
+                    p.SetUserProperty(ModelUDA.FirstVariationNumber(), variationNumber);
                 }
             }
+
         }
 
         public static bool ModifyAttributes(this List<PrismPart> selectedObjects, int stageNumber, PrismProjectData projectData,
@@ -126,7 +124,7 @@ namespace Prism
                 if (row != null)
                 {
                     part.SetUserProperty("SEV-UDA-130", row.Code);
-                    part.SetUserProperty("SEV-UDA-131", row.Title);                    
+                    part.SetUserProperty("SEV-UDA-131", row.Title);
                 }
             }
             if (stageNumber == 7)
@@ -136,6 +134,11 @@ namespace Prism
             if (stageNumber == 7 && !Operation.IsNumberingUpToDate(part))
             {
                 return PrismWarnings.NumbersNoLongerUpToDate();
+            }
+
+            if (projectData.IsVariation)
+            {
+                SetVariationAttribute(projectData.VariationNumber, part);
             }
 
             return true;
@@ -194,7 +197,7 @@ namespace Prism
         public static void AddPrelimMarks(this SelectedObjects selectedObjects, PrismProjectData pData)
         {
             int currentLastNumber = Logging.GetLastUsedPrelim(pData.ProjNumberAndGuid);
-            string prelimPrefix = Logging.GetPrelimPrefix(pData.ProjNumberAndGuid).ToString();
+            string prelimPrefix = Logging.GetAdvancedSetting(pData.ProjNumberAndGuid, AdvancedSettingType.PrelimPrefix);
 
             foreach (PrismPart p in selectedObjects.PrismParts)
             {

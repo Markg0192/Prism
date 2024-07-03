@@ -39,7 +39,7 @@ namespace Prism
             return true;
         }
 
-        public static bool FabsecCarcasses(ReportManager myReportManager, Model model, PrismProjectData projectData, string phaseNumber, string issueNumber,
+        public static bool FabsecCarcasses(ReportManager myReportManager, Model model, PrismProjectData projectData,
             SelectedObjects myObjects, int stageNumber, string orderType, string orderDate, int typeOfOrder, ToolStrip toolStrip, ToolStripStatusLabel tssl)
         {
             if (typeOfOrder == 1)
@@ -49,7 +49,7 @@ namespace Prism
             if (typeOfOrder == 2)
             {
                 if (!FabsecProcessing.AddCarcassToSelection(model, myObjects, out List<PrismPart> originalFabsecs, out List<PrismPart> fabsecCarcasses)) return false;
-                return OrderFabsecCarcasses(myReportManager, model, projectData, phaseNumber, issueNumber, myObjects, stageNumber, originalFabsecs, fabsecCarcasses, orderType, orderDate, toolStrip, tssl);
+                return OrderFabsecCarcasses(myReportManager, model, projectData, myObjects, stageNumber, originalFabsecs, fabsecCarcasses, orderType, orderDate, toolStrip, tssl);
             }
             return false;
         }
@@ -77,12 +77,12 @@ namespace Prism
             return true;
         }
 
-        public static bool OrderFabsecCarcasses(ReportManager myReportManager, Model model, PrismProjectData projectData, string phaseNumber,
-            string issueNumber, SelectedObjects myObjects, int stageNumber, List<PrismPart> originalFabsecs, List<PrismPart> fabsecCarcasses, string orderType, string orderDate, ToolStrip toolStrip, ToolStripStatusLabel tssl)
+        public static bool OrderFabsecCarcasses(ReportManager myReportManager, Model model, PrismProjectData projectData,
+         SelectedObjects myObjects, int stageNumber, List<PrismPart> originalFabsecs, List<PrismPart> fabsecCarcasses, string orderType, string orderDate, ToolStrip toolStrip, ToolStripStatusLabel tssl)
         {
             if (!myReportManager.Folders.CreateFabsecCarcassFolder()) return false;
             ReportManager.SelectDrawingsInDocManager(null);
-            DrawingManager dm = new DrawingManager(model, projectData, phaseNumber, issueNumber);
+            DrawingManager dm = new DrawingManager(model, projectData, myReportManager.PhaseNum, myReportManager.IssueNum);
             if (dm.NotLabelledDrawings.Count != 0) { PrismWarnings.IncorrectlyAssignedDrawings(); return false; }
 
             List<int> drawingCount = new List<int> { 0, dm.PgcDrawings.Count };
@@ -91,7 +91,7 @@ namespace Prism
 
             fabsecCarcasses.SelectParts();
             myReportManager.CreateG2Assy();
-            BswxExporter.ExportBSWX(myObjects, myReportManager.Folders.CarcassOrderPath, projectData, phaseNumber, issueNumber, Enums.StageTypes.Prelim3);
+            BswxExporter.ExportBSWX(myObjects, myReportManager.Folders.CarcassOrderPath, projectData, myReportManager.PhaseNum, myReportManager.IssueNum, Enums.StageTypes.Prelim3);
             ModelModifiers.RemoveLog(myReportManager.Folders.CarcassOrderPath);
 
             myObjects.PrismParts.SelectParts();

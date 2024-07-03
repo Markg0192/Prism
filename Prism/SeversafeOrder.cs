@@ -208,7 +208,6 @@ namespace Prism
             return Math.Round(value * 2) / 2.0;
         }
 
-
         public static void CollateOrderableParts(Model model, List<PrismPart> selectedObjects, PrismProjectData projData)
         {
             foreach (PrismPart p in selectedObjects)

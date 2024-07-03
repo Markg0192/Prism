@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using Tekla.Structures.Model;
 
 namespace Prism
 {
@@ -30,7 +29,9 @@ namespace Prism
         public FolderManager(PrismProjectData projectData, string phaseNum, string issueNum)
         {
             PrismFileLocaton = projectData.ProjPath + "\\" + Constants.PrismPackageFolderName;
+            QrCodePath = PrismFileLocaton + "\\" + "QR Codes";
             if(!Directory.Exists(PrismFileLocaton)) { Directory.CreateDirectory(PrismFileLocaton); }
+            if(!Directory.Exists(QrCodePath)) { Directory.CreateDirectory(QrCodePath); }
             FabFolder = $"{projectData.ProjNumber}-{phaseNum}-FAB-ISSUE{issueNum}";
             MatFolder = $"{projectData.ProjNumber}-{phaseNum}-PRELIM-ISSUE{issueNum}";
             EpoFolder = $"{projectData.ProjNumber}-{phaseNum}-EPO-ISSUE{issueNum}";
@@ -51,6 +52,7 @@ namespace Prism
             ReportPath = Path.Combine(FabPath, _reportFolder);
             DspPath = Path.Combine(FabPath, _dspFolder);
             WldPath = Path.Combine(FabPath, _wldFolder);
+
             ShaftPath = Path.Combine(FabPath, _shaftFolder);
             _folderNames = new List<string>
                 {assPath, fitPath, prtPath, DspPath, NcPath, ReportPath, ShaftPath, IfcPath, WldPath};
@@ -62,6 +64,7 @@ namespace Prism
         public string MatFolder {get;set;}
         public string EpoFolder {get;set;}
         public string FabsecCarcassFolder { get;set;}
+        public string QrCodePath { get; set; }
         public string FabPath {get;set;}
         public string MatPath {get;set;}
         public string EpoPath {get;set;}

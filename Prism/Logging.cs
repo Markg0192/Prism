@@ -95,17 +95,25 @@ namespace Prism
         {
             string[] content = new string[]
             {
-                $"Prelim Mark Prefix: ",
-                "Fab Pack Type: By Phase",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                ""
+                $"{Enums.AdvancedSettingType.PrelimPrefix.ToString()}: ",
+                $"{Enums.AdvancedSettingType.FabPackType.ToString()}: By Phase",
+                $"{Enums.AdvancedSettingType.DirectoryMaterial.ToString()}: ",
+                $"{Enums.AdvancedSettingType.DirectoryCarcasses.ToString()}",
+                $"{Enums.AdvancedSettingType.DirectoryBolts.ToString()}",
+                $"{Enums.AdvancedSettingType.DirectorySeversafe.ToString()}",
+                $"{Enums.AdvancedSettingType.DirectoryFabPack.ToString()}",
+                $"{Enums.AdvancedSettingType.DirectoryVariation.ToString()}",
+                $"",
+                $"",
+                $"",
+                $"",
+                $"",
+                $"",
+                $"",
+                $"",
+                $"",
+                $"",
+                $""
             };
 
             WebService.WriteAllLinesWithArray(filePathLine, content, additonalString);
@@ -204,20 +212,23 @@ namespace Prism
             return Convert.ToInt32(lastusedPrelim);
         }
 
-        public static string GetPrelimPrefix(string jobName)
+        public static string GetAdvancedSetting(string jobName, Enums.AdvancedSettingType settingType)
         {
-            string lastUsedPrelimLine = WebService.ReadSpecificLine(Constants.PrismModelData, 1, Constants.ModelProjectAdvancedSettingLocation(jobName));
-            string lastusedPrelim = lastUsedPrelimLine.Split(':')[1].Trim();
+            string fullSettingLine = WebService.ReadSpecificLine(Constants.PrismModelData, (int)settingType, Constants.ModelProjectAdvancedSettingLocation(jobName));
+            if(fullSettingLine == "")
+            {
+                WriteSettingLine(settingType, jobName);
+                fullSettingLine = WebService.ReadSpecificLine(Constants.PrismModelData, (int)settingType, Constants.ModelProjectAdvancedSettingLocation(jobName));
+            }
+            string lastusedPrelim = fullSettingLine.Split(':')[1].Trim();
             return lastusedPrelim;
         }
 
-        public static string GetFabPackType(string jobName)
+        private static void WriteSettingLine(Enums.AdvancedSettingType settingType,string jobName)
         {
-            string lastUsedPrelimLine = WebService.ReadSpecificLine(Constants.PrismModelData, 2, Constants.ModelProjectAdvancedSettingLocation(jobName));
-            string lastusedPrelim = lastUsedPrelimLine.Split(':')[1].Trim();
-            return lastusedPrelim;
+            WebService.WriteToSpecificLine(Constants.PrismModelData, (int)settingType, settingType.ToString() + ": ", Constants.ModelProjectAdvancedSettingLocation(jobName));
         }
-
+       
         public static void SetLastUsedPrelim(string jobName, int lastUsedPrelim)
         {
             string content = $"Next prelim to use: {lastUsedPrelim}";

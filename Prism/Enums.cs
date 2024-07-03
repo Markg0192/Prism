@@ -6,5 +6,6 @@
         public enum Factory { SNI, SUK, Unknown};
         public enum IgnoreType { AutoFix, Ignore, Stop, Unspecified };
         public enum Error { Execution, Orientation, NameAndClass}
+        public enum AdvancedSettingType { Default, PrelimPrefix, FabPackType, DirectoryMaterial, DirectoryCarcasses, DirectoryBolts, DirectorySeversafe, DirectoryFabPack, DirectoryVariation}
     }
 }
