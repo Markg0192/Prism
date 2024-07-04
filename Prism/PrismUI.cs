@@ -219,6 +219,7 @@ namespace Prism
         {
             StartFunction();
 
+
             // MovePackToDirectory("C:\\TeklaStructuresModels2023\\Sandbox\\Prism Packages\\C1991-120-FAB-ISSUE01");
 
             /*
@@ -497,10 +498,10 @@ namespace Prism
             if (runDrawings)
             {
                 ReportManager.SelectDrawingsInDocManager(null);
-                DrawingManager dm = new DrawingManager(_model, _projectData, txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text);
-                if (dm.NotLabelledDrawings.Count != 0) { PrismWarnings.IncorrectlyAssignedDrawings(); return false; }
+                DrawingManager dm = new DrawingManager(_model, _projectData, txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text, myReportManager.Folders.MatFolder);
+                if (dm.GetDrawingFolder(Enums.DrawingFolder.Default).Count != 0) { PrismWarnings.IncorrectlyAssignedDrawings(); return false; }
 
-                List<int> drawingCount = new List<int> { 0, dm.AllFittings.Count };
+                List<int> drawingCount = new List<int> { 0, dm.GetDrawingByType("W").Count };
                 DrawingManager.PrintAndIssueDrawings(myReportManager.Folders.MatFolder, myReportManager.Folders.MatPath, drawingCount, "\\SPC", 0, 1, myReportManager, false, toolStrip, statusLabel);
                 PrismMacroBuilder.ClearPrintDialog();
             }

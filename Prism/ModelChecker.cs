@@ -236,7 +236,6 @@ namespace Prism
                     IncorrectOrientation.Add(new PrismPart(b));
                 }
             }
-
         }
 
         private static void CheckRafterOrientation(Beam b)

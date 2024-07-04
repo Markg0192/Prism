@@ -1,10 +1,5 @@
-﻿//using Microsoft.Office.Interop.Excel;
-using Microsoft.Office.Interop.Outlook;
-//using Org.BouncyCastle.Utilities;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Windows.Forms;
-using System.Windows.Forms.VisualStyles;
-using Tekla.Structures.Model;
 using Model = Tekla.Structures.Model.Model;
 
 namespace Prism
@@ -82,10 +77,10 @@ namespace Prism
         {
             if (!myReportManager.Folders.CreateFabsecCarcassFolder()) return false;
             ReportManager.SelectDrawingsInDocManager(null);
-            DrawingManager dm = new DrawingManager(model, projectData, myReportManager.PhaseNum, myReportManager.IssueNum);
-            if (dm.NotLabelledDrawings.Count != 0) { PrismWarnings.IncorrectlyAssignedDrawings(); return false; }
+            DrawingManager dm = new DrawingManager(model, projectData, myReportManager.PhaseNum, myReportManager.IssueNum, myReportManager.Folders.CarcassOrderPath);
+            if (dm.GetDrawingFolder(Enums.DrawingFolder.Default).Count != 0) { PrismWarnings.IncorrectlyAssignedDrawings(); return false; }
 
-            List<int> drawingCount = new List<int> { 0, dm.PgcDrawings.Count };
+            List<int> drawingCount = new List<int> { 0, dm.GetDrawingFolder(Enums.DrawingFolder.PGC).Count };
             DrawingManager.PrintAndIssueDrawings(myReportManager.Folders.FabsecCarcassFolder, myReportManager.Folders.CarcassOrderPath, drawingCount, "\\PGC", 0, 1, myReportManager, false, toolStrip, tssl);
             PrismMacroBuilder.ClearPrintDialog();
 
@@ -110,7 +105,6 @@ namespace Prism
             EmailWriter.WriteFabsecCarcassEmail(myReportManager.ProjectData, myReportManager.CarcassReportPrefix, myReportManager.IssueNum, myReportManager.PhaseNum, orderDate, myReportManager.Folders.CarcassOrderPath);
 
             return true;
-
         }
 
         private static bool OrderHoldingDownBolts(SelectedObjects selectedObjects, ReportManager reportManager, string projectName)

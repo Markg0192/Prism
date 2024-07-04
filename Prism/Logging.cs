@@ -93,16 +93,17 @@ namespace Prism
 
         public static void WriteAdvancedSettings(int filePathLine, string additonalString)
         {
+            string split = ":split: ";
             string[] content = new string[]
             {
-                $"{Enums.AdvancedSettingType.PrelimPrefix.ToString()}: ",
-                $"{Enums.AdvancedSettingType.FabPackType.ToString()}: By Phase",
-                $"{Enums.AdvancedSettingType.DirectoryMaterial.ToString()}: ",
-                $"{Enums.AdvancedSettingType.DirectoryCarcasses.ToString()}",
-                $"{Enums.AdvancedSettingType.DirectoryBolts.ToString()}",
-                $"{Enums.AdvancedSettingType.DirectorySeversafe.ToString()}",
-                $"{Enums.AdvancedSettingType.DirectoryFabPack.ToString()}",
-                $"{Enums.AdvancedSettingType.DirectoryVariation.ToString()}",
+                $"{Enums.AdvancedSettingType.PrelimPrefix.ToString()}{split} ",
+                $"{Enums.AdvancedSettingType.FabPackType.ToString()}{split} By Phase",
+                $"{Enums.AdvancedSettingType.DirectoryMaterial.ToString()}{split} ",
+                $"{Enums.AdvancedSettingType.DirectoryCarcasses.ToString()}{split} ",
+                $"{Enums.AdvancedSettingType.DirectoryBolts.ToString()}{split} ",
+                $"{Enums.AdvancedSettingType.DirectorySeversafe.ToString()}{split} ",
+                $"{Enums.AdvancedSettingType.DirectoryFabPack.ToString()}{split} ",
+                $"{Enums.AdvancedSettingType.DirectoryVariation.ToString()}{split} ",
                 $"",
                 $"",
                 $"",
@@ -220,13 +221,14 @@ namespace Prism
                 WriteSettingLine(settingType, jobName);
                 fullSettingLine = WebService.ReadSpecificLine(Constants.PrismModelData, (int)settingType, Constants.ModelProjectAdvancedSettingLocation(jobName));
             }
-            string lastusedPrelim = fullSettingLine.Split(':')[1].Trim();
+            string[] setting = fullSettingLine.Split(new string[] { ":" }, StringSplitOptions.None);
+            string lastusedPrelim = setting.Count() == 2 ? setting[1] : fullSettingLine.Split(new string[] { ":split:" }, StringSplitOptions.None)[1].Trim();
             return lastusedPrelim;
         }
 
         private static void WriteSettingLine(Enums.AdvancedSettingType settingType,string jobName)
         {
-            WebService.WriteToSpecificLine(Constants.PrismModelData, (int)settingType, settingType.ToString() + ": ", Constants.ModelProjectAdvancedSettingLocation(jobName));
+            WebService.WriteToSpecificLine(Constants.PrismModelData, (int)settingType, settingType.ToString() + ":split: ", Constants.ModelProjectAdvancedSettingLocation(jobName));
         }
        
         public static void SetLastUsedPrelim(string jobName, int lastUsedPrelim)
@@ -412,19 +414,24 @@ namespace Prism
                 $"{DateTime.Now} - User: {Environment.UserName} - Model: {modelName}"
             };
 
-            foreach (Drawing drawing in dm.NotLabelledDrawings)
+            foreach (PrismDrawing drawing in dm.GetDrawingFolder(Enums.DrawingFolder.Default))
             {
-                contentList.Add($"Drawing ID No: {drawing.GetIdentifier()}");
-                contentList.Add($"Drawing type: {drawing.GetType().ToString()}");
+                contentList.Add($"Drawing ID No: {drawing.DrawingPartName}");
+                contentList.Add($"Drawing type: {drawing.DrawingType}");
             }
 
-            if (dm.GADrawings.Count != 0) contentList.Add($"GA Drawings Found: {dm.GADrawings.Count.ToString()}");
-            if (dm.AssDrawings.Count != 0) contentList.Add($"ASS Drawings Found: {dm.AssDrawings.Count.ToString()}");
-            if (dm.FitDrawings.Count != 0) contentList.Add($"FIT Drawings Found: {dm.FitDrawings.Count.ToString()}");
-            if (dm.PrtDrawings.Count != 0) contentList.Add($"PRT Drawings Found: {dm.PrtDrawings.Count.ToString()}");
-            if (dm.ShaDrawings.Count != 0) contentList.Add($"SHA Drawings Found: {dm.ShaDrawings.Count.ToString()}");
-            if (dm.PgcDrawings.Count != 0) contentList.Add($"PGC Drawings Found: {dm.PgcDrawings.Count.ToString()}");
-            if (dm.WldDrawings.Count != 0) contentList.Add($"WLD Drawings Found: {dm.WldDrawings.Count.ToString()}");
+            int assCount = dm.GetDrawingFolder(Enums.DrawingFolder.ASS).Count;
+            if (assCount != 0) contentList.Add($"ASS Drawings Found: {assCount}");
+            int fitCount = dm.GetDrawingFolder(Enums.DrawingFolder.FIT).Count;
+            if (fitCount != 0) contentList.Add($"FIT Drawings Found: {fitCount}");
+            int prtCount = dm.GetDrawingFolder(Enums.DrawingFolder.PRT).Count;
+            if (prtCount != 0) contentList.Add($"PRT Drawings Found: {prtCount}");
+            int shaCount = dm.GetDrawingFolder(Enums.DrawingFolder.SHA).Count;
+            if (shaCount != 0) contentList.Add($"SHA Drawings Found: {shaCount}");
+            int pgcCount = dm.GetDrawingFolder(Enums.DrawingFolder.PGC).Count;
+            if (pgcCount != 0) contentList.Add($"PGC Drawings Found: {pgcCount}");
+            int wldCount = dm.GetDrawingFolder(Enums.DrawingFolder.WLD).Count;
+            if (wldCount != 0) contentList.Add($"WLD Drawings Found: {wldCount}");
 
             string[] content = contentList.ToArray();
 

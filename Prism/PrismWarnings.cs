@@ -413,7 +413,14 @@ namespace Prism
             string message = "Warning: The Tekla PDF printer has failed to print all drawings expected of the currrent type, please check drawing numbers at the end.";
             const string notUpToDateTitle = "Drawing print failure";
             CreateOKForm(message, notUpToDateTitle);
+        }
 
+        public static void DrawingsWithoutRevisions(int count)
+        {
+            string message = count > 1 ? $"There are {count} drawings in your selection that do not have a revision. Revisions must be added before continuing." :
+               $"There is a drawing in your selection that does not have a revision. A revision must be added before continuing.";
+            const string notUpToDateTitle = "Missing Revision(s)";
+            CreateOKForm(message, notUpToDateTitle);
         }
 
         public static void IncorrectlyAssignedDrawings()

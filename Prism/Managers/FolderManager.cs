@@ -52,10 +52,11 @@ namespace Prism
             ReportPath = Path.Combine(FabPath, _reportFolder);
             DspPath = Path.Combine(FabPath, _dspFolder);
             WldPath = Path.Combine(FabPath, _wldFolder);
+            string fabFabsecCarcasses = Path.Combine(FabPath, _fabsecCarcasses);
 
             ShaftPath = Path.Combine(FabPath, _shaftFolder);
             _folderNames = new List<string>
-                {assPath, fitPath, prtPath, DspPath, NcPath, ReportPath, ShaftPath, IfcPath, WldPath};
+                {assPath, fitPath, prtPath, DspPath, NcPath, ReportPath, ShaftPath, IfcPath, WldPath, fabFabsecCarcasses};
             DrawingVaultFolders = new List<string>
             { _assFolder, _prtFolder, _fitFolder, _shaftFolder, _ifcFolder};
         }

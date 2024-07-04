@@ -62,7 +62,7 @@ namespace Prism.CustomDialogs
 
         private void WriteSetting(Enums.AdvancedSettingType setting, string textToWrite)
         {
-            WebService.WriteToSpecificLine(Constants.PrismDataLogLocation, (int)setting, setting.ToString() + ": " + textToWrite, Constants.ModelProjectAdvancedSettingLocation(ProjectData.ProjNumberAndGuid));
+            WebService.WriteToSpecificLine(Constants.PrismDataLogLocation, (int)setting, setting.ToString() + ":split: " + textToWrite, Constants.ModelProjectAdvancedSettingLocation(ProjectData.ProjNumberAndGuid));
         }
 
         private void btn_Close_Click(object sender, EventArgs e)
