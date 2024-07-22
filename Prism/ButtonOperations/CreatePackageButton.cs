@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
-using Tekla.Structures.Drawing.UI;
 using Tekla.Structures.Model;
 using static Prism.Enums;
 using Model = Tekla.Structures.Model.Model;
@@ -12,8 +11,9 @@ namespace Prism.ButtonOperations
     public static class CreatePackageButton
     {
         public static bool CreateFabPackage(this SelectedObjects myObjects, Model model, PrismProjectData projectData, string phaseNumber, string issueNumber, StageTypes stageType, string siteDate, bool runSeversafe, bool runChangeManager,
-           ToolStrip toolStrip, ToolStripStatusLabel label, string teklaVersion)
+           ToolStrip toolStrip, ToolStripStatusLabel label, string teklaVersion, out int totalNcRequired)
         {
+            totalNcRequired = 0;
             string packagingType = Logging.GetAdvancedSetting(projectData.ProjNumberAndGuid, AdvancedSettingType.FabPackType);
 
             if (packagingType.Contains("Lot"))
@@ -36,7 +36,7 @@ namespace Prism.ButtonOperations
             {
                 if (!runChangeManager)
                 {
-                    return CreateFirstIssue(projectData, phaseNumber, issueNumber, runSeversafe, myObjects, model, stageType, siteDate, teklaVersion, toolStrip, label);
+                    return CreateFirstIssue(projectData, phaseNumber, issueNumber, runSeversafe, myObjects, model, stageType, siteDate, teklaVersion, toolStrip, label, out totalNcRequired);
                 }
 
                 string fileLocation = Constants.ModelDataLogLocation(projectData.ProjNumberAndGuid + "\\Fab XMLs");
@@ -45,17 +45,21 @@ namespace Prism.ButtonOperations
                     out List<SteelItemBase> omitItems, out List<SteelItemBase> addItems, out string messageForEmail)) return false;
 
                 return issueNumber == "01"
-                    ? CreateFirstIssue(projectData, phaseNumber, issueNumber, runSeversafe, myObjects, model, stageType, siteDate, teklaVersion, toolStrip, label)
-                    : ProcessSubsequentIssues(projectData, phaseNumber, issueNumber, revisedItems, addItems, runSeversafe, myObjects, model, siteDate, stageType, messageForEmail, teklaVersion, toolStrip, label);
+                    ? CreateFirstIssue(projectData, phaseNumber, issueNumber, runSeversafe, myObjects, model, stageType, siteDate, teklaVersion, toolStrip, label, out totalNcRequired)
+                    : ProcessSubsequentIssues(projectData, phaseNumber, issueNumber, revisedItems, addItems, runSeversafe, myObjects, model, siteDate, stageType, messageForEmail, teklaVersion, toolStrip, label, out totalNcRequired);
             }
         }
 
         private static bool CreateFirstIssue(PrismProjectData projectData, string phaseNumber, string issueNumber, bool runSeversafe, SelectedObjects myObjects, Model model, StageTypes stageType, string siteDate, string teklaVersion,
-            ToolStrip toolStrip, ToolStripStatusLabel tssl)
+            ToolStrip toolStrip, ToolStripStatusLabel tssl, out int totalNcRequired)
         {
+            totalNcRequired = 0;
+
             if (!InitialisePackageAndCreateFolders(projectData, phaseNumber, issueNumber, runSeversafe, myObjects, out ReportManager reportManager, out CpuCounter cpuCounter)) return false;
 
             if (!ProcessAndPrintDrawings(cpuCounter, myObjects.GetNonSeversafeParts(), model, projectData, phaseNumber, issueNumber, reportManager, toolStrip, tssl, out DrawingManager drawingManager)) return false;
+
+            totalNcRequired = drawingManager.NumberOfNcRequired;
 
             if (!Constants.IsSpecialPerson()) { myObjects.ExportBSWX(reportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType); }
 
@@ -78,8 +82,10 @@ namespace Prism.ButtonOperations
         }
 
         private static bool ProcessSubsequentIssues(PrismProjectData projectData, string phaseNumber, string issueNumber, List<SteelItemBase> revisedItems, List<SteelItemBase> addItems,
-            bool runSeversafe, SelectedObjects myObjects, Model model, string siteDate, StageTypes stageType, string messageForEmail, string teklaVersion, ToolStrip ts, ToolStripStatusLabel tssl)
+            bool runSeversafe, SelectedObjects myObjects, Model model, string siteDate, StageTypes stageType, string messageForEmail, string teklaVersion, ToolStrip ts, ToolStripStatusLabel tssl, out int totalNcRequired)
         {
+            totalNcRequired = 0;
+
             if (revisedItems != null && addItems != null)
             {
                 if (!InitialisePackageAndCreateFolders(projectData, phaseNumber, issueNumber, runSeversafe, myObjects, out ReportManager reportManager, out CpuCounter cpuCounter)) return false;
@@ -94,6 +100,8 @@ namespace Prism.ButtonOperations
                 ModelModifiers.SelectParts(combinedParts);
 
                 if (!ProcessAndPrintDrawings(cpuCounter, combinedParts, model, projectData, phaseNumber, issueNumber, reportManager, ts, tssl, out DrawingManager drawingManager)) return false;
+
+                totalNcRequired = drawingManager.NumberOfNcRequired;
 
                 reportManager.CreateFabReports(combinedParts, myObjects.PrismBoltGroups, teklaVersion, ts, tssl);
                 ModelModifiers.SelectParts(combinedParts);

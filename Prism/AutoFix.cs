@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Tekla.Structures.Geometry3d;
@@ -12,9 +13,17 @@ namespace Prism
         {
             foreach (PrismPart p in ModelChecker.IncorrectNameAndClass)
             {
-                List<string> myClass = GdomValues.PartClass()[p.Part.Name] as List<string>;
-                p.Part.Class = myClass[0];
-                p.Part.Modify();
+                if (p.Part.Name.IndexOf("TEMP", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    p.Part.Class = GdomValues.TemporaryObjectClass;
+                    p.Part.Modify();
+                }
+                else
+                {
+                    List<string> myClass = GdomValues.PartClass()[p.Part.Name];
+                    p.Part.Class = myClass[0];
+                    p.Part.Modify();
+                }
             }
             PrismWarnings.ErrorsFixed(ModelChecker.IncorrectNameAndClass.Count);
         }
@@ -41,7 +50,7 @@ namespace Prism
                     if (beam.Position.Rotation == Position.RotationEnum.BACK)
                     {
                         beam.Position.Rotation = Position.RotationEnum.FRONT;
-                    }                    
+                    }
                     if (beam.StartPoint.Z > beam.EndPoint.Z)
                     {
                         SwapHandles(beam);
@@ -58,7 +67,7 @@ namespace Prism
             Point endPoint = b.EndPoint;
             b.StartPoint = endPoint;
             b.EndPoint = startPoint;
-           
+
         }
 
         public static void ExecutionClass()

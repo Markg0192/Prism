@@ -19,6 +19,8 @@ namespace Prism
         public static string BraceName = "BRACE";
         public static string SeversafePotProfile = "SHS50*50*4.0";
 
+        public static string TemporaryObjectClass = "112";
+
         public static int MaxFittingLength(Factory factory, double plateThickness, bool isFlat)
         {
             if (factory == Factory.SUK)
@@ -39,18 +41,19 @@ namespace Prism
             return 6000;
         }
 
-        public static Hashtable PartClass() // This table matches a part name to its correct class according to the GDOM
+
+        public static Dictionary<string, List<string>> PartClass()
         {
-            Hashtable partClassTable = new Hashtable
-            {
-                { BeamName, new List<string> { "3" } },
-                { ColumnName, new List<string> { "2", "5" } },
-                { BraceName, new List<string> { "4", "13" } },
-                { FabsecName, new List<string> { FabsecClass } },
-                { RafterName, new List<string> { "8" } },
-                { PortalRafterName, new List<string> { "8" } }
-            };
-            return partClassTable;
+            Dictionary<string, List<string>> partClassDictionary = new Dictionary<string, List<string>>()
+             {
+                 { BeamName, new List<string> { "3" } },
+                 { ColumnName, new List<string> { "2", "5" } },
+                 { BraceName, new List<string> { "4", "13" } },
+                 { FabsecName, new List<string> { "FabsecClass" } },
+                 { RafterName, new List<string> { "8" } },
+                 { PortalRafterName, new List<string> { "8" } },                 
+             };
+            return partClassDictionary;
         }
 
         public static List<string> ApprovedFittingGrades(bool isFlat)

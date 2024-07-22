@@ -1,5 +1,7 @@
 ﻿using Prism.CustomDialogs;
 using System.Collections.Generic;
+using System.Windows;
+using System.Windows.Forms;
 using Tekla.Structures.Model;
 using Tekla.Structures.Model.UI;
 using static Prism.Enums;
@@ -75,6 +77,13 @@ namespace Prism
             CreateOKForm(notUpToDateMessage, notUpToDateTitle);
         }
 
+        public static void FatalError(string message, PrismUI ui)
+        {
+            string notUpToDateMessage = $"A fatal error has occured, and Prism cannot continue this function.\r\rIf this error persists, contact help.\r\r{message}";
+            string notUpToDateTitle = "Fatal error.";
+            System.Windows.Forms.MessageBox.Show(ui, notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
         public static void BigTimeUsage(int timesUsed)
         {
             string notUpToDateMessage = $"Congratulations, your latest run of Prism was the {timesUsed}th time it's been used. I hope you are happy with yourself, goodbye.";
@@ -84,7 +93,7 @@ namespace Prism
 
         public static void NcDataCreationFailed()
         {
-            string notUpToDateMessage = $"NC Data creation failed:\r\rNo NC has been created, if this was not the intention please create this manually and add to your package.";
+            string notUpToDateMessage = $"NC Data creation error:\r\rThe expected number of NC files has not been created, please check the NC files for discrepancies.";
             const string notUpToDateTitle = "No NC found";
             CreateOKForm(notUpToDateMessage, notUpToDateTitle);
         }

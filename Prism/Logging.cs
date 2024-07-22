@@ -216,15 +216,33 @@ namespace Prism
         public static string GetAdvancedSetting(string jobName, Enums.AdvancedSettingType settingType)
         {
             string fullSettingLine = WebService.ReadSpecificLine(Constants.PrismModelData, (int)settingType, Constants.ModelProjectAdvancedSettingLocation(jobName));
-            if(fullSettingLine == "")
+
+            if (string.IsNullOrEmpty(fullSettingLine))
             {
                 WriteSettingLine(settingType, jobName);
                 fullSettingLine = WebService.ReadSpecificLine(Constants.PrismModelData, (int)settingType, Constants.ModelProjectAdvancedSettingLocation(jobName));
             }
-            string[] setting = fullSettingLine.Split(new string[] { ":" }, StringSplitOptions.None);
-            string lastusedPrelim = setting.Count() == 2 ? setting[1] : fullSettingLine.Split(new string[] { ":split:" }, StringSplitOptions.None)[1].Trim();
+
+            string lastusedPrelim = ExtractSettingValue(fullSettingLine);
             return lastusedPrelim;
         }
+
+        private static string ExtractSettingValue(string fullSettingLine)
+        {
+            const string splitMarker = ":split:";
+
+            if (fullSettingLine.Contains(splitMarker))
+            {
+                string[] setting = fullSettingLine.Split(new string[] { splitMarker }, StringSplitOptions.None);
+                return setting.Length > 1 ? setting[1].Trim() : string.Empty;
+            }
+            else
+            {
+                int firstColonIndex = fullSettingLine.IndexOf(':');
+                return firstColonIndex != -1 ? fullSettingLine.Substring(firstColonIndex + 1).Trim() : string.Empty;
+            }
+        }
+
 
         private static void WriteSettingLine(Enums.AdvancedSettingType settingType,string jobName)
         {
@@ -353,7 +371,7 @@ namespace Prism
             }
         }
 
-        public static void NCFailed(string modelName, string phaseNumber, string issueNumber, string teklaVersion, string ncLocation)
+        public static void NCFailed(string modelName, string phaseNumber, string issueNumber, string teklaVersion, string ncLocation, int totalNcRequired, int totalNcCreated)
         {
             if (Environment.UserName != "mark.gibson")
             {
@@ -365,14 +383,15 @@ namespace Prism
                     $"Tekla version {teklaVersion}",
                     $"Phase - {phaseNumber} Issue - {issueNumber}",
                     $"NC Failed - Prism {version}",
-                    $"NC Location - {ncLocation}"
+                    $"NC Location - {ncLocation}",
+                    $"NC Required  {totalNcRequired} - Nc Created {totalNcCreated}"
                 };
 
                 WebService.WriteAppendStringsToFile(11, content, "");
             }
         }
 
-        public static void NCCreated(string modelName, string phaseNumber, string issueNumber, string teklaVersion, string ncLocation)
+        public static void NCCreated(string modelName, string phaseNumber, string issueNumber, string teklaVersion, string ncLocation, int totalNcRequired, int totalNcCreated)
         {
             if (Environment.UserName != "mark.gibson")
             {
@@ -384,10 +403,33 @@ namespace Prism
                     $"Tekla version {teklaVersion}",
                     $"Phase - {phaseNumber} Issue - {issueNumber}",
                     $"NC Created - Prism {version}",
-                    $"NC Location - {ncLocation}"
+                    $"NC Location - {ncLocation}",
+                    $"NC Required  {totalNcRequired} - Nc Created {totalNcCreated}"
                 };
 
                 WebService.WriteAppendStringsToFile(10, content, "");
+            }
+        }
+
+        public static void ExceptionError(string modelName, string teklaVersion, string message, string stackTrace)
+        {
+           // if (Environment.UserName != "mark.gibson")
+            {
+                string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+                string[] content = new string[]
+                {
+                    "",
+                    "---------------------------------------------------------------------------------------------------------",
+                    $"{DateTime.Now} - User: {Environment.UserName} - Model: {modelName} - Tekla version: {teklaVersion}",
+                    $"Tekla version {teklaVersion}",
+                    $"NC Created - Prism {version}",
+                    "-----------------------------------",
+                    message,
+                    "-----------------------------------",
+                    stackTrace
+                };
+
+                WebService.WriteAppendStringsToFile(12, content, "");
             }
         }
 

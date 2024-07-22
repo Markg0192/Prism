@@ -1,18 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Tekla.Structures;
-using Tekla.Structures.Drawing;
 using Tekla.Structures.Model;
 using Tekla.Structures.Model.Operations;
+using static Prism.Enums;
 
-//This class is temporarily not in use
 namespace Prism
 {
     /// <summary>
@@ -26,6 +21,7 @@ namespace Prism
         private Model _model;
 
         public List<PrismDrawing> Drawings = new List<PrismDrawing>();
+        public int NumberOfNcRequired { get; set; }
 
         /// <summary>
         /// /// Create the report and then read data
@@ -35,9 +31,8 @@ namespace Prism
             PrismMacroBuilder.SelectDrawings();
             string teklaReportLocation = Path.Combine(FirmFolderLoc.ReportTemplates(), "PrismDrawing_List.rpt");
             string newReportLocation = Path.Combine(packagePath,  "PrismDrawing_List.xsr");
-            
-            Operation.CreateReportFromSelected(teklaReportLocation, newReportLocation, "", "", "");
-            if (!File.Exists(newReportLocation)) return;
+
+            if (!CreateReportAndWait(teklaReportLocation, newReportLocation)) return;
 
             // wait until Tekla Structures has unlocked the file, or timeout
             if (!IfLockedWait(newReportLocation, 15)) return;
@@ -58,6 +53,29 @@ namespace Prism
             }
 
             File.Delete(newReportLocation);
+
+            NumberOfNcRequired = Drawings.Count(d => d.DrawingFolder == DrawingFolder.ASS) + Drawings.Count(d => d.DrawingFolder == DrawingFolder.FIT) + Drawings.Count(d => d.DrawingFolder == DrawingFolder.PRT);
+        }
+
+        public bool CreateReportAndWait(string teklaReportLocation, string newReportLocation)
+        {
+            Operation.CreateReportFromSelected(teklaReportLocation, newReportLocation, "", "", "");
+
+            int waitTime = 0;
+            const int maxWaitTime = 10000; // 10 seconds
+
+            while (waitTime < maxWaitTime)
+            {
+                if (File.Exists(newReportLocation))
+                {
+                    return true;
+                }
+
+                Thread.Sleep(1000); // wait for 1 second
+                waitTime += 1000;
+            }
+
+            return false;
         }
 
         /// <summary>
