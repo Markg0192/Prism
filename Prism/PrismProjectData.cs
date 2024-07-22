@@ -35,6 +35,7 @@ namespace Prism
             WebService = webService;
         }
 
+        public string VariationNumber { get; set; }
         public readonly string ProjNumberAndName;
         public readonly string ProjNumberAndGuid;
         public readonly string ProjPath;

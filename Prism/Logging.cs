@@ -93,19 +93,28 @@ namespace Prism
 
         public static void WriteAdvancedSettings(int filePathLine, string additonalString)
         {
+            string split = ":split: ";
             string[] content = new string[]
             {
-                $"Prelim Mark Prefix: ",
-                "Fab Pack Type: By Phase",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                ""
+                $"{Enums.AdvancedSettingType.PrelimPrefix.ToString()}{split} ",
+                $"{Enums.AdvancedSettingType.FabPackType.ToString()}{split} By Phase",
+                $"{Enums.AdvancedSettingType.DirectoryMaterial.ToString()}{split} ",
+                $"{Enums.AdvancedSettingType.DirectoryCarcasses.ToString()}{split} ",
+                $"{Enums.AdvancedSettingType.DirectoryBolts.ToString()}{split} ",
+                $"{Enums.AdvancedSettingType.DirectorySeversafe.ToString()}{split} ",
+                $"{Enums.AdvancedSettingType.DirectoryFabPack.ToString()}{split} ",
+                $"{Enums.AdvancedSettingType.DirectoryVariation.ToString()}{split} ",
+                $"",
+                $"",
+                $"",
+                $"",
+                $"",
+                $"",
+                $"",
+                $"",
+                $"",
+                $"",
+                $""
             };
 
             WebService.WriteAllLinesWithArray(filePathLine, content, additonalString);
@@ -204,20 +213,42 @@ namespace Prism
             return Convert.ToInt32(lastusedPrelim);
         }
 
-        public static string GetPrelimPrefix(string jobName)
+        public static string GetAdvancedSetting(string jobName, Enums.AdvancedSettingType settingType)
         {
-            string lastUsedPrelimLine = WebService.ReadSpecificLine(Constants.PrismModelData, 1, Constants.ModelProjectAdvancedSettingLocation(jobName));
-            string lastusedPrelim = lastUsedPrelimLine.Split(':')[1].Trim();
+            string fullSettingLine = WebService.ReadSpecificLine(Constants.PrismModelData, (int)settingType, Constants.ModelProjectAdvancedSettingLocation(jobName));
+
+            if (string.IsNullOrEmpty(fullSettingLine))
+            {
+                WriteSettingLine(settingType, jobName);
+                fullSettingLine = WebService.ReadSpecificLine(Constants.PrismModelData, (int)settingType, Constants.ModelProjectAdvancedSettingLocation(jobName));
+            }
+
+            string lastusedPrelim = ExtractSettingValue(fullSettingLine);
             return lastusedPrelim;
         }
 
-        public static string GetFabPackType(string jobName)
+        private static string ExtractSettingValue(string fullSettingLine)
         {
-            string lastUsedPrelimLine = WebService.ReadSpecificLine(Constants.PrismModelData, 2, Constants.ModelProjectAdvancedSettingLocation(jobName));
-            string lastusedPrelim = lastUsedPrelimLine.Split(':')[1].Trim();
-            return lastusedPrelim;
+            const string splitMarker = ":split:";
+
+            if (fullSettingLine.Contains(splitMarker))
+            {
+                string[] setting = fullSettingLine.Split(new string[] { splitMarker }, StringSplitOptions.None);
+                return setting.Length > 1 ? setting[1].Trim() : string.Empty;
+            }
+            else
+            {
+                int firstColonIndex = fullSettingLine.IndexOf(':');
+                return firstColonIndex != -1 ? fullSettingLine.Substring(firstColonIndex + 1).Trim() : string.Empty;
+            }
         }
 
+
+        private static void WriteSettingLine(Enums.AdvancedSettingType settingType,string jobName)
+        {
+            WebService.WriteToSpecificLine(Constants.PrismModelData, (int)settingType, settingType.ToString() + ":split: ", Constants.ModelProjectAdvancedSettingLocation(jobName));
+        }
+       
         public static void SetLastUsedPrelim(string jobName, int lastUsedPrelim)
         {
             string content = $"Next prelim to use: {lastUsedPrelim}";
@@ -340,7 +371,7 @@ namespace Prism
             }
         }
 
-        public static void NCFailed(string modelName, string phaseNumber, string issueNumber, string teklaVersion, string ncLocation)
+        public static void NCFailed(string modelName, string phaseNumber, string issueNumber, string teklaVersion, string ncLocation, int totalNcRequired, int totalNcCreated)
         {
             if (Environment.UserName != "mark.gibson")
             {
@@ -352,14 +383,15 @@ namespace Prism
                     $"Tekla version {teklaVersion}",
                     $"Phase - {phaseNumber} Issue - {issueNumber}",
                     $"NC Failed - Prism {version}",
-                    $"NC Location - {ncLocation}"
+                    $"NC Location - {ncLocation}",
+                    $"NC Required  {totalNcRequired} - Nc Created {totalNcCreated}"
                 };
 
                 WebService.WriteAppendStringsToFile(11, content, "");
             }
         }
 
-        public static void NCCreated(string modelName, string phaseNumber, string issueNumber, string teklaVersion, string ncLocation)
+        public static void NCCreated(string modelName, string phaseNumber, string issueNumber, string teklaVersion, string ncLocation, int totalNcRequired, int totalNcCreated)
         {
             if (Environment.UserName != "mark.gibson")
             {
@@ -371,10 +403,33 @@ namespace Prism
                     $"Tekla version {teklaVersion}",
                     $"Phase - {phaseNumber} Issue - {issueNumber}",
                     $"NC Created - Prism {version}",
-                    $"NC Location - {ncLocation}"
+                    $"NC Location - {ncLocation}",
+                    $"NC Required  {totalNcRequired} - Nc Created {totalNcCreated}"
                 };
 
                 WebService.WriteAppendStringsToFile(10, content, "");
+            }
+        }
+
+        public static void ExceptionError(string modelName, string teklaVersion, string message, string stackTrace)
+        {
+           // if (Environment.UserName != "mark.gibson")
+            {
+                string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+                string[] content = new string[]
+                {
+                    "",
+                    "---------------------------------------------------------------------------------------------------------",
+                    $"{DateTime.Now} - User: {Environment.UserName} - Model: {modelName} - Tekla version: {teklaVersion}",
+                    $"Tekla version {teklaVersion}",
+                    $"NC Created - Prism {version}",
+                    "-----------------------------------",
+                    message,
+                    "-----------------------------------",
+                    stackTrace
+                };
+
+                WebService.WriteAppendStringsToFile(12, content, "");
             }
         }
 
@@ -401,19 +456,24 @@ namespace Prism
                 $"{DateTime.Now} - User: {Environment.UserName} - Model: {modelName}"
             };
 
-            foreach (Drawing drawing in dm.NotLabelledDrawings)
+            foreach (PrismDrawing drawing in dm.GetDrawingFolder(Enums.DrawingFolder.Default))
             {
-                contentList.Add($"Drawing ID No: {drawing.GetIdentifier()}");
-                contentList.Add($"Drawing type: {drawing.GetType().ToString()}");
+                contentList.Add($"Drawing ID No: {drawing.DrawingPartName}");
+                contentList.Add($"Drawing type: {drawing.DrawingType}");
             }
 
-            if (dm.GADrawings.Count != 0) contentList.Add($"GA Drawings Found: {dm.GADrawings.Count.ToString()}");
-            if (dm.AssDrawings.Count != 0) contentList.Add($"ASS Drawings Found: {dm.AssDrawings.Count.ToString()}");
-            if (dm.FitDrawings.Count != 0) contentList.Add($"FIT Drawings Found: {dm.FitDrawings.Count.ToString()}");
-            if (dm.PrtDrawings.Count != 0) contentList.Add($"PRT Drawings Found: {dm.PrtDrawings.Count.ToString()}");
-            if (dm.ShaDrawings.Count != 0) contentList.Add($"SHA Drawings Found: {dm.ShaDrawings.Count.ToString()}");
-            if (dm.PgcDrawings.Count != 0) contentList.Add($"PGC Drawings Found: {dm.PgcDrawings.Count.ToString()}");
-            if (dm.WldDrawings.Count != 0) contentList.Add($"WLD Drawings Found: {dm.WldDrawings.Count.ToString()}");
+            int assCount = dm.GetDrawingFolder(Enums.DrawingFolder.ASS).Count;
+            if (assCount != 0) contentList.Add($"ASS Drawings Found: {assCount}");
+            int fitCount = dm.GetDrawingFolder(Enums.DrawingFolder.FIT).Count;
+            if (fitCount != 0) contentList.Add($"FIT Drawings Found: {fitCount}");
+            int prtCount = dm.GetDrawingFolder(Enums.DrawingFolder.PRT).Count;
+            if (prtCount != 0) contentList.Add($"PRT Drawings Found: {prtCount}");
+            int shaCount = dm.GetDrawingFolder(Enums.DrawingFolder.SHA).Count;
+            if (shaCount != 0) contentList.Add($"SHA Drawings Found: {shaCount}");
+            int pgcCount = dm.GetDrawingFolder(Enums.DrawingFolder.PGC).Count;
+            if (pgcCount != 0) contentList.Add($"PGC Drawings Found: {pgcCount}");
+            int wldCount = dm.GetDrawingFolder(Enums.DrawingFolder.WLD).Count;
+            if (wldCount != 0) contentList.Add($"WLD Drawings Found: {wldCount}");
 
             string[] content = contentList.ToArray();
 
