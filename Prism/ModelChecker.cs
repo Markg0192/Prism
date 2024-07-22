@@ -236,7 +236,6 @@ namespace Prism
                     IncorrectOrientation.Add(new PrismPart(b));
                 }
             }
-
         }
 
         private static void CheckRafterOrientation(Beam b)
@@ -283,12 +282,23 @@ namespace Prism
 
         public static void NameAndClassAligned(SelectedObjects selectedObjects)
         {
-            foreach (PrismPart p in selectedObjects.PrismParts)
+            var partClass = GdomValues.PartClass();
+
+            foreach (var p in selectedObjects.PrismParts)
             {
-                List<string> meantToBeClass = GdomValues.PartClass()[p.Part.Name] as List<string>;
-                if (meantToBeClass != null && !meantToBeClass.Contains(p.Part.Class))
+                if (p.Part.Name.IndexOf("TEMP", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
-                    IncorrectNameAndClass.Add(p);
+                    if (p.Part.Class != GdomValues.TemporaryObjectClass)
+                    {
+                        IncorrectNameAndClass.Add(p);
+                    }
+                }
+                else
+                {
+                    if (partClass.TryGetValue(p.Part.Name, out var meantToBeClass) && meantToBeClass != null && !meantToBeClass.Contains(p.Part.Class))
+                    {
+                        IncorrectNameAndClass.Add(p);
+                    }
                 }
             }
         }

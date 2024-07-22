@@ -1,5 +1,4 @@
-﻿using Prism.ExternalService;
-using System;
+﻿using System;
 using System.Windows.Forms;
 
 namespace Prism.CustomDialogs
@@ -35,15 +34,41 @@ namespace Prism.CustomDialogs
                 return;
             }
 
-            txt_PrelimPrefix.Text = Logging.GetPrelimPrefix(projectData.ProjNumberAndGuid).ToString();
-            cmb_FaPackType.Text = Logging.GetFabPackType(projectData.ProjNumberAndGuid).ToString();
+            txt_PrelimPrefix.Text = Logging.GetAdvancedSetting(projectData.ProjNumberAndGuid, Enums.AdvancedSettingType.PrelimPrefix);
+            cmb_FaPackType.Text = Logging.GetAdvancedSetting(projectData.ProjNumberAndGuid, Enums.AdvancedSettingType.FabPackType);
+            txt_DirectoryMaterial.Text = Logging.GetAdvancedSetting(projectData.ProjNumberAndGuid, Enums.AdvancedSettingType.DirectoryMaterial);
+            txt_DirectoryCarcass.Text = Logging.GetAdvancedSetting(projectData.ProjNumberAndGuid, Enums.AdvancedSettingType.DirectoryCarcasses);
+            txt_DirectoryBolts.Text = Logging.GetAdvancedSetting(projectData.ProjNumberAndGuid, Enums.AdvancedSettingType.DirectoryBolts);
+            txt_DirectorySeversafe.Text = Logging.GetAdvancedSetting(projectData.ProjNumberAndGuid, Enums.AdvancedSettingType.DirectorySeversafe);
+            txt_DirectoryFab.Text = Logging.GetAdvancedSetting(projectData.ProjNumberAndGuid, Enums.AdvancedSettingType.DirectoryFabPack);
+            txt_DirectoryVariation.Text = Logging.GetAdvancedSetting(projectData.ProjNumberAndGuid, Enums.AdvancedSettingType.DirectoryVariation);  
         }
 
         private void btn_Apply_Click(object sender, EventArgs e)
         {
-            WebService.WriteToSpecificLine(1, 1, "Prelim Mark Prefix: " + txt_PrelimPrefix.Text, Constants.ModelProjectAdvancedSettingLocation(ProjectData.ProjNumberAndGuid));
-            WebService.WriteToSpecificLine(1, 2, "Fab Pack Type: " + cmb_FaPackType.Text, Constants.ModelProjectAdvancedSettingLocation(ProjectData.ProjNumberAndGuid));
+            StatusLabel.Text = "Applying settings";
+
+            WriteSetting(Enums.AdvancedSettingType.PrelimPrefix, txt_PrelimPrefix.Text);
+            WriteSetting(Enums.AdvancedSettingType.FabPackType, cmb_FaPackType.Text);
+            WriteSetting(Enums.AdvancedSettingType.DirectoryMaterial, txt_DirectoryMaterial.Text);
+            WriteSetting(Enums.AdvancedSettingType.DirectoryCarcasses, txt_DirectoryCarcass.Text);
+            WriteSetting(Enums.AdvancedSettingType.DirectoryBolts, txt_DirectoryBolts.Text);
+            WriteSetting(Enums.AdvancedSettingType.DirectorySeversafe, txt_DirectorySeversafe.Text);
+            WriteSetting(Enums.AdvancedSettingType.DirectoryFabPack, txt_DirectoryFab.Text);
+            WriteSetting(Enums.AdvancedSettingType.DirectoryVariation, txt_DirectoryVariation.Text);
+
             StatusLabel.Text = "Settings applied";
+        }
+
+        private void WriteSetting(Enums.AdvancedSettingType setting, string textToWrite)
+        {
+            WebService.WriteToSpecificLine(Constants.PrismDataLogLocation, (int)setting, setting.ToString() + ":split: " + textToWrite, Constants.ModelProjectAdvancedSettingLocation(ProjectData.ProjNumberAndGuid));
+        }
+
+        private void btn_Close_Click(object sender, EventArgs e)
+        {
+            this.Close();
+            return;
         }
     }
 }

@@ -1,5 +1,7 @@
 ﻿using Prism.CustomDialogs;
 using System.Collections.Generic;
+using System.Windows;
+using System.Windows.Forms;
 using Tekla.Structures.Model;
 using Tekla.Structures.Model.UI;
 using static Prism.Enums;
@@ -75,6 +77,13 @@ namespace Prism
             CreateOKForm(notUpToDateMessage, notUpToDateTitle);
         }
 
+        public static void FatalError(string message, PrismUI ui)
+        {
+            string notUpToDateMessage = $"A fatal error has occured, and Prism cannot continue this function.\r\rIf this error persists, contact help.\r\r{message}";
+            string notUpToDateTitle = "Fatal error.";
+            System.Windows.Forms.MessageBox.Show(ui, notUpToDateMessage, notUpToDateTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
         public static void BigTimeUsage(int timesUsed)
         {
             string notUpToDateMessage = $"Congratulations, your latest run of Prism was the {timesUsed}th time it's been used. I hope you are happy with yourself, goodbye.";
@@ -84,7 +93,7 @@ namespace Prism
 
         public static void NcDataCreationFailed()
         {
-            string notUpToDateMessage = $"NC Data creation failed:\r\rNo NC has been created, if this was not the intention please create this manually and add to your package.";
+            string notUpToDateMessage = $"NC Data creation error:\r\rThe expected number of NC files has not been created, please check the NC files for discrepancies.";
             const string notUpToDateTitle = "No NC found";
             CreateOKForm(notUpToDateMessage, notUpToDateTitle);
         }
@@ -236,6 +245,20 @@ namespace Prism
             CreateOKForm(notUpToDateMessage, notUpToDateTitle);
         }
 
+        public static void DirectoryCannotBeReached(string directory)
+        {
+            string notUpToDateMessage = $"The directory {directory} cannot be reached, package moving will be cancelled";
+            string notUpToDateTitle = "Directory not found.";
+            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+        }
+
+        public static void DirectoryCannotBeCopied(string message)
+        {
+            string notUpToDateMessage = $"The file cannot be moved, package moving will be cancelled, {message}";
+            string notUpToDateTitle = "Copying failed.";
+            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+        }
+
         public static void KeepExistingPackage()
         {
             const string notUpToDateMessage = "You have decided to keep the existing package, action cancelled.";
@@ -263,6 +286,18 @@ namespace Prism
         {
             const string notUpToDateMessage = "You have Seversafe in your selection, would you like to create an order for this?";
             const string notUpToDateTitle = "Seversafe found";
+            return CreateYesNoForm(notUpToDateMessage, notUpToDateTitle);
+        }
+
+        public static bool MoveToFabDirectory(string directory, string variationDirectory, bool isVariation)
+        {
+            string directoryString = directory == "" ? directory : $"You have specified location {directory} in advanced settings as an alternate location for this type of package.";
+            string also = directory == "" ? "" : "also ";
+            string s = variationDirectory == "" && directory == "" && isVariation ? "" : "s";
+            string variationString = variationDirectory == "" ? variationDirectory : $"\r\rYou have {also}specified location {directory} in advanced settings as an alternate location for all variation packages";
+            string notUpToDateMessage = $"{directoryString}{variationString}\r\rWould you like to move your package{s} here?";
+                        
+            string notUpToDateTitle = "Alternate Package directory";
             return CreateYesNoForm(notUpToDateMessage, notUpToDateTitle);
         }
 
@@ -387,7 +422,14 @@ namespace Prism
             string message = "Warning: The Tekla PDF printer has failed to print all drawings expected of the currrent type, please check drawing numbers at the end.";
             const string notUpToDateTitle = "Drawing print failure";
             CreateOKForm(message, notUpToDateTitle);
+        }
 
+        public static void DrawingsWithoutRevisions(int count)
+        {
+            string message = count > 1 ? $"There are {count} drawings in your selection that do not have a revision. Revisions must be added before continuing." :
+               $"There is a drawing in your selection that does not have a revision. A revision must be added before continuing.";
+            const string notUpToDateTitle = "Missing Revision(s)";
+            CreateOKForm(message, notUpToDateTitle);
         }
 
         public static void IncorrectlyAssignedDrawings()

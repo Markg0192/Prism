@@ -37,11 +37,18 @@ namespace Prism
         {
             StartFunction();
 
-            if (!await Task.Run(() => InitialSetup(StageTypes.Prelim1, false, "x", "x", statusStrip_Mat, MaterialStatusLabel))) { EndFunction(0); return; }
+            try
+            {
+                if (!await Task.Run(() => InitialSetup(StageTypes.Prelim1, false, "x", "x", statusStrip_Mat, MaterialStatusLabel))) { EndFunction(0); return; }
 
-            if (!await Task.Run(() => _selectedObjects.MaterialButton1op(_projectData, (int)StageTypes.Prelim1, statusStrip_Mat, MaterialStatusLabel))) { EndFunction(0); return; }
+                if (!await Task.Run(() => _selectedObjects.MaterialButton1op(_projectData, (int)StageTypes.Prelim1, statusStrip_Mat, MaterialStatusLabel))) { EndFunction(0); return; }
 
-            ModelModifiers.RedrawViews();
+                ModelModifiers.RedrawViews();
+            }
+            catch (Exception ex)
+            {
+                EndWithException(ex); return;
+            }
 
             EndFunction(1);
         }
@@ -50,11 +57,18 @@ namespace Prism
         {
             StartFunction();
 
-            if (!await Task.Run(() => InitialSetup(StageTypes.Prelim2, true, "x", "x", statusStrip_Mat, MaterialStatusLabel))) { EndFunction(0); return; };
+            try
+            {
+                if (!await Task.Run(() => InitialSetup(StageTypes.Prelim2, true, "x", "x", statusStrip_Mat, MaterialStatusLabel))) { EndFunction(0); return; };
 
-            if (!await Task.Run(() => _selectedObjects.MaterialButton2op(txt_StartNumber.Text, (int)StageTypes.Prelim2, _projectData, _model, statusStrip_Mat, MaterialStatusLabel))) { EndFunction(0); return; }
+                if (!await Task.Run(() => _selectedObjects.MaterialButton2op(txt_StartNumber.Text, (int)StageTypes.Prelim2, _projectData, _model, statusStrip_Mat, MaterialStatusLabel))) { EndFunction(0); return; }
 
-            ModelModifiers.RedrawViews();
+                ModelModifiers.RedrawViews();
+            }
+            catch (Exception ex)
+            {
+                EndWithException(ex); return;
+            }
 
             EndFunction(1);
         }
@@ -63,40 +77,89 @@ namespace Prism
         {
             StartFunction();
 
-            string orderType = $"{cmb_OrderCall.Text} {cmb_OrderMaterial.Text}";
+            string orderType;
 
-            if (orderType.Contains("Special Fittings"))
+            try
             {
-                if (!await Task.Run(() => ProcessSpecialFittings(orderType, statusStrip_Mat, MaterialStatusLabel))) return;
-            }
-            else
-            {
-                if (!orderType.Contains("Bolts"))
+                orderType = $"{cmb_OrderCall.Text} {cmb_OrderMaterial.Text}";
+
+                ReportManager myReportManager = new ReportManager(_projectData, txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text);
+                ModelModifiers.VariationCheck(txt_MaterialPhaseNumber.Text, _projectData);
+
+                if (orderType.Contains("Special Fittings"))
                 {
-                    if (!await Task.Run(() => InitialSetup(StageTypes.Prelim3, true, "x", "x", statusStrip_Mat, MaterialStatusLabel))) { EndFunction(0); return; };
+                    if (!await Task.Run(() => ProcessSpecialFittings(orderType, statusStrip_Mat, MaterialStatusLabel))) return;
                 }
-                else { ModelChecker.ClearOldLists(); }
+                else
+                {
+                    if (!orderType.Contains("Bolts"))
+                    {
+                        if (!await Task.Run(() => InitialSetup(StageTypes.Prelim3, true, "x", "x", statusStrip_Mat, MaterialStatusLabel))) { EndFunction(0); return; };
+                    }
+                    else { ModelChecker.ClearOldLists(); }
 
-                if (!await Task.Run(() => _selectedObjects.MaterialButton3op(_projectData, txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text,
-                    orderType, (int)StageTypes.Prelim3, StageTypes.Prelim3, _model, txt_MatSiteDate.Text, statusStrip_Mat, MaterialStatusLabel))) { EndFunction(0); return; }
 
-                _model.CommitChanges();
+                    if (!await Task.Run(() => _selectedObjects.MaterialButton3op(_projectData, myReportManager,
+                        orderType, (int)StageTypes.Prelim3, StageTypes.Prelim3, _model, txt_MatSiteDate.Text, statusStrip_Mat, MaterialStatusLabel))) { EndFunction(0); return; }
+
+                    _model.CommitChanges();
+                }
+
+                SetNextPrelimToUseLabel();
+
+                MovePackToDirectory(MaterialFolderType(orderType, myReportManager.Folders, out AdvancedSettingType setting), setting, txt_MaterialPhaseNumber.Text);
+
+                Logging.AddToMaterialOrderProcessedCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndGuid));
             }
-
-            SetNextPrelimToUseLabel();
-
-            Logging.AddToMaterialOrderProcessedCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndGuid));
+            catch (Exception ex)
+            {
+                EndWithException(ex); return;
+            }
 
             EndFunction(1, orderType.Contains("Omit"));
+        }
+
+        private string MaterialFolderType(string orderType, FolderManager folders, out AdvancedSettingType setting)
+        {
+            if (orderType.Contains("Material"))
+            {
+                setting = AdvancedSettingType.DirectoryMaterial;
+                return folders.MatPath;
+            }
+            if (orderType.Contains("Carcass"))
+            {
+                setting = AdvancedSettingType.DirectoryCarcasses;
+                return folders.FabsecCarcassPath;
+            }
+            if (orderType.Contains("Bolt"))
+            {
+                setting = AdvancedSettingType.DirectoryBolts;
+                return folders.BoltPath;
+            }
+            if (orderType.Contains("Seversafe"))
+            {
+                setting = AdvancedSettingType.DirectorySeversafe;
+                return folders.EpoPath;
+            }
+
+            setting = AdvancedSettingType.Default;
+            return "";
         }
 
         private async void btn_Detail1_Click_1(object sender, EventArgs e)
         {
             StartFunction();
 
-            if (!await Task.Run(() => InitialSetup(StageTypes.Check1, false, "x", "x", statusStrip_Det, DetailingStatusLabel))) { EndFunction(0); return; }
+            try
+            {
+                if (!await Task.Run(() => InitialSetup(StageTypes.Check1, false, "x", "x", statusStrip_Det, DetailingStatusLabel))) { EndFunction(0); return; }
 
-            if (!await Task.Run(() => _selectedObjects.DetailButton1op(_projectData, (int)StageTypes.Check1, statusStrip_Mat, MaterialStatusLabel))) { EndFunction(0); return; }
+                if (!await Task.Run(() => _selectedObjects.DetailButton1op(_projectData, (int)StageTypes.Check1, statusStrip_Mat, MaterialStatusLabel))) { EndFunction(0); return; }
+            }
+            catch (Exception ex)
+            {
+                EndWithException(ex); return;
+            }
 
             EndFunction(1);
         }
@@ -105,11 +168,18 @@ namespace Prism
         {
             StartFunction();
 
-            ModelModifiers.ResetWorkPlane(_model);
-            if (!await Task.Run(() => InitialSetup(StageTypes.Check2, true, "x", "x", statusStrip_Det, DetailingStatusLabel))) { EndFunction(0); return; }
+            try
+            {
+                ModelModifiers.ResetWorkPlane(_model);
+                if (!await Task.Run(() => InitialSetup(StageTypes.Check2, true, "x", "x", statusStrip_Det, DetailingStatusLabel))) { EndFunction(0); return; }
 
-            string orientationType = cmb_ColumnOrientationType.Text; //we need this to avoid cross threading. (unsure why...)
-            if (!await Task.Run(() => _selectedObjects.DetailButton2op(_projectData, (int)StageTypes.Check2, orientationType, txt_PlateOnFlange.Text, statusStrip_Det, DetailingStatusLabel))) { return; }
+                string orientationType = cmb_ColumnOrientationType.Text; //we need this to avoid cross threading. (unsure why...)
+                if (!await Task.Run(() => _selectedObjects.DetailButton2op(_projectData, (int)StageTypes.Check2, orientationType, txt_PlateOnFlange.Text, statusStrip_Det, DetailingStatusLabel))) { return; }
+            }
+            catch (Exception ex)
+            {
+                EndWithException(ex); return;
+            }
 
             EndFunction(1);
         }
@@ -118,9 +188,16 @@ namespace Prism
         {
             StartFunction();
 
-            if (!await Task.Run(() => InitialSetup(StageTypes.Check3, true, "x", "x", statusStrip_Det, DetailingStatusLabel))) { EndFunction(0); return; }
+            try
+            {
+                if (!await Task.Run(() => InitialSetup(StageTypes.Check3, true, "x", "x", statusStrip_Det, DetailingStatusLabel))) { EndFunction(0); return; }
 
-            if (!_selectedObjects.DetailButton3op(_projectData, (int)StageTypes.Check3, statusStrip_Mat, MaterialStatusLabel)) { EndFunction(0); return; }
+                if (!_selectedObjects.DetailButton3op(_projectData, (int)StageTypes.Check3, statusStrip_Mat, MaterialStatusLabel)) { EndFunction(0); return; }
+            }
+            catch (Exception ex)
+            {
+                EndWithException(ex); return;
+            }
 
             EndFunction(1);
         }
@@ -161,50 +238,78 @@ namespace Prism
 
         private void btnCreatePackage1_Click_1(object sender, EventArgs e)
         {
-            Logging.DebugLog("create package start", "");
-            CreatePackageAsync(StageTypes.FAB);
+            try
+            {
+                Logging.DebugLog("create package start", "");
+                CreatePackageAsync(StageTypes.FAB);
+            }
+            catch (Exception ex)
+            {
+                Logging.ExceptionError(_projectData.ProjName, TeklaStructuresInfo.GetCurrentProgramVersion(), ex.Message, ex.StackTrace);
+                PrismWarnings.FatalError(ex.Message, this);
+            }
         }
 
         private async void btn_RocketPacket_Click(object sender, EventArgs e)
         {
-            if (!PrismWarnings.RocketButtonCheck()) return;
-
-            if (!await Task.Run(() => InitialSetup(StageTypes.RocketPacket, false))) { EndFunction(0); return; }
-
-            int rocketPartLimit = 100;
-            int numberOfSelectedParts = _selectedObjects.PrismParts.Count;
-            if (numberOfSelectedParts > rocketPartLimit)
+            try
             {
-                PrismWarnings.TooManyPartsForRocket(numberOfSelectedParts.ToString(), rocketPartLimit.ToString());
-                EndFunction(0); return;
-            }
+                if (!PrismWarnings.RocketButtonCheck()) return;
 
-            CreatePackageAsync(StageTypes.RocketPacket);
+                if (!await Task.Run(() => InitialSetup(StageTypes.RocketPacket, false))) { EndFunction(0); return; }
+
+                int rocketPartLimit = 100;
+                int numberOfSelectedParts = _selectedObjects.PrismParts.Count;
+                if (numberOfSelectedParts > rocketPartLimit)
+                {
+                    PrismWarnings.TooManyPartsForRocket(numberOfSelectedParts.ToString(), rocketPartLimit.ToString());
+                    EndFunction(0); return;
+                }
+
+                CreatePackageAsync(StageTypes.RocketPacket);
+            }
+            catch (Exception ex)
+            {
+                EndWithException(ex); return;
+            }
         }
 
-        private void btn_SpecialOperations_Click(object sender, EventArgs e)
+        private async void btn_SpecialOperations_Click(object sender, EventArgs e)
         {
-           // MaiksMacro("C:\\TeklaStructuresModels2023\\Sandbox\\PlotFiles");
- 
+            StartFunction();
+
+            try
+            {
+                int checker = Directory.GetFiles("BogusPath").Length;
+            }
+            catch (Exception ex)
+            {
+                EndWithException(ex); return;
+            }
+
+
+            // MovePackToDirectory("C:\\TeklaStructuresModels2023\\Sandbox\\Prism Packages\\C1991-120-FAB-ISSUE01");
+
+            /*
+
+             if (!await Task.Run(() => InitialSetup(StageTypes.Check1, false, "x", "x", statusStrip_Det, DetailingStatusLabel))) { EndFunction(0); return; }
+
+             FolderManager fm = new FolderManager(_projectData, "100", "01");
+             fm.CreateFabFolders();
+
+             QrCodeGenerator.ApplyQrCode(_selectedObjects.PrismParts, _projectData, fm.IfcPath, fm.QrCodePath);
+
+             IFCExporter.ExportIndividualIFC(_selectedObjects, fm.IfcPath, "");*/
+
+            EndFunction(1);
         }
 
-      /*  public void MaiksMacro(string fileLocation)
+        private void EndWithException(Exception ex)
         {
-            if (TeklaStructures.Connect())
-            {
-                MacroBuilder macBuilder = new MacroBuilder();
-                macBuilder.WpfCommandRepositoryCommand("Drawing.DrawingList");
-                macBuilder.PushWpfButton("DocumentManager.MainWindow", "AID_DOCMAN_ButtonSelectDrawings");
-                macBuilder.PushWpfContextMenuButton("DocumentManager.MainWindow", "AID_DOCMAN_DataGridControl", "AID_DocMgr_Print");
-                macBuilder.WpfCommandRepositoryCommand("Common.PrintDrawings");
-                macBuilder.SetWpfTextBoxText("DPMPrinterFeature.DPMPrinterViewWindow", new string[] { "AID_PDFPD_SettingsTabControl", "AID_PDFPD_ParentStackPanel", "AID_PDFPD_FileLocationPanel", "AID_PDFPD_FileLocation" }, fileLocation);//@"C:\\Temp"
-                macBuilder.PushWpfButton("DPMPrinterFeature.DPMPrinterViewWindow", "AID_PDFPD_PrintButton");
-                macBuilder.CloseWpfView("DPMPrinterFeature.DPMPrinterViewWindow");
-                macBuilder.SetWpfToggleButtonChecked("DocumentManager.MainWindow", new string[] { "AID_DOCMAN_ToggleButtonShowSelected" });
-                macBuilder.CloseWpfView("DocumentManager.MainWindow");
-                macBuilder.Run();
-            }
-        }*/
+            Logging.ExceptionError(_projectData.ProjName, TeklaStructuresInfo.GetCurrentProgramVersion(), ex.Message, ex.StackTrace);
+            PrismWarnings.FatalError(ex.Message, this);
+            EndFunction(0);
+        }
 
         public bool InitialSetup(StageTypes stageType, bool checkForPreviousSteps, string phaseNum = "x", string issueNum = "x", ToolStrip toolStrip = null, ToolStripStatusLabel statusLabel = null)
         {
@@ -247,6 +352,8 @@ namespace Prism
 
             GetPhaseAndIssueNumber(out string phaseNum, out string issueNum, out bool runChangeManager);
 
+            ModelModifiers.VariationCheck(phaseNum, _projectData);
+
             if (!await Task.Run(() => InitialSetup(StageTypes.FAB, stageType == StageTypes.FAB, phaseNum, issueNum, statusStrip_Fab, StatusLabel))) { EndFunction(0); return; }
 
             if (!_selectedObjects.NumbersUpToDate) { SetStatusLabels("Numbers not up to date"); EndFunction(0); return; }
@@ -271,26 +378,146 @@ namespace Prism
 
             ReportManager myReportManager = new ReportManager(_projectData, phaseNumber.Text, issueNum);
 
-            if (!await Task.Run(() => _selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber.Text, issueNum, stageType, txt_SiteDate.Text, runSeversafe, runChangeManager, statusStrip_Fab, StatusLabel, _teklaVersion))) { EndFunction(0); return; }
+            int totalNcRequired = 0;
+            if (!await Task.Run(() => _selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber.Text, issueNum, stageType, txt_SiteDate.Text, runSeversafe, runChangeManager, statusStrip_Fab, StatusLabel, _teklaVersion, out totalNcRequired))) { EndFunction(0); return; }
 
-            await Task.Run(() => FabMisc.FabMiscOp(_model, txt_SiteDate.Text, _selectedObjects, runSeversafe, myReportManager, divisionNo, _projectData, runChangeManager));
+            bool boltOrderAdded = false;
+            await Task.Run(() => FabMisc.FabMiscOp(_model, txt_SiteDate.Text, _selectedObjects, runSeversafe, myReportManager, divisionNo, _projectData, runChangeManager, out boltOrderAdded));
 
-            if (!CheckNcCreation(myReportManager))
+            if (!CheckNcCreation(myReportManager, totalNcRequired, out int numberOfFilesCreated))
             {
                 PrismWarnings.NcDataCreationFailed();
-                Logging.NCFailed(_projectData.ProjNumberAndName, phaseNumber.Text, issueNum, Tekla.Structures.TeklaStructuresInfo.GetCurrentProgramVersion(), myReportManager.Folders.NcPath);
+                Logging.NCFailed(_projectData.ProjNumberAndName, phaseNumber.Text, issueNum, TeklaStructuresInfo.GetCurrentProgramVersion(), myReportManager.Folders.NcPath, totalNcRequired, numberOfFilesCreated);
             }
             else
             {
-                Logging.NCCreated(_projectData.ProjNumberAndName, phaseNumber.Text, issueNum, Tekla.Structures.TeklaStructuresInfo.GetCurrentProgramVersion(), myReportManager.Folders.NcPath);
+                Logging.NCCreated(_projectData.ProjNumberAndName, phaseNumber.Text, issueNum, TeklaStructuresInfo.GetCurrentProgramVersion(), myReportManager.Folders.NcPath, totalNcRequired, numberOfFilesCreated);
             }
+
+            MovePackToDirectory(myReportManager.Folders.FabPath, AdvancedSettingType.DirectoryFabPack, phaseNum);
+            if (boltOrderAdded) MovePackToDirectory(myReportManager.Folders.BoltPath, AdvancedSettingType.DirectoryBolts, phaseNum);
 
             Logging.AddToFabCompleteCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndGuid));
 
             EndFunction(1);
         }
 
-        private bool CheckNcCreation(ReportManager reportManager)
+        private bool MovePackToDirectory(string sourcePath1, AdvancedSettingType settingType, string phaseNumber)
+        {
+            string directory = Logging.GetAdvancedSetting(_projectData.ProjNumberAndGuid, settingType);
+            string variationDirectory = "";
+            if (_projectData.IsVariation)
+            {
+                variationDirectory = Logging.GetAdvancedSetting(_projectData.ProjNumberAndGuid, AdvancedSettingType.DirectoryVariation);
+            }
+
+            if (directory != "" || variationDirectory != "")
+            {
+                string variationWithSubFolder = VariationSubFolderName(variationDirectory, settingType);
+                if (!PrismWarnings.MoveToFabDirectory(directory, variationWithSubFolder, _projectData.IsVariation)) return false;
+                return CopyAndDeleteDirectory(sourcePath1, directory, variationWithSubFolder, phaseNumber);
+            }
+            return true;
+        }
+
+        private string VariationSubFolderName(string variation, AdvancedSettingType setting)
+        {
+            if (variation != "")
+            {
+                if (setting == AdvancedSettingType.DirectoryMaterial)
+                {
+                    variation = Path.Combine(variation, "Material");
+                }
+                if (setting == AdvancedSettingType.DirectoryBolts)
+                {
+                    variation = Path.Combine(variation, "Bolt Orders");
+                }
+                if (setting == AdvancedSettingType.DirectoryCarcasses)
+                {
+                    variation = Path.Combine(variation, "Fabsec Carcasses");
+                }
+                if (setting == AdvancedSettingType.DirectorySeversafe)
+                {
+                    variation = Path.Combine(variation, "Seversafe Orders");
+                }
+                if (setting == AdvancedSettingType.DirectoryFabPack)
+                {
+                    variation = Path.Combine(variation, "Fabrication Packages");
+                }
+                if (!Directory.Exists(variation)) //check that it exists
+                {
+                    // Create the destination directory if it doesn't exist
+                    Directory.CreateDirectory(variation);
+                }
+            }
+            return variation;
+        }
+
+        public bool CopyAndDeleteDirectory(string sourceDir, string destDir, string secondDestDir, string phaseNumber)
+        {
+            try
+            {
+                // Ensure the source directory exists
+                if (!Directory.Exists(sourceDir))
+                {
+                    PrismWarnings.DirectoryCannotBeReached(sourceDir);
+                    return false;
+                }
+
+                if (!RunCopyLogicForGivenDirectory(sourceDir, destDir, phaseNumber)) return false;
+                if (!RunCopyLogicForGivenDirectory(sourceDir, secondDestDir, phaseNumber)) return false;
+
+                // Delete the source directory after copying
+                Directory.Delete(sourceDir, true);
+            }
+            catch (Exception ex)
+            {
+                PrismWarnings.DirectoryCannotBeCopied(ex.Message);
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool RunCopyLogicForGivenDirectory(string sourceDir, string destDir, string phaseNumber)
+        {
+            // if the destination is given
+            if (destDir != "")
+            {
+                if (!Directory.Exists(destDir)) //check that it exists
+                {
+                    PrismWarnings.DirectoryCannotBeReached(destDir); //if it doesn't tell the user and quit
+                    return false;
+                }
+                else
+                { //if it does copy from source to dest(ination)
+                    destDir = Path.Combine(destDir, "Phase " + phaseNumber);
+                    // Create the destination directory
+                    string newDestDir = Path.Combine(destDir, Path.GetFileName(sourceDir));
+                    CopyDirectory(sourceDir, newDestDir);
+                }
+            }
+            return true;
+        }
+
+        private void CopyDirectory(string sourceDir, string destDir)
+        {
+            // Create the destination directory if it doesn't exist
+            Directory.CreateDirectory(destDir);
+            foreach (string file in Directory.GetFiles(sourceDir))
+            {
+                string destFile = Path.Combine(destDir, Path.GetFileName(file));
+                File.Copy(file, destFile, true);
+            }
+
+            foreach (string directory in Directory.GetDirectories(sourceDir))
+            {
+                string destDirectory = Path.Combine(destDir, Path.GetFileName(directory));
+                CopyDirectory(directory, destDirectory);
+            }
+        }
+
+        private bool CheckNcCreation(ReportManager reportManager, int totalNcRequired, out int numberOfFilesCreated)
         {
             // Get the location of the folder to search
             string fabPackageLocation = reportManager.Folders.FabPath;
@@ -298,8 +525,8 @@ namespace Prism
             // Path of the file to check
             string fileToCheck = fabPackageLocation + "\\NC";
 
-            // Check if the file exists in the specified directory
-            return Directory.Exists(fileToCheck);
+            numberOfFilesCreated = Directory.Exists(fileToCheck) ? Directory.GetFiles(fileToCheck).Length : 0;
+            return numberOfFilesCreated == totalNcRequired;
         }
 
         private void GetPhaseAndIssueNumber(out string phaseNum, out string issueNum, out bool runChangeManager)
@@ -347,10 +574,10 @@ namespace Prism
             if (runDrawings)
             {
                 ReportManager.SelectDrawingsInDocManager(null);
-                DrawingManager dm = new DrawingManager(_model, _projectData, txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text);
-                if (dm.NotLabelledDrawings.Count != 0) { PrismWarnings.IncorrectlyAssignedDrawings(); return false; }
+                DrawingManager dm = new DrawingManager(_model, _projectData, txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text, myReportManager.Folders.MatFolder);
+                if (dm.GetDrawingFolder(Enums.DrawingFolder.Default).Count != 0) { PrismWarnings.IncorrectlyAssignedDrawings(); return false; }
 
-                List<int> drawingCount = new List<int> { 0, dm.AllFittings.Count };
+                List<int> drawingCount = new List<int> { 0, dm.GetDrawingByType("W").Count };
                 DrawingManager.PrintAndIssueDrawings(myReportManager.Folders.MatFolder, myReportManager.Folders.MatPath, drawingCount, "\\SPC", 0, 1, myReportManager, false, toolStrip, statusLabel);
                 PrismMacroBuilder.ClearPrintDialog();
             }
@@ -483,7 +710,7 @@ namespace Prism
                 if (!myReportManager.Folders.CreateMatFolder(false)) { EndFunction(0); return false; };
                 myReportManager.CreateMaterialReports(_selectedObjects, orderType, StageTypes.Prelim3);
                 if (!MaterialButton3.FinishOrder(_selectedObjects, (int)StageTypes.Prelim3, _projectData, myReportManager.MatReportPrefix,
-                    txt_MaterialIssueNumber.Text, txt_MaterialPhaseNumber.Text, orderType, myReportManager, txt_MatSiteDate.Text, toolStrip, tssl)) { return false; }
+                    orderType, myReportManager, txt_MatSiteDate.Text, toolStrip, tssl)) { return false; }
             }
             else
             {
@@ -494,7 +721,7 @@ namespace Prism
                 {
                     if (!OrderSpecials(orderAction, orderType, StageTypes.Prelim3, myReportManager, toolStrip, tssl)) { EndFunction(0); return false; }
                     if (!MaterialButton3.FinishOrder(_selectedObjects, (int)StageTypes.Prelim3, _projectData, myReportManager.MatReportPrefix,
-                        txt_MaterialIssueNumber.Text, txt_MaterialPhaseNumber.Text, orderType, myReportManager, txt_MatSiteDate.Text, toolStrip, tssl, true)) { return false; }
+                       orderType, myReportManager, txt_MatSiteDate.Text, toolStrip, tssl, true)) { return false; }
                 }
                 if (orderAction == 4 || orderAction == 5) //then user wants to make drawings
                 {

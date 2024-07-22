@@ -56,6 +56,7 @@ namespace Prism
         {
             List<string> specialOperationUsers = new List<string>
             {
+                "Jamie.Field",
                 "David.Hunter",
                 "Ian.Partridge",
                 "mark.gibson",

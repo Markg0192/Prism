@@ -11,9 +11,10 @@ namespace Prism.ButtonOperations
     public static class CreatePackageButton
     {
         public static bool CreateFabPackage(this SelectedObjects myObjects, Model model, PrismProjectData projectData, string phaseNumber, string issueNumber, StageTypes stageType, string siteDate, bool runSeversafe, bool runChangeManager,
-           ToolStrip toolStrip, ToolStripStatusLabel label, string teklaVersion)
+           ToolStrip toolStrip, ToolStripStatusLabel label, string teklaVersion, out int totalNcRequired)
         {
-            string packagingType = Logging.GetFabPackType(projectData.ProjNumberAndGuid).ToString();
+            totalNcRequired = 0;
+            string packagingType = Logging.GetAdvancedSetting(projectData.ProjNumberAndGuid, AdvancedSettingType.FabPackType);
 
             if (packagingType.Contains("Lot"))
             {
@@ -35,7 +36,7 @@ namespace Prism.ButtonOperations
             {
                 if (!runChangeManager)
                 {
-                    return CreateFirstIssue(projectData, phaseNumber, issueNumber, runSeversafe, myObjects, model, stageType, siteDate, teklaVersion, toolStrip, label);
+                    return CreateFirstIssue(projectData, phaseNumber, issueNumber, runSeversafe, myObjects, model, stageType, siteDate, teklaVersion, toolStrip, label, out totalNcRequired);
                 }
 
                 string fileLocation = Constants.ModelDataLogLocation(projectData.ProjNumberAndGuid + "\\Fab XMLs");
@@ -44,17 +45,21 @@ namespace Prism.ButtonOperations
                     out List<SteelItemBase> omitItems, out List<SteelItemBase> addItems, out string messageForEmail)) return false;
 
                 return issueNumber == "01"
-                    ? CreateFirstIssue(projectData, phaseNumber, issueNumber, runSeversafe, myObjects, model, stageType, siteDate, teklaVersion, toolStrip, label)
-                    : ProcessSubsequentIssues(projectData, phaseNumber, issueNumber, revisedItems, addItems, runSeversafe, myObjects, model, siteDate, stageType, messageForEmail, teklaVersion, toolStrip, label);
+                    ? CreateFirstIssue(projectData, phaseNumber, issueNumber, runSeversafe, myObjects, model, stageType, siteDate, teklaVersion, toolStrip, label, out totalNcRequired)
+                    : ProcessSubsequentIssues(projectData, phaseNumber, issueNumber, revisedItems, addItems, runSeversafe, myObjects, model, siteDate, stageType, messageForEmail, teklaVersion, toolStrip, label, out totalNcRequired);
             }
         }
 
         private static bool CreateFirstIssue(PrismProjectData projectData, string phaseNumber, string issueNumber, bool runSeversafe, SelectedObjects myObjects, Model model, StageTypes stageType, string siteDate, string teklaVersion,
-            ToolStrip toolStrip, ToolStripStatusLabel tssl)
+            ToolStrip toolStrip, ToolStripStatusLabel tssl, out int totalNcRequired)
         {
+            totalNcRequired = 0;
+
             if (!InitialisePackageAndCreateFolders(projectData, phaseNumber, issueNumber, runSeversafe, myObjects, out ReportManager reportManager, out CpuCounter cpuCounter)) return false;
 
             if (!ProcessAndPrintDrawings(cpuCounter, myObjects.GetNonSeversafeParts(), model, projectData, phaseNumber, issueNumber, reportManager, toolStrip, tssl, out DrawingManager drawingManager)) return false;
+
+            totalNcRequired = drawingManager.NumberOfNcRequired;
 
             if (!Constants.IsSpecialPerson()) { myObjects.ExportBSWX(reportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType); }
 
@@ -70,15 +75,17 @@ namespace Prism.ButtonOperations
 
             EmailWriter.WriteFabEmail(projectData, myObjects, reportManager.FabReportPrefix, issueNumber, phaseNumber, siteDate, reportManager.Folders.FabPath, zipFileCanBeAttached);
 
-            Logging.UpdateFrozenDrawingCount(projectData.ProjNumberAndGuid, drawingManager.FrozenDrawings.Count, drawingManager.UnFrozenDrawings.Count);
+            Logging.UpdateFrozenDrawingCount(projectData.ProjNumberAndGuid, drawingManager.GetFrozenDrawings().Count, drawingManager.GetUnFrozenDrawings().Count);
             Logging.LogProgress(projectData.ProjNumberAndName, stageType.ToString(), 0, myObjects.GetMainParts().Count);
 
             return true;
         }
 
         private static bool ProcessSubsequentIssues(PrismProjectData projectData, string phaseNumber, string issueNumber, List<SteelItemBase> revisedItems, List<SteelItemBase> addItems,
-            bool runSeversafe, SelectedObjects myObjects, Model model, string siteDate, StageTypes stageType, string messageForEmail, string teklaVersion, ToolStrip ts, ToolStripStatusLabel tssl)
+            bool runSeversafe, SelectedObjects myObjects, Model model, string siteDate, StageTypes stageType, string messageForEmail, string teklaVersion, ToolStrip ts, ToolStripStatusLabel tssl, out int totalNcRequired)
         {
+            totalNcRequired = 0;
+
             if (revisedItems != null && addItems != null)
             {
                 if (!InitialisePackageAndCreateFolders(projectData, phaseNumber, issueNumber, runSeversafe, myObjects, out ReportManager reportManager, out CpuCounter cpuCounter)) return false;
@@ -86,13 +93,15 @@ namespace Prism.ButtonOperations
                 List<Part> teklaParts = CombineAddAndOmitParts(model, revisedItems, addItems);
 
                 List<PrismPart> combinedParts = new List<PrismPart>();
-                foreach(Part p in teklaParts)
+                foreach (Part p in teklaParts)
                 {
                     combinedParts.Add(new PrismPart(p));
                 }
                 ModelModifiers.SelectParts(combinedParts);
 
                 if (!ProcessAndPrintDrawings(cpuCounter, combinedParts, model, projectData, phaseNumber, issueNumber, reportManager, ts, tssl, out DrawingManager drawingManager)) return false;
+
+                totalNcRequired = drawingManager.NumberOfNcRequired;
 
                 reportManager.CreateFabReports(combinedParts, myObjects.PrismBoltGroups, teklaVersion, ts, tssl);
                 ModelModifiers.SelectParts(combinedParts);
@@ -109,7 +118,7 @@ namespace Prism.ButtonOperations
 
                 EmailWriter.WriteRevisedFabEmail(projectData, reportManager.FabReportPrefix, issueNumber, phaseNumber, siteDate, reportManager.Folders.FabPath, zipFileCanBeAttached, messageForEmail);
 
-                Logging.UpdateFrozenDrawingCount(projectData.ProjNumberAndGuid, drawingManager.FrozenDrawings.Count, drawingManager.UnFrozenDrawings.Count);
+                Logging.UpdateFrozenDrawingCount(projectData.ProjNumberAndGuid, drawingManager.GetFrozenDrawings().Count, drawingManager.GetUnFrozenDrawings().Count);
                 Logging.LogProgress(projectData.ProjNumberAndName, stageType.ToString(), 0, myObjects.GetMainParts().Count);
             }
 
@@ -122,29 +131,41 @@ namespace Prism.ButtonOperations
             ReportManager.SelectDrawingsInDocManager(partsToSelect);
 
             CpuSpeedCheck(cpuCounter);
-            drawingManager = new DrawingManager(model, projectData, phaseNumber, issueNumber);
+            drawingManager = new DrawingManager(model, projectData, phaseNumber, issueNumber, reportManager.Folders.FabPath);
 
-            CpuSpeedCheck(cpuCounter);
-            PrismMacroBuilder.IssueAndLockStampOff();
+            if (!CheckForProblemsWithDrawings(drawingManager, projectData.ProjNumber, out bool createDrawings)) return false;
 
-            bool createDrawings = true;
+            if (createDrawings)
+            {
+                CpuSpeedCheck(cpuCounter);
+                PrismMacroBuilder.IssueAndLockStampOff();
+                List<int> drawingCount = NewCountDrawings(drawingManager);
+                DrawingManager.NewPrintDrawings(reportManager, drawingManager, drawingCount, toolStrip, statusLabel);
+            }
 
-            if (!drawingManager.DrawingsAreUpToDate) { PrismWarnings.DrawingsNotUpToDate(); return false; }
-            if (drawingManager.NotLabelledDrawings.Count != 0)
+            return true;
+        }
+
+        private static bool CheckForProblemsWithDrawings(DrawingManager drawingManager, string projectNumber, out bool createDrawings)
+        {
+            createDrawings = true;
+
+            if (drawingManager.GetOutOfDateDrawings().Count > 0) { PrismWarnings.DrawingsNotUpToDate(); return false; }
+            if (drawingManager.GetDrawingFolder(DrawingFolder.Default).Count != 0)
             {
                 PrismWarnings.IncorrectlyAssignedDrawings();
-                Logging.UnAssignedDrawings(projectData.ProjNumber, drawingManager);
+                Logging.UnAssignedDrawings(projectNumber, drawingManager);
 
                 if (!PrismWarnings.CreatePackageWithoutDrawings()) return false;
                 else createDrawings = false;
             }
 
-            if (createDrawings)
+            int drawingsWithoutRevisions = drawingManager.GetDrawingsWithoutRevision().Count;
+            if (drawingsWithoutRevisions > 0)
             {
-                List<int> drawingCount = CountDrawings(drawingManager);
-                DrawingManager.PrintDrawings(reportManager, drawingManager, drawingCount, toolStrip, statusLabel);
+                PrismWarnings.DrawingsWithoutRevisions(drawingsWithoutRevisions);
+                return false;
             }
-
             return true;
         }
 
@@ -188,25 +209,56 @@ namespace Prism.ButtonOperations
         private static List<int> CountDrawings(DrawingManager dm)
         {
             int fitStartPoint = 0;
-            int fitEndPoint = dm.NotLabelledDrawings.Count + dm.FitDrawings.Count;
+            int fitEndPoint = dm.GetDrawingFolder(DrawingFolder.Default).Count + dm.GetDrawingFolder(DrawingFolder.FIT).Count;
             int notRequiredStartPoint = fitEndPoint;
-            int notRequiredEndPoint = dm.NotRequiredDrawings.Count;
+            int notRequiredEndPoint = dm.GetDrawingFolder(DrawingFolder.NotRequired).Count;
 
             int pgcStartPoint = fitEndPoint + notRequiredEndPoint;
-            int pgcEndPoint = dm.PgcDrawings.Count;
+            int pgcEndPoint = dm.GetDrawingFolder(DrawingFolder.PGC).Count;
 
             int prtStartPoint = pgcStartPoint + pgcEndPoint;
-            int prtEndPoint = dm.PrtDrawings.Count;
+            int prtEndPoint = dm.GetDrawingFolder(DrawingFolder.PRT).Count;
+
             int shaStartPoint = prtStartPoint + prtEndPoint;
-            int shaEndPoint = dm.ShaDrawings.Count;
+            int shaEndPoint = dm.GetDrawingFolder(DrawingFolder.SHA).Count;
 
             int assStartPoint = 0;
-            int assEndPoint = dm.AssDrawings.Count;
+            int assEndPoint = dm.GetDrawingFolder(DrawingFolder.ASS).Count;
 
-            int wldStartPoint = assEndPoint;
-            int wldEndPoint = dm.WldDrawings.Count;
+            int assNotReqStartPoint = assEndPoint;
+            int assNotReqEndPoint = dm.GetDrawingFolder(DrawingFolder.AssNotRequired).Count;
 
-            return new List<int>() { fitStartPoint, fitEndPoint, notRequiredStartPoint, notRequiredEndPoint, pgcStartPoint, pgcEndPoint, prtStartPoint, prtEndPoint, shaStartPoint, shaEndPoint, assStartPoint, assEndPoint, wldStartPoint, wldEndPoint };
+            int wldStartPoint = assNotReqStartPoint + assNotReqEndPoint;
+            int wldEndPoint = dm.GetDrawingFolder(DrawingFolder.WLD).Count;
+
+            return new List<int>() { fitStartPoint, fitEndPoint, notRequiredStartPoint, notRequiredEndPoint, pgcStartPoint, pgcEndPoint, prtStartPoint, prtEndPoint, shaStartPoint, shaEndPoint, assStartPoint, assEndPoint, assNotReqStartPoint, assNotReqEndPoint, wldStartPoint, wldEndPoint };
+        }
+
+        private static List<int> NewCountDrawings(DrawingManager dm)
+        {
+            int assStartPoint = 0;
+            int assEndPoint = dm.GetDrawingFolder(DrawingFolder.ASS).Count;
+
+            int fitStartPoint = assStartPoint + assEndPoint;
+            int fitEndPoint = dm.GetDrawingFolder(DrawingFolder.FIT).Count;
+
+            int notRequiredStartPoint = fitStartPoint + fitEndPoint;
+            int notRequiredEndPoint = dm.GetDrawingFolder(DrawingFolder.NotRequired).Count + dm.GetDrawingFolder(DrawingFolder.AssNotRequired).Count;
+
+            int pgcStartPoint = notRequiredStartPoint + notRequiredEndPoint;
+            int pgcEndPoint = dm.GetDrawingFolder(DrawingFolder.PGC).Count;
+
+            int prtStartPoint = pgcStartPoint + pgcEndPoint;
+            int prtEndPoint = dm.GetDrawingFolder(DrawingFolder.PRT).Count;
+
+            int shaStartPoint = prtStartPoint + prtEndPoint;
+            int shaEndPoint = dm.GetDrawingFolder(DrawingFolder.SHA).Count;
+
+            int wldStartPoint = shaStartPoint + shaEndPoint;
+            int wldEndPoint = dm.GetDrawingFolder(DrawingFolder.WLD).Count;
+
+            return new List<int>() { assStartPoint, assEndPoint, fitStartPoint, fitEndPoint, notRequiredStartPoint, notRequiredEndPoint, pgcStartPoint, pgcEndPoint, prtStartPoint, prtEndPoint, shaStartPoint, shaEndPoint, wldStartPoint, wldEndPoint };
+
         }
     }
 }

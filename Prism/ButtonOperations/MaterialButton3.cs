@@ -11,14 +11,14 @@ namespace Prism.ButtonOperations
 {
     public static class MaterialButton3
     {
-        public static bool MaterialButton3op(this SelectedObjects myObjects, PrismProjectData projectData,
-            string phaseNumber, string issueNumber, string orderType, int stageNumber, StageTypes stageType, Model model, string siteDate, ToolStrip toolStrip, ToolStripStatusLabel tssl)
+        public static bool MaterialButton3op(this SelectedObjects myObjects, PrismProjectData projectData,ReportManager reportManager,
+            string orderType, int stageNumber, StageTypes stageType, Model model, string siteDate, ToolStrip toolStrip, ToolStripStatusLabel tssl)
         {
-            ReportManager myReportManager = new ReportManager(projectData, phaseNumber, issueNumber);
+           
             // HDBolts.StampConnectionCodeOnMainMember(myObjects);
 
             //First check if the order is for Bolts, Seversafe or HD Bolts.
-            bool boltSeversafeAndHdBoltsResult = Order.BoltsSeversafeAndHdBolts(orderType, myReportManager, siteDate, model, myObjects, projectData, out bool orderRequired);
+            bool boltSeversafeAndHdBoltsResult = Order.BoltsSeversafeAndHdBolts(orderType, reportManager, siteDate, model, myObjects, projectData, out bool orderRequired);
             if (orderRequired) return boltSeversafeAndHdBoltsResult;
 
             int typeOfOrder = 0;
@@ -27,7 +27,7 @@ namespace Prism.ButtonOperations
             {
                 typeOfOrder = PrismWarnings.FabsecCarcassAction();
                 //If there are fabsecs present the we need to add the carcass to the selection instead of those in the model space
-                if (!FabsecOrderWorker(myObjects, orderType, myReportManager, model, projectData, phaseNumber, issueNumber, stageNumber, siteDate, typeOfOrder, toolStrip, tssl)) return false;
+                if (!FabsecOrderWorker(myObjects, orderType, reportManager, model, projectData, stageNumber, siteDate, typeOfOrder, toolStrip, tssl)) return false;
             }
 
             else
@@ -39,25 +39,24 @@ namespace Prism.ButtonOperations
 
                 //Check if everything in the selection needs to be ordered/omitted
                 if (!ShouldPartsBeOrdered(orderType)) { return false; }
-                if (!myReportManager.Folders.CreateMatFolder(false)) return false;
+                if (!reportManager.Folders.CreateMatFolder(false)) return false;
 
                 //  if (!Order.Fabsecs(fabsecsPresent, myReportManager, model, projectData, phaseNumber, issueNumber, myObjects, stageNumber, originalFabsecs, fabsecCarcasses)) { return false; }
-
-                ModelModifiers.VariationCheck(phaseNumber, myObjects, projectData);
+                                
                 myObjects.AddPrelimMarks(projectData);
 
-                myReportManager.CreateMaterialReports(myObjects, orderType, stageType);
+                reportManager.CreateMaterialReports(myObjects, orderType, stageType);
 
                 myObjects.OmittedParts = MoveOmitMaterial(orderType, myObjects, myObjects.GetFabsecParts(), model);
                 
-                if (!FinishOrder(myObjects, stageNumber, projectData, myReportManager.MatReportPrefix, issueNumber, phaseNumber, orderType, myReportManager, siteDate, toolStrip, tssl, false, myObjects.GetFabsecParts().Count > 0)) { return false; }
+                if (!FinishOrder(myObjects, stageNumber, projectData, reportManager.MatReportPrefix, orderType, reportManager, siteDate, toolStrip, tssl, false, myObjects.GetFabsecParts().Count > 0)) { return false; }
             }
 
             return true;
         }
 
         private static bool FabsecOrderWorker(SelectedObjects myObjects, string orderType, ReportManager myReportManager, Model model,
-            PrismProjectData projectData, string phaseNumber, string issueNumber, int stageNumber, string siteDate, int typeOfOrder, 
+            PrismProjectData projectData, int stageNumber, string siteDate, int typeOfOrder, 
             ToolStrip toolStrip, ToolStripStatusLabel tssl)
         {
             List<PrismPart> fabsecParts = myObjects.GetFabsecParts();
@@ -72,7 +71,7 @@ namespace Prism.ButtonOperations
 
                 if (!CheckFabsecOrderStatusAgainstRequiredActions(fabsecParts, typeOfOrder)) return false;
 
-                bool fabsecCarcassOrdering = Order.FabsecCarcasses(myReportManager, model, projectData, phaseNumber, issueNumber, myObjects, stageNumber, orderType, siteDate, typeOfOrder, toolStrip, tssl);
+                bool fabsecCarcassOrdering = Order.FabsecCarcasses(myReportManager, model, projectData, myObjects, stageNumber, orderType, siteDate, typeOfOrder, toolStrip, tssl);
                 return fabsecCarcassOrdering;
             }
             if (orderType.Contains("Fabsec Carcass") && (orderType.Contains("Add") || orderType.Contains("Omit")))
@@ -180,7 +179,7 @@ namespace Prism.ButtonOperations
         }
 
         public static bool FinishOrder(SelectedObjects myObjects, int stageNumber, PrismProjectData projectData, string matReportPrefix,
-            string issueNumber, string phaseNumber, string orderType, ReportManager reportManager, string siteDate, ToolStrip toolStrip, ToolStripStatusLabel tssl, bool isSpecialFittingOrder = false, bool fabsecsPresent = false)
+          string orderType, ReportManager reportManager, string siteDate, ToolStrip toolStrip, ToolStripStatusLabel tssl, bool isSpecialFittingOrder = false, bool fabsecsPresent = false)
         {
             if (orderType == "Omit Material")
             {
@@ -195,7 +194,7 @@ namespace Prism.ButtonOperations
             PrismWarnings.MaterialOrderComplete(projectData);
 
             reportManager.Folders.ZipFolder(reportManager.Folders.MatPath);
-            EmailWriter.WriteMatEmail(projectData, myObjects, matReportPrefix, issueNumber, phaseNumber, orderType, reportManager.Folders.MatPath, fabsecsPresent, siteDate);
+            EmailWriter.WriteMatEmail(projectData, myObjects, matReportPrefix, reportManager.IssueNum, reportManager.PhaseNum, orderType, reportManager.Folders.MatPath, fabsecsPresent, siteDate);
 
             Logging.LogProgress(projectData.ProjNumberAndName, "Material 3", 0, myObjects.GetMainParts().Count);
 

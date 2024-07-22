@@ -50,7 +50,7 @@ namespace Prism
             bimRevExp.SetAttribute("selected_parts_only", 1);
 
             // Start ActionPopUps in a new thread before calling Insert
-            Task.Run(() => ActionPopUps());
+            //Task.Run(() => ActionPopUps());
 
             bimRevExp.Insert();
 
