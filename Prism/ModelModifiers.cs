@@ -429,16 +429,6 @@ namespace Prism
             }
         }
 
-        private static void HandleNonFabsecMember(Part part, double distanceToMoveInZ, bool keepOriginal, List<Part> movedParts)
-        {
-            // ... existing logic for non-fabsec members
-        }
-
-        private static void UpdateCarcassAttributes(Part carcass)
-        {
-            // Implement the logic to update attributes of the carcass
-        }
-
         private static void ClearFabsecAttributes(Part fabsec)
         {
             for (int i = 0; i < 10; i++)
@@ -460,12 +450,13 @@ namespace Prism
             part.GetUserProperty(stageType, ref stageString);
             return stageString;
         }
-
+        
         public static bool PerformNumbering()
         {
             // new MacroBuilder().Callback("acmd_partnumbers_selected", string.Empty, "main_frame").Run(); 
-            TeklaStructures.Connect();
-            TeklaStructures.CommonTasks.PerformNumbering(false);
+           // TeklaStructures.Connect();
+          //  TeklaStructures.CommonTasks.PerformNumbering(false);
+            PrismMacroBuilder.NumberSelected();
             return PrismWarnings.AreYouHappyWithNumbering();
         }
 
