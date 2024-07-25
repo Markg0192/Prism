@@ -11,6 +11,7 @@ namespace Prism
         public static string DrawingOperation = "PrismDrawingOperation.cs";
         public static string IssueDrawings = "IssueStampDrawings.cs";
         public static string ClearPrintDialog = "ClearPrintDialog.cs";
+        public static string NumberSelectedPartsMacro = "NumberSelected.cs";
         public static string PrismPackageFolderName = "Prism Packages";
 
         public static int PrismDataLogLocation = 1;

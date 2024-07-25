@@ -10,23 +10,88 @@ using Tekla.Structures;
 using Drawing = Tekla.Structures.Drawing.Drawing;
 using QRCoder;
 using System.IO;
+using System.Drawing;
+using Prism.Properties;
+using System.Threading.Tasks;
+using System.Linq;
+using System.Windows.Media;
 
 namespace Prism
 {
-    public static  class QrCodeGenerator
+    public static class QrCodeGenerator
     {
         private const string ServerUrl = @"https://devtest.severfield.com:44348/?fileName=1991%5CIFC%5CFB100.ifc";
-        private const string ImageSavePath = "C:\\Users\\mark.gibson\\OneDrive - Severfield plc\\Desktop\\Desktop\\Pdf\\IFCs\\QRCodeImage2.png";
-        private const string modelFolderPath = @"C:\TeklaStructuresModels2023\Sandbox\QR Code Generator";
+        //private const string ImageSavePath = "C:\\Users\\mark.gibson\\OneDrive - Severfield plc\\Desktop\\Desktop\\Pdf\\IFCs\\QRCodeImage2.png";
+        //private const string modelFolderPath = @"C:\TeklaStructuresModels2023\Sandbox\QR Code Generator";
 
-        public static void ApplyQrCode(List<PrismPart> selectedParts, PrismProjectData data, string ifcPath, string qrCodeFolderPath)
+        public static void ApplyQrCode(List<PrismPart> selectedParts, PrismProjectData data, string qrCodeFolderPath)
         {
-            foreach (PrismPart part in selectedParts)
+            // Create QR codes in parallel for parts where IsMainPart is true
+            Parallel.ForEach(selectedParts.Where(part => part.IsMainPart), part =>
             {
                 CreateQrCode(part.Part.GetPartMark(), data, qrCodeFolderPath);
-            }
+            });
 
-            GetDrawingsAndInsertQrCodes(qrCodeFolderPath);
+            GetDrawingsAndInsertQrCodes(qrCodeFolderPath, data);
+        }
+
+        private static void CreateQrCode(string partMark, PrismProjectData data, string ifcPath)
+        {
+            try
+            {
+                string urlPath = CreateUrlPathFromPart(partMark, data);
+                GenerateAndSaveQrCode(urlPath, Path.Combine(ifcPath, partMark + ".png"));
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to create QR code: {ex.Message}");
+            }
+        }
+
+        public static void GetDrawingsAndInsertQrCodes(string qrCodeFolderPath, PrismProjectData data)
+        {
+            DrawingHandler drawingHandler = new DrawingHandler();
+
+            if (drawingHandler.GetConnectionStatus())
+            {
+                IEnumerable<int> drawingNos = Tekla.Structures.DrawingInternal.Operation.GetDrawingsBySelectedParts(true, true);
+                foreach (var no in drawingNos)
+                {
+                    var id = new Identifier(no);
+                    var drawing = Tekla.Structures.DrawingInternal.Operation.GetDrawing(id);
+                    if (drawing is AssemblyDrawing assDrawing)
+                    {
+                        try
+                        {
+                            assDrawing.Select();
+                            string sanitizedMark = assDrawing.Mark.Replace(".", "").Replace("[", "").Replace("]", "");
+                            InsertCode(assDrawing, qrCodeFolderPath, sanitizedMark, data);
+                        }
+                        catch (Exception ex)
+                        {
+                            // Log the exception or handle it accordingly
+                            Console.WriteLine($"Error processing drawing {id}: {ex.Message}");
+                        }
+                    }
+                }
+            }
+        }
+
+        private static Text HyperlinkText(ContainerView sheet, string inputText)
+        {            
+            Text myText = new Text(sheet, new Point(3.146, 220), inputText);
+
+            myText.Attributes.Font.Height = 2.0;
+            myText.Attributes.Font.Name = "Arial"; // Set font
+            myText.Attributes.Font.Color = DrawingColors.Blue; // Set color
+            myText.Attributes.Font.Bold = false;
+            myText.Attributes.Font.Italic = false;
+            myText.Attributes.Angle = 90;
+            myText.Attributes.Frame.Type = FrameTypes.Line;
+            myText.Attributes.Frame.Color = DrawingColors.Blue;
+            myText.Attributes.PreferredPlacing = PreferredMarkPlacingTypes.PointPlacingType();
+            return myText;
         }
 
         private static string CreateUrlPathFromPart(string partMark, PrismProjectData data)
@@ -35,32 +100,53 @@ namespace Prism
             return $@"https://devtest.severfield.com:44348/?fileName={projectNumber}%5CIFC%5C{partMark}.ifc";
         }
 
-        private static void CreateQrCode(string partMark, PrismProjectData data, string ifcPath)
-        {           
-            try
-            {
-                string urlPath = CreateUrlPathFromPart(partMark, data);
-                GenerateAndSaveQrCode(urlPath, Path.Combine(ifcPath, partMark + ".png"));
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Failed to create QR code: {ex.Message}");
-            }
-        }
-
         private static void GenerateAndSaveQrCode(string url, string filePath)
         {
             QRCodeGenerator qrGenerator = new QRCodeGenerator();
             QRCodeData qrCodeData = qrGenerator.CreateQrCode(url, QRCodeGenerator.ECCLevel.Q);
             QRCode qrCode = new QRCode(qrCodeData);
-            qrCode.GetGraphic(20).Save(filePath, ImageFormat.Png);
+
+            using (Bitmap qrCodeImage = qrCode.GetGraphic(20))
+            using (Bitmap logo = new Bitmap(Resources.SeverS))
+            {
+                int logoSize = qrCodeImage.Width / 5;
+                int logoX = (qrCodeImage.Width - logoSize) / 2;
+                int logoY = (qrCodeImage.Height - logoSize) / 2;
+
+                using (Graphics graphics = Graphics.FromImage(qrCodeImage))
+                {
+                    graphics.DrawImage(logo, logoX, logoY, logoSize, logoSize);
+                }
+
+                qrCodeImage.Save(filePath, ImageFormat.Png);
+            }
         }
 
-        private static (Point, Size) GetImageProperties(Drawing drawing)
+        private static void InsertCode(Drawing drawing, string qrCodeFolderPath, string partMark, PrismProjectData data)
+        {
+            string codePath = Path.Combine(qrCodeFolderPath, partMark + ".png");
+            string shortCodePath = Path.Combine(".\\Prism Packages\\QR Codes", partMark + ".png");
+
+            if (!File.Exists(codePath)) return;
+
+            ContainerView sheet = drawing.GetSheet();
+
+            // Get the image size and insertion point based on drawing
+            (Point insertionPoint, Size imageSize) = GetImageProperties(sheet);
+
+            // Create an image object
+            Image qrImage = new Image(sheet, insertionPoint, imageSize, shortCodePath);
+            qrImage.Attributes.Scaling = EmbeddedObjectScalingOptions.ScaleToFit;
+            // Insert the image into the drawing
+            if (qrImage.Insert() && HyperlinkText(sheet, "Link - " + CreateUrlPathFromPart(partMark, data)).Insert())
+                drawing.CommitChanges();
+        }
+
+        private static (Point, Size) GetImageProperties(ContainerView sheet)
         {
             // Retrieve the width and height of the drawing's sheet
-            double width = drawing.GetSheet().Width;
-            double height = drawing.GetSheet().Height;
+            double width = sheet.Width;
+            double height = sheet.Height;
 
             // Initialize placeholders for insertion point and image size
             Point insertionPoint = new Point(100, 100, 0); // Default
@@ -69,77 +155,27 @@ namespace Prism
             // Define conditions for each drawing size
             if (width == 1152 && height == 821) // A0
             {
-                insertionPoint = new Point(859, 5, 0);
-                imageSize = new Size(50, 50);
+                insertionPoint = new Point(1041.5, 25.5, 0);
+                imageSize = new Size(32.2495, 29.7453);
             }
             else if (width == 804 && height == 557) // A1
             {
-                insertionPoint = new Point(511, 5, 0);
-                imageSize = new Size(50, 50);
+                insertionPoint = new Point(693.5, 25.5, 0);
+                imageSize = new Size(32.2495, 29.7453);
             }
             else if (width == 584 && height == 410) // A2
             {
-                insertionPoint = new Point(291, 5, 0);
-                imageSize = new Size(50, 50);
+                insertionPoint = new Point(473.5, 25.5, 0);
+                imageSize = new Size(32.2495, 29.7453);
             }
             else if (width == 410 && height == 287) // A3
             {
-                insertionPoint = new Point(243, 61, 0);
-                imageSize = new Size(33, 33);
+                insertionPoint = new Point(299.5, 25.5, 0);
+                imageSize = new Size(32.2495, 29.7453);
             }
 
             // Return both the insertion point and size as a tuple
             return (insertionPoint, imageSize);
-        }
-
-        private static void InsertCode(Drawing drawing, string qrCodeFolderPath, string partMark)
-        {            
-            string codePath = Path.Combine(qrCodeFolderPath, partMark + ".png");
-            string shortCodePath = Path.Combine(".\\Prism Packages\\QR Codes" , partMark + ".png");
-
-            if (!File.Exists(codePath)) return;
-
-            // Get the image size and insertion point based on drawing
-            (Point insertionPoint, Size imageSize) = GetImageProperties(drawing);
-                       
-            // Create an image object
-            Image qrImage = new Image(drawing.GetSheet(), insertionPoint, imageSize, shortCodePath);
-            qrImage.Attributes.Scaling = EmbeddedObjectScalingOptions.ScaleToFit;
-            // Insert the image into the drawing
-            if (qrImage.Insert())
-                drawing.CommitChanges();
-        }
-
-        public static void GetDrawingsAndInsertQrCodes(string qrCodeFolderPath)
-        {
-            DrawingHandler drawingHandler = new DrawingHandler();
-
-            if (drawingHandler.GetConnectionStatus())
-            {
-                //Drawing drawing = drawingHandler.GetActiveDrawing();
-
-                var lsi = GetDrawingList();
-                foreach (Drawing drawing in lsi)
-                {
-                    if(drawing is AssemblyDrawing assDrawing)
-                    {
-                        drawing.Select();
-                        InsertCode(drawing, qrCodeFolderPath, drawing.Mark.Replace(".", "").Replace("[", "").Replace("]", "")); 
-                    }           
-                }
-            }
-        }
-
-        private static List<Drawing> GetDrawingList()
-        {
-            List<Drawing> drawings = new List<Drawing>();
-            IEnumerable<int> drawingNos = Tekla.Structures.DrawingInternal.Operation.GetDrawingsBySelectedParts(true, true);
-            foreach (var no in drawingNos)
-            {
-                var id = new Identifier(no);
-                drawings.Add(Tekla.Structures.DrawingInternal.Operation.GetDrawing(id));
-            }
-            return drawings;
         }
     }
 }

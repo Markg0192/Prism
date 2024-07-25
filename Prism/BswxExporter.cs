@@ -22,8 +22,7 @@ namespace Prism
         private static bool RunBswxExport(ArrayList inputList, string myFolder, PrismProjectData modelData, string phaseNumber,
             string issueNumber, StageTypes stageType)
         {
-           ModelModifiers.HideOrRestoreTekla(7);
-           ModelModifiers.HideOrRestoreTekla(7);
+            ModelModifiers.HideOrRestoreTekla(7);
             Component bimRevExp = new Component();
             bimRevExp.Name = "BIMREVIEW Export";
             bimRevExp.Number = -100000;

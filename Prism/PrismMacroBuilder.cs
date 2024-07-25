@@ -66,7 +66,7 @@ namespace Prism
             TeklaStructuresSettings.GetAdvancedOption("XS_MACRO_DIRECTORY", ref macrodir);
             var dir = macrodir.Split(';')[0];
 
-            var writer = new StreamWriter(dir + $@"\modeling\{Constants.ForceFabsecNumber}");
+            var writer = new StreamWriter(dir + $@"\modeling\{Constants.NumberSelectedPartsMacro}");
             var macro =
                         "#pragma warning disable 1633 // Unrecognized #pragma directive" + Environment.NewLine +
                         "#pragma reference \"Tekla.Macros.Wpf.Runtime\"" + Environment.NewLine +
@@ -85,6 +85,15 @@ namespace Prism
                         "            }" + Environment.NewLine +
                         "        }" + Environment.NewLine +
                         "    }";
+            writer.Write(macro);
+            writer.Close();
+
+            Operation.RunMacro(Constants.NumberSelectedPartsMacro);
+
+            while (Operation.IsMacroRunning()) // Wait until macro for selecting drawings in the document manager is complete before moving on
+            {
+                System.Threading.Tasks.Task.Delay(10);
+            }
         }
 
         public static void FabsecAssignNumber(string prefix, string prelim)

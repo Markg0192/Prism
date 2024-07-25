@@ -17,6 +17,7 @@ using Application = System.Windows.Forms.Application;
 using Microsoft.Win32;
 using System.Linq;
 using Tekla.Structures;
+using static QRCoder.Base64QRCode;
 
 namespace Prism
 {
@@ -278,14 +279,13 @@ namespace Prism
         {
             StartFunction();
 
-            try
-            {
-                int checker = Directory.GetFiles("BogusPath").Length;
-            }
-            catch (Exception ex)
-            {
-                EndWithException(ex); return;
-            }
+          //  ModelModifiers.PerformNumbering();
+
+            ReportManager repoman = new ReportManager(_projectData, "100", "200");
+
+            _selectedObjects = new SelectedObjects(StageTypes.FAB, repoman.PhaseNum, repoman.IssueNum);
+
+            QrCodeGenerator.ApplyQrCode(_selectedObjects.PrismParts, _projectData, repoman.Folders.QrCodePath);
 
 
             // MovePackToDirectory("C:\\TeklaStructuresModels2023\\Sandbox\\Prism Packages\\C1991-120-FAB-ISSUE01");
@@ -384,9 +384,16 @@ namespace Prism
             bool boltOrderAdded = false;
             await Task.Run(() => FabMisc.FabMiscOp(_model, txt_SiteDate.Text, _selectedObjects, runSeversafe, myReportManager, divisionNo, _projectData, runChangeManager, out boltOrderAdded));
 
-            if (!CheckNcCreation(myReportManager, totalNcRequired, out int numberOfFilesCreated))
+            if (!CheckNcCreation(myReportManager, totalNcRequired, out int numberOfFilesCreated, out HashSet<string> uniqueFiles))
             {
-                PrismWarnings.NcDataCreationFailed();
+                // Get files from the comparison folder
+                HashSet<string> comparisonFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                AddFilesFromFolder(myReportManager.Folders.NcPath, comparisonFiles);
+
+                // Get the list of files that exist in the unique set but not in the comparison folder
+                List<string> filesNotInComparisonFolder = uniqueFiles.Except(comparisonFiles).ToList();
+
+                PrismWarnings.NcDataCreationFailed(filesNotInComparisonFolder);
                 Logging.NCFailed(_projectData.ProjNumberAndName, phaseNumber.Text, issueNum, TeklaStructuresInfo.GetCurrentProgramVersion(), myReportManager.Folders.NcPath, totalNcRequired, numberOfFilesCreated);
             }
             else
@@ -517,7 +524,7 @@ namespace Prism
             }
         }
 
-        private bool CheckNcCreation(ReportManager reportManager, int totalNcRequired, out int numberOfFilesCreated)
+        private bool CheckNcCreation(ReportManager reportManager, int totalNcRequired, out int numberOfFilesCreated, out HashSet<string> uniqueFiles)
         {
             // Get the location of the folder to search
             string fabPackageLocation = reportManager.Folders.FabPath;
@@ -526,7 +533,36 @@ namespace Prism
             string fileToCheck = fabPackageLocation + "\\NC";
 
             numberOfFilesCreated = Directory.Exists(fileToCheck) ? Directory.GetFiles(fileToCheck).Length : 0;
-            return numberOfFilesCreated == totalNcRequired;
+
+            // Get files from the folders
+            uniqueFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            AddFilesFromFolder(reportManager.Folders.FabPath + "\\ASS", uniqueFiles);
+            AddFilesFromFolder(reportManager.Folders.FabPath + "\\PRT", uniqueFiles);
+            AddFilesFromFolder(reportManager.Folders.FabPath + "\\FIT", uniqueFiles);
+
+            // Count the unique files
+            return uniqueFiles.Count == numberOfFilesCreated;
+        }
+
+        static void AddFilesFromFolder(string folderPath, HashSet<string> uniqueFiles)
+        {
+            if (Directory.Exists(folderPath))
+            {
+                var files = Directory.GetFiles(folderPath);
+                foreach (var file in files)
+                {
+                    string fileName = Path.GetFileNameWithoutExtension(file);
+
+                    // Split by dash and take the first part, then remove any remaining file extension
+                    string baseFileName = fileName.Contains('-') ? fileName.Split('-')[0] : fileName.Split('.')[0];
+                    uniqueFiles.Add(baseFileName);
+                }
+            }
+            else
+            {
+                Console.WriteLine($"Folder does not exist: {folderPath}");
+            }
         }
 
         private void GetPhaseAndIssueNumber(out string phaseNum, out string issueNum, out bool runChangeManager)
@@ -605,6 +641,7 @@ namespace Prism
         {
             Cursor = Cursors.AppStarting;
             flowLayoutPanel1.Enabled = false;
+            ModelModifiers.ResetWorkPlane(_model);
         }
 
         private void EndFunction(int cancelledOrComplete, bool isOmit = false) //0 = cancelled 1 = Complete
@@ -633,6 +670,8 @@ namespace Prism
 
             Prism.Properties.Settings.Default.UniqueId = key;
             Prism.Properties.Settings.Default.Save();
+
+            
             //if webservice is a succes save the key
             if (!CheckModelConnection()) return;
 

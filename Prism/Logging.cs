@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Tekla.Structures.Drawing;
-using Tekla.Structures.DrawingInternal;
 using Tekla.Structures.Model;
-//Test lineaa
 
 namespace Prism
 {

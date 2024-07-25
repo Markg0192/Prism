@@ -91,11 +91,11 @@ namespace Prism
             CreateOKForm(notUpToDateMessage, notUpToDateTitle);
         }
 
-        public static void NcDataCreationFailed()
+        public static void NcDataCreationFailed(List<string> missingFiles)
         {
             string notUpToDateMessage = $"NC Data creation error:\r\rThe expected number of NC files has not been created, please check the NC files for discrepancies.";
             const string notUpToDateTitle = "No NC found";
-            CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+            CreateOkWithReportForm(notUpToDateMessage, notUpToDateTitle, missingFiles);
         }
 
         public static void CantFindAdvancedSettings()
@@ -600,6 +600,13 @@ namespace Prism
         private static void CreateOkWithReportForm(string message, string title, List<PrismPart> failedParts, string standardPartMessage)
         {
             OkWithReportForm okForm = new OkWithReportForm(message, title, failedParts, standardPartMessage);
+            okForm.TopMost = true;
+            okForm.ShowDialog();
+        }
+
+        private static void CreateOkWithReportForm(string message, string title, List<string> failedParts)
+        {
+            OkWithReportForm okForm = new OkWithReportForm(message, title, failedParts, "");
             okForm.TopMost = true;
             okForm.ShowDialog();
         }
