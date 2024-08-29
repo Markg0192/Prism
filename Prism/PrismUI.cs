@@ -18,6 +18,7 @@ using Microsoft.Win32;
 using System.Linq;
 using Tekla.Structures;
 using static QRCoder.Base64QRCode;
+using System.IO.Packaging;
 
 namespace Prism
 {
@@ -279,13 +280,35 @@ namespace Prism
         {
             StartFunction();
 
-          //  ModelModifiers.PerformNumbering();
+ ReportManager repoman = new ReportManager(_projectData, "100", "01");
+            repoman.Folders.CreateFabFolders();
 
-            ReportManager repoman = new ReportManager(_projectData, "100", "200");
+_selectedObjects = new SelectedObjects(StageTypes.FAB, repoman.PhaseNum, repoman.IssueNum);
+       /*     IFCExporter.ExportIndividualIFC(_selectedObjects, repoman.Folders.IfcPath, "");*/
+            //  ModelModifiers.PerformNumbering();
 
-            _selectedObjects = new SelectedObjects(StageTypes.FAB, repoman.PhaseNum, repoman.IssueNum);
+           
+        /*    string packType = "Orders\\Material";
+            string serverLocation = $@"\\sfrplc.local\public\Do Issues\{repoman.ProjectData.ProjNumber}\{repoman.PhaseNum}\{packType}";
 
-            QrCodeGenerator.ApplyQrCode(_selectedObjects.PrismParts, _projectData, repoman.Folders.QrCodePath);
+            CopyToServer(repoman.Folders.MatPath, serverLocation);
+
+            repoman = new ReportManager(_projectData, "100", "02");
+            packType = "Orders\\Material";
+            serverLocation = $@"\\sfrplc.local\public\Do Issues\{repoman.ProjectData.ProjNumber}\{repoman.PhaseNum}\{packType}";
+
+            CopyToServer(repoman.Folders.MatPath, serverLocation);
+
+            repoman = new ReportManager(_projectData, "100", "01");
+            packType = "Orders\\Bolts";
+            serverLocation = $@"\\sfrplc.local\public\Do Issues\{repoman.ProjectData.ProjNumber}\{repoman.PhaseNum}\{packType}";
+
+            CopyToServer(repoman.Folders.BoltPath, serverLocation);*/
+
+
+            // 
+
+           QrCodeGenerator.ApplyQrCode(_selectedObjects.PrismParts, _projectData, repoman.Folders.QrCodePath);
 
 
             // MovePackToDirectory("C:\\TeklaStructuresModels2023\\Sandbox\\Prism Packages\\C1991-120-FAB-ISSUE01");
@@ -302,6 +325,62 @@ namespace Prism
              IFCExporter.ExportIndividualIFC(_selectedObjects, fm.IfcPath, "");*/
 
             EndFunction(1);
+        }
+
+        private bool CopyToServer(string sourceDir, string serverLocation)
+        {
+            if (!Directory.Exists(sourceDir)) //check that it exists
+            {
+                PrismWarnings.DirectoryCannotBeReached(sourceDir); //if it doesn't tell the user and quit
+                return false;
+            }
+            else
+            { 
+                CopyDirectory2(sourceDir, serverLocation);
+            }
+            return true;
+        }
+
+        private void CopyDirectory2(string sourceDir, string destDir)
+        {
+            // Get the name of the source directory
+            string sourceDirectoryName = Path.GetFileName(sourceDir.TrimEnd(Path.DirectorySeparatorChar));
+
+            // Combine the destination directory with the source directory name
+            string newDestDir = Path.Combine(destDir, sourceDirectoryName);
+
+            // Check if the destination directory already exists
+            if (Directory.Exists(newDestDir))
+            {
+                // Show a message box to the user to ask if they want to replace the existing directory
+                DialogResult result = MessageBox.Show(this, "The directory already exists. Do you want to replace it?", "Directory Exists", MessageBoxButtons.YesNo);
+
+                if (result == DialogResult.No)
+                {
+                    // User chose not to replace the directory, so stop the operation
+                    return;
+                }
+
+                // If the user chooses Yes, you can optionally delete the existing directory before creating the new one
+                Directory.Delete(newDestDir, true);
+            }
+
+            // Create the destination directory
+            Directory.CreateDirectory(newDestDir);
+
+            // Copy all the files from the source directory to the destination directory
+            foreach (string file in Directory.GetFiles(sourceDir))
+            {
+                string destFile = Path.Combine(newDestDir, Path.GetFileName(file));
+                File.Copy(file, destFile, true);
+            }
+
+            // Copy all the subdirectories from the source directory to the destination directory
+            foreach (string directory in Directory.GetDirectories(sourceDir))
+            {
+                string destDirectory = Path.Combine(newDestDir, Path.GetFileName(directory));
+                CopyDirectory2(directory, destDirectory);
+            }
         }
 
         private void EndWithException(Exception ex)
@@ -602,6 +681,7 @@ namespace Prism
                 _selectedObjects = new SelectedObjects(stageType, myReportManager.PhaseNum, myReportManager.IssueNum); // we reset selected objects here (because we just changed the selection)
                 myReportManager.CreateMaterialReports(_selectedObjects, orderType, stageType);
             }
+            else
             {
                 ModelModifiers.AddPrelimMarks(_selectedObjects, _projectData);
                 myReportManager.CreateMaterialReports(_selectedObjects, orderType, stageType);

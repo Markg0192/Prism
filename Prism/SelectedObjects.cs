@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using Tekla.Structures.Drawing;
 using Tekla.Structures.Model;
 using static Prism.Enums;
+using static Tekla.Structures.Filtering.Categories.PartFilterExpressions;
 using ModelObject = Tekla.Structures.Model.ModelObject;
 using Operation = Tekla.Structures.Model.Operations.Operation;
 using Part = Tekla.Structures.Model.Part;
@@ -36,7 +37,8 @@ namespace Prism
             Moe = new Tekla.Structures.Model.UI.ModelObjectSelector().GetSelectedObjects();
             ProcessModelObjects(stageType, phaseNum, issueNum, toolStrip, statusLabel);
 
-            PartWeight = Math.Round(PartWeight / 1000, 3);
+            MainPartWeight = Math.Round(MainPartWeight / 1000, 3);
+            FittingWeight = Math.Round(FittingWeight / 1000, 3);
         }
 
         public double SmallestX = 100000000;
@@ -50,7 +52,10 @@ namespace Prism
         public List<PrismBoltGroup> PrismBoltGroups = new List<PrismBoltGroup>();
 
         public string ErrorMessage { get; set; }
-        public double PartWeight { get; set; }
+
+        public double MainPartWeight { get; set; }
+        public double FittingWeight { get; set; }
+
         public bool NumbersUpToDate { get; set; }
         public bool SeversafePresent = false;
         public List<string> MyMarks { get; set; }
@@ -79,6 +84,16 @@ namespace Prism
         public List<PrismPart> GetFabsecParts()
         {
             return PrismParts.Where(part => part.IsFabsec).ToList();
+        }
+
+        public List<PrismPart> GetPartsWithStartNumberError()
+        {
+            return PrismParts.Where(part => part.StartNumberDoesntMatch).ToList();
+        }
+
+        public List<PrismPart> GetPartsWithPhaseNotMatchingError()
+        {
+            return PrismParts.Where(part => part.PhaseDoesntMatchMain).ToList();
         }
 
         public List<PrismPart> GetNonFabsecParts()
@@ -195,7 +210,7 @@ namespace Prism
 
             PrismPart myPrismPart = CategorizeAndProcessPart(myPart, isSeversafe);
 
-            UpdatePartWeight(myPart);
+            UpdatePartWeight(myPrismPart);
 
             AddPartMark(myPart);
 
@@ -220,12 +235,15 @@ namespace Prism
             return myPrismPart;
         }
 
-        private void UpdatePartWeight(Part myPart)
+        private void UpdatePartWeight(PrismPart myPart)
         {
-            double weight = 0;
-            if (myPart.GetReportProperty(ModelUDA.Weight(), ref weight))
+            if (!new[] { "PLT", "FLT", "RSA" }.Any(myPart.Profile.Contains)) //it is not a fitting
             {
-                PartWeight += weight;
+                MainPartWeight += myPart.Weight;
+            }
+            else
+            {
+                FittingWeight += myPart.Weight;
             }
         }
 
@@ -236,11 +254,9 @@ namespace Prism
 
         private async void ProcessAssembly(PrismPart myPart, string phaseNum, string issueNum)
         {
-            Assembly assembly = myPart.Part.GetAssembly();
-            if (assembly.GetMainPart().Identifier.GUID == myPart.Part.Identifier.GUID)
+            if (myPart.IsMainPart)
             {
-                myPart.IsMainPart = true;
-                var boltsFromAssembly = await GetBoltsFromAssemblyAsync(assembly);
+                var boltsFromAssembly = await GetBoltsFromAssemblyAsync(myPart.Assembly);
                 if (boltsFromAssembly != null)
                 {
                     var prismBoltGroupsForAssembly = boltsFromAssembly

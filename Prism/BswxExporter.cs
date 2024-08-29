@@ -4,7 +4,6 @@ using System.Collections;
 using System.Windows.Automation;
 using static Prism.Enums;
 using Tekla.Structures.Model;
-using Task = System.Threading.Tasks.Task;
 
 namespace Prism
 {

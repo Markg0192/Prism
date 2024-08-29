@@ -340,16 +340,9 @@ namespace Prism
 
         public static async void SelectDrawingsInDocManager(List<PrismPart> selectedParts)
         {
-            PrismMacroBuilder.DrawingOperations();
-
             if (selectedParts != null) selectedParts.SelectParts();
 
-            Operation.RunMacro(Constants.DrawingOperation);
-
-            while (Operation.IsMacroRunning()) // Wait until macro for selecting drawings in the document manager is complete before moving on
-            {
-                await System.Threading.Tasks.Task.Delay(10);
-            }
+            await PrismMacroBuilder.DrawingOperations();    
         }
 
         private static void TextToPDF(string folderPath)

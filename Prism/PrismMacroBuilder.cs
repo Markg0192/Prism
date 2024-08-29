@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 using Tekla.Structures;
 using Tekla.Structures.Model.Operations;
 
@@ -216,8 +217,6 @@ namespace Prism
             }
         }
 
-
-
         public static void RefreshDrawings()
         {
             var macrodir = "";
@@ -245,7 +244,60 @@ namespace Prism
             }
         }
 
-        public static bool DrawingOperations()
+        public static async Task<bool> DrawingOperations()
+        {
+            var macrodir = "";
+            TeklaStructuresSettings.GetAdvancedOption("XS_MACRO_DIRECTORY", ref macrodir);
+            var dir = macrodir.Split(';')[0];
+            var filePath = Path.Combine(dir, @"modeling", Constants.DrawingOperation);
+
+            if (!File.Exists(filePath))
+            {
+                var macro =
+                    "#pragma warning disable 1633 // Unrecognized #pragma directive" + Environment.NewLine +
+                    "#pragma reference \"Tekla.Macros.Wpf.Runtime\"" + Environment.NewLine +
+                    "#pragma reference \"Tekla.Macros.Runtime\"" + Environment.NewLine +
+                    "#pragma warning restore 1633 // Unrecognized #pragma directive" + Environment.NewLine +
+                    "" + Environment.NewLine +
+                    "namespace UserMacros" + Environment.NewLine +
+                    "{" + Environment.NewLine +
+                    "    public sealed class Macro" + Environment.NewLine +
+                    "    {" + Environment.NewLine +
+                    "        [Tekla.Macros.Runtime.MacroEntryPointAttribute()]" + Environment.NewLine +
+                    "        public static void Run(Tekla.Macros.Runtime.IMacroRuntime runtime)" + Environment.NewLine +
+                    "        {" + Environment.NewLine +
+                    "            Tekla.Macros.Wpf.Runtime.IWpfMacroHost wpf = runtime.Get<Tekla.Macros.Wpf.Runtime.IWpfMacroHost>();" + Environment.NewLine +
+                    "            wpf.InvokeCommand(\"CommandRepository\", \"Drawing.DrawingList\");" + Environment.NewLine +
+                    "            wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_ShowAllDocuments\").As.Button.Invoke();" + Environment.NewLine +
+                    // "            wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_CategoryList\").As.Selector.DoSelection.With(\"albl_single_part_drawings\").Invoke();" + Environment.NewLine +
+                    // "            wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_CategoryList\").As.Selector.DoSelection.With(\"albl_single_part_drawings\").With(\"albl_Assembly_drawings\").Invoke();" + Environment.NewLine +
+                    "            wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_ButtonSelectDrawings\").As.Button.Invoke();" + Environment.NewLine +
+                    "        }" + Environment.NewLine +
+                    "    }" + Environment.NewLine +
+                    "}";
+
+                // Use StreamWriter asynchronously
+                using (var writer = new StreamWriter(filePath))
+                {
+                    await writer.WriteAsync(macro);
+                }
+
+                // Run the macro
+                Operation.RunMacro(Constants.DrawingOperation);
+
+                // Wait asynchronously until the macro operation is complete
+                while (Operation.IsMacroRunning())
+                {
+                    await Task.Delay(10);
+                }
+
+                return true;
+            }
+            return false;
+        }
+
+
+   /*     public static bool DrawingOperations()
         {
             var macrodir = "";
             TeklaStructuresSettings.GetAdvancedOption("XS_MACRO_DIRECTORY", ref macrodir);
@@ -278,69 +330,20 @@ namespace Prism
                                "}";
 
                 writer.Write(macro);
+
                 writer.Close();
+
+                Operation.RunMacro(Constants.DrawingOperation);
+
+                while (Operation.IsMacroRunning()) // Wait until macro for selecting drawings in the document manager is complete before moving on
+                {
+                   System.Threading.Tasks.Task.Delay(10);
+                }
+
                 return true;
             }
             return false;
-        }
-
-        public static void PrintSelectedASSDrawings(string fileToPrintTo, int drawingCount)
-        {
-            string printLocation = $".\\\\{fileToPrintTo}";
-            var macrodir = "";
-            TeklaStructuresSettings.GetAdvancedOption("XS_MACRO_DIRECTORY", ref macrodir);
-            var dir = macrodir.Split(';')[0];
-
-            var writer = new StreamWriter(dir + $@"\modeling\{Constants.DrawingPrinterMacro}");
-            var macro =
-                        "#pragma warning disable 1633 // Unrecognized #pragma directive" + Environment.NewLine +
-                        "#pragma reference \"Tekla.Macros.Wpf.Runtime\"" + Environment.NewLine +
-                        "#pragma reference \"Tekla.Macros.Runtime\"" + Environment.NewLine +
-                        "#pragma warning restore 1633 // Unrecognized #pragma directive" + Environment.NewLine +
-                        Environment.NewLine +
-                        "namespace UserMacros" + Environment.NewLine +
-                        "    {" + Environment.NewLine +
-                        "        public sealed class Macro" + Environment.NewLine +
-                        "        {" + Environment.NewLine +
-                        "            [Tekla.Macros.Runtime.MacroEntryPointAttribute()]" + Environment.NewLine +
-                        "            public static void Run(Tekla.Macros.Runtime.IMacroRuntime runtime)" + Environment.NewLine +
-                        "            {" + Environment.NewLine +
-                        "                Tekla.Macros.Wpf.Runtime.IWpfMacroHost wpf = runtime.Get<Tekla.Macros.Wpf.Runtime.IWpfMacroHost>();" + Environment.NewLine +
-
-                        "                wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_ShowAllDocuments\").As.Button.Invoke();" + Environment.NewLine +
-                        "                wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_ButtonSelectDrawings\").As.Button.Invoke();" + Environment.NewLine +
-                        "                wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_CategoryList\").As.Selector.DoSelection.With(\"albl_Assembly_drawings\").Invoke();" + Environment.NewLine +
-                       $"                wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_DataGridControl\").As.DataGrid.NewSelection.WithRange(0, {drawingCount}).Invoke();" + Environment.NewLine +
-                        "                wpf.InvokeCommand(\"CommandRepository\", \"Common.PrintDrawings\");" + Environment.NewLine +
-                        "                wpf.View(\"DPMPrinterFeature.DPMPrinterViewWindow\").Find(\"AID_PDFPD_LoadSaveCombo\").As.Selector.Select(0);" + Environment.NewLine +
-
-                        "                wpf.View(\"DPMPrinterFeature.DPMPrinterViewWindow\").Find(\"AID_PDFPD_SettingsTabControl\", \"AID_PDFPD_ParentStackPanel\", \"AID_PDFPD_FileLocationPanel\", \"AID_PDFPD_FileLocation\").As.TextBox.SetText(\"" + printLocation + "\\\\ASS\");" + Environment.NewLine +
-
-                        "                wpf.View(\"DPMPrinterFeature.DPMPrinterViewWindow\").Find(\"AID_PDFPD_SettingsTabControl\", \"AID_PDFPD_ParentStackPanel\", \"AID_PDFPD_PrintTargetStackPanel\", \"AID_PDFPD_PDFRadio\").As.ToggleButton.State.SetChecked();" + Environment.NewLine +
-                        "                wpf.View(\"DPMPrinterFeature.DPMPrinterViewWindow\").Find(\"AID_PDFPD_SettingsTabControl\", \"AID_PDFPD_ParentStackPanel\", \"AID_PDFPD_OrientationPanel\", \"AID_PDFPD_Orientation\").As.Selector.Select(0);" + Environment.NewLine +
-                        "                wpf.View(\"DPMPrinterFeature.DPMPrinterViewWindow\").Find(\"AID_PDFPD_SettingsTabControl\", \"AID_PDFPD_ParentStackPanel\", \"AID_PDFPD_CenterDrawingOnPaper\").As.ToggleButton.State.SetChecked();" + Environment.NewLine +
-                        "                wpf.View(\"DPMPrinterFeature.DPMPrinterViewWindow\").Find(\"AID_PDFPD_SettingsTabControl\", \"AID_PDFPD_ParentStackPanel\", \"AID_PDFPD_ColorPanel\", \"AID_PDFPD_Color\").As.Selector.Select(1);" + Environment.NewLine +
-                        "                wpf.View(\"DPMPrinterFeature.DPMPrinterViewWindow\").Find(\"AID_PDFPD_SettingsTabControl\", \"AID_PDFPD_ParentStackPanel\", \"AID_PDFPD_OutputToSingleFile\").As.ToggleButton.State.SetUnchecked();" + Environment.NewLine +
-                        "                wpf.View(\"DPMPrinterFeature.DPMPrinterViewWindow\").Find(\"AID_PDFPD_SettingsTabControl\", \"AID_PDFPD_ParentStackPanel\", \"AID_PDFPD_OpenFileWhenFinished\").As.ToggleButton.State.SetUnchecked();" + Environment.NewLine +
-                        "                wpf.View(\"DPMPrinterFeature.DPMPrinterViewWindow\").Find(\"AID_PDFPD_SettingsTabControl\", \"AID_PDFPD_ParentStackPanel\", \"AID_PDFPD_OpenFolderWhenFinished\").As.ToggleButton.State.SetUnchecked();" + Environment.NewLine +
-                        "                wpf.View(\"DPMPrinterFeature.DPMPrinterViewWindow\").Find(\"AID_PDFPD_SettingsTabControl\", \"AID_PDFPD_ParentStackPanel\", \"AID_PDFPD_IncludeRevision\").As.ToggleButton.State.SetChecked();" + Environment.NewLine +
-
-                        "                wpf.View(\"DPMPrinterFeature.DPMPrinterViewWindow\").Find(\"AID_PDFPD_PrintButton\").As.Button.Invoke();" + Environment.NewLine +
-                        "                wpf.View(\"DPMPrinterFeature.DPMPrinterViewWindow\").As.Window.Close();" + Environment.NewLine +
-
-                        "            }" + Environment.NewLine +
-                        "        }" + Environment.NewLine +
-                        "    }";
-            writer.Write(macro);
-            writer.Close();
-
-            Operation.RunMacro(Constants.DrawingPrinterMacro);
-
-            while (Operation.IsMacroRunning()) // Wait until macro for selecting drawings in the document manager is complete before moving on
-            {
-                System.Threading.Tasks.Task.Delay(10);
-            }
-        }
+        }*/
 
         public static void IssueAndLockStampOn()
         {
@@ -418,6 +421,8 @@ namespace Prism
             TeklaStructuresSettings.GetAdvancedOption("XS_MACRO_DIRECTORY", ref macrodir);
             var dir = macrodir.Split(';')[0];
 
+            string plotFiles = @".\\PlotFiles"; // Use verbatim string literal to directly write .\PlotFiles        
+
             var writer = new StreamWriter(dir + $@"\modeling\{Constants.ClearPrintDialog}");
             var macro =
                         "#pragma warning disable 1633 // Unrecognized #pragma directive" + Environment.NewLine +
@@ -434,8 +439,9 @@ namespace Prism
                         "            {" + Environment.NewLine +
                         "                Tekla.Macros.Wpf.Runtime.IWpfMacroHost wpf = runtime.Get<Tekla.Macros.Wpf.Runtime.IWpfMacroHost>();" + Environment.NewLine +
                         "                wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_DataGridControl\").As.DataGrid.NewSelection.With(0).Invoke();" + Environment.NewLine +
+                        "                wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_DataGridControl\").As.ContextMenu.Find(\"AID_DocMgr_Print\").As.Button.Invoke();" + Environment.NewLine +
                         "                wpf.InvokeCommand(\"CommandRepository\", \"Common.PrintDrawings\");" + Environment.NewLine +
-                        "                wpf.View(\"DPMPrinterFeature.DPMPrinterViewWindow\").Find(\"AID_PDFPD_SettingsTabControl\", \"AID_PDFPD_ParentStackPanel\", \"AID_PDFPD_FileLocationPanel\", \"AID_PDFPD_FileLocation\").As.TextBox.SetText(\"./ \");" + Environment.NewLine +
+                        $"                wpf.View(\"DPMPrinterFeature.DPMPrinterViewWindow\").Find(\"AID_PDFPD_SettingsTabControl\", \"AID_PDFPD_ParentStackPanel\", \"AID_PDFPD_FileLocationPanel\", \"AID_PDFPD_FileLocation\").As.TextBox.SetText(\"{plotFiles}\");" + Environment.NewLine +
                         "                wpf.View(\"DPMPrinterFeature.DPMPrinterViewWindow\").As.Window.Close();" + Environment.NewLine +
                         "                wpf.View(\"DocumentManager.MainWindow\").As.Window.Close();" + Environment.NewLine +
                         "            }" + Environment.NewLine +
