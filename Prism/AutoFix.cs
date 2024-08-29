@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using Tekla.Structures.Geometry3d;
 using Tekla.Structures.Model;
 
@@ -81,25 +80,25 @@ namespace Prism
             PrismWarnings.ErrorsFixed(ModelChecker.MissingExecutionClass.Count);
         }
 
-        public static void AssemblyAndStartNumbers()
+        public static void AssemblyAndStartNumbers(List<PrismPart> parts)
         {
-            foreach (PrismPart p in ModelChecker.StartNumbersDoNotMatch)
+            foreach (PrismPart p in parts)
             {
                 p.Part.AssemblyNumber.StartNumber = p.StartNumber;
                 p.Part.PartNumber.StartNumber = p.StartNumber;
                 p.Part.Modify();
             }
-            PrismWarnings.ErrorsFixed(ModelChecker.StartNumbersDoNotMatch.Count);
+            PrismWarnings.ErrorsFixed(parts.Count);
         }
 
-        public static void PartPhasing()
+        public static void PartPhasing(List<PrismPart> parts)
         {
-            foreach (PrismPart p in ModelChecker.PhasesDoNotMatch)
+            foreach (PrismPart p in parts)
             {
                 p.Part.SetPhase(p.Phase);
                 p.Part.Modify();
             }
-            PrismWarnings.ErrorsFixed(ModelChecker.PhasesDoNotMatch.Count);
+            PrismWarnings.ErrorsFixed(parts.Count);
         }
     }
 }

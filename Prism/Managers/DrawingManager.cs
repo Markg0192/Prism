@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Tekla.Structures.Model;
 using Tekla.Structures.Model.Operations;
@@ -29,7 +30,7 @@ namespace Prism
         public void CreateReportAndGetDrawingInfo(string packagePath)
         {            
             PrismMacroBuilder.SelectDrawings();
-            string teklaReportLocation = Path.Combine(FirmFolderLoc.ReportTemplates(), "PrismDrawing_List.rpt");
+            string teklaReportLocation = "C:\\Sev_Firm_2021\\Reports\\Prism\\PrismDrawing_List.rpt";// Path.Combine(FirmFolderLoc.ReportTemplates(), "PrismDrawing_List.rpt");
             string newReportLocation = Path.Combine(packagePath,  "PrismDrawing_List.xsr");
 
             if (!CreateReportAndWait(teklaReportLocation, newReportLocation)) return;

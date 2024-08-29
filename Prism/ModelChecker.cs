@@ -18,13 +18,16 @@ namespace Prism
         public static List<PrismPart> IncorrectNameAndClass = new List<PrismPart>();
         public static List<PrismPart> MissingExecutionClass = new List<PrismPart>();
         public static List<PrismPart> HasNoFinish = new List<PrismPart>();
-        public static List<PrismPart> StartNumbersDoNotMatch = new List<PrismPart>();
-        public static List<PrismPart> PhasesDoNotMatch = new List<PrismPart>();
-        public static List<PrismPart> PhasesDoNotMatchParts = new List<PrismPart>();
+      //  public static List<PrismPart> StartNumbersDoNotMatch = new List<PrismPart>();
+      //  public static List<PrismPart> PhasesDoNotMatch = new List<PrismPart>();
+      //   public static List<PrismPart> PhasesDoNotMatchParts = new List<PrismPart>();
         public static List<ModelObject> NotOrderedParts = new List<ModelObject>();
         public static List<ModelObject> OrderedParts = new List<ModelObject>();
         public static List<PrismPart> PartsWithoutIntumescentLoading = new List<PrismPart>();
         public static List<PrismPart> IncorrectOrientation = new List<PrismPart>();
+
+        public static int StartNumbersDontMatch = 0;
+        public static int PhasesDontMatch = 0;
 
         public static void BoltThrough2Ply(SelectedObjects selectedObjects)
         {
@@ -58,12 +61,12 @@ namespace Prism
                 ArrayList mySecondaries = myMainPart.Part.GetAssembly().GetSecondaries();
                 foreach (Part mySecondaryPart in mySecondaries)
                 {
-                    GetPartsThatStartNumbersDontMatch(myMainPart.Part, mySecondaryPart);
-                    GetPartsWherePhasesDontMatch(myMainPart.Part, mySecondaryPart);
+                    GetPartsThatStartNumbersDontMatch(myMainPart, mySecondaryPart, selectedObjects);
+                    GetPartsWherePhasesDontMatch(myMainPart, mySecondaryPart, selectedObjects);
                     CheckFittings.GetIncorrectFittings(mySecondaryPart, location);
                 }
             }
-            return CheckForAndActionErrors(userName, selectedObjects.PrismBoltGroups);
+            return CheckForAndActionErrors(userName, selectedObjects.PrismBoltGroups, selectedObjects);
         }
 
         private static List<BoltGroup> GetShearStudBoltGroups(List<BoltGroup> boltGroups)
@@ -106,9 +109,9 @@ namespace Prism
             PartsWithoutIntumescentLoading.Clear();
             OrderedParts.Clear();
             NotOrderedParts.Clear();
-            StartNumbersDoNotMatch.Clear();
-            PhasesDoNotMatch.Clear();
-            PhasesDoNotMatchParts.Clear();
+         //   StartNumbersDoNotMatch.Clear();
+         //   PhasesDoNotMatch.Clear();
+         //   PhasesDoNotMatchParts.Clear();
         }
 
         public static bool MemberOrientationIsCorrect(SelectedObjects selectedObjects, out IgnoreType ignore)
@@ -324,22 +327,24 @@ namespace Prism
             return true;
         }
 
-        private static bool CheckForAndActionErrors(string userName, List<PrismBoltGroup> prismBoltGroups)
+        private static bool CheckForAndActionErrors(string userName, List<PrismBoltGroup> prismBoltGroups, SelectedObjects selectedObjects)
         {
             if (!OrderErrors()) { return false; }
             if (!FinishErrors()) { return false; }
 
-            IgnoreType startNumberError = StartNumbersErrors();
+            IgnoreType startNumberError = StartNumbersErrors(selectedObjects, out List<PrismPart> startNumberErrorParts);
             if (startNumberError == IgnoreType.AutoFix)
             {
-                AutoFix.AssemblyAndStartNumbers();
+                StartNumbersDontMatch = startNumberErrorParts.Count;
+                AutoFix.AssemblyAndStartNumbers(startNumberErrorParts);
             }
             if (startNumberError == IgnoreType.Stop) { return false; }
 
-            IgnoreType phaseMatchError = PhaseMatchErrors();
+            IgnoreType phaseMatchError = PhaseMatchErrors(selectedObjects, out List<PrismPart> phaseErrorParts);
             if (phaseMatchError == IgnoreType.AutoFix)
             {
-                AutoFix.PartPhasing();
+                PhasesDontMatch = phaseErrorParts.Count;
+                AutoFix.PartPhasing(phaseErrorParts);
             }
             if (phaseMatchError == IgnoreType.Stop) { return false; }
 
@@ -381,30 +386,35 @@ namespace Prism
         }
 
 
-        public static IgnoreType PhaseMatchErrors()
+        public static IgnoreType PhaseMatchErrors(SelectedObjects selectedObjects, out List<PrismPart> partsWithError)
         {
-            if (PhasesDoNotMatch.Count != 0)
+            partsWithError = selectedObjects.GetPartsWithPhaseNotMatchingError();
+
+            int errorCount = partsWithError.Count;
+
+            if (errorCount != 0)
             {
-                PrismWarnings.Warning = PhasesDoNotMatch.Count.ToString();
+                PrismWarnings.Warning = errorCount.ToString();
 
-                PrismWarnings.PhasesDontMatch(PhasesDoNotMatch);
+                PrismWarnings.PhasesDontMatch(partsWithError);
 
-                ModelModifiers.SetPartsRed(Convertor.PrismPartsToModelObjects(PhasesDoNotMatchParts));
+                ModelModifiers.SetPartsRed(Convertor.PrismPartsToModelObjects(partsWithError));
 
                 return PrismWarnings.NewIgnoreWarning();
             }
             return IgnoreType.Unspecified;
         }
 
-        public static IgnoreType StartNumbersErrors()
+        public static IgnoreType StartNumbersErrors(SelectedObjects selectedObjects, out List<PrismPart> partsWithError)
         {
-            if (StartNumbersDoNotMatch.Count != 0)
+            partsWithError = selectedObjects.GetPartsWithStartNumberError();
+            if (partsWithError.Count != 0)
             {
-                PrismWarnings.Warning = StartNumbersDoNotMatch.Count.ToString();
+                PrismWarnings.Warning = partsWithError.Count.ToString();
 
-                PrismWarnings.StartNumbersDontMatch(StartNumbersDoNotMatch);
+                PrismWarnings.StartNumbersDontMatch(partsWithError);
 
-                ModelModifiers.SetPartsRed(Convertor.PrismPartsToModelObjects(StartNumbersDoNotMatch));
+                ModelModifiers.SetPartsRed(Convertor.PrismPartsToModelObjects(partsWithError));
 
                 return PrismWarnings.NewIgnoreWarning();
             }
@@ -456,26 +466,26 @@ namespace Prism
             return true;
         }
 
-        public static void GetPartsThatStartNumbersDontMatch(this Part mainPart, Part secondaryPart)
+        public static void GetPartsThatStartNumbersDontMatch(this PrismPart mainPart, Part secondaryPart, SelectedObjects selectedObjects)
         {
-            if (mainPart.AssemblyNumber.StartNumber != secondaryPart.PartNumber.StartNumber)
+            int mainPartNumber = mainPart.Part.AssemblyNumber.StartNumber;
+            if (mainPartNumber != secondaryPart.PartNumber.StartNumber)
             {
-                //ModelPart newPart = new ModelPart(secondaryPart, mainPart.AssemblyNumber.StartNumber);
-                PrismPart newPart = new PrismPart(secondaryPart) { StartNumber = mainPart.AssemblyNumber.StartNumber };
-                StartNumbersDoNotMatch.Add(newPart);
+                PrismPart p = selectedObjects.PrismParts.Find(x => x.Guid == secondaryPart.Identifier.GUID.ToString());
+                p.StartNumberDoesntMatch = true;
+                p.StartNumber = mainPartNumber;
             }
         }
 
-        public static void GetPartsWherePhasesDontMatch(this Part mainPart, Part secondaryPart)
+        public static void GetPartsWherePhasesDontMatch(this PrismPart mainPart, Part secondaryPart, SelectedObjects selectedObjects)
         {
-            mainPart.GetPhase(out Phase mainPartPhase);
             secondaryPart.GetPhase(out Phase secondaryPhase);
 
-            if (mainPartPhase.PhaseNumber != secondaryPhase.PhaseNumber)
+            if(mainPart.Phase.PhaseNumber != secondaryPhase.PhaseNumber)
             {
-                PrismPart p = new PrismPart(secondaryPart) { Phase = mainPartPhase };
-                PhasesDoNotMatch.Add(p);
-                PhasesDoNotMatchParts.Add(new PrismPart(secondaryPart));
+                PrismPart p = selectedObjects.PrismParts.Find(x => x.Guid == secondaryPart.Identifier.GUID.ToString());
+                p.PhaseDoesntMatchMain = true;
+                p.Phase = mainPart.Phase;
             }
         }
 

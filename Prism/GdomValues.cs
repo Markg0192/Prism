@@ -49,7 +49,7 @@ namespace Prism
                  { BeamName, new List<string> { "3" } },
                  { ColumnName, new List<string> { "2", "5" } },
                  { BraceName, new List<string> { "4", "13" } },
-                 { FabsecName, new List<string> { "FabsecClass" } },
+                 { FabsecName, new List<string> { FabsecClass } },
                  { RafterName, new List<string> { "8" } },
                  { PortalRafterName, new List<string> { "8" } },                 
              };

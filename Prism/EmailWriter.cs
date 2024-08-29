@@ -92,6 +92,8 @@ namespace Prism
 
         public static void WriteFabEmail(PrismProjectData projData, SelectedObjects objects, string fabPrefix, string issueNumber, string phaseNumber, string siteDate, string fabPath, bool zipFileCanBeAttached)
         {
+            double fittingsToAssemblyWeightRatio = Math.Round((objects.FittingWeight / objects.MainPartWeight) * 100, 1);
+            double totalWeight = objects.MainPartWeight + objects.FittingWeight;
             ExecuteEmailAction(outlookApp =>
             {
                 MailItem email = (MailItem)outlookApp.CreateItem(OlItemType.olMailItem);
@@ -107,7 +109,9 @@ namespace Prism
                                 $"This fab package contains the following;{_mailNewLine}" +
                                 $"{objects.GetMainParts().Count} Assemblies.{_mailNewLine}" +
                                 $"{objects.PrismParts.Count} Parts.{_mailNewLine}" +
-                                $"{objects.PartWeight} T. {_mailNewLine}" +
+                                $"{_mailNewLine}" +
+                                $"Total weight = {totalWeight}t. {_mailNewLine}" +
+                                $"PLT/RSA weight = {objects.FittingWeight}t ({fittingsToAssemblyWeightRatio}% of total). {_mailNewLine}" +
                                 $"{_mailNewLine}" +
                                 $"Regards,{_mailNewLine}{_mailNewLine}" +
                                 $"{projData.Full}";
@@ -246,7 +250,7 @@ namespace Prism
                                 $"{_mailNewLine}" +
                                 $"{RemoveOrAddMaterial(orderType)}{_mailNewLine}" +
                                 $"{objects.PrismParts.Count} Parts.{_mailNewLine}" +
-                                $"{objects.PartWeight} T. {_mailNewLine}" +
+                                $"{objects.MainPartWeight} + {objects.FittingWeight}t. {_mailNewLine}" +
                                 $"{_mailNewLine}" +
                                 $"{DateRequired(orderType, siteDate)}" +
                                 $"Regards,{_mailNewLine}{_mailNewLine}" +

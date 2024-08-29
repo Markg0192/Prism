@@ -13,7 +13,7 @@ namespace Prism.ButtonOperations
 
             if(!myObjects.PrismParts.ModifyAttributes(stageNumber, projectData, toolStrip, tssl)) { return false; }
             ModelModifiers.RedrawViews();
-            int autoFixCount = ModelChecker.PhasesDoNotMatch.Count + ModelChecker.StartNumbersDoNotMatch.Count;
+            int autoFixCount = ModelChecker.PhasesDontMatch + ModelChecker.StartNumbersDontMatch;
             Logging.LogProgress(projectData.ProjNumberAndName, "Detail 2", autoFixCount, myObjects.GetMainParts().Count);
             return true;
         }
