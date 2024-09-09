@@ -250,7 +250,7 @@ namespace Prism
                                 $"{_mailNewLine}" +
                                 $"{RemoveOrAddMaterial(orderType)}{_mailNewLine}" +
                                 $"{objects.PrismParts.Count} Parts.{_mailNewLine}" +
-                                $"{objects.MainPartWeight} + {objects.FittingWeight}t. {_mailNewLine}" +
+                                $"{objects.MainPartWeight + objects.FittingWeight}t. {_mailNewLine}" +
                                 $"{_mailNewLine}" +
                                 $"{DateRequired(orderType, siteDate)}" +
                                 $"Regards,{_mailNewLine}{_mailNewLine}" +

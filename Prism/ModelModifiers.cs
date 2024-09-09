@@ -660,9 +660,9 @@ namespace Prism
             ModelObjectVisualization.SetTemporaryState(myParts, color);
         }
 
-        public static int ChangeSpecialTag(string newTagString, string phaseNum, string issueNum, out List<ModelObject> objects)
+        public static int ChangeSpecialTag(string newTagString, string phaseNum, string issueNum, Model model, out List<ModelObject> objects)
         {
-            SelectedObjects selectedObjects = new SelectedObjects(StageTypes.Prelim3, phaseNum, issueNum);
+            SelectedObjects selectedObjects = new SelectedObjects("", StageTypes.Prelim3, phaseNum, issueNum, model, false);
             ModifySpecialTag(newTagString, selectedObjects.PrismParts);
             objects = new List<ModelObject>();
             foreach (PrismPart p in selectedObjects.PrismParts)
