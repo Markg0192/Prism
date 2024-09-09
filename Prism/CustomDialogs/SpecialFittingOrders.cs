@@ -18,23 +18,25 @@ namespace Prism.CustomDialogs
         public int orderAction;
         private string phaseNum;
         private string issueNum;
+        private Model _model;
 
-        public SpecialFittingOrders()
+        public SpecialFittingOrders(Model model)
         {
             InitializeComponent();
             CenterToScreen();
             TopMost = true;
+            _model = model;
         }
 
         private void btn_TagSpecial_Click(object sender, EventArgs e)
         {
-            orderAction = ModelModifiers.ChangeSpecialTag("Special", phaseNum, issueNum, out List<ModelObject> objects);
+            orderAction = ModelModifiers.ChangeSpecialTag("Special", phaseNum, issueNum, _model, out List<ModelObject> objects);
             ModelModifiers.SetPartsBlue(objects);
         }
 
         private void btn_RemoveSpecialTag_Click(object sender, EventArgs e)
         {
-            orderAction = ModelModifiers.ChangeSpecialTag("", phaseNum, issueNum, out List<ModelObject> objects);
+            orderAction = ModelModifiers.ChangeSpecialTag("", phaseNum, issueNum, _model, out List<ModelObject> objects);
             ModelModifiers.SetPartsRed(objects);
         }
 
@@ -57,7 +59,7 @@ namespace Prism.CustomDialogs
 
         private void btn_ShowTagged_Click(object sender, EventArgs e)
         {
-            SelectedObjects selectedObjects = new SelectedObjects(StageTypes.Prelim3, phaseNum, issueNum);
+            SelectedObjects selectedObjects = new SelectedObjects("", StageTypes.Prelim3, phaseNum, issueNum, _model, false);
             List<ModelObject> objects = new List<ModelObject>();
             foreach (PrismPart p in selectedObjects.PrismParts)
             {

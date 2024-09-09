@@ -1,7 +1,5 @@
 ﻿using Prism.ExternalService;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Management;
@@ -11,7 +9,7 @@ using System.Windows.Forms;
 
 namespace Prism
 {
-    public static class WebService
+	public static class WebService
     {
         private static SecurityUtils _encoder = new SecurityUtils("Prism"); //The key given here is used for excryption/decryption of information passed between services and apps
         public static WebService1 _service;

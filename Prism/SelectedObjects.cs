@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,7 +10,6 @@ using System.Windows.Forms;
 using Tekla.Structures.Drawing;
 using Tekla.Structures.Model;
 using static Prism.Enums;
-using static Tekla.Structures.Filtering.Categories.PartFilterExpressions;
 using ModelObject = Tekla.Structures.Model.ModelObject;
 using Operation = Tekla.Structures.Model.Operations.Operation;
 using Part = Tekla.Structures.Model.Part;
@@ -17,381 +17,508 @@ using Task = System.Threading.Tasks.Task;
 
 namespace Prism
 {
-    /// <summary>
-    /// The SelecedObjects class gets and stores model objects for our use elsewhere.
-    /// </summary>
-    public class SelectedObjects
-    {
-        private ModelObjectEnumerator Moe;
-        public DrawingHandler MyDrawingHandler;
+	/// <summary>
+	/// The SelecedObjects class gets and stores model objects for our use elsewhere.
+	/// </summary>
+	public class SelectedObjects
+	{
+		private ModelObjectEnumerator Moe;
+		public DrawingHandler MyDrawingHandler;
 
-        public SelectedObjects(StageTypes stageType, string phaseNum, string issueNum, ToolStrip toolStrip = null, ToolStripStatusLabel statusLabel = null)
-        {
-            NumbersUpToDate = true;
-            MyDrawingHandler = new DrawingHandler();
+		public SelectedObjects(string projectPath, StageTypes stageType, string phaseNum, string issueNum, Model model, bool isSpecialUser, ToolStrip toolStrip = null, ToolStripStatusLabel statusLabel = null)
+		{
+			NumbersUpToDate = true;
+			MyDrawingHandler = new DrawingHandler();
 
-            PrismParts = new List<PrismPart>();
+			PrismParts = new List<PrismPart>();
 
-            MyMarks = new List<string>();
+			MyMarks = new List<string>();
 
-            Moe = new Tekla.Structures.Model.UI.ModelObjectSelector().GetSelectedObjects();
-            ProcessModelObjects(stageType, phaseNum, issueNum, toolStrip, statusLabel);
+			bool runNewMethod = false;
 
-            MainPartWeight = Math.Round(MainPartWeight / 1000, 3);
-            FittingWeight = Math.Round(FittingWeight / 1000, 3);
-        }
+			if (isSpecialUser)
+			{
+				runNewMethod = PrismWarnings.TryTheNewSelectionMethod();
+			}
+			if (runNewMethod)
+			{
+				CreatePartListFromReport(projectPath, model, phaseNum, issueNum);
+				UpdatePartWeights(PrismParts);
+			}
+			else
+			{
+				Moe = new Tekla.Structures.Model.UI.ModelObjectSelector().GetSelectedObjects();
+				ProcessModelObjects(stageType, phaseNum, issueNum, toolStrip, statusLabel);
+			}
 
-        public double SmallestX = 100000000;
-        public double SmallestY = 100000000;
-        public double SmallestZ = 100000000;
-        public double BiggestX = -100000000;
-        public double BiggestY = -100000000;
-        public double BiggestZ = -100000000;
+			MainPartWeight = Math.Round(MainPartWeight / 1000, 3);
+			FittingWeight = Math.Round(FittingWeight / 1000, 3);
+		}
 
-        public List<PrismPart> PrismParts { get; set; }
-        public List<PrismBoltGroup> PrismBoltGroups = new List<PrismBoltGroup>();
+		public double SmallestX = 100000000;
+		public double SmallestY = 100000000;
+		public double SmallestZ = 100000000;
+		public double BiggestX = -100000000;
+		public double BiggestY = -100000000;
+		public double BiggestZ = -100000000;
 
-        public string ErrorMessage { get; set; }
+		public List<PrismPart> PrismParts { get; set; }
+		public List<PrismBoltGroup> PrismBoltGroups = new List<PrismBoltGroup>();
 
-        public double MainPartWeight { get; set; }
-        public double FittingWeight { get; set; }
+		public string ErrorMessage { get; set; }
 
-        public bool NumbersUpToDate { get; set; }
-        public bool SeversafePresent = false;
-        public List<string> MyMarks { get; set; }
-        public List<PrismPart> OmittedParts = new List<PrismPart>();
+		public double MainPartWeight { get; set; }
+		public double FittingWeight { get; set; }
 
-        public List<PrismPart> GetNonSeversafeParts()
-        {
-            return PrismParts.Where(part => !part.IsSeversafe).ToList();
-        }
+		public bool NumbersUpToDate { get; set; }
+		public bool SeversafePresent = false;
+		public List<string> MyMarks { get; set; }
+		public List<PrismPart> OmittedParts = new List<PrismPart>();
 
-        public List<PrismPart> GetSeversafeParts()
-        {
-            return PrismParts.Where(part => part.IsSeversafe).ToList();
-        }
+		public List<PrismPart> GetNonSeversafeParts()
+		{
+			return PrismParts.Where(part => !part.IsSeversafe).ToList();
+		}
 
-        public List<PrismPart> GetNonLockedParts()
-        {
-            return PrismParts.Where(part => !part.IsLocked).ToList();
-        }
+		public List<PrismPart> GetSeversafeParts()
+		{
+			return PrismParts.Where(part => part.IsSeversafe).ToList();
+		}
 
-        public List<PrismPart> GetLockedParts()
-        {
-            return PrismParts.Where(part => part.IsLocked).ToList();
-        }
+		public List<PrismPart> GetNonLockedParts()
+		{
+			return PrismParts.Where(part => !part.IsLocked).ToList();
+		}
 
-        public List<PrismPart> GetFabsecParts()
-        {
-            return PrismParts.Where(part => part.IsFabsec).ToList();
-        }
+		public List<PrismPart> GetLockedParts()
+		{
+			return PrismParts.Where(part => part.IsLocked).ToList();
+		}
 
-        public List<PrismPart> GetPartsWithStartNumberError()
-        {
-            return PrismParts.Where(part => part.StartNumberDoesntMatch).ToList();
-        }
+		public List<PrismPart> GetFabsecParts()
+		{
+			return PrismParts.Where(part => part.IsFabsec).ToList();
+		}
 
-        public List<PrismPart> GetPartsWithPhaseNotMatchingError()
-        {
-            return PrismParts.Where(part => part.PhaseDoesntMatchMain).ToList();
-        }
+		public List<PrismPart> GetPartsWithStartNumberError()
+		{
+			return PrismParts.Where(part => part.StartNumberDoesntMatch).ToList();
+		}
 
-        public List<PrismPart> GetNonFabsecParts()
-        {
-            return PrismParts.Where(part => !part.IsFabsec).ToList();
-        }
+		public List<PrismPart> GetPartsWithPhaseNotMatchingError()
+		{
+			return PrismParts.Where(part => part.PhaseDoesntMatchMain).ToList();
+		}
 
-        public List<PrismPart> GetMainParts()
-        {
-            return PrismParts.Where(part => part.IsMainPart).ToList();
-        }
+		public List<PrismPart> GetNonFabsecParts()
+		{
+			return PrismParts.Where(part => !part.IsFabsec).ToList();
+		}
 
-        private void CheckXYZSize(Part myPart)
-        {
-            if (myPart is Beam beam)
-            {
-                SmallestX = Math.Min(beam.EndPoint.X, Math.Min(beam.StartPoint.X, SmallestX));
-                SmallestY = Math.Min(beam.EndPoint.Y, Math.Min(beam.StartPoint.Y, SmallestY));
-                SmallestZ = Math.Min(beam.EndPoint.Z, Math.Min(beam.StartPoint.Z, SmallestZ));
+		public List<PrismPart> GetMainParts()
+		{
+			return PrismParts.Where(part => part.IsMainPart).ToList();
+		}
 
-                BiggestX = Math.Max(beam.EndPoint.X, Math.Max(beam.StartPoint.X, BiggestX));
-                BiggestY = Math.Max(beam.EndPoint.Y, Math.Max(beam.StartPoint.Y, BiggestY));
-                BiggestZ = Math.Max(beam.EndPoint.Z, Math.Max(beam.StartPoint.Z, BiggestZ));
-            }
-        }
+		public List<PrismPart> GetPartsWithOutOfDateNumbers()
+		{
+			return PrismParts.Where(part => part.NumbersOutOfDate).ToList();
+		}
 
-        private void ProcessModelObjects(StageTypes stageType, string phaseNum, string issueNum, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
-        {
-            int currentCount = 0;
-            int totalCount = toolStrip == null ? -1 : Moe.GetSize();
+		private void UpdatePartWeights(List<PrismPart> partsList)
+		{
+			// Using LINQ to calculate MainPartWeight and FittingWeight
+			var weightData = partsList
+				.GroupBy(part => new[] { "PLT", "FLT", "RSA" }.Any(part.Profile.Contains))
+				.Select(group => new
+				{
+					IsFitting = group.Key, // true if it matches any of the fitting profiles, false otherwise
+					TotalWeight = group.Sum(part => part.Weight)
+				});
 
-            foreach (var myObject in Moe)
-            {
-                if (totalCount > 0) UpdateStatusLabelWithProcessCount(ref currentCount, toolStrip, statusLabel, totalCount);
-                if (!NumbersUpToDate) return;
+			MainPartWeight = weightData
+				.Where(w => !w.IsFitting)
+				.Select(w => w.TotalWeight)
+				.FirstOrDefault();
 
-                // Process directly if RocketPacket or not a BaseComponent
-                if (stageType == StageTypes.RocketPacket || !(myObject is BaseComponent myComponent))
-                {
-                    ProcessObject(myObject, stageType, phaseNum, issueNum);
-                }
-                else
-                {
-                    ProcessChildren(myComponent, stageType, phaseNum, issueNum);
-                }
-            }
-        }
+			FittingWeight = weightData
+				.Where(w => w.IsFitting)
+				.Select(w => w.TotalWeight)
+				.FirstOrDefault();
+		}
 
-        private static void UpdateStatusLabelWithProcessCount(ref int processedCount, ToolStrip toolStrip, ToolStripStatusLabel statusLabel, int totalCount)
-        {
-            int currentCount = Interlocked.Increment(ref processedCount);
-            double progressPercentage = (double)currentCount / totalCount * 100;
+		private void CheckXYZSize(Part myPart)
+		{
+			if (myPart is Beam beam)
+			{
+				SmallestX = Math.Min(beam.EndPoint.X, Math.Min(beam.StartPoint.X, SmallestX));
+				SmallestY = Math.Min(beam.EndPoint.Y, Math.Min(beam.StartPoint.Y, SmallestY));
+				SmallestZ = Math.Min(beam.EndPoint.Z, Math.Min(beam.StartPoint.Z, SmallestZ));
 
-            // Throttle UI updates to maintain responsiveness
-            if (currentCount % 5 == 0 || currentCount == totalCount)
-            {
-                toolStrip.Invoke(new System.Action(() =>
-                {
-                    if (currentCount < totalCount)
-                    {
-                        statusLabel.Text = $"Processing part: {currentCount} of {totalCount} ({progressPercentage:N1}%)";
-                    }
-                }));
-            }
-        }
+				BiggestX = Math.Max(beam.EndPoint.X, Math.Max(beam.StartPoint.X, BiggestX));
+				BiggestY = Math.Max(beam.EndPoint.Y, Math.Max(beam.StartPoint.Y, BiggestY));
+				BiggestZ = Math.Max(beam.EndPoint.Z, Math.Max(beam.StartPoint.Z, BiggestZ));
+			}
+		}
 
-        private void ProcessChildren(BaseComponent component, StageTypes stageType, string phaseNum, string issueNum)
-        {
-            var childrenEnumerator = component.GetChildren();
-            var allDescendants = new List<object>();
+		private void ProcessModelObjects(StageTypes stageType, string phaseNum, string issueNum, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
+		{
+			int currentCount = 0;
+			int totalCount = toolStrip == null ? -1 : Moe.GetSize();
 
-            while (childrenEnumerator.MoveNext())
-            {
-                var child = childrenEnumerator.Current;
-                if (child == null) continue;
+			foreach (var myObject in Moe)
+			{
+				if (totalCount > 0) UpdateStatusLabelWithProcessCount(ref currentCount, toolStrip, statusLabel, totalCount);
+				if (!NumbersUpToDate) return;
 
-                allDescendants.Add(child);
+				// Process directly if RocketPacket or not a BaseComponent
+				if (stageType == StageTypes.RocketPacket || !(myObject is BaseComponent myComponent))
+				{
+					ProcessObject(myObject, stageType, phaseNum, issueNum);
+				}
+				else
+				{
+					ProcessChildren(myComponent, stageType, phaseNum, issueNum);
+				}
+			}
+		}
 
-                if (child is BaseComponent componentChild)
-                {
-                    var grandchildrenEnumerator = componentChild.GetChildren();
-                    while (grandchildrenEnumerator.MoveNext())
-                    {
-                        var grandChild = grandchildrenEnumerator.Current;
-                        if (grandChild != null)
-                        {
-                            allDescendants.Add(grandChild);
-                        }
-                    }
-                }
-            }
+		private static void UpdateStatusLabelWithProcessCount(ref int processedCount, ToolStrip toolStrip, ToolStripStatusLabel statusLabel, int totalCount)
+		{
+			int currentCount = Interlocked.Increment(ref processedCount);
+			double progressPercentage = (double)currentCount / totalCount * 100;
 
-            foreach (var descendant in allDescendants)
-            {
-                ProcessObject(descendant, stageType, phaseNum, issueNum);
-            }
-        }
+			// Throttle UI updates to maintain responsiveness
+			if (currentCount % 5 == 0 || currentCount == totalCount)
+			{
+				toolStrip.Invoke(new System.Action(() =>
+				{
+					if (currentCount < totalCount)
+					{
+						statusLabel.Text = $"Processing part: {currentCount} of {totalCount} ({progressPercentage:N1}%)";
+					}
+				}));
+			}
+		}
 
-        private void ProcessObject(object myObject, StageTypes stageType, string phaseNum, string issueNum)
-        {
-            if (!(myObject is Part myPart) || !IsValidPart(myPart)) return;
+		private void ProcessChildren(BaseComponent component, StageTypes stageType, string phaseNum, string issueNum)
+		{
+			var childrenEnumerator = component.GetChildren();
+			var allDescendants = new List<object>();
 
-            bool isSeversafe = IsSeversafePart(myPart);
-            if (stageType == StageTypes.FAB || stageType == StageTypes.RocketPacket)
-            {
-                CheckXYZSize(myPart);
-                if (!isSeversafe && !Operation.IsNumberingUpToDate(myPart))
-                {
-                    PrismWarnings.NumberingIsNotUpToDate();
-                    NumbersUpToDate = false;
-                    return;
-                }
-            }
+			while (childrenEnumerator.MoveNext())
+			{
+				var child = childrenEnumerator.Current;
+				if (child == null) continue;
 
-            PrismPart myPrismPart = CategorizeAndProcessPart(myPart, isSeversafe);
+				allDescendants.Add(child);
 
-            UpdatePartWeight(myPrismPart);
+				if (child is BaseComponent componentChild)
+				{
+					var grandchildrenEnumerator = componentChild.GetChildren();
+					while (grandchildrenEnumerator.MoveNext())
+					{
+						var grandChild = grandchildrenEnumerator.Current;
+						if (grandChild != null)
+						{
+							allDescendants.Add(grandChild);
+						}
+					}
+				}
+			}
 
-            AddPartMark(myPart);
+			foreach (var descendant in allDescendants)
+			{
+				ProcessObject(descendant, stageType, phaseNum, issueNum);
+			}
+		}
 
-            ProcessAssembly(myPrismPart, phaseNum, issueNum);
 
-            PrismParts.Add(myPrismPart);
-        }
+		private void CreatePartListFromReport(string packagePath, Model model, string phaseNum, string issueNum)
+		{
+			string teklaReportLocation = Path.Combine(FirmFolderLoc.ReportTemplates(), "PrismPart_List.rpt");
+			string newReportLocation = Path.Combine(packagePath, "PrismPart_List.xsr");
 
-        private PrismPart CategorizeAndProcessPart(Part myPart, bool isSeversafe)
-        {
-            PrismPart myPrismPart = new PrismPart(myPart) { IsSeversafe = isSeversafe };
+			if (!CreateReportAndWait(teklaReportLocation, newReportLocation)) return;
 
-            if (isSeversafe)
-            {
-                SeversafePresent = true;
-            }
-            else
-            {
-                if (IsLocked(myPart)) myPrismPart.IsLocked = true;
-                myPrismPart.IsFabsec = myPart.Profile.ProfileString.StartsWith("PG");
-            }
-            return myPrismPart;
-        }
+			// wait until Tekla Structures has unlocked the file, or timeout
+			if (!IfLockedWait(newReportLocation, 15)) return;
 
-        private void UpdatePartWeight(PrismPart myPart)
-        {
-            if (!new[] { "PLT", "FLT", "RSA" }.Any(myPart.Profile.Contains)) //it is not a fitting
-            {
-                MainPartWeight += myPart.Weight;
-            }
-            else
-            {
-                FittingWeight += myPart.Weight;
-            }
-        }
+			// read the report
+			using (var reader = new StreamReader(newReportLocation))
+			{
+				string line;
+				while ((line = reader.ReadLine()) != null)
+				{
+					var items = line.Split(',');
 
-        private void AddPartMark(Part myPart)
-        {
-            MyMarks.Add(myPart.GetPartMark());
-        }
+					if (items[0] == " Part")
+					{
+						PrismParts.Add(new PrismPart(items, model));
+					}
+					if (items[0] == " Bolt")
+					{
+						PrismBoltGroups.Add(new PrismBoltGroup(items, phaseNum, issueNum, model));
+					}
+				}
+			}
 
-        private async void ProcessAssembly(PrismPart myPart, string phaseNum, string issueNum)
-        {
-            if (myPart.IsMainPart)
-            {
-                var boltsFromAssembly = await GetBoltsFromAssemblyAsync(myPart.Assembly);
-                if (boltsFromAssembly != null)
-                {
-                    var prismBoltGroupsForAssembly = boltsFromAssembly
-                        .Where(boltGroup => boltGroup.Bolt) // Filter out BoltGroup objects where Bolt is false (Holes)
-                        .Select(boltGroup => new PrismBoltGroup(boltGroup, phaseNum, issueNum)) //Cast those bolGroups as PrismBoltGroups
-                        .ToList();
+			File.Delete(newReportLocation);
+		}
 
-                    PrismBoltGroups.AddRange(prismBoltGroupsForAssembly);
-                }
-            }
-        }
+		public bool CreateReportAndWait(string teklaReportLocation, string newReportLocation)
+		{
+			Operation.CreateReportFromSelected(teklaReportLocation, newReportLocation, "", "", "");
 
-        private bool IsSeversafePart(Part myPart)
-        {
-            if (myPart.Name.Contains("SS-"))
-            {
-                return true;
-            }
-            return false;
-        }
+			int waitTime = 0;
+			const int maxWaitTime = 10000; // 10 seconds
 
-        private bool IsLocked(Part myPart)
-        {
-            string isLocked = "";
-            myPart.GetReportProperty("OBJECT_LOCKED", ref isLocked);
-            if (isLocked == "Yes")
-            {
-                return true;
-            }
-            return false;
-        }
+			while (waitTime < maxWaitTime)
+			{
+				if (File.Exists(newReportLocation))
+				{
+					return true;
+				}
 
-        private bool IsValidPart(Part p)
-        {
-            if (p.Name == "GROUT")
-            {
-                return false;
-            }
-            if (p.Profile.ProfileString.StartsWith("HEX"))
-            {
-                return false;
-            }
-            if (p.Profile.ProfileString.StartsWith("ROD"))
-            {
-                return false;
-            }
-            if (p.Name.StartsWith("HD"))
-            {
-                return false;
-            }
-            return true;
-        }
+				Thread.Sleep(1000); // wait for 1 second
+				waitTime += 1000;
+			}
 
-        public void GetCorrectModelSelection()
-        {
-            ArrayList selectList = new ArrayList();
-            foreach (PrismPart part in PrismParts)
-            {
-                selectList.Add(part.Part);
-            }
-            Tekla.Structures.Model.UI.ModelObjectSelector ms = new Tekla.Structures.Model.UI.ModelObjectSelector();
-            ms.Select(selectList);
-        }
+			return false;
+		}
 
-        private static async Task<List<BoltGroup>> GetBoltsFromAssemblyAsync(Assembly assembly)
-        {
-            List<BoltGroup> myBoltsList = new List<BoltGroup>();
-            ArrayList secondaries = assembly.GetSecondaries();
-            secondaries.Add(assembly.GetMainPart());
+		/// <summary>
+		/// Waits until a file is properly closed or returns false
+		/// </summary>
+		/// <param name="fileName"></param>
+		/// /// <param name="seconds"></param>
+		/// <returns></returns>
+		public static bool IfLockedWait(string fileName, int seconds)
+		{
+			while (true)
+			{
+				try
+				{
+					using (var fileStream = new FileStream(fileName, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
+					{
+						var readText = new byte[fileStream.Length];
+						fileStream.Seek(0, SeekOrigin.Begin);
+						var unused = fileStream.Read(readText, 0, (int)fileStream.Length);
+					}
+					return true;
+				}
 
-            ConcurrentBag<BoltGroup> myBoltsBag = new ConcurrentBag<BoltGroup>();
+				catch (IOException)
+				{
+					// wait one second
+					Thread.Sleep(1000);
+					seconds--;
+					if (seconds == 0)
+						return false;
+				}
+			}
+		}
 
-            List<Task> tasks = new List<Task>();
+		private void ProcessObject(object myObject, StageTypes stageType, string phaseNum, string issueNum)
+		{
+			if (!(myObject is Part myPart) || !IsValidPart(myPart)) return;
 
-            foreach (ModelObject item in secondaries)
-            {
-                if (item is Part part)
-                {
-                    tasks.Add(Task.Run(() =>
-                    {
-                        ModelObjectEnumerator bolts = part.GetBolts();
-                        foreach (var setOfBolts in bolts)
-                        {
-                            if (setOfBolts is BoltGroup bolt)
-                            {
-                                if (bolt.PartToBeBolted.Identifier.GUID == part.Identifier.GUID)
-                                {
-                                    if (!myBoltsBag.Any(x => x.Identifier.GUID == bolt.Identifier.GUID))
-                                    {
-                                        myBoltsBag.Add(bolt);
-                                    }
-                                }
-                            }
-                        }
-                    }));
-                }
-            }
+			bool isSeversafe = IsSeversafePart(myPart);
+			if (stageType == StageTypes.FAB || stageType == StageTypes.RocketPacket)
+			{
+				CheckXYZSize(myPart);
+				if (!isSeversafe && !Operation.IsNumberingUpToDate(myPart))
+				{
+					PrismWarnings.NumberingIsNotUpToDate();
+					NumbersUpToDate = false;
+					return;
+				}
+			}
 
-            await Task.WhenAll(tasks);
+			PrismPart myPrismPart = CategorizeAndProcessPart(myPart, isSeversafe);
 
-            // If you need a List instead of ConcurrentBag
-            return myBoltsBag.ToList();
-        }
+			UpdatePartWeight(myPrismPart);
 
-        private static List<BoltGroup> GetBoltsFromAssembly(Assembly assembly)
-        {
-            List<BoltGroup> myBoltsList = new List<BoltGroup>();
-            ArrayList secondaries = assembly.GetSecondaries();
-            secondaries.Add(assembly.GetMainPart());
+			AddPartMark(myPart);
 
-            foreach (Tekla.Structures.Model.ModelObject item in secondaries)
-            {
-                if (item is Part part)
-                {
-                    ModelObjectEnumerator bolts = part.GetBolts();
+			ProcessAssembly(myPrismPart, phaseNum, issueNum);
 
-                    foreach (var setOfBolts in bolts)
-                    {
-                        BoltGroup bolt = setOfBolts as BoltGroup;
-                        if (bolt != null)
-                        {
-                            if (bolt.PartToBeBolted.Identifier.GUID == part.Identifier.GUID)
-                            {
-                                BoltGroup matchingBolt = null;
-                                matchingBolt = myBoltsList.Find(x => x.Identifier.GUID == bolt.Identifier.GUID);
-                                if (matchingBolt == null)
-                                {
-                                    myBoltsList.Add(bolt);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            return myBoltsList;
-        }
-    }
+			PrismParts.Add(myPrismPart);
+		}
+
+		private PrismPart CategorizeAndProcessPart(Part myPart, bool isSeversafe)
+		{
+			PrismPart myPrismPart = new PrismPart(myPart) { IsSeversafe = isSeversafe };
+
+			if (isSeversafe)
+			{
+				SeversafePresent = true;
+			}
+			else
+			{
+				if (IsLocked(myPart)) myPrismPart.IsLocked = true;
+				myPrismPart.IsFabsec = myPart.Profile.ProfileString.StartsWith("PG");
+			}
+			return myPrismPart;
+		}
+
+		private void UpdatePartWeight(PrismPart myPart)
+		{
+			if (!new[] { "PLT", "FLT", "RSA" }.Any(myPart.Profile.Contains)) //it is not a fitting
+			{
+				MainPartWeight += myPart.Weight;
+			}
+			else
+			{
+				FittingWeight += myPart.Weight;
+			}
+		}
+
+		private void AddPartMark(Part myPart)
+		{
+			MyMarks.Add(myPart.GetPartMark());
+		}
+
+		private async void ProcessAssembly(PrismPart myPart, string phaseNum, string issueNum)
+		{
+			if (myPart.IsMainPart)
+			{
+				var boltsFromAssembly = await GetBoltsFromAssemblyAsync(myPart.Assembly);
+				if (boltsFromAssembly != null)
+				{
+					var prismBoltGroupsForAssembly = boltsFromAssembly
+						.Where(boltGroup => boltGroup.Bolt) // Filter out BoltGroup objects where Bolt is false (Holes)
+						.Select(boltGroup => new PrismBoltGroup(boltGroup, phaseNum, issueNum)) //Cast those bolGroups as PrismBoltGroups
+						.ToList();
+
+					PrismBoltGroups.AddRange(prismBoltGroupsForAssembly);
+				}
+			}
+		}
+
+		private bool IsSeversafePart(Part myPart)
+		{
+			if (myPart.Name.Contains("SS-"))
+			{
+				return true;
+			}
+			return false;
+		}
+
+		private bool IsLocked(Part myPart)
+		{
+			string isLocked = "";
+			myPart.GetReportProperty("OBJECT_LOCKED", ref isLocked);
+			if (isLocked == "Yes")
+			{
+				return true;
+			}
+			return false;
+		}
+
+		private bool IsValidPart(Part p)
+		{
+			if (p.Name == "GROUT")
+			{
+				return false;
+			}
+			if (p.Profile.ProfileString.StartsWith("HEX"))
+			{
+				return false;
+			}
+			if (p.Profile.ProfileString.StartsWith("ROD"))
+			{
+				return false;
+			}
+			if (p.Name.StartsWith("HD"))
+			{
+				return false;
+			}
+			return true;
+		}
+
+		public void GetCorrectModelSelection()
+		{
+			ArrayList selectList = new ArrayList();
+			foreach (PrismPart part in PrismParts)
+			{
+				selectList.Add(part.Part);
+			}
+			Tekla.Structures.Model.UI.ModelObjectSelector ms = new Tekla.Structures.Model.UI.ModelObjectSelector();
+			ms.Select(selectList);
+		}
+
+		private static async Task<List<BoltGroup>> GetBoltsFromAssemblyAsync(Assembly assembly)
+		{
+			List<BoltGroup> myBoltsList = new List<BoltGroup>();
+			ArrayList secondaries = assembly.GetSecondaries();
+			secondaries.Add(assembly.GetMainPart());
+
+			ConcurrentBag<BoltGroup> myBoltsBag = new ConcurrentBag<BoltGroup>();
+
+			List<Task> tasks = new List<Task>();
+
+			foreach (ModelObject item in secondaries)
+			{
+				if (item is Part part)
+				{
+					tasks.Add(Task.Run(() =>
+					{
+						ModelObjectEnumerator bolts = part.GetBolts();
+						foreach (var setOfBolts in bolts)
+						{
+							if (setOfBolts is BoltGroup bolt)
+							{
+								if (bolt.PartToBeBolted.Identifier.GUID == part.Identifier.GUID)
+								{
+									if (!myBoltsBag.Any(x => x.Identifier.GUID == bolt.Identifier.GUID))
+									{
+										myBoltsBag.Add(bolt);
+									}
+								}
+							}
+						}
+					}));
+				}
+			}
+
+			await Task.WhenAll(tasks);
+
+			// If you need a List instead of ConcurrentBag
+			return myBoltsBag.ToList();
+		}
+
+		private static List<BoltGroup> GetBoltsFromAssembly(Assembly assembly)
+		{
+			List<BoltGroup> myBoltsList = new List<BoltGroup>();
+			ArrayList secondaries = assembly.GetSecondaries();
+			secondaries.Add(assembly.GetMainPart());
+
+			foreach (Tekla.Structures.Model.ModelObject item in secondaries)
+			{
+				if (item is Part part)
+				{
+					ModelObjectEnumerator bolts = part.GetBolts();
+
+					foreach (var setOfBolts in bolts)
+					{
+						BoltGroup bolt = setOfBolts as BoltGroup;
+						if (bolt != null)
+						{
+							if (bolt.PartToBeBolted.Identifier.GUID == part.Identifier.GUID)
+							{
+								BoltGroup matchingBolt = null;
+								matchingBolt = myBoltsList.Find(x => x.Identifier.GUID == bolt.Identifier.GUID);
+								if (matchingBolt == null)
+								{
+									myBoltsList.Add(bolt);
+								}
+							}
+						}
+					}
+				}
+			}
+			return myBoltsList;
+		}
+	}
 }

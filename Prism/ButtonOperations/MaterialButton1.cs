@@ -1,5 +1,4 @@
 ﻿using System.Windows.Forms;
-using static Prism.Enums;
 
 namespace Prism.ButtonOperations
 {

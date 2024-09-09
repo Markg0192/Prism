@@ -461,7 +461,7 @@ namespace Prism
             TeklaStructuresSettings.GetAdvancedOption("XS_MACRO_DIRECTORY", ref macrodir);
             var dir = macrodir.Split(';')[0];
 
-            var writer = new StreamWriter(dir + $@"\modeling\{Constants.ClearPrintDialog}");
+            var writer = new StreamWriter(dir + $@"\modeling\{Constants.SelectDrawings}");
             var macro =
                         "#pragma warning disable 1633 // Unrecognized #pragma directive" + Environment.NewLine +
                         "#pragma reference \"Tekla.Macros.Wpf.Runtime\"" + Environment.NewLine +
@@ -477,7 +477,8 @@ namespace Prism
                         "            {" + Environment.NewLine +
                         "                Tekla.Macros.Wpf.Runtime.IWpfMacroHost wpf = runtime.Get<Tekla.Macros.Wpf.Runtime.IWpfMacroHost>();" + Environment.NewLine +
                         "                wpf.InvokeCommand(\"CommandRepository\", \"Drawing.DrawingList\");" + Environment.NewLine +
-                        "                wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_CategoryList\").As.Selector.DoSelection.With(\"albl_single_part_drawings\").With(\"albl_Assembly_drawings\").Invoke();" + Environment.NewLine +
+						"                wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_CategoryList\").As.Selector.DoSelection.With(\"albl_Cast_unit_drawings\").Invoke();" + Environment.NewLine +
+						"                wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_CategoryList\").As.Selector.DoSelection.With(\"albl_single_part_drawings\").With(\"albl_Assembly_drawings\").Invoke();" + Environment.NewLine +
                         "                wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_DataGridControl\", \"AID_DocMgr_Mark\").As.Button.Invoke();" + Environment.NewLine +
                         "                wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_DataGridControl\", \"AID_DocMgr_Title1\").As.Button.Invoke();" + Environment.NewLine +
                         "                wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_ButtonSelectDrawings\").As.Button.Invoke();" + Environment.NewLine +
@@ -488,7 +489,7 @@ namespace Prism
             writer.Write(macro);
             writer.Close();
 
-            Operation.RunMacro(Constants.ClearPrintDialog);
+            Operation.RunMacro(Constants.SelectDrawings);
         }
 
         public static void PrintSelectedDrawings(string fileToPrintTo, string folderName, int startPoint, int drawingCount, bool isAss)

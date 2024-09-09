@@ -1,16 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-//using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Prism.CustomDialogs
 {
-    public partial class AuthKeyInput : Form
+	public partial class AuthKeyInput : Form
     {
         public string AuthKeyInputString = "";
 

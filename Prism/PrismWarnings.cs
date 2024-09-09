@@ -33,9 +33,9 @@ namespace Prism
             return form.executionClass;
         }
 
-        public static int SpecialFittingOrder()
+        public static int SpecialFittingOrder(Model model)
         {
-            var form = new SpecialFittingOrders();
+            var form = new SpecialFittingOrders(model);
             form.ShowDialog();
             return form.orderAction;
         }
@@ -446,7 +446,14 @@ namespace Prism
             return CreateYesNoForm(notUpToDateMessage, notUpToDateTitle);
         }
 
-        public static bool ContinueAnyway()
+		public static bool TryTheNewSelectionMethod()
+		{
+			string notUpToDateMessage = "You're a special user, do you want to try the new part selection method (it's fast but new so not widely tested)";
+			const string notUpToDateTitle = "You're special";
+			return CreateYesNoForm(notUpToDateMessage, notUpToDateTitle);
+		}
+
+		public static bool ContinueAnyway()
         {
             string notUpToDateMessage = "Do you want to ignore this warning?";
             const string notUpToDateTitle = "Error";
