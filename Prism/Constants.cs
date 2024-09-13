@@ -13,7 +13,8 @@ namespace Prism
         public static string ClearPrintDialog = "ClearPrintDialog.cs";
         public static string NumberSelectedPartsMacro = "NumberSelected.cs";
         public static string PrismPackageFolderName = "Prism Packages";
-        public static string SelectDrawings = "SelectDrawings.cs";
+        public static string SelectedDrawings = "SelectDrawings.cs";
+        public static string RunPrismDrawingList = "RunPrismDrawingList.cs";
 
         public static int PrismDataLogLocation = 1;
         public static int PrismDebugLogLoction = 2;
@@ -65,7 +66,8 @@ namespace Prism
                 "conan.mulholland",
                 "Matthew.Poots",
 				"John.Senior",
-				"Paul.Foreman"
+				"Paul.Foreman",
+				"Dean.Johnston"
 			};
 
             foreach (string user in specialOperationUsers)

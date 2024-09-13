@@ -1,11 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows.Media;
+using Tekla.Structures;
 using Tekla.Structures.Drawing;
 using Tekla.Structures.DrawingInternal;
 using Tekla.Structures.Model;
+using Drawing = Tekla.Structures.Drawing.Drawing;
 
 namespace Prism
 {
@@ -22,7 +25,7 @@ namespace Prism
             ChangeMessage = information[7].TrimEnd(' ').TrimStart(' ');
             DrawingType = information[8].TrimEnd(' ').TrimStart(' ');
             DrawingFolder = GetDrawingType(information[4].TrimEnd(' ').TrimStart(' '), DrawingType);
-        }
+		}
 
         private Enums.DrawingFolder GetDrawingType(string folder, string type)
         {
