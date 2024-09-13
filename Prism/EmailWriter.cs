@@ -59,13 +59,14 @@ namespace Prism
             {
                 // Create a new MailItem
                 MailItem email = (MailItem)outlookApp.CreateItem(OlItemType.olMailItem);
-                email.Subject = $"{fabPrefix} E.P.O. Order";
+                email.Subject = $"{fabPrefix} E.P.O. Order{AddVariationNoIfReqd(projData.IsVariation, projData.VariationNumber)}";
 
                 // Set the email body
                 email.Body = $"Hello,{_mailNewLine}" +
                               $"{_mailNewLine}" +
                               $"This is the edge protection order for phase {phaseNumber}, issue {issueNumber}, in {projData.ProjNumber}, {projData.ProjName}.{_mailNewLine}" +
-                              $"Please make this order available.{_mailNewLine}" +
+							  $"{IsPartOfAVariation(projData.IsVariation, projData.VariationNumber)}" +
+							  $"Please make this order available.{_mailNewLine}" +
                               $"{_mailNewLine}" +
                               $"Site date is {SiteDateNote(siteDate)}{_mailNewLine}" +
                               $"{_mailNewLine}" +
@@ -97,12 +98,13 @@ namespace Prism
             ExecuteEmailAction(outlookApp =>
             {
                 MailItem email = (MailItem)outlookApp.CreateItem(OlItemType.olMailItem);
-                email.Subject = $"{fabPrefix} Fab Issue";
+                email.Subject = $"{fabPrefix} Fab Issue{AddVariationNoIfReqd(projData.IsVariation, projData.VariationNumber)}";
 
                 email.Body = $"Hello,{_mailNewLine}" +
                                 $"{_mailNewLine}" +
                                 $"This is the fab package for phase {phaseNumber}, issue {issueNumber}, in {projData.ProjNumber}, {projData.ProjName}.{_mailNewLine}" +
-                                $"Please issue this package to the works when possible.{_mailNewLine}" +
+								$"{IsPartOfAVariation(projData.IsVariation, projData.VariationNumber)}" +
+								$"Please issue this package to the works when possible.{_mailNewLine}" +
                                 $"{_mailNewLine}" +
                                 $"Site date is {SiteDateNote(siteDate)}{_mailNewLine}" +
                                 $"{_mailNewLine}" +
@@ -134,7 +136,7 @@ namespace Prism
             ExecuteEmailAction(outlookApp =>
             {
                 MailItem email = (MailItem)outlookApp.CreateItem(OlItemType.olMailItem);
-                email.Subject = $"{fabPrefix} Revised Fab Issue";
+                email.Subject = $"{fabPrefix} Revised Fab Issue{AddVariationNoIfReqd(projData.IsVariation, projData.VariationNumber)}";
 
                 // Set the body format to HTML
                 email.BodyFormat = OlBodyFormat.olFormatHTML;
@@ -143,7 +145,8 @@ namespace Prism
                 email.HTMLBody = $"<html><body>" +
                                  $"Hello,<br><br>" +
                                  $"This is the revised fab package for phase {phaseNumber}, issue {issueNumber}, in {projData.ProjNumber}, {projData.ProjName}.<br>" +
-                                 $"Please issue this package to the works when possible.<br><br>" +
+								 $"{IsPartOfAVariation(projData.IsVariation, projData.VariationNumber)}" +
+								 $"Please issue this package to the works when possible.<br><br>" +
                                  $"Site date is <u>{SiteDateNote(siteDate)}</u><br><br>" +
                                  $"The changes to the package are as follows;<br><br>" +
                                  messageForEmail +
@@ -189,12 +192,13 @@ namespace Prism
             {
 
                 MailItem email = (MailItem)outlookApp.CreateItem(OlItemType.olMailItem);
-                email.Subject = $"{fabPrefix} Bolt Order";
+                email.Subject = $"{fabPrefix} Bolt Order{AddVariationNoIfReqd(projData.IsVariation, projData.VariationNumber)}";
 
                 email.Body = $"Hello,{_mailNewLine}" +
                                 $"{_mailNewLine}" +
                                 $"This is the bolt order for phase {phaseNumber}, issue {issueNumber}, in {projData.ProjNumber}, {projData.ProjName}.{_mailNewLine}" +
-                                $"Please order these bolts when possible.{_mailNewLine}{_mailNewLine}" +
+							    $"{IsPartOfAVariation(projData.IsVariation, projData.VariationNumber)}" +
+								$"Please order these bolts when possible.{_mailNewLine}{_mailNewLine}" +
                                 $"Site date is {SiteDateNote(siteDate)}" +
                                 $"{_mailNewLine}{_mailNewLine}" +
                                 $"Regards,{_mailNewLine}{_mailNewLine}" +
@@ -214,14 +218,14 @@ namespace Prism
         {
             ExecuteEmailAction(outlookApp =>
             {
-
                 MailItem email = (MailItem)outlookApp.CreateItem(OlItemType.olMailItem);
-                email.Subject = $"{fabPrefix} Fabsec Carcass Order";
+                email.Subject = $"{fabPrefix} Fabsec Carcass Order{AddVariationNoIfReqd(projData.IsVariation, projData.VariationNumber)}";
 
                 email.Body = $"Hello,{_mailNewLine}" +
                                 $"{_mailNewLine}" +
                                 $"This is the fabsec carcass order for phase {phaseNumber}, issue {issueNumber}, in {projData.ProjNumber}, {projData.ProjName}.{_mailNewLine}" +
-                                $"Please process these carcasses when possible.{_mailNewLine}{_mailNewLine}" +
+								$"{IsPartOfAVariation(projData.IsVariation, projData.VariationNumber)}" +
+								$"Please process these carcasses when possible.{_mailNewLine}{_mailNewLine}" +
                                 $"{DateRequiredNote("These carcasses are required for fab", siteDate)}" +
                                 $"Regards,{_mailNewLine}{_mailNewLine}" +
                                 $"{projData.Full}";
@@ -241,11 +245,12 @@ namespace Prism
             ExecuteEmailAction(outlookApp =>
             {
                 MailItem email = (MailItem)outlookApp.CreateItem(OlItemType.olMailItem);
-                email.Subject = $"{fabPrefix} {IssueType(orderType)}";
+                email.Subject = $"{fabPrefix} {IssueType(orderType)}{AddVariationNoIfReqd(projData.IsVariation, projData.VariationNumber)}";
 
                 email.Body = $"Hello,{_mailNewLine}" +
                                 $"{_mailNewLine}" +
-                                $"{OrderTypeText(orderType)} for {PhaseOrVariation(projData.IsVariation)} {phaseNumber}, issue {issueNumber}, in {projData.ProjNumber}, {projData.ProjName}.{_mailNewLine}" +
+                                $"{OrderTypeText(orderType)} for phase {phaseNumber}, issue {issueNumber}, in {projData.ProjNumber}, {projData.ProjName}.{_mailNewLine}" +
+                                $"{IsPartOfAVariation(projData.IsVariation, projData.VariationNumber)}" +
                                 $"{RemoveOrAddText(orderType)} as soon as possible.{_mailNewLine}" +
                                 $"{_mailNewLine}" +
                                 $"{RemoveOrAddMaterial(orderType)}{_mailNewLine}" +
@@ -330,16 +335,26 @@ namespace Prism
             }
         }
 
-        private static string PhaseOrVariation(bool isVariation)
+        private static string IsPartOfAVariation(bool isVariation, string variationNumber)
         {
-            if (isVariation)
+            if(isVariation)
             {
-                return "variation";
+                return $"This should be recorded as being required for Variation number {variationNumber}.{_mailNewLine}";
             }
-            return "phase";
+            return "";
         }
 
-        private static string DateRequired(string orderType, string siteDate)
+        private static string AddVariationNoIfReqd(bool isVariation, string variationNumber)
+        {
+            if(isVariation)
+            {
+                return $" {variationNumber}";
+            }
+            return "";
+        }
+
+
+		private static string DateRequired(string orderType, string siteDate)
         {
             if (orderType.Contains("Omit"))
             {
@@ -422,17 +437,18 @@ namespace Prism
 
         private static string IssueType(string orderType)
         {
+
             if (orderType.Contains("Order"))
             {
-                return "Prelim Issue";
+                return $"Prelim Issue";
             }
             if (orderType.Contains("Add"))
             {
-                return "Additional Issue";
+                return $"Additional Issue";
             }
             if (orderType.Contains("Omit"))
             {
-                return "OMIT Issue";
+                return $"OMIT Issue";
             }
             return "";
         }

@@ -31,10 +31,13 @@ namespace Prism
         public void CreateReportAndGetDrawingInfo(string packagePath)
         {            
             PrismMacroBuilder.SelectDrawings();
-            string teklaReportLocation = "C:\\Sev_Firm_2021\\Reports\\Prism\\PrismDrawing_List.rpt";// Path.Combine(FirmFolderLoc.ReportTemplates(), "PrismDrawing_List.rpt");
+            PrismMacroBuilder.RunPrismDrawingReport(packagePath);
+          //  string teklaReportLocation = "C:\\TeklaStructuresModels2023\\Sandbox\\PrismDrawing_List.rpt";
+
+		//	string teklaReportLocation = "C:\\Sev_Firm_2021\\Reports\\Prism\\PrismDrawing_List.rpt";// Path.Combine(FirmFolderLoc.ReportTemplates(), "PrismDrawing_List.rpt");
             string newReportLocation = Path.Combine(packagePath,  "PrismDrawing_List.xsr");
 
-            if (!CreateReportAndWait(teklaReportLocation, newReportLocation)) return;
+            if (!CreateReportAndWait(/*teklaReportLocation, */newReportLocation)) return;
 
             // wait until Tekla Structures has unlocked the file, or timeout
             if (!IfLockedWait(newReportLocation, 15)) return;
@@ -49,6 +52,7 @@ namespace Prism
 
                     if (items.Length >= 8)
                     {
+
                         Drawings.Add(new PrismDrawing(items));
                     }
                 }
@@ -59,9 +63,9 @@ namespace Prism
             NumberOfNcRequired = Drawings.Count(d => d.DrawingFolder == DrawingFolder.ASS) + Drawings.Count(d => d.DrawingFolder == DrawingFolder.FIT) + Drawings.Count(d => d.DrawingFolder == DrawingFolder.PRT);
         }
 
-        public bool CreateReportAndWait(string teklaReportLocation, string newReportLocation)
+        public bool CreateReportAndWait(/*string teklaReportLocation, */string newReportLocation)
         {
-            Operation.CreateReportFromSelected(teklaReportLocation, newReportLocation, "", "", "");
+           // Operation.CreateReportFromSelected(teklaReportLocation, newReportLocation, "", "", "");
 
             int waitTime = 0;
             const int maxWaitTime = 10000; // 10 seconds

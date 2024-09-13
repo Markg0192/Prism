@@ -83,7 +83,7 @@ namespace Prism
 				orderType = $"{cmb_OrderCall.Text} {cmb_OrderMaterial.Text}";
 
 				ReportManager myReportManager = new ReportManager(_projectData, txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text);
-				ModelModifiers.VariationCheck(txt_MaterialPhaseNumber.Text, _projectData);
+				ModelModifiers.VariationCheck(_projectData, txt_VariationNumber.Text, cmb_VariationType.Text);
 
 				if (orderType.Contains("Special Fittings"))
 				{
@@ -275,7 +275,8 @@ namespace Prism
 
 		private async void btn_SpecialOperations_Click(object sender, EventArgs e)
 		{
-			StartFunction();
+			PrismMacroBuilder.RunPrismDrawingReport(@"C:\\TeklaStructuresModels2023\\Sandbox\\PlotFiles");
+		/*	StartFunction();
 
 			ReportManager repoman = new ReportManager(_projectData, "IFC", "01");
 			repoman.Folders.CreateFabFolders();
@@ -319,7 +320,7 @@ namespace Prism
 
              QrCodeGenerator.ApplyQrCode(_selectedObjects.PrismParts, _projectData, fm.IfcPath, fm.QrCodePath);
 			*/
-			IFCExporter.ExportIndividualIFC(_selectedObjects, repoman.Folders.IfcPath, "");
+			//IFCExporter.ExportIndividualIFC(_selectedObjects, repoman.Folders.IfcPath, "");
 
 			EndFunction(1);
 		}
@@ -456,7 +457,7 @@ namespace Prism
 
 			GetPhaseAndIssueNumber(out string phaseNum, out string issueNum, out bool runChangeManager);
 
-			ModelModifiers.VariationCheck(phaseNum, _projectData);
+			ModelModifiers.VariationCheck(_projectData, txt_Variation_Fab.Text, cmb_VariationType_Fab.Text);
 
 			if (!await Task.Run(() => InitialSetup(StageTypes.FAB, stageType == StageTypes.FAB, phaseNum, issueNum, statusStrip_Fab, StatusLabel))) { EndFunction(0); return; }
 
@@ -1219,6 +1220,45 @@ namespace Prism
 			{
 				advancedSettings.ShowDialog();
 			}
+		}
+
+		private void txt_VariationNumber_TextChanged(object sender, EventArgs e)
+		{
+			CheckForVariationNumber(ref txt_VariationNumber, ref cmb_VariationType);
+		}
+
+		private void CheckForVariationNumber(ref TextBox textBox, ref ComboBox combobox)
+		{
+			if (textBox.Text.Length > 0)
+			{
+				textBox.BackColor = Color.White;
+				combobox.BackColor = Color.White;
+			}
+			else
+			{
+				textBox.BackColor = Color.Moccasin;
+				combobox.BackColor = Color.Moccasin;
+			}
+		}
+
+		private void txt_VariationNumber_KeyPress(object sender, KeyPressEventArgs e)
+		{
+			AllowNumbersAndDeleteOnly(e);
+		}
+
+		private void txt_Variation_Fab_TextChanged(object sender, EventArgs e)
+		{
+			CheckForVariationNumber(ref txt_Variation_Fab, ref cmb_VariationType_Fab);
+		}
+
+		private void txt_MaterialPhaseNumber_KeyPress(object sender, KeyPressEventArgs e)
+		{
+			AllowNumbersAndDeleteOnly(e);
+		}
+
+		private void phaseNumber_KeyPress(object sender, KeyPressEventArgs e)
+		{
+			AllowNumbersAndDeleteOnly(e);
 		}
 	}
 }
