@@ -1258,7 +1258,20 @@ namespace Prism
 
 		private void phaseNumber_KeyPress(object sender, KeyPressEventArgs e)
 		{
-			AllowNumbersAndDeleteOnly(e);
+			AllowNumbersAndDeleteAndSW(e);
 		}
+
+		private void AllowNumbersAndDeleteAndSW(KeyPressEventArgs e)
+		{
+			char delete = '\b'; //This is the code created when backspace is pressed.
+
+			// Check if the pressed key is a number, delete key, or 's'/'w'
+			if (!Char.IsNumber(e.KeyChar) && e.KeyChar != delete && e.KeyChar != 'S' && e.KeyChar != 'W')
+			{
+				e.Handled = true; // If it's not a number, delete, 's', or 'w', ignore the input.
+				return;
+			}
+		}
+
 	}
 }
