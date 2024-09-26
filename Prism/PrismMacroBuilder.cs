@@ -490,7 +490,7 @@ namespace Prism
 					"		}" + Environment.NewLine +
 					"	}";
 
-	writer.Write(macro);
+	        writer.Write(macro);
 			writer.Close();
 			Operation.RunMacro(Constants.RunPrismDrawingList);
 		}
