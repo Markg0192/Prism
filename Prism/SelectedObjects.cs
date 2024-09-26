@@ -85,6 +85,11 @@ namespace Prism
 			return PrismParts.Where(part => part.IsSeversafe).ToList();
 		}
 
+		public List<PrismPart> GetFittings()
+		{
+			return PrismParts.Where(part => part.IsFitting).ToList();
+		}
+
 		public List<PrismPart> GetNonLockedParts()
 		{
 			return PrismParts.Where(part => !part.IsLocked).ToList();

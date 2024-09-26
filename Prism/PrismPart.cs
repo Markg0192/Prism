@@ -39,6 +39,8 @@ namespace Prism
 			Name = Trim(items[8]);
 			IsSeversafe = IsSeversafePart(Name);
 			IsLocked = Trim(items[9]) == "1";
+			IsFabsec = Profile.StartsWith("PG");
+			IsFitting = Profile == "PL" || Profile == "RS" || Profile == "FL";
 			PartMark = Trim(items[10]);
 			NumbersOutOfDate = PartMark.Contains("?");
 			Part = model.SelectModelObject(model.GetIdentifierByGUID(Guid)) as Part;
@@ -67,6 +69,7 @@ namespace Prism
 		public bool IsSeversafe { get; set; }
 		public bool IsLocked { get; set; }
 		public bool IsFabsec { get; set; }
+		public bool IsFitting { get;set; }
 		public string LotName { get; set; }
 		public bool IsMainPart { get; set; }
 		public double Weight { get; set; }
