@@ -175,18 +175,23 @@ namespace Prism
 
 		public static void StampBoltUDA(List<BoltGroup> allBolts, string name, string date, string phaseNumber, string issueNumber)
 		{
+			//run macro
 			foreach (BoltGroup bolts in allBolts)
 			{
-				bolts.SetUserProperty(ModelUDA.BoltOrderedBy(), name);
-				bolts.SetUserProperty(ModelUDA.BoltOrderedDate(), date);
-				bolts.SetUserProperty(ModelUDA.BoltOrderedAmount(), BoltPhaseAndIssue(phaseNumber, issueNumber));
+				if (bolts != null)
+				{
+					bolts.SetUserProperty(ModelUDA.BoltOrderedBy(), name);
+					bolts.SetUserProperty(ModelUDA.BoltOrderedDate(), date);
+					bolts.SetUserProperty(ModelUDA.BoltOrderPhaseNo(), phaseNumber);
+					bolts.SetUserProperty(ModelUDA.BoltOrderIssueNo(), issueNumber);
+				}
 			}
 		}
 
 		private static string TimesBoltOrdered(BoltGroup bolts)
 		{
 			string timesOrdered = "";
-			bolts.GetUserProperty(ModelUDA.BoltOrderedAmount(), ref timesOrdered);
+			bolts.GetUserProperty(ModelUDA.BoltOrderPhaseNo(), ref timesOrdered);
 
 			if (timesOrdered != "" && timesOrdered.Contains("Times ordered"))
 			{
@@ -201,7 +206,6 @@ namespace Prism
 		public static string BoltPhaseAndIssue(string phaseNumber, string issueNumber)
 		{
 			return $"Ordered Phase-{phaseNumber} Issue{issueNumber}";
-
 		}
 
 		public static void StampPartFabUDA(List<PrismPart> selectedModelParts, string phaseNumber, string issueNumber)

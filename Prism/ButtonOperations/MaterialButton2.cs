@@ -11,7 +11,7 @@ namespace Prism.ButtonOperations
             //HDBolts.StampConnectionCodeOnMainMember(myObjects);
             if (ModelChecker.MemberOrientationIsCorrect(myObjects, out IgnoreType ignore))
             {
-                if (!FabsecProcessing.PrepFabsecCarcassesForMaterialOrder(myObjects, model, startNumber)) return false;
+                if (!FabsecProcessing.PrepFabsecCarcassesForMaterialOrder(myObjects, projectData, model, startNumber)) return false;
                 // if (!myObjects.ProcessFabsecs(model, projectData)) { return false; }
 
                 myObjects.GetNonFabsecParts().AddStartNumbers(startNumber);

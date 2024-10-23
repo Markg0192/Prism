@@ -39,7 +39,7 @@ namespace Prism
         {
             if (typeOfOrder == 1)
             {
-                return FabsecProcessing.CreateFabsecCarcasses(myObjects, model);
+                return FabsecProcessing.CreateFabsecCarcasses(myObjects, projectData, model);
             }
             if (typeOfOrder == 2)
             {

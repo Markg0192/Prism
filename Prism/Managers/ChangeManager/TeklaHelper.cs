@@ -19,6 +19,7 @@ using System.Xml.Serialization;
 using Tekla.Structures.Model;
 using static Prism.Enum;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using Action = System.Action;
 using Assembly = Tekla.Structures.Model.Assembly;
 using Label = System.Windows.Forms.Label;
 using Model = Tekla.Structures.Model.Model;
@@ -28,52 +29,160 @@ namespace Prism
 {
     public class TeklaHelper
     {
-        public static void CreateAssemblyXmls(Model model, string filePath, SelectedObjects selectedObjects, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
-        {
-            var allUnsupportedTypes = new ConcurrentBag<string>();
-            int totalCount = selectedObjects.GetMainParts().Count;
-            int xmlProcessedCount = 0;
-            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
-            var assemblyCounts = new ConcurrentDictionary<string, int>();
-            var fittingCounts = new ConcurrentDictionary<string, int>();
+		/*  public static void CreateAssemblyXmls(Model model, string filePath, SelectedObjects selectedObjects, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
+		  {
+			  var allUnsupportedTypes = new ConcurrentBag<string>();
+			  int totalCount = selectedObjects.GetMainParts().Count;
+			  int xmlProcessedCount = 0;
+			  var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
+			  var assemblyCounts = new ConcurrentDictionary<string, int>();
+			  var fittingCounts = new ConcurrentDictionary<string, int>();
 
-                // Process MyAssembly objects in parallel
-                Parallel.ForEach(selectedObjects.GetMainParts(), parallelOptions, assembly =>
-                {
-                    var myAssembly = MyAssembly.CreateMyAssembly(assembly.Part.GetAssembly(), model);
+				  // Process MyAssembly objects in parallel
+				  Parallel.ForEach(selectedObjects.GetMainParts(), parallelOptions, assembly =>
+				  {
+					  var myAssembly = MyAssembly.CreateMyAssembly(assembly.Part.GetAssembly(), model);
 
-                    assemblyCounts.AddOrUpdate(myAssembly.PartMark, 1, (key, oldValue) => oldValue + 1);
-                    Parallel.ForEach(myAssembly.Fittings, parallelOptions, fitting =>
-                    {
-                        fittingCounts.AddOrUpdate(fitting.PartMark, 1, (key, oldValue) => oldValue + 1);
-                    });
+					  assemblyCounts.AddOrUpdate(myAssembly.PartMark, 1, (key, oldValue) => oldValue + 1);
+					  Parallel.ForEach(myAssembly.Fittings, parallelOptions, fitting =>
+					  {
+						  fittingCounts.AddOrUpdate(fitting.PartMark, 1, (key, oldValue) => oldValue + 1);
+					  });
 
-                    string localFileName = Path.Combine(filePath, $"{myAssembly.Guid}.xml");
+					  string localFileName = Path.Combine(filePath, $"{myAssembly.Guid}.xml");
 
-                    using (var xmlWriter = XmlWriter.Create(localFileName, new XmlWriterSettings { Indent = true }))
-                    {
-                        new XmlSerializer(typeof(MyAssembly)).Serialize(xmlWriter, myAssembly);
-                    }
+					  using (var xmlWriter = XmlWriter.Create(localFileName, new XmlWriterSettings { Indent = true }))
+					  {
+						  new XmlSerializer(typeof(MyAssembly)).Serialize(xmlWriter, myAssembly);
+					  }
 
-                    UpdateStatusLabelWithXmlProgress(ref xmlProcessedCount, toolStrip, statusLabel, totalCount);
-                });
+					  UpdateStatusLabelWithXmlProgress(ref xmlProcessedCount, toolStrip, statusLabel, totalCount);
+				  });
 
-            SerializeData(assemblyCounts, fittingCounts, filePath);
 
-            if (allUnsupportedTypes.Count > 0)
-            {
-                // Handle unsupported types
-            }
-            toolStrip.Invoke(new System.Action(() =>
-            {
-                statusLabel.Text = "Data saved, creating Fab Package";
-            }));
 
-            // Optional: Force a garbage collection if memory usage is still high after processing
-            // GC.Collect();
-        }
 
-        private static void UpdateStatusLabelWithXmlProgress(ref int processedCount, ToolStrip toolStrip, ToolStripStatusLabel statusLabel, int totalCount)
+			  SerializeData(assemblyCounts, fittingCounts, filePath);
+
+			  if (allUnsupportedTypes.Count > 0)
+			  {
+				  // Handle unsupported types
+			  }
+			  toolStrip.Invoke(new System.Action(() =>
+			  {
+				  statusLabel.Text = "Data saved, creating Fab Package";
+			  }));
+
+			  // Optional: Force a garbage collection if memory usage is still high after processing
+			  // GC.Collect();
+		  }*/
+		private static volatile int xmlProcessedCount = 0;
+
+		public static void CreateAssemblyXmls(Model model, string filePath, SelectedObjects selectedObjects, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
+		{
+			var allUnsupportedTypes = new ConcurrentBag<string>();
+			int totalCount = selectedObjects.GetMainParts().Count;		
+			var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
+			var assemblyCounts = new ConcurrentDictionary<string, int>();
+			var fittingCounts = new ConcurrentDictionary<string, int>();
+
+			// Shared XmlSerializer instance
+			var myAssemblySerializer = new XmlSerializer(typeof(MyAssembly));
+
+			// Collection to hold MyAssembly instances
+			var myAssemblies = new ConcurrentBag<MyAssembly>();
+
+			// Set up a cancellation token for the UI update task
+			var cts = new CancellationTokenSource();
+			var cancellationToken = cts.Token;
+
+			// Start a task to update the UI periodically
+			var uiUpdateTask = Task.Run(async () =>
+			{
+				while (!cancellationToken.IsCancellationRequested)
+				{
+					int currentCount = xmlProcessedCount;
+					toolStrip.Invoke(new Action(() =>
+					{
+						statusLabel.Text = $"Storing Assembly data: {currentCount} of {totalCount}";
+					}));
+					await Task.Delay(500); // Adjust the delay as needed
+				}
+			});
+
+			try
+			{
+				// Process MyAssembly objects in parallel
+				Parallel.ForEach(selectedObjects.GetMainParts(), parallelOptions, assembly =>
+				{
+					try
+					{
+						var myAssembly = MyAssembly.CreateMyAssembly(assembly.Part.GetAssembly(), model);
+						myAssemblies.Add(myAssembly);
+
+						assemblyCounts.AddOrUpdate(myAssembly.PartMark, 1, (key, oldValue) => oldValue + 1);
+
+						foreach (var fitting in myAssembly.Fittings)
+						{
+							fittingCounts.AddOrUpdate(fitting.PartMark, 1, (key, oldValue) => oldValue + 1);
+						}
+
+						Interlocked.Increment(ref xmlProcessedCount);
+					}
+					catch (Exception ex)
+					{
+						Console.WriteLine($"Error processing assembly {assembly.Part.GetAssembly().Identifier}: {ex.Message}");
+						// Optionally, log or handle the exception
+					}
+				});
+
+				// Serialize MyAssembly instances sequentially to avoid thread-safety issues
+				int serializedCount = 0;
+				foreach (var myAssembly in myAssemblies)
+				{
+					try
+					{
+						string localFileName = Path.Combine(filePath, $"{myAssembly.Guid}.xml");
+						using (var xmlWriter = XmlWriter.Create(localFileName, new XmlWriterSettings { Indent = true }))
+						{
+							myAssemblySerializer.Serialize(xmlWriter, myAssembly);
+						}
+						serializedCount++;
+					}
+					catch (Exception ex)
+					{
+						Console.WriteLine($"Error serializing assembly {myAssembly.Guid}: {ex.Message}");
+						// Optionally, log or handle the exception
+					}
+				}
+
+				SerializeData(assemblyCounts, fittingCounts, filePath);
+
+				if (allUnsupportedTypes.Count > 0)
+				{
+					// Handle unsupported types
+				}
+
+				// Update the status label after completion
+				toolStrip.Invoke(new Action(() =>
+				{
+					statusLabel.Text = "Data saved, creating Fab Package";
+				}));
+			}
+			finally
+			{
+				// Cancel the UI update task
+				cts.Cancel();
+				uiUpdateTask.Wait();
+			}
+
+			// Optional: Force a garbage collection if memory usage is still high after processing
+			// GC.Collect();
+		}
+
+
+
+		private static void UpdateStatusLabelWithXmlProgress(ref int processedCount, ToolStrip toolStrip, ToolStripStatusLabel statusLabel, int totalCount)
         {
             int currentCount = Interlocked.Increment(ref processedCount);
 
@@ -584,7 +693,7 @@ namespace Prism
                 case "BooleanPlane":
                     return "A cut has moved.";
                 default:
-                    return "A cut property has be changed";
+                    return "A cut property has been changed";
             }
         }
 

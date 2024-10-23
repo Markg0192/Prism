@@ -102,7 +102,7 @@ namespace Prism
                 $"{Enums.AdvancedSettingType.DirectorySeversafe.ToString()}{split} ",
                 $"{Enums.AdvancedSettingType.DirectoryFabPack.ToString()}{split} ",
                 $"{Enums.AdvancedSettingType.DirectoryVariation.ToString()}{split} ",
-                $"",
+                $"{Enums.AdvancedSettingType.FabsecGreen.ToString()}{split}",
                 $"",
                 $"",
                 $"",
