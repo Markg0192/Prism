@@ -59,7 +59,7 @@ namespace Prism
 		private const string _output2OName = "-2o-HotRolledMemList-OMIT.xsr";
 		private string _report2OName = $"{_output2OName.Replace("xsr", "rpt")}";
 		private const string _output2PgName = "-2PG-HotRolledPgMemList.xsr";
-		private string _report2PgName = $"{_output2OName.Replace("xsr", "rpt")}";
+		private string _report2PgName = $"{_output2PgName.Replace("xsr", "rpt")}";
 
 		private const string _output3Name = "-3-HotRolledFitList.xsr";
 		private string _report3Name = $"{_output3Name.Replace("xsr", "rpt")}";

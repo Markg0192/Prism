@@ -160,13 +160,19 @@
             return "BOLT_USERFIELD_8";
         }
 
-        public static string BoltOrderedAmount()
+        public static string BoltOrderPhaseNo()
         {
             return "SEV-UDA-138";
             return "BOLT_USERFIELD_6";
         }
 
-        public static string BoltShearStudTag()
+		public static string BoltOrderIssueNo()
+		{
+			return "SEV-UDA-350";
+			return "BOLT_USERFIELD_6";
+		}
+
+		public static string BoltShearStudTag()
         {
             return "SEV-UDA-139";
             return "BOLT_USERFIELD_6";

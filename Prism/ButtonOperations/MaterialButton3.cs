@@ -190,7 +190,7 @@ namespace Prism.ButtonOperations
                 if (!myObjects.PrismParts.ModifyAttributes(stageNumber, projectData, toolStrip, tssl, isSpecialFittingOrder)) { return false; }
             }
 
-            if (fabsecsPresent && !orderType.Contains("Omit")) FabsecProcessing.RemoveGreenFromFabsecs(myObjects.GetFabsecParts());
+            if (fabsecsPresent && !orderType.Contains("Omit")) FabsecProcessing.RemoveGreenFromFabsecs(myObjects.GetFabsecParts(), projectData);
             PrismWarnings.MaterialOrderComplete(projectData);
 
             reportManager.Folders.ZipFolder(reportManager.Folders.MatPath);

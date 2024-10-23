@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 using Tekla.Structures.Model;
+using Task = System.Threading.Tasks.Task;
 
 namespace Prism.Managers.ChangeManager
 {
@@ -21,94 +22,158 @@ namespace Prism.Managers.ChangeManager
         private static List<SteelItemBase> _addItems;
         private static string IssueNo;
 
-        public static bool RunChangeManagement(Model model, string currentIssueNo, string fileLocation, string phaseNumber, PrismProjectData projectData, SelectedObjects selectedObjects,
-          ToolStrip toolStrip, ToolStripStatusLabel label, out List<SteelItemBase> revisedItems, out List<SteelItemBase> omitItems, out List<SteelItemBase> addItems, out string messageForEmail)
-        {
-            ModelModifiers.ResetWorkPlane(model);
+		/*   public static bool RunChangeManagement(Model model, string currentIssueNo, string fileLocation, string phaseNumber, PrismProjectData projectData, SelectedObjects selectedObjects,
+			 ToolStrip toolStrip, ToolStripStatusLabel label, out List<SteelItemBase> revisedItems, out List<SteelItemBase> omitItems, out List<SteelItemBase> addItems, out string messageForEmail)
+		   {
+			   ModelModifiers.ResetWorkPlane(model);
 
-            _revisedItems = new List<SteelItemBase>();
-            _omitItems = new List<SteelItemBase>();
-            _addItems = new List<SteelItemBase>();
-            WriteNewXML(model, currentIssueNo, fileLocation, phaseNumber, selectedObjects, toolStrip, label);
-            if (currentIssueNo.Contains("01"))
-            {
-                revisedItems = null;
-                omitItems = null;
-                addItems = null;
-                messageForEmail = "";
-                return true;
-            }
-            else
-            {
-                ReturnXmlPath(currentIssueNo, fileLocation, phaseNumber, out string previousIssuePath, out string currentIssuePath);
+			   _revisedItems = new List<SteelItemBase>();
+			   _omitItems = new List<SteelItemBase>();
+			   _addItems = new List<SteelItemBase>();
+			   WriteNewXML(model, currentIssueNo, fileLocation, phaseNumber, selectedObjects, toolStrip, label);
+			   if (currentIssueNo.Contains("01"))
+			   {
+				   revisedItems = null;
+				   omitItems = null;
+				   addItems = null;
+				   messageForEmail = "";
+				   return true;
+			   }
+			   else
+			   {
+				   ReturnXmlPath(currentIssueNo, fileLocation, phaseNumber, out string previousIssuePath, out string currentIssuePath);
 
-                Console.WriteLine("Fetching new steel info for comparison...");
+				   Console.WriteLine("Fetching new steel info for comparison...");
 
-                //  List<MyAssembly> newAssemblyList = new List<MyAssembly>();
+				   //  List<MyAssembly> newAssemblyList = new List<MyAssembly>();
 
-                // Ensure newAssemblyList is a ConcurrentBag to safely add items in parallel
-                ConcurrentBag<MyAssembly> newAssemblyList = new ConcurrentBag<MyAssembly>();
+				   // Ensure newAssemblyList is a ConcurrentBag to safely add items in parallel
+				   ConcurrentBag<MyAssembly> newAssemblyList = new ConcurrentBag<MyAssembly>();
 
-                var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
-                int processedCount = 0;
+				   var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
+				   int processedCount = 0;
 
-                Parallel.ForEach(selectedObjects.GetMainParts(), parallelOptions, ass =>
-                {
-                    MyAssembly myAssembly = CheckForAndGetExistingData(previousIssuePath + "\\", ass.Part.GetAssembly(), model); ;
-                    //  FormChangeLists(myAssembly); // Ensure this operation is thread-safe if uncommented
-                    newAssemblyList.Add(myAssembly);
+				   Parallel.ForEach(selectedObjects.GetMainParts(), parallelOptions, ass =>
+				   {
+					   MyAssembly myAssembly = CheckForAndGetExistingData(previousIssuePath + "\\", ass.Part.GetAssembly(), model); ;
+					   //  FormChangeLists(myAssembly); // Ensure this operation is thread-safe if uncommented
+					   newAssemblyList.Add(myAssembly);
 
-                    int currentCount = Interlocked.Increment(ref processedCount);
+					   int currentCount = Interlocked.Increment(ref processedCount);
 
-                    // Throttle UI updates to avoid overwhelming the UI thread
-                    //   if (currentCount % 5 == 0 || currentCount == totalCount)
-                    toolStrip.Invoke(new System.Action(() =>
-                    {
-                        label.Text = $"Comparing Objects: {currentCount} of {selectedObjects.GetMainParts().Count}";
-                    }));
-                });
+					   // Throttle UI updates to avoid overwhelming the UI thread
+					   //   if (currentCount % 5 == 0 || currentCount == totalCount)
+					   toolStrip.Invoke(new System.Action(() =>
+					   {
+						   label.Text = $"Comparing Objects: {currentCount} of {selectedObjects.GetMainParts().Count}";
+					   }));
+				   });
 
-                Dictionary<string, int> oldFittingCounter = LoadDictionaryFromXml(previousIssuePath + "\\Fitting Count.xml");
-                Dictionary<string, int> newFittingCount = LoadDictionaryFromXml(currentIssuePath + "\\Fitting Count.xml");
-                Dictionary<string, int> oldAssemblyCounter = LoadDictionaryFromXml(previousIssuePath + "\\Assembly Count.xml");
-                Dictionary<string, int> newAssemblyCounter = LoadDictionaryFromXml(currentIssuePath + "\\Assembly Count.xml");
+				   Dictionary<string, int> oldFittingCounter = LoadDictionaryFromXml(previousIssuePath + "\\Fitting Count.xml");
+				   Dictionary<string, int> newFittingCount = LoadDictionaryFromXml(currentIssuePath + "\\Fitting Count.xml");
+				   Dictionary<string, int> oldAssemblyCounter = LoadDictionaryFromXml(previousIssuePath + "\\Assembly Count.xml");
+				   Dictionary<string, int> newAssemblyCounter = LoadDictionaryFromXml(currentIssuePath + "\\Assembly Count.xml");
 
-                List<MyFitting> fittingComparisonResult = TeklaHelper.IdentifyDifferencesInLists(oldFittingCounter, newFittingCount);
+				   List<MyFitting> fittingComparisonResult = TeklaHelper.IdentifyDifferencesInLists(oldFittingCounter, newFittingCount);
 
-                // Create a dictionary to keep track of assigned GUIDs
-                Dictionary<string, Queue<string>> partMarkToGuidsMap = selectedObjects.PrismParts
-                    .GroupBy(p => p.Part.GetPartMark())
-                    .ToDictionary(g => g.Key, g => new Queue<string>(g.Select(p => p.Guid)));
+				   // Create a dictionary to keep track of assigned GUIDs
+				   Dictionary<string, Queue<string>> partMarkToGuidsMap = selectedObjects.PrismParts
+					   .GroupBy(p => p.Part.GetPartMark())
+					   .ToDictionary(g => g.Key, g => new Queue<string>(g.Select(p => p.Guid)));
 
-                // Match and update Guid
-                foreach (var fitting in fittingComparisonResult)
-                {
-                    if (partMarkToGuidsMap.TryGetValue(fitting.PartMark, out var guidQueue) && guidQueue.Count > 0)
-                    {
-                        fitting.Guid = guidQueue.Dequeue();
-                    }
-                }
+				   // Match and update Guid
+				   foreach (var fitting in fittingComparisonResult)
+				   {
+					   if (partMarkToGuidsMap.TryGetValue(fitting.PartMark, out var guidQueue) && guidQueue.Count > 0)
+					   {
+						   fitting.Guid = guidQueue.Dequeue();
+					   }
+				   }
 
-                (List<string> messages, List<MyAssembly> omittedAssemblies) = TeklaHelper.IdentifyDifferencesInLists(oldAssemblyCounter, newAssemblyCounter, newAssemblyList.ToList(), fittingComparisonResult);
+				   (List<string> messages, List<MyAssembly> omittedAssemblies) = TeklaHelper.IdentifyDifferencesInLists(oldAssemblyCounter, newAssemblyCounter, newAssemblyList.ToList(), fittingComparisonResult);
 
-                FormChangeLists(newAssemblyList, fittingComparisonResult, omittedAssemblies);
+				   FormChangeLists(newAssemblyList, fittingComparisonResult, omittedAssemblies);
 
-                //  TeklaHelper.GetSelectedSteelInfo(model, fileLocation, selectedObjects);
-                //
-                //   var newFittingDictionary = CreateFittingDictionary(currentSelection);
-                //
-                //   var omittedMembers = TeklaHelper.CompareSteelLists(previousSelection.Assemblies, currentSelection, oldFittingDictionary, newFittingDictionary);
+				   //  TeklaHelper.GetSelectedSteelInfo(model, fileLocation, selectedObjects);
+				   //
+				   //   var newFittingDictionary = CreateFittingDictionary(currentSelection);
+				   //
+				   //   var omittedMembers = TeklaHelper.CompareSteelLists(previousSelection.Assemblies, currentSelection, oldFittingDictionary, newFittingDictionary);
 
-                revisedItems = _revisedItems;
-                omitItems = _omitItems;
-                addItems = _addItems;
+				   revisedItems = _revisedItems;
+				   omitItems = _omitItems;
+				   addItems = _addItems;
 
-                return WriteMyChangeMessage(fileLocation, phaseNumber, projectData, out messageForEmail);
-                //  Logging.LogProgress(model.GetProjectInfo().Name, currentSelection.Count(), differenceMessages.Count());
-            }
-        }
+				   return WriteMyChangeMessage(fileLocation, phaseNumber, projectData, out messageForEmail);
+				   //  Logging.LogProgress(model.GetProjectInfo().Name, currentSelection.Count(), differenceMessages.Count());
+			   }
+		   }*/
 
-        private static MyAssembly CheckForAndGetExistingData(string filePath, Assembly myAssembly, Model model)
+		public static async Task<(bool success, List<SteelItemBase> revisedItems, List<SteelItemBase> omitItems, List<SteelItemBase> addItems, string messageForEmail)> RunChangeManagementAsync(
+	Model model, string currentIssueNo, string fileLocation, string phaseNumber, PrismProjectData projectData, SelectedObjects selectedObjects,
+	ToolStrip toolStrip, ToolStripStatusLabel label)
+		{
+			ModelModifiers.ResetWorkPlane(model);
+
+			_revisedItems = new List<SteelItemBase>();
+			_omitItems = new List<SteelItemBase>();
+			_addItems = new List<SteelItemBase>();
+
+			await WriteNewXML(model, currentIssueNo, fileLocation, phaseNumber, selectedObjects, toolStrip, label);
+
+			if (currentIssueNo.Contains("01"))
+			{
+				return (true, null, null, null, ""); // Returning a tuple with default values for issue 01
+			}
+
+			ReturnXmlPath(currentIssueNo, fileLocation, phaseNumber, out string previousIssuePath, out string currentIssuePath);
+
+			ConcurrentBag<MyAssembly> newAssemblyList = new ConcurrentBag<MyAssembly>();
+			var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
+			int processedCount = 0;
+
+			var tasks = selectedObjects.GetMainParts().Select(ass => Task.Run(async () =>
+			{
+				MyAssembly myAssembly = await Task.Run(() => CheckForAndGetExistingData(previousIssuePath + "\\", ass.Part.GetAssembly(), model));
+				newAssemblyList.Add(myAssembly);
+
+				int currentCount = Interlocked.Increment(ref processedCount);
+
+				// Update UI
+				if (currentCount % 5 == 0 || currentCount == selectedObjects.GetMainParts().Count)
+				{
+					toolStrip.BeginInvoke(new Action(() =>
+					{
+						label.Text = $"Comparing Objects: {currentCount} of {selectedObjects.GetMainParts().Count}";
+					}));
+				}
+			}));
+
+
+			await System.Threading.Tasks.Task.WhenAll(tasks);
+
+			Dictionary<string, int> oldFittingCounter = LoadDictionaryFromXml(previousIssuePath + "\\Fitting Count.xml");
+			Dictionary<string, int> newFittingCount = LoadDictionaryFromXml(currentIssuePath + "\\Fitting Count.xml");
+			Dictionary<string, int> oldAssemblyCounter = LoadDictionaryFromXml(previousIssuePath + "\\Assembly Count.xml");
+			Dictionary<string, int> newAssemblyCounter = LoadDictionaryFromXml(currentIssuePath + "\\Assembly Count.xml");
+
+			List<MyFitting> fittingComparisonResult = TeklaHelper.IdentifyDifferencesInLists(oldFittingCounter, newFittingCount);
+
+			(List<string> messages, List<MyAssembly> omittedAssemblies) = TeklaHelper.IdentifyDifferencesInLists(oldAssemblyCounter, newAssemblyCounter, newAssemblyList.ToList(), fittingComparisonResult);
+
+			FormChangeLists(newAssemblyList, fittingComparisonResult, omittedAssemblies);
+
+			// Prepare return values
+			var revisedItems = _revisedItems;
+			var omitItems = _omitItems;
+			var addItems = _addItems;
+
+			bool success = WriteMyChangeMessage(fileLocation, phaseNumber, projectData, out string messageForEmail);
+
+			return (success, revisedItems, omitItems, addItems, messageForEmail); // Return the tuple with all the data
+		}
+
+		private static MyAssembly CheckForAndGetExistingData(string filePath, Assembly myAssembly, Model model)
         {
             //  we need to check this method works, it should return the list of xmls and do a basic comparison of assemlies.
             //    var xmlFiles = Directory.GetFiles(filePath, "*.xml");
@@ -287,13 +352,13 @@ namespace Prism.Managers.ChangeManager
             }
         }
 
-        private static void WriteNewXML(Model model, string issueNumber, string fileLocation, string phaseNumber, SelectedObjects selectedObjects, ToolStrip toolStrip, ToolStripStatusLabel label)
+        private static async Task WriteNewXML(Model model, string issueNumber, string fileLocation, string phaseNumber, SelectedObjects selectedObjects, ToolStrip toolStrip, ToolStripStatusLabel label)
         {
             string filetoWrite = fileLocation + "\\" + "Phase " + phaseNumber + " - Issue " + issueNumber.Substring(0, 2);
 
             Directory.CreateDirectory(filetoWrite);
 
-            TeklaHelper.CreateAssemblyXmls(model, filetoWrite, selectedObjects, toolStrip, label);
+			await Task.Run(() => TeklaHelper.CreateAssemblyXmls(model, filetoWrite, selectedObjects, toolStrip, label));
         }
 
         private static void FormChangeLists(MyAssembly myAssembly)

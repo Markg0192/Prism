@@ -95,6 +95,14 @@ namespace Prism
 			return PrismParts.Where(part => !part.IsLocked).ToList();
 		}
 
+		public List<PrismPart> GetDistinctByPartMark(List<PrismPart> prismParts)
+		{
+			return prismParts
+				.GroupBy(part => part.PartMark)
+				.Select(group => group.First())
+				.ToList();
+		}
+
 		public List<PrismPart> GetLockedParts()
 		{
 			return PrismParts.Where(part => part.IsLocked).ToList();
@@ -238,7 +246,6 @@ namespace Prism
 			}
 		}
 
-
 		private void CreatePartListFromReport(string packagePath, Model model, string phaseNum, string issueNum)
 		{
 			string teklaReportLocation = Path.Combine(FirmFolderLoc.ReportTemplates(), "PrismPart_List.rpt");
@@ -263,7 +270,12 @@ namespace Prism
 					}
 					if (items[0] == " Bolt")
 					{
-						PrismBoltGroups.Add(new PrismBoltGroup(items, phaseNum, issueNum, model));
+						// we create the bg and check for null because it was failing sometimes..
+						PrismBoltGroup bg = new PrismBoltGroup(items, phaseNum, issueNum, model);
+						if (bg != null)
+						{
+							PrismBoltGroups.Add(bg);
+						}
 					}
 				}
 			}

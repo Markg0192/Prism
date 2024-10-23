@@ -275,14 +275,18 @@ namespace Prism
 
 		private async void btn_SpecialOperations_Click(object sender, EventArgs e)
 		{
-			PrismMacroBuilder.RunPrismDrawingReport(@"C:\\TeklaStructuresModels2023\\Sandbox\\PlotFiles");
-		/*	StartFunction();
+		//	PrismMacroBuilder.RunPrismDrawingReport(@"C:\\TeklaStructuresModels2023\\Sandbox\\PlotFiles");
+			StartFunction();
 
-			ReportManager repoman = new ReportManager(_projectData, "IFC", "01");
+			ReportManager repoman = new ReportManager(_projectData, "IFC", "02");
 			repoman.Folders.CreateFabFolders();
 
-			_selectedObjects = new SelectedObjects("", StageTypes.FAB, repoman.PhaseNum, repoman.IssueNum, _model, Constants.SpecialOperationUser());
-			/*     IFCExporter.ExportIndividualIFC(_selectedObjects, repoman.Folders.IfcPath, "");*/
+			_selectedObjects = new SelectedObjects("C:\\TeklaStructuresModels\\2021 models\\Sandbox\\PrismIFCExportTest\\", StageTypes.Check2, repoman.PhaseNum, repoman.IssueNum, _model, Constants.SpecialOperationUser());
+		   
+			IFCExporter.ExportIndividualIFC(_selectedObjects, repoman.Folders.IfcPath, statusStrip_Fab, StatusLabel);
+			//bool boltOrderAdded = false;
+		//	await Task.Run(() => FabMisc.FabMiscOp(_model, txt_SiteDate.Text, _selectedObjects, false, repoman, 1, _projectData, false, statusStrip_Fab, StatusLabel, out boltOrderAdded));
+
 			//  ModelModifiers.PerformNumbering();
 
 
@@ -483,11 +487,15 @@ namespace Prism
 
 			ReportManager myReportManager = new ReportManager(_projectData, phaseNumber.Text, issueNum);
 
-			int totalNcRequired = 0;
-			if (!await Task.Run(() => _selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber.Text, issueNum, stageType, txt_SiteDate.Text, runSeversafe, runChangeManager, statusStrip_Fab, StatusLabel, _teklaVersion, out totalNcRequired))) { EndFunction(0); return; }
+			var (success, totalNcRequired) = await _selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber.Text, issueNum, stageType, txt_SiteDate.Text, runSeversafe, runChangeManager, statusStrip_Fab, StatusLabel, _teklaVersion);
+
+			if (!success)
+			{
+				EndFunction(0);
+			}
 
 			bool boltOrderAdded = false;
-			await Task.Run(() => FabMisc.FabMiscOp(_model, txt_SiteDate.Text, _selectedObjects, runSeversafe, myReportManager, divisionNo, _projectData, runChangeManager, out boltOrderAdded));
+			await Task.Run(() => FabMisc.FabMiscOp(_model, txt_SiteDate.Text, _selectedObjects, runSeversafe, myReportManager, divisionNo, _projectData, runChangeManager, statusStrip_Fab, StatusLabel, out boltOrderAdded));
 
 			if (!CheckNcCreation(myReportManager, totalNcRequired, out int numberOfFilesCreated, out HashSet<string> uniqueFiles))
 			{
@@ -704,7 +712,7 @@ namespace Prism
 			{
 				ModelModifiers.SelectSpecialTaggedInSelection(_selectedObjects);
 				ModelModifiers.AddPrelimMarks(_selectedObjects, _projectData);
-				_selectedObjects = new SelectedObjects("", stageType, myReportManager.PhaseNum, myReportManager.IssueNum, _model, Constants.SpecialOperationUser()); // we reset selected objects here (because we just changed the selection)
+				_selectedObjects = new SelectedObjects(myReportManager.Folders.MatPath, stageType, myReportManager.PhaseNum, myReportManager.IssueNum, _model, Constants.SpecialOperationUser()); // we reset selected objects here (because we just changed the selection)
 				myReportManager.CreateMaterialReports(_selectedObjects, orderType, stageType);
 			}
 			else
@@ -1253,7 +1261,7 @@ namespace Prism
 
 		private void txt_MaterialPhaseNumber_KeyPress(object sender, KeyPressEventArgs e)
 		{
-			AllowNumbersAndDeleteOnly(e);
+			AllowNumbersAndDeleteAndSW(e);
 		}
 
 		private void phaseNumber_KeyPress(object sender, KeyPressEventArgs e)
@@ -1266,7 +1274,7 @@ namespace Prism
 			char delete = '\b'; //This is the code created when backspace is pressed.
 
 			// Check if the pressed key is a number, delete key, or 's'/'w'
-			if (!Char.IsNumber(e.KeyChar) && e.KeyChar != delete && e.KeyChar != 'S' && e.KeyChar != 'W')
+			if (!Char.IsNumber(e.KeyChar) && e.KeyChar != delete && e.KeyChar != 'S' && e.KeyChar != 'W' && e.KeyChar != '-')
 			{
 				e.Handled = true; // If it's not a number, delete, 's', or 'w', ignore the input.
 				return;

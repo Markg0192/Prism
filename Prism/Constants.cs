@@ -67,7 +67,8 @@ namespace Prism
                 "Matthew.Poots",
 				"John.Senior",
 				"Paul.Foreman",
-				"Dean.Johnston"
+				"Dean.Johnston",
+				"Rhys.Thompson"
 			};
 
             foreach (string user in specialOperationUsers)

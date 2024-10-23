@@ -44,7 +44,10 @@ namespace Prism
 			PartMark = Trim(items[10]);
 			NumbersOutOfDate = PartMark.Contains("?");
 			Part = model.SelectModelObject(model.GetIdentifierByGUID(Guid)) as Part;
+			if (IsMainPart) Assembly = Part.GetAssembly();
 			ModelObject = Part;
+			DrawingRevision = Trim(items[11]);
+
 		}
 
 		private string Trim(string s)
@@ -52,6 +55,7 @@ namespace Prism
 			return s.TrimEnd(' ').TrimStart(' ');
 		}
 
+		public string DrawingRevision { get; set; }
 		public bool NumbersOutOfDate { get; set; }
 		public string PartMark { get; set; }
 		public bool StartNumberDoesntMatch { get; set; }

@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using Tekla.Structures.Model;
 using System.Linq;
+using System.Windows.Forms;
 
 namespace Prism
 {
     public static class FabMisc
     {
-        public static void FabMiscOp(Model model, string siteDate, SelectedObjects selectedObjects, bool runSeversafe, ReportManager reportManager, int divisionNo, PrismProjectData projData, bool runChangeManager, out bool boltOrderAdded)
+        public static void FabMiscOp(Model model, string siteDate, SelectedObjects selectedObjects, bool runSeversafe, ReportManager reportManager, int divisionNo, PrismProjectData projData, bool runChangeManager, ToolStrip toolStrip, ToolStripStatusLabel statusLabel, out bool boltOrderAdded)
         {
             boltOrderAdded = false;
             if (selectedObjects.PrismBoltGroups.Any(b => b.isOrdered == false))
@@ -24,7 +25,7 @@ namespace Prism
             if (runSeversafe) { SeversafeOrder.CreateSeversafeOrder(model, selectedObjects.GetSeversafeParts(), siteDate, reportManager, divisionNo, reportManager.EpoReportPrefix, projData); }
 
             ModelModifiers.StampPartFabUDA(selectedObjects.PrismParts, reportManager.PhaseNum, reportManager.IssueNum);
-            ViewManager.CreateFabView(reportManager.PhaseNum, reportManager.IssueNum, reportManager.ProjectData, selectedObjects);
+            ViewManager.CreateFabView(reportManager.PhaseNum, reportManager.IssueNum, reportManager.ProjectData, selectedObjects);         
         }
 
         public static void CreateBoltOrder(ReportManager reportManager, string siteDate, List<BoltGroup> unorderedBoltGroups)

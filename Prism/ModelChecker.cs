@@ -472,6 +472,11 @@ namespace Prism
 			if (mainPartNumber != secondaryPart.PartNumber.StartNumber)
 			{
 				PrismPart p = selectedObjects.PrismParts.Find(x => x.Guid == secondaryPart.Identifier.GUID.ToString());
+				if (p == null)
+				{
+					p = new PrismPart(secondaryPart);
+					selectedObjects.PrismParts.Add(new PrismPart(secondaryPart));
+				}
 				p.StartNumberDoesntMatch = true;
 				p.StartNumber = mainPartNumber;
 			}
@@ -600,5 +605,11 @@ namespace Prism
 			}
 			return true;
 		}
+
+		public static bool IsCurrentUser(params string[] userNames)
+		{
+			return userNames.Any(userName => string.Equals(Environment.UserName, userName, StringComparison.OrdinalIgnoreCase));
+		}
 	}
+	
 }

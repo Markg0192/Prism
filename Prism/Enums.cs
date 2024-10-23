@@ -6,7 +6,7 @@
         public enum Factory { SNI, SUK, Unknown};
         public enum IgnoreType { AutoFix, Ignore, Stop, Unspecified };
         public enum Error { Execution, Orientation, NameAndClass}
-        public enum AdvancedSettingType { Default, PrelimPrefix, FabPackType, DirectoryMaterial, DirectoryCarcasses, DirectoryBolts, DirectorySeversafe, DirectoryFabPack, DirectoryVariation}
-         public enum DrawingFolder { Default, ASS, FIT, PRT, WLD, SHA, PGC, NotRequired, AssNotRequired}
+        public enum AdvancedSettingType { Default, PrelimPrefix, FabPackType, DirectoryMaterial, DirectoryCarcasses, DirectoryBolts, DirectorySeversafe, DirectoryFabPack, DirectoryVariation, FabsecGreen}
+        public enum DrawingFolder { Default, ASS, FIT, PRT, WLD, SHA, PGC, NotRequired, AssNotRequired}
     }
 }

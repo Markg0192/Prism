@@ -42,7 +42,9 @@ namespace Prism.CustomDialogs
             txt_DirectorySeversafe.Text = Logging.GetAdvancedSetting(projectData.ProjNumberAndGuid, Enums.AdvancedSettingType.DirectorySeversafe);
             txt_DirectoryFab.Text = Logging.GetAdvancedSetting(projectData.ProjNumberAndGuid, Enums.AdvancedSettingType.DirectoryFabPack);
             txt_DirectoryVariation.Text = Logging.GetAdvancedSetting(projectData.ProjNumberAndGuid, Enums.AdvancedSettingType.DirectoryVariation);  
-        }
+            txt_FabsecGreen.Text = Logging.GetAdvancedSetting(projectData.ProjNumberAndGuid, Enums.AdvancedSettingType.FabsecGreen);
+            if (txt_FabsecGreen.Text == "") txt_FabsecGreen.Text = "100";
+		}
 
         private void btn_Apply_Click(object sender, EventArgs e)
         {
@@ -56,8 +58,9 @@ namespace Prism.CustomDialogs
             WriteSetting(Enums.AdvancedSettingType.DirectorySeversafe, txt_DirectorySeversafe.Text);
             WriteSetting(Enums.AdvancedSettingType.DirectoryFabPack, txt_DirectoryFab.Text);
             WriteSetting(Enums.AdvancedSettingType.DirectoryVariation, txt_DirectoryVariation.Text);
+			WriteSetting(Enums.AdvancedSettingType.FabsecGreen, txt_FabsecGreen.Text);
 
-            StatusLabel.Text = "Settings applied";
+			StatusLabel.Text = "Settings applied";
         }
 
         private void WriteSetting(Enums.AdvancedSettingType setting, string textToWrite)
