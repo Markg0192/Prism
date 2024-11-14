@@ -31,6 +31,7 @@ namespace Prism
 			MyDrawingHandler = new DrawingHandler();
 
 			PrismParts = new List<PrismPart>();
+			PrismDrawings = new List<PrismDrawing>();
 
 			MyMarks = new List<string>();
 
@@ -63,6 +64,7 @@ namespace Prism
 		public double BiggestZ = -100000000;
 
 		public List<PrismPart> PrismParts { get; set; }
+		public List<PrismDrawing> PrismDrawings { get; set; }
 		public List<PrismBoltGroup> PrismBoltGroups = new List<PrismBoltGroup>();
 
 		public string ErrorMessage { get; set; }
@@ -256,6 +258,8 @@ namespace Prism
 			// wait until Tekla Structures has unlocked the file, or timeout
 			if (!IfLockedWait(newReportLocation, 15)) return;
 
+			List<PrismDrawing> unfilteredDrawingList = new List<PrismDrawing>();
+
 			// read the report
 			using (var reader = new StreamReader(newReportLocation))
 			{
@@ -266,7 +270,17 @@ namespace Prism
 
 					if (items[0] == " Part")
 					{
-						PrismParts.Add(new PrismPart(items, model));
+						PrismPart newPart = new PrismPart(items, model);
+						PrismParts.Add(newPart);
+						CheckXYZSize(newPart.Part);
+						/*if (items[11].TrimEnd(' ').TrimStart(' ') != "") // then assembly drawing information is available
+						{
+							unfilteredDrawingList.Add(new PrismDrawing(items, true));
+						}
+						if(items[18].TrimEnd(' ').TrimStart(' ') != "") //then fitting drwaing information is available
+						{
+							unfilteredDrawingList.Add(new PrismDrawing(items, false));
+						}*/
 					}
 					if (items[0] == " Bolt")
 					{
@@ -278,6 +292,13 @@ namespace Prism
 						}
 					}
 				}
+
+			/*	// Remove duplicates based on AssemblyDrawingNumber and PartDrawingNumber
+				PrismDrawings = unfilteredDrawingList
+					.GroupBy(d => new { d.AssemblyDrawingNumber, d.PartDrawingNumber })
+					.Select(g => g.First())
+					.ToList();*/
+ 
 			}
 
 			File.Delete(newReportLocation);

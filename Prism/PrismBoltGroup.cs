@@ -42,18 +42,19 @@ namespace Prism
 			return IsBoltOrdered(phaseNum, issueNum, shearTag, boltPhaseNo, boltIssueNo);
 		}
 
-		private static bool IsBoltOrdered(string phaseNum, string issueNum, string boltShearStudTag, string orderPhaseNo, string orderIssueNo)
+		private static bool IsBoltOrdered(string currentPhaseNum, string currentIssueNum, string boltShearStudTag, string existingPhaseNo, string existingIssueNo)
 		{
-			if (orderPhaseNo == phaseNum && orderIssueNo == issueNum)
-			{
-				return true;
-			}
-			if (boltShearStudTag != "")
-			{
-				return true;
+			if (existingPhaseNo == "" || existingIssueNo == "")
+			{ 
+				return false; 
 			}
 
-			return false;
+			if (existingPhaseNo == currentPhaseNum && existingIssueNo == currentIssueNum)
+			{
+				return false;
+			}
+
+			return true;
 		}
 
 		private static bool BoltIsNotOrdered(bool isShearStud, string phaseNum, string issueNum, string boltShearStudTag, string orderPhaseNo, string orderIssueNo)

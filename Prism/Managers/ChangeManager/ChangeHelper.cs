@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 using Tekla.Structures.Model;
+using static Prism.TeklaHelper;
 using Task = System.Threading.Tasks.Task;
 
 namespace Prism.Managers.ChangeManager
@@ -152,10 +153,10 @@ namespace Prism.Managers.ChangeManager
 
 			await System.Threading.Tasks.Task.WhenAll(tasks);
 
-			Dictionary<string, int> oldFittingCounter = LoadDictionaryFromXml(previousIssuePath + "\\Fitting Count.xml");
-			Dictionary<string, int> newFittingCount = LoadDictionaryFromXml(currentIssuePath + "\\Fitting Count.xml");
-			Dictionary<string, int> oldAssemblyCounter = LoadDictionaryFromXml(previousIssuePath + "\\Assembly Count.xml");
-			Dictionary<string, int> newAssemblyCounter = LoadDictionaryFromXml(currentIssuePath + "\\Assembly Count.xml");
+			List<XmlItem> oldFittingCounter = LoadDictionaryFromXml(previousIssuePath + "\\Fitting Count.xml");
+			List<XmlItem> newFittingCount = LoadDictionaryFromXml(currentIssuePath + "\\Fitting Count.xml");
+			List<XmlItem> oldAssemblyCounter = LoadDictionaryFromXml(previousIssuePath + "\\Assembly Count.xml");
+			List<XmlItem> newAssemblyCounter = LoadDictionaryFromXml(currentIssuePath + "\\Assembly Count.xml");
 
 			List<MyFitting> fittingComparisonResult = TeklaHelper.IdentifyDifferencesInLists(oldFittingCounter, newFittingCount);
 
@@ -361,7 +362,7 @@ namespace Prism.Managers.ChangeManager
 			await Task.Run(() => TeklaHelper.CreateAssemblyXmls(model, filetoWrite, selectedObjects, toolStrip, label));
         }
 
-        private static void FormChangeLists(MyAssembly myAssembly)
+      /*  private static void FormChangeLists(MyAssembly myAssembly)
         {
             //   _omitItems.Add(omittedAssembly);
 
@@ -370,8 +371,8 @@ namespace Prism.Managers.ChangeManager
             {
                 AddItemToList(fitting);
             }
-
-        }
+     
+        }*/
 
         private static void FormChangeLists(ConcurrentBag<MyAssembly> myAssemblies, List<MyFitting> comparisonResult, List<MyAssembly> omittedAssemblies)//, SteelItemBase omittedAssembly)
         {
@@ -433,7 +434,7 @@ namespace Prism.Managers.ChangeManager
             return fittingMarkCounts;
         }
 
-        /*   private static SerializationWrapper LoadFromXml(string filePath)
+		/*   private static SerializationWrapper LoadFromXml(string filePath)
           {
                if (!File.Exists(filePath))
                {
@@ -448,23 +449,48 @@ namespace Prism.Managers.ChangeManager
                }
            }*/
 
-        private static Dictionary<string, int> LoadDictionaryFromXml(string filePath)
-        {
-            if (!File.Exists(filePath))
-            {
-                return new Dictionary<string, int>();
-            }
+		public class XmlItem
+		{
+			public string Key { get; set; }
+			public int Value { get; set; }
+			public string Guid { get; set; } // Third piece of information
+		}
 
-            var serializer = new XmlSerializer(typeof(KeyValueListWrapper));
-            using (var reader = new StreamReader(filePath))
-            {
-                var result = (KeyValueListWrapper)serializer.Deserialize(reader);
-                // Convert List<KeyValueItem> to Dictionary<string, int>
-                return result.Items.ToDictionary(item => item.Key, item => item.Value);
-            }
-        }
+		private static List<XmlItem> LoadDictionaryFromXml(string filePath)
+		{
+			if (!File.Exists(filePath))
+			{
+				return new List<XmlItem>();
+			}
 
-        public static void PopulateIssueNumbers(ref ComboBox cmb_IssueNo, ref TextBox txt_PhaseNo, string fileLocation)
+			var serializer = new XmlSerializer(typeof(PartCountWrapper)); // Use PartCountWrapper instead
+			using (var reader = new StreamReader(filePath))
+			{
+				var result = (PartCountWrapper)serializer.Deserialize(reader);
+				// No need to convert, just return the Items directly if they are already XmlItem
+				return result.Items;
+			}
+		}
+
+
+
+		/*	private static Dictionary<string, int> LoadDictionaryFromXml(string filePath)
+			{
+				if (!File.Exists(filePath))
+				{
+					return new Dictionary<string, int>();
+				}
+
+				var serializer = new XmlSerializer(typeof(KeyValueListWrapper));
+				using (var reader = new StreamReader(filePath))
+				{
+					var result = (KeyValueListWrapper)serializer.Deserialize(reader);
+					// Convert List<KeyValueItem> to Dictionary<string, int>
+					return result.Items.ToDictionary(item => item.Key, item => item.Value);
+				}
+			}*/
+
+		public static void PopulateIssueNumbers(ref ComboBox cmb_IssueNo, ref TextBox txt_PhaseNo, string fileLocation)
         {
             cmb_IssueNo.Items.Clear(); // clear old items
             var phaseNumber = txt_PhaseNo.Text;

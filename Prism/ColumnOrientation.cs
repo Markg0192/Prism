@@ -15,6 +15,8 @@ namespace Prism
 
         public static void DetailColumnOrientationHoles(SelectedObjects myObjects, string columnOrientationType, string flangeThickness)
         {
+            double tolerance = 0.5;
+
             if (columnOrientationType != "None")
             {
                 List<Beam> columns = new List<Beam>();
@@ -24,8 +26,10 @@ namespace Prism
                     Beam b = prismPart.Part as Beam;
                     if (b != null)
                     {
-                        if (b.Name == "COLUMN" && /*!b.Profile.ProfileString.Contains("SHS") && !b.Profile.ProfileString.Contains("CHS") &&*/ !b.Profile.ProfileString.Contains("PFC") && !b.Profile.ProfileString.Contains("RSA"))
-                        {
+                        if ((b.Name == "COLUMN" && !b.Profile.ProfileString.Contains("PFC") && !b.Profile.ProfileString.Contains("RSA")) ||
+                       (b.Profile.ProfileString.Contains("PG") && Math.Abs(b.StartPoint.X - b.EndPoint.X) <= tolerance && Math.Abs(b.StartPoint.Y - b.EndPoint.Y) <= tolerance))
+
+						{
                             columns.Add(b);
                         }
                     }

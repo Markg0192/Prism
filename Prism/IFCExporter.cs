@@ -13,7 +13,7 @@ namespace Prism
 	{
 		public static async Task ExportIndividualIFC(this SelectedObjects selectedObjects, string myFolder, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
 		{
-			if (ModelChecker.IsCurrentUser("dean.johnston",  "mark.gibson", "ian.partridge"))
+			//if (ModelChecker.IsCurrentUser("dean.johnston",  "mark.gibson", "ian.partridge"))
 			{
 				await RunIFCExport(GetDistinctByPartMark(selectedObjects.GetMainParts()), myFolder, toolStrip, statusLabel);
 				selectedObjects.PrismParts.SelectParts();
@@ -31,7 +31,7 @@ namespace Prism
 		private static async Task RunIFCExport(List<PrismPart> prismParts, string localFolder, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
 		{
 			int numberOfParts = prismParts.Count;
-			int currentPartNo = 1;
+			 int currentPartNo = 1;
 			Tekla.Structures.Model.UI.ModelObjectSelector MS = new Tekla.Structures.Model.UI.ModelObjectSelector();
 
 			await Task.Run(() =>

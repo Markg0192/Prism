@@ -18,6 +18,7 @@ namespace Prism
 			Assembly = p.GetAssembly();
 			IsMainPart = Assembly.GetMainPart().Identifier.GUID == p.Identifier.GUID;
 
+			PartMark = Part.GetPartMark();
 			double weight = 0;
 			p.GetReportProperty(ModelUDA.Weight(), ref weight);
 			Weight = weight;
@@ -25,6 +26,9 @@ namespace Prism
 
 			p.GetPhase(out Phase partPhase);
 			Phase = partPhase;
+			string drawingRevision = "";
+			Part.GetReportProperty("ASSEMBLY.DRAWING.REVISION.MARK", ref drawingRevision);
+			DrawingRevision = drawingRevision;
 		}
 
 		public PrismPart(string[] items, Model model)
@@ -47,7 +51,6 @@ namespace Prism
 			if (IsMainPart) Assembly = Part.GetAssembly();
 			ModelObject = Part;
 			DrawingRevision = Trim(items[11]);
-
 		}
 
 		private string Trim(string s)

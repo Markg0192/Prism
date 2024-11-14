@@ -93,6 +93,16 @@ namespace Prism.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Envelope {
+            get {
+                object obj = ResourceManager.GetObject("Envelope", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Gears {
             get {
                 object obj = ResourceManager.GetObject("Gears", resourceCulture);

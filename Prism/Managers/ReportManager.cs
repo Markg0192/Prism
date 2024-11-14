@@ -8,6 +8,7 @@ using System.Drawing;
 using System;
 using System.Linq;
 using System.Windows.Forms;
+using Newtonsoft.Json.Linq;
 
 namespace Prism
 {
@@ -245,9 +246,14 @@ namespace Prism
 			bool createPgReport = false;
 			string sectionSize;
 
-			bool shopBoltsPresent = boltList.Any(pbg => pbg.isShop && !pbg.isShearStud && !pbg.isOrdered);   //is a shop bolt but not a shear stud
-			bool siteBoltsPresent = boltList.Any(pbg => !pbg.isShop && !pbg.isShearStud && !pbg.isOrdered); //Is neither shop bolt or shear stud
+			bool shopBoltsPresent = false;
+			bool siteBoltsPresent = false;
+			if (boltList.Count > 0)
+			{
+				shopBoltsPresent = boltList.Any(pbg => pbg!=null && pbg.isShop && !pbg.isShearStud && !pbg.isOrdered);   //is a shop bolt but not a shear stud
+				siteBoltsPresent = boltList.Any(pbg => !pbg.isShop && !pbg.isShearStud && !pbg.isOrdered); //Is neither shop bolt or shear stud
 
+			}
 			foreach (PrismPart part in partsList)
 			{
 				sectionSize = part.Part.Profile.ProfileString.Substring(0, 2);
@@ -269,6 +275,8 @@ namespace Prism
 			UpdateStatusLabel(toolStrip, statusLabel, "Converting Reports To PDF");
 
 			TextToPDF(Folders.ReportPath);
+
+			ModelModifiers.SelectParts(partsList);
 		}
 
 		private void UpdateStatusLabel(ToolStrip toolStrip, ToolStripStatusLabel statusLabel, string labelMessage)

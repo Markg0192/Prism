@@ -18,6 +18,7 @@ using System.Xml;
 using System.Xml.Serialization;
 using Tekla.Structures.Model;
 using static Prism.Enum;
+using static Prism.Managers.ChangeManager.ChangeHelper;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Action = System.Action;
 using Assembly = Tekla.Structures.Model.Assembly;
@@ -77,6 +78,132 @@ namespace Prism
 			  // GC.Collect();
 		  }*/
 		private static volatile int xmlProcessedCount = 0;
+
+		public class PartCountInfo
+		{
+			public string PartMark { get; set; }
+			public int Count { get; set; }
+			public string Guid { get; set; }
+		}
+		public static void CreateAssemblyXmls(Model model, string filePath, SelectedObjects selectedObjects, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
+		{
+			var allUnsupportedTypes = new ConcurrentBag<string>();
+			int totalCount = selectedObjects.GetMainParts().Count;
+			var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
+
+			// Use a ConcurrentDictionary that stores PartCountInfo
+			var assemblyCounts = new ConcurrentDictionary<string, PartCountInfo>();
+			var fittingCounts = new ConcurrentDictionary<string, PartCountInfo>();
+
+			// Shared XmlSerializer instance
+			var myAssemblySerializer = new XmlSerializer(typeof(MyAssembly));
+
+			// Collection to hold MyAssembly instances
+			var myAssemblies = new ConcurrentBag<MyAssembly>();
+
+			// Set up a cancellation token for the UI update task
+			var cts = new CancellationTokenSource();
+			var cancellationToken = cts.Token;
+
+			// Start a task to update the UI periodically
+			var uiUpdateTask = Task.Run(async () =>
+			{
+				while (!cancellationToken.IsCancellationRequested)
+				{
+					int currentCount = xmlProcessedCount;
+					toolStrip.Invoke(new Action(() =>
+					{
+						statusLabel.Text = $"Storing Assembly data: {currentCount} of {totalCount}";
+					}));
+					await Task.Delay(500); // Adjust the delay as needed
+				}
+			});
+
+			try
+			{
+				// Process MyAssembly objects in parallel
+				Parallel.ForEach(selectedObjects.GetMainParts(), parallelOptions, assembly =>
+				{
+					try
+					{
+						var myAssembly = MyAssembly.CreateMyAssembly(assembly.Part.GetAssembly(), model);
+						myAssemblies.Add(myAssembly);
+
+						assemblyCounts.AddOrUpdate(myAssembly.PartMark,
+							new PartCountInfo { PartMark = myAssembly.PartMark, Count = 1, Guid = myAssembly.Guid },
+							(key, oldValue) =>
+							{
+								oldValue.Count += 1;
+								return oldValue;
+							});
+
+						foreach (var fitting in myAssembly.Fittings)
+						{
+							fittingCounts.AddOrUpdate(fitting.PartMark,
+								new PartCountInfo { PartMark = fitting.PartMark, Count = 1, Guid = fitting.Guid },
+								(key, oldValue) =>
+								{
+									oldValue.Count += 1;
+									return oldValue;
+								});
+						}
+
+						Interlocked.Increment(ref xmlProcessedCount);
+					}
+					catch (Exception ex)
+					{
+						Console.WriteLine($"Error processing assembly {assembly.Part.GetAssembly().Identifier}: {ex.Message}");
+						// Optionally, log or handle the exception
+					}
+				});
+
+				// Serialize MyAssembly instances sequentially to avoid thread-safety issues
+				int serializedCount = 0;
+				foreach (var myAssembly in myAssemblies)
+				{
+					try
+					{
+						string localFileName = Path.Combine(filePath, $"{myAssembly.Guid}.xml");
+						using (var xmlWriter = XmlWriter.Create(localFileName, new XmlWriterSettings { Indent = true }))
+						{
+							myAssemblySerializer.Serialize(xmlWriter, myAssembly);
+						}
+						serializedCount++;
+					}
+					catch (Exception ex)
+					{
+						Console.WriteLine($"Error serializing assembly {myAssembly.Guid}: {ex.Message}");
+						// Optionally, log or handle the exception
+					}
+				}
+
+				// Update SerializeData to handle PartCountInfo
+				SerializeData(assemblyCounts, fittingCounts, filePath);
+
+				if (allUnsupportedTypes.Count > 0)
+				{
+					// Handle unsupported types
+				}
+
+				// Update the status label after completion
+				toolStrip.Invoke(new Action(() =>
+				{
+					statusLabel.Text = "Data saved, creating Fab Package";
+				}));
+			}
+			finally
+			{
+				// Cancel the UI update task
+				cts.Cancel();
+				uiUpdateTask.Wait();
+			}
+
+			// Optional: Force a garbage collection if memory usage is still high after processing
+			// GC.Collect();
+		}
+
+
+		/*
 
 		public static void CreateAssemblyXmls(Model model, string filePath, SelectedObjects selectedObjects, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
 		{
@@ -179,7 +306,7 @@ namespace Prism
 			// Optional: Force a garbage collection if memory usage is still high after processing
 			// GC.Collect();
 		}
-
+        */
 
 
 		private static void UpdateStatusLabelWithXmlProgress(ref int processedCount, ToolStrip toolStrip, ToolStripStatusLabel statusLabel, int totalCount)
@@ -194,55 +321,91 @@ namespace Prism
             }));
         }
 
-        private static void SerializeData(ConcurrentDictionary<string, int> assemblyCounts, ConcurrentDictionary<string, int> fittingCounts, string filePath)
-        {
-            // Convert ConcurrentDictionary to KeyValueListWrapper
-            var assemblyCountsWrapper = new KeyValueListWrapper
-            {
-                Items = assemblyCounts.Select(kvp => new KeyValueItem(kvp.Key, kvp.Value)).ToList()
-            };
+		public class PartCountWrapper
+		{
+			public List<XmlItem> Items { get; set; }
+		}
 
-            var fittingCountsWrapper = new KeyValueListWrapper
-            {
-                Items = fittingCounts.Select(kvp => new KeyValueItem(kvp.Key, kvp.Value)).ToList()
-            };
+		private static void SerializeData(ConcurrentDictionary<string, PartCountInfo> assemblyCounts,
+										  ConcurrentDictionary<string, PartCountInfo> fittingCounts,
+										  string filePath)
+		{
+			// Convert ConcurrentDictionary to PartCountWrapper, including GUID
+			var assemblyCountsWrapper = new PartCountWrapper
+			{
+				Items = assemblyCounts.Select(kvp => new XmlItem
+				{
+					Key = kvp.Key,
+					Value = kvp.Value.Count,
+					Guid = kvp.Value.Guid // Save the GUID
+				}).ToList()
+			};
 
-            // Serialize the wrappers
-            var serializer = new XmlSerializer(typeof(KeyValueListWrapper));
+			var fittingCountsWrapper = new PartCountWrapper
+			{
+				Items = fittingCounts.Select(kvp => new XmlItem
+				{
+					Key = kvp.Key,
+					Value = kvp.Value.Count,
+					Guid = kvp.Value.Guid // Save the GUID
+				}).ToList()
+			};
 
-            using (var xmlWriter = XmlWriter.Create(filePath + "\\Assembly Count.xml", new XmlWriterSettings { Indent = true }))
-            {
-                serializer.Serialize(xmlWriter, assemblyCountsWrapper);
-            }
+			// Serialize the wrappers
+			var serializer = new XmlSerializer(typeof(PartCountWrapper));
 
-            using (var xmlWriter = XmlWriter.Create(filePath + "\\Fitting Count.xml", new XmlWriterSettings { Indent = true }))
-            {
-                serializer.Serialize(xmlWriter, fittingCountsWrapper);
-            }
-        }
+			using (var xmlWriter = XmlWriter.Create(filePath + "\\Assembly Count.xml", new XmlWriterSettings { Indent = true }))
+			{
+				serializer.Serialize(xmlWriter, assemblyCountsWrapper);
+			}
 
-        public class KeyValueItem
-        {
-            public string Key { get; set; }
-            public int Value { get; set; }
+			using (var xmlWriter = XmlWriter.Create(filePath + "\\Fitting Count.xml", new XmlWriterSettings { Indent = true }))
+			{
+				serializer.Serialize(xmlWriter, fittingCountsWrapper);
+			}
+		}
 
-            public KeyValueItem() { } // Parameterless constructor for serialization
 
-            public KeyValueItem(string key, int value)
-            {
-                Key = key;
-                Value = value;
-            }
-        }
 
-        public class KeyValueListWrapper
-        {
-            public List<KeyValueItem> Items { get; set; } = new List<KeyValueItem>();
+		/*    private static void SerializeData(ConcurrentDictionary<string, int> assemblyCounts, ConcurrentDictionary<string, int> fittingCounts, string filePath)
+			{
+				// Convert ConcurrentDictionary to KeyValueListWrapper, including the third value (AdditionalData)
+				var assemblyCountsWrapper = new KeyValueListWrapper
+				{
+					Items = assemblyCounts.Select(kvp => new XmlItem
+					{
+						Key = kvp.Key,
+						Value = kvp.Value,
+						Guid = GetAdditionalData(kvp.Key) // Assuming you have a way to retrieve this data
+					}).ToList()
+				};
 
-            public KeyValueListWrapper() { } // Parameterless constructor for serialization
-        }
+				var fittingCountsWrapper = new KeyValueListWrapper
+				{
+					Items = fittingCounts.Select(kvp => new XmlItem
+					{
+						Key = kvp.Key,
+						Value = kvp.Value,
+						Guid = GetAdditionalData(kvp.Key) // Retrieve third value here as well
+					}).ToList()
+				};
 
-        public static List<SteelItemBase> CompareSteelLists(List<MyAssembly> oldList, List<MyAssembly> newList, Dictionary<string, int> oldFittingDictionary, Dictionary<string, int> newFittingDictionary)
+				// Serialize the wrappers
+				var serializer = new XmlSerializer(typeof(KeyValueListWrapper));
+
+				using (var xmlWriter = XmlWriter.Create(filePath + "\\Assembly Count.xml", new XmlWriterSettings { Indent = true }))
+				{
+					serializer.Serialize(xmlWriter, assemblyCountsWrapper);
+				}
+
+				using (var xmlWriter = XmlWriter.Create(filePath + "\\Fitting Count.xml", new XmlWriterSettings { Indent = true }))
+				{
+					serializer.Serialize(xmlWriter, fittingCountsWrapper);
+				}
+			}*/
+
+
+		public static List<SteelItemBase> CompareSteelLists(List<MyAssembly> oldList, List<MyAssembly> newList, List<XmlItem> oldFittingDictionary, List<XmlItem> newFittingDictionary)
         {
             var omittedParts = new List<SteelItemBase>();
 
@@ -273,7 +436,91 @@ namespace Prism
             DetectChangesInExistingMembers(oldAssembly, newAssembly);//, comparisonResult); // this gets me all the changes not related to number of assemblies.
         }
 
-        public static List<MyFitting> IdentifyDifferencesInLists(Dictionary<string, int> oldPartMarkCounts, Dictionary<string, int> newPartMarkCounts)
+		public static List<MyFitting> IdentifyDifferencesInLists(List<XmlItem> oldPartMarkCounts, List<XmlItem> newPartMarkCounts)
+		{
+			var modifications = new Dictionary<string, ModificationType>();
+			var messages = new List<string>();
+			var modifiedParts = new List<MyFitting>();
+			var addedFittings = new List<MyFitting>();
+
+			foreach (var oldItem in oldPartMarkCounts)
+			{
+				var partMark = oldItem.Key;
+				var oldCount = oldItem.Value;
+
+				// Find the corresponding new item by partMark in the new list
+				var newItem = newPartMarkCounts.FirstOrDefault(x => x.Key == partMark);
+				var newCount = newItem != null ? newItem.Value : 0;  // Default to 0 if not found
+
+				if (oldCount != newCount)
+				{
+					int numberOfChanged = newCount - oldCount;
+
+					if (newCount == 0)
+					{
+                        MyFitting fitting = new MyFitting
+                        {
+                            PartMark = partMark,
+                            Modification = ModificationType.Omit,
+                           
+                        };
+						fitting.ChangeMessages.Add($"Fitting number {partMark} has been completely removed.");
+						modifiedParts.Add(fitting);
+					}
+					else if (newCount < oldCount)
+					{
+						MyFitting fitting = new MyFitting
+						{
+							PartMark = partMark,
+							Modification = ModificationType.OmitRevise,
+							Guid = newItem.Guid
+						};
+						fitting.ChangeMessages.Add($"Fitting number {partMark} has reduced in number by {numberOfChanged}.");
+						modifications[partMark] = ModificationType.OmitRevise;
+						modifiedParts.Add(fitting);
+					}
+					else // newCount > oldCount
+					{
+						MyFitting fitting = new MyFitting
+						{
+							PartMark = partMark,
+							Modification = ModificationType.AddRevise,
+							Guid = newItem.Guid
+						};
+						fitting.ChangeMessages.Add($"Fitting number {partMark} has increased in number by {numberOfChanged}.");
+						modifiedParts.Add(fitting);
+						addedFittings.Add(fitting);
+						modifications[partMark] = ModificationType.Add;
+						messages.Add($"Fitting number {partMark} has increased in number by {numberOfChanged}.");
+					}
+				}
+			}
+
+			// Find parts in newPartMarkCounts that are not in oldPartMarkCounts
+			foreach (var newItem in newPartMarkCounts)
+			{
+				var partMark = newItem.Key;
+				if (!oldPartMarkCounts.Any(x => x.Key == partMark))
+				{
+					MyFitting fitting = new MyFitting
+					{
+						PartMark = partMark,
+						Modification = ModificationType.Add,
+						Guid = newItem.Guid
+					};
+					fitting.ChangeMessages.Add($"Fitting number {partMark} is new.");
+					modifiedParts.Add(fitting);
+					messages.Add($"Fitting number {partMark} is new.");
+					modifications[partMark] = ModificationType.Add;
+				}
+			}
+
+			return modifiedParts;
+		}
+
+
+		/*
+        public static List<MyFitting> IdentifyDifferencesInLists(List<XmlItem> oldPartMarkCounts, List<XmlItem> newPartMarkCounts)
         {
             var modifications = new Dictionary<string, ModificationType>();
             var messages = new List<string>();
@@ -342,55 +589,61 @@ namespace Prism
             }
 
             return modifiedParts;
-        }
+        }*/
 
-        private static List<string> IdentifyDifferencesInLists(Dictionary<string, int> oldPartMarkCounts, Dictionary<string, int> newPartMarkCounts, MyAssembly assembly)
-        {
-            var messages = new List<string>();
+		private static List<string> IdentifyDifferencesInLists(List<XmlItem> oldPartMarkCounts, List<XmlItem> newPartMarkCounts, MyAssembly assembly)
+		{
+			var messages = new List<string>();
 
-            foreach (var kvp in oldPartMarkCounts)
-            {
-                var partMark = kvp.Key;
-                var oldCount = kvp.Value;
-                newPartMarkCounts.TryGetValue(partMark, out int newCount);
+			// Loop through old part mark counts
+			foreach (var oldItem in oldPartMarkCounts)
+			{
+				var partMark = oldItem.Key;
+				var oldCount = oldItem.Value;
 
-                if (oldCount != newCount)
-                {
-                    int numberOfChanged = newCount - oldCount;
-                    assembly.Modification = ModificationType.Revise;
-                    if (newCount == 0)
-                    {
-                        assembly.ChangeMessages.Add($"Fitting number {partMark} has been completely removed from assembly {assembly.PartMark}.");
-                        messages.Add($"Fitting number {partMark} has been completely removed from assembly {assembly.PartMark}.");
-                    }
-                    else if (newCount < oldCount)
-                    {
-                        assembly.ChangeMessages.Add($"Fitting number {partMark} has reduced in number by {numberOfChanged} on assembly {assembly.PartMark}.");
-                        messages.Add($"Fitting number {partMark} has reduced in number by {numberOfChanged} on assembly {assembly.PartMark}.");
-                    }
-                    else // newCount > oldCount
-                    {
-                        assembly.ChangeMessages.Add($"Fitting number {partMark} has increased in number by {numberOfChanged} on assembly {assembly.PartMark}.");
-                        messages.Add($"Fitting number {partMark} has increased in number by {numberOfChanged} on assembly {assembly.PartMark}.");
-                    }
-                }
-            }
+				// Find the corresponding item in the new list
+				var newItem = newPartMarkCounts.FirstOrDefault(x => x.Key == partMark);
+				var newCount = newItem != null ? newItem.Value : 0;  // Set to 0 if not found
 
-            foreach (var kvp in newPartMarkCounts)
-            {
-                var partMark = kvp.Key;
-                if (!oldPartMarkCounts.ContainsKey(partMark))
-                {
-                    messages.Add($"Fitting number {partMark} is new and has been added to assembly {assembly.PartMark}.");
-                    assembly.ChangeMessages.Add($"Fitting number {partMark} is new and has been added to assembly");
-                    assembly.Modification = ModificationType.Revise;
-                }
-            }
+				if (oldCount != newCount)
+				{
+					int numberOfChanged = newCount - oldCount;
+					assembly.Modification = ModificationType.Revise;
+					if (newCount == 0)
+					{
+						assembly.ChangeMessages.Add($"Fitting number {partMark} has been completely removed from assembly {assembly.PartMark}.");
+						messages.Add($"Fitting number {partMark} has been completely removed from assembly {assembly.PartMark}.");
+					}
+					else if (newCount < oldCount)
+					{
+						assembly.ChangeMessages.Add($"Fitting number {partMark} has reduced in number by {numberOfChanged} on assembly {assembly.PartMark}.");
+						messages.Add($"Fitting number {partMark} has reduced in number by {numberOfChanged} on assembly {assembly.PartMark}.");
+					}
+					else // newCount > oldCount
+					{
+						assembly.ChangeMessages.Add($"Fitting number {partMark} has increased in number by {numberOfChanged} on assembly {assembly.PartMark}.");
+						messages.Add($"Fitting number {partMark} has increased in number by {numberOfChanged} on assembly {assembly.PartMark}.");
+					}
+				}
+			}
 
-            return messages;
-        }
+			// Check for new part marks in the new list
+			foreach (var newItem in newPartMarkCounts)
+			{
+				var partMark = newItem.Key;
+				// Check if the partMark exists in the old list
+				if (!oldPartMarkCounts.Any(x => x.Key == partMark))
+				{
+					messages.Add($"Fitting number {partMark} is new and has been added to assembly {assembly.PartMark}.");
+					assembly.ChangeMessages.Add($"Fitting number {partMark} is new and has been added to assembly");
+					assembly.Modification = ModificationType.Revise;
+				}
+			}
 
-        public class ComparisonResult
+			return messages;
+		}
+
+		public class ComparisonResult
         {
             public List<MyFitting> OmittedFittings = new List<MyFitting>();
             public List<MyFitting> AddedFittings = new List<MyFitting>();
@@ -399,109 +652,132 @@ namespace Prism
 
         }
 
-        public static (List<string> Messages, List<MyAssembly> omittedAssemblies) IdentifyDifferencesInLists(Dictionary<string, int> oldPartMarkCounts,
-            Dictionary<string, int> newPartMarkCounts, List<MyAssembly> newList, List<MyFitting> comparisonResult)
+		public static (List<string> Messages, List<MyAssembly> omittedAssemblies) IdentifyDifferencesInLists( List<XmlItem> oldPartMarkCounts,
+	  List<XmlItem> newPartMarkCounts,  List<MyAssembly> newList,  List<MyFitting> comparisonResult)
+		{
+			List<MyAssembly> omittedAssemblies = new List<MyAssembly>();
+			var messages = new List<string>();
+
+			// Handle the case where new assemblies are added which were not in the old list
+			foreach (var newItem in newPartMarkCounts)
+			{
+				var partMark = newItem.Key;
+				var newCount = newItem.Value;
+
+				if (!oldPartMarkCounts.Any(x => x.Key == partMark)) // Check if oldPartMarkCounts contains the partMark
+				{
+					var assembliesToUpdate = newList.Where(x => x.PartMark == partMark);
+
+					foreach (MyAssembly assembly in assembliesToUpdate)
+					{
+						if (assembly.Fittings.Count > 0) assembly.ChangeMessages.Add($"{newCount} No. added each containing:");
+						foreach (var fitting in assembly.Fittings)
+						{
+							assembly.ChangeMessages.Add($"Fitting - {fitting.PartMark} - {fitting.ProfileString}");
+						}
+						assembly.Modification = ModificationType.Add; // This is a brand new piece so is an add
+
+						foreach (var fitting in assembly.Fittings)
+						{
+							// Find a matching item in the comparisonList based on PartMark
+							var matchingFitting = comparisonResult.FirstOrDefault(f => f.PartMark == fitting.PartMark);
+
+							if (matchingFitting != null)
+							{
+								// Set fitting.ChangeMessage to the ChangeMessage of the matching item
+								fitting.ChangeMessages = matchingFitting.ChangeMessages;
+								fitting.Modification = matchingFitting.Modification;
+							}
+						}
+					}
+				}
+			}
+
+			foreach (var oldItem in oldPartMarkCounts)
+			{
+				var partMark = oldItem.Key;
+				var oldCount = oldItem.Value;
+
+				// Find corresponding new count in newPartMarkCounts
+				var newItem = newPartMarkCounts.FirstOrDefault(x => x.Key == partMark);
+				var newCount = newItem != null ? newItem.Value : 0; // If not found, assume count is 0
+
+				if (oldCount != newCount)
+				{
+					if (newCount == 0) // This piece no longer exists, so it's a full omit
+					{
+						MyAssembly ass = new MyAssembly
+						{
+							PartMark = partMark,
+							Modification = ModificationType.Omit
+						};
+						ass.ChangeMessages.Add("This member has been completely removed.");
+						omittedAssemblies.Add(ass);
+
+						messages.Add($"Beam number {partMark} has been completely removed.");
+					}
+					else
+					{
+						var assembliesToUpdate = newList.Where(x => x.PartMark == partMark);
+						var assembly = assembliesToUpdate.FirstOrDefault();
+						if (assembly != null)
+						{
+							int numberOfChange = Math.Abs(newCount - oldCount);
+							if (newCount < oldCount) // The number of pieces has been reduced but not fully removed
+							{
+								assembly.Modification = ModificationType.OmitRevise;
+								messages.Add($"Beam number {assembly.PartMark} has reduced in number by {numberOfChange}.");
+
+								MyAssembly ass = new MyAssembly
+								{
+									PartMark = partMark
+								};
+								ass.ChangeMessages.Add($"Member has reduced in number by {numberOfChange}.");
+								omittedAssemblies.Add(ass);
+
+								assembly.ChangeMessages.Add($"Member has reduced in number by {numberOfChange}.");
+							}
+							else // newCount > oldCount, so more parts than before
+							{
+								assembly.ChangeMessages.Add($"Member has increased in number by {numberOfChange}.");
+								messages.Add($"Beam number {assembly.PartMark} has increased in number by {numberOfChange}.");
+								assembly.Modification = ModificationType.Add;
+							}
+						}
+					}
+				}
+			}
+
+			return (messages, omittedAssemblies);
+		}
+
+
+		private static (List<string> Messages, List<MyAssembly> omittedAssemblies) DetectPartMarkCountDifferences(List<MyAssembly> oldList, List<MyAssembly> newList, List<MyFitting> comparisonResult)
         {
-            List<MyAssembly> omittedAssemblies = new List<MyAssembly>();
-            var messages = new List<string>();
+			List<XmlItem> oldPartMarkCounts = oldList.GroupBy(x => x.PartMark).Select(g => new XmlItem
+			{
+				Key = g.Key,
+				Value = g.Count(),
+				Guid = g.First().Guid
+			}).ToList();
+			List<XmlItem> newPartMarkCounts = newList.GroupBy(x => x.PartMark).Select(g => new XmlItem
+			{
+				Key = g.Key,
+				Value = g.Count(),
+				Guid = g.First().Guid
+			}).ToList();
 
-            List<MyAssembly> newStuff = new List<MyAssembly>();
-            // Handle the case where new assemblies are added which were not in the old list
-            foreach (var kvp in newPartMarkCounts)
-            {
-                var partMark = kvp.Key;
-                var newCount = kvp.Value;
 
-                if (!oldPartMarkCounts.ContainsKey(partMark))
-                {
-                    var assembliesToUpdate = newList.Where(x => x.PartMark == partMark);
-
-                    foreach (MyAssembly assembly in assembliesToUpdate)
-                    {
-                        if (assembly.Fittings.Count > 0) assembly.ChangeMessages.Add($"{newCount} No. added each containing:");
-                        foreach (var fitting in assembly.Fittings)
-                        {
-                            assembly.ChangeMessages.Add($"Fitting - {fitting.PartMark} - {fitting.ProfileString}");
-                        }
-                        assembly.Modification = ModificationType.Add; // This is a brand new piece so is an add
-
-                        foreach (var fitting in assembly.Fittings)
-                        {
-                            // Find a matching item in the comparisonList based on PartMark
-                            var matchingFitting = comparisonResult.FirstOrDefault(f => f.PartMark == fitting.PartMark);
-
-                            if (matchingFitting != null)
-                            {
-                                // Set fitting.ChangeMessage to the ChangeMessage of the matching item
-                                fitting.ChangeMessages = matchingFitting.ChangeMessages;
-                                fitting.Modification = matchingFitting.Modification;
-                            }
-                        }
-                    }
-                }
-            }
-
-            foreach (var kvp in oldPartMarkCounts)
-            {
-                var partMark = kvp.Key;
-                var oldCount = kvp.Value;
-
-                newPartMarkCounts.TryGetValue(partMark, out int newCount);
-
-                if (oldCount != newCount)
-                {
-                    if (newCount == 0) //This piece no longer exists so is a full omit
-                    {
-                        MyAssembly ass = new MyAssembly();
-                        ass.PartMark = partMark;
-                        ass.Modification = ModificationType.Omit;
-                        ass.ChangeMessages.Add("This member has been completly removed.");
-                        omittedAssemblies.Add(ass);
-
-                        messages.Add($"Beam number {partMark} has been completely removed.");
-                    }
-                    else
-                    {
-                        var assembliesToUpdate = newList.Where(x => x.PartMark == partMark);
-                        var assembly = assembliesToUpdate.First();
-                        {
-                            int numberOfChange = Math.Abs(newCount - oldCount);
-                            if (newCount < oldCount) //The number of pieces has been reduced but not fully removed, an omit that requires a revised drawing
-                            {
-                                assembly.Modification = ModificationType.OmitRevise;
-                                messages.Add($"Beam number {assembly.PartMark} has reduced in number by {numberOfChange}.");
-
-                                MyAssembly ass = new MyAssembly();
-                                ass.PartMark = partMark;
-                                ass.ChangeMessages.Add($"Member has reduced in number by {numberOfChange}.");
-                                omittedAssemblies.Add(ass);
-                                assembly.ChangeMessages.Add($"Member has reduced in number by {numberOfChange}.");
-                            }
-                            else // newCount > oldCount more parts than before, an add
-                            {
-                                assembly.ChangeMessages.Add($"Member has increased in number by {numberOfChange}.");
-                                messages.Add($"Beam number {assembly.PartMark} has increased in number by {numberOfChange}.");
-                                assembly.Modification = ModificationType.Add;
-                            }
-                        }
-                    }
-                }
-            }
-
-            return (messages, omittedAssemblies);
-        }
-
-        private static (List<string> Messages, List<MyAssembly> omittedAssemblies) DetectPartMarkCountDifferences(List<MyAssembly> oldList, List<MyAssembly> newList, List<MyFitting> comparisonResult)
-        {
-            var oldPartMarkCounts = oldList.GroupBy(x => x.PartMark).ToDictionary(g => g.Key, g => g.Count());
-            var newPartMarkCounts = newList.GroupBy(x => x.PartMark).ToDictionary(g => g.Key, g => g.Count());
             return IdentifyDifferencesInLists(oldPartMarkCounts, newPartMarkCounts, newList, comparisonResult);
         }
 
         private static List<string> DetectPartMarkCountDifferences(List<MyFitting> oldList, List<MyFitting> newList, MyAssembly assembly)
-        {
-            var oldPartMarkCounts = oldList.GroupBy(x => x.PartMark).ToDictionary(g => g.Key, g => g.Count());
-            var newPartMarkCounts = newList.GroupBy(x => x.PartMark).ToDictionary(g => g.Key, g => g.Count());
+        { 
+			List<XmlItem> oldPartMarkCounts = oldList.GroupBy(x => x.PartMark).Select(g => new XmlItem{
+		Key = g.Key, Value = g.Count(),	Guid = g.First().Guid }).ToList();
+			List<XmlItem> newPartMarkCounts = newList.GroupBy(x => x.PartMark).Select(g => new XmlItem{
+		Key = g.Key, Value = g.Count(), Guid = g.First().Guid }).ToList();
+
             return IdentifyDifferencesInLists(oldPartMarkCounts, newPartMarkCounts, assembly);
         }
 
