@@ -687,9 +687,8 @@ namespace Prism
 		private static void SetColouring(List<ModelObject> myParts, Color color, bool reset)
 		{
 			if (reset)
-			{
-				ModelObjectVisualization.SetTransparencyForAll(TemporaryTransparency.SEMITRANSPARENT);
-				ModelObjectVisualization.SetTemporaryStateForAll(new Color(0.5, 0.5, 0.5));
+			{ 
+				ModelObjectVisualization.SetTemporaryStateForAll(new Color(0.5, 0.5, 0.5, 0.2));
 			}
 			ModelObjectVisualization.SetTemporaryState(myParts, color);
 		}

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Tekla.Structures;
 using Tekla.Structures.Model;
 using static Prism.Enums;
 using Model = Tekla.Structures.Model.Model;
@@ -85,17 +86,17 @@ namespace Prism.ButtonOperations
 				return (false, totalNcRequired);
 
 			// Await the ProcessAndPrintDrawings method and handle the result tuple
-			var (success, drawingManager) = await ProcessAndPrintDrawings(cpuCounter, myObjects.GetNonSeversafeParts(), model, projectData, phaseNumber, issueNumber, reportManager, toolStrip, tssl);
+			var (success, drawingManager) = await ProcessAndPrintDrawings(cpuCounter, myObjects.GetNonSeversafeParts(), model, projectData, phaseNumber, issueNumber, reportManager, toolStrip, tssl, myObjects.PrismDrawings);
 			if (!success)
 				return (false, totalNcRequired);
 
 			// Use the DrawingManager to assign total NC required
 			totalNcRequired = drawingManager.NumberOfNcRequired;
 
+			myObjects.ExportBSWX(reportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType);
+
 			// Create fabrication reports
 			reportManager.CreateFabReports(myObjects.GetNonSeversafeParts(), myObjects.PrismBoltGroups, teklaVersion, toolStrip, tssl);
-
-			myObjects.ExportBSWX(reportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType);
 
 			// Modify attributes of non-seversafe parts
 			if (!myObjects.GetNonSeversafeParts().ModifyAttributes((int)stageType, projectData, toolStrip, tssl))
@@ -113,6 +114,8 @@ namespace Prism.ButtonOperations
 			// Complete fabrication package and send warning if applicable
 			PrismWarnings.FabPackComplete(projectData, zipFileCanBeAttached);
 
+			//EmailWriter.CreateFabEmailText(projectData, myObjects, reportManager.FabReportPrefix, issueNumber, phaseNumber, siteDate, reportManager.Folders.FabPath);
+
 			// Send the fabrication email
 			EmailWriter.WriteFabEmail(projectData, myObjects, reportManager.FabReportPrefix, issueNumber, phaseNumber, siteDate, reportManager.Folders.FabPath, zipFileCanBeAttached);
 
@@ -123,8 +126,6 @@ namespace Prism.ButtonOperations
 			// Return the success status and the total number of NC required
 			return (true, totalNcRequired);
 		}
-
-
 
 		private static async Task<(bool success, int totalNcRequired)> ProcessSubsequentIssues(PrismProjectData projectData, string phaseNumber, string issueNumber, List<SteelItemBase> revisedItems, List<SteelItemBase> addItems,
 			bool runSeversafe, SelectedObjects myObjects, Model model, string siteDate, StageTypes stageType, string messageForEmail, string teklaVersion, ToolStrip ts, ToolStripStatusLabel tssl)
@@ -148,20 +149,16 @@ namespace Prism.ButtonOperations
 				SelectedObjects objects = new SelectedObjects(projectData.ProjPath, stageType, phaseNumber, issueNumber, model, Constants.SpecialOperationUser(), ts, tssl);
 
 				// Await the async method and handle the result tuple
-				var (success, drawingManager) = await ProcessAndPrintDrawings(cpuCounter, objects.PrismParts, model, projectData, phaseNumber, issueNumber, reportManager, ts, tssl);
+				var (success, drawingManager) = await ProcessAndPrintDrawings(cpuCounter, objects.PrismParts, model, projectData, phaseNumber, issueNumber, reportManager, ts, tssl, objects.PrismDrawings);
 				if (!success)
 					return (false, totalNcRequired);
 
 				// Use the drawingManager to set totalNcRequired
 				totalNcRequired = drawingManager.NumberOfNcRequired;
 
-				reportManager.CreateFabReports(objects.PrismParts, objects.PrismBoltGroups, teklaVersion, ts, tssl);
-				ModelModifiers.SelectParts(objects.PrismParts);
+				objects.ExportBSWX(reportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType);
 
-				if (!Constants.IsSpecialPerson())
-				{
-					objects.ExportBSWX(reportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType);
-				}
+				reportManager.CreateFabReports(objects.PrismParts, objects.PrismBoltGroups, teklaVersion, ts, tssl);
 
 				if (!objects.PrismParts.ModifyAttributes((int)stageType, projectData, ts, tssl))
 					return (false, totalNcRequired);
@@ -184,15 +181,23 @@ namespace Prism.ButtonOperations
 			return (true, totalNcRequired);
 		}
 
-		private static async Task<(bool success, DrawingManager drawingManager)> ProcessAndPrintDrawings(CpuCounter cpuCounter, List<PrismPart> partsToSelect, Model model, PrismProjectData projectData, string phaseNumber, string issueNumber, ReportManager reportManager, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
+		private static async Task<(bool success, DrawingManager drawingManager)> ProcessAndPrintDrawings(CpuCounter cpuCounter, List<PrismPart> partsToSelect, Model model, PrismProjectData projectData, string phaseNumber, string issueNumber, ReportManager reportManager, ToolStrip toolStrip, ToolStripStatusLabel statusLabel, List<PrismDrawing> drawings)
 		{
 			CpuSpeedCheck(cpuCounter);
 			ReportManager.SelectDrawingsInDocManager(partsToSelect);
 
 			CpuSpeedCheck(cpuCounter);
-			DrawingManager drawingManager = new DrawingManager(model, projectData, phaseNumber, issueNumber, reportManager.Folders.FabPath);
+			DrawingManager drawingManager = new DrawingManager(model, projectData, phaseNumber, issueNumber, reportManager.Folders.FabPath, drawings);
 
 			if (!CheckForProblemsWithDrawings(drawingManager, projectData.ProjNumber, out bool createDrawings)) return (false, null);
+
+		/*	string TeklaEnvi = string.Empty;
+			TeklaStructuresSettings.GetAdvancedOption("XS_ROLE_INI", ref TeklaEnvi);
+
+			if (TeklaEnvi.Contains("SEV_GENERAL"))
+			{
+				QrCodeGenerator.ApplyQrCode(partsToSelect, projectData, reportManager.Folders.QrCodePath, drawingManager, toolStrip, statusLabel);
+			}*/
 
 			if (createDrawings)
 			{

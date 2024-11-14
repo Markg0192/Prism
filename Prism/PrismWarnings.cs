@@ -538,9 +538,7 @@ namespace Prism
                     MemberOrientationIsWrong(errorList);
                 }
 
-                ModelObjectVisualization.SetTransparencyForAll(TemporaryTransparency.SEMITRANSPARENT);
-                ModelObjectVisualization.SetTemporaryStateForAll(new Color(0.5, 0.5, 0.5));
-                ModelObjectVisualization.SetTemporaryState(Convertor.PrismPartsToModelObjects(errorList), new Color(1, 0, 0));
+                ModelModifiers.SetPartsRed(Convertor.PrismPartsToModelObjects(errorList), true);
                 return NewIgnoreWarning();
             }
             return IgnoreType.Unspecified;

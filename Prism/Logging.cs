@@ -5,7 +5,6 @@ using Tekla.Structures.Model;
 
 namespace Prism
 {
-
     public static class Logging
     {
         public static void UpdateUserUseCount(string userName)
@@ -275,14 +274,14 @@ namespace Prism
             WebService.WriteToSpecificLine(Constants.PrismModelData, linetoWriteTo, content, jobName);
         }
 
-        public static void AddToFabCompleteCount(string jobName)
+        public static void AddToFabCompleteCount()
         {
-            int linetoWriteTo = 3;
-            string fabCompleteLine = WebService.ReadSpecificLine(Constants.PrismModelData, linetoWriteTo, jobName);
+            int linetoWriteTo = 5;
+            string fabCompleteLine = WebService.ReadSpecificLine(Constants.PrismTotalUseLogLocation, linetoWriteTo, "");
             string fabCompleteCount = fabCompleteLine.Split(':')[1].Trim();
             int newFabCompleteCount = Convert.ToInt32(fabCompleteCount) + 1;
             string content = $"Fab packages created: {newFabCompleteCount}";
-            WebService.WriteToSpecificLine(Constants.PrismModelData, linetoWriteTo, content, jobName);
+            WebService.WriteToSpecificLine(Constants.PrismTotalUseLogLocation, linetoWriteTo, content, "");
         }
 
         public static void LogProgress(string modelName, string buttonPress, int autoFixCount, int totalObjects)

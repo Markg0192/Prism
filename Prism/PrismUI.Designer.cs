@@ -74,6 +74,7 @@ namespace Prism
 			this.btn_Detail3 = new System.Windows.Forms.Button();
 			this.btn_Detail1 = new System.Windows.Forms.Button();
 			this.pnl_Package = new System.Windows.Forms.Panel();
+			this.btn_SendFabPack = new System.Windows.Forms.Button();
 			this.label8 = new System.Windows.Forms.Label();
 			this.cmb_VariationType_Fab = new System.Windows.Forms.ComboBox();
 			this.txt_Variation_Fab = new System.Windows.Forms.TextBox();
@@ -84,7 +85,6 @@ namespace Prism
 			this.statusStrip_Fab = new System.Windows.Forms.StatusStrip();
 			this.StatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
 			this.txt_SiteDate = new System.Windows.Forms.TextBox();
-			this.btn_FabMisc = new System.Windows.Forms.Button();
 			this.btnCreatePackage1 = new System.Windows.Forms.Button();
 			this.label16 = new System.Windows.Forms.Label();
 			this.label18 = new System.Windows.Forms.Label();
@@ -561,7 +561,7 @@ namespace Prism
 			this.cmb_ColumnOrientationType.Name = "cmb_ColumnOrientationType";
 			this.cmb_ColumnOrientationType.Size = new System.Drawing.Size(126, 21);
 			this.cmb_ColumnOrientationType.TabIndex = 43;
-			this.cmb_ColumnOrientationType.Text = "Holes only";
+			this.cmb_ColumnOrientationType.Text = "None";
 			this.cmb_ColumnOrientationType.SelectedIndexChanged += new System.EventHandler(this.cmb_ColumnOrientationType_SelectedIndexChanged);
 			// 
 			// info_Detail
@@ -652,6 +652,7 @@ namespace Prism
 			// 
 			this.pnl_Package.BackColor = System.Drawing.Color.White;
 			this.pnl_Package.BackgroundImage = global::Prism.Properties.Resources.watereddownlogo;
+			this.pnl_Package.Controls.Add(this.btn_SendFabPack);
 			this.pnl_Package.Controls.Add(this.label8);
 			this.pnl_Package.Controls.Add(this.cmb_VariationType_Fab);
 			this.pnl_Package.Controls.Add(this.txt_Variation_Fab);
@@ -661,7 +662,6 @@ namespace Prism
 			this.pnl_Package.Controls.Add(this.btn_HomePackage);
 			this.pnl_Package.Controls.Add(this.statusStrip_Fab);
 			this.pnl_Package.Controls.Add(this.txt_SiteDate);
-			this.pnl_Package.Controls.Add(this.btn_FabMisc);
 			this.pnl_Package.Controls.Add(this.btnCreatePackage1);
 			this.pnl_Package.Controls.Add(this.label16);
 			this.pnl_Package.Controls.Add(this.label18);
@@ -673,6 +673,21 @@ namespace Prism
 			this.pnl_Package.Size = new System.Drawing.Size(214, 281);
 			this.pnl_Package.TabIndex = 3;
 			this.pnl_Package.Visible = false;
+			// 
+			// btn_SendFabPack
+			// 
+			this.btn_SendFabPack.BackgroundImage = global::Prism.Properties.Resources.Envelope;
+			this.btn_SendFabPack.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+			this.btn_SendFabPack.Enabled = false;
+			this.btn_SendFabPack.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.btn_SendFabPack.Location = new System.Drawing.Point(154, 208);
+			this.btn_SendFabPack.Name = "btn_SendFabPack";
+			this.btn_SendFabPack.Size = new System.Drawing.Size(52, 43);
+			this.btn_SendFabPack.TabIndex = 53;
+			this.toolTip1.SetToolTip(this.btn_SendFabPack, "Send Package");
+			this.btn_SendFabPack.UseVisualStyleBackColor = true;
+			this.btn_SendFabPack.Visible = false;
+			this.btn_SendFabPack.Click += new System.EventHandler(this.btn_SendFabPack_Click);
 			// 
 			// label8
 			// 
@@ -785,22 +800,6 @@ namespace Prism
 			this.txt_SiteDate.TabIndex = 35;
 			this.toolTip1.SetToolTip(this.txt_SiteDate, "dd/mm/yyyy preferred");
 			this.txt_SiteDate.TextChanged += new System.EventHandler(this.txt_SiteDate_TextChanged);
-			// 
-			// btn_FabMisc
-			// 
-			this.btn_FabMisc.BackColor = System.Drawing.Color.Gainsboro;
-			this.btn_FabMisc.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-			this.btn_FabMisc.Enabled = false;
-			this.btn_FabMisc.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-			this.btn_FabMisc.ForeColor = System.Drawing.SystemColors.ControlText;
-			this.btn_FabMisc.Location = new System.Drawing.Point(154, 208);
-			this.btn_FabMisc.Name = "btn_FabMisc";
-			this.btn_FabMisc.Size = new System.Drawing.Size(52, 43);
-			this.btn_FabMisc.TabIndex = 33;
-			this.toolTip1.SetToolTip(this.btn_FabMisc, "Fab Package Extras");
-			this.btn_FabMisc.UseVisualStyleBackColor = false;
-			this.btn_FabMisc.Visible = false;
-			this.btn_FabMisc.Click += new System.EventHandler(this.btn_FabMisc_Click);
 			// 
 			// btnCreatePackage1
 			// 
@@ -1035,7 +1034,6 @@ namespace Prism
         private System.Windows.Forms.StatusStrip statusStrip_Fab;
         private System.Windows.Forms.ToolStripStatusLabel StatusLabel;
         private System.Windows.Forms.TextBox txt_SiteDate;
-        private System.Windows.Forms.Button btn_FabMisc;
         private System.Windows.Forms.Button btnCreatePackage1;
         private System.Windows.Forms.Label label16;
         private System.Windows.Forms.Label label18;
@@ -1076,5 +1074,6 @@ namespace Prism
 		private System.Windows.Forms.Label label8;
 		private System.Windows.Forms.ComboBox cmb_VariationType_Fab;
 		public System.Windows.Forms.TextBox txt_Variation_Fab;
+		private System.Windows.Forms.Button btn_SendFabPack;
 	}
 }

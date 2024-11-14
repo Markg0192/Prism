@@ -16,6 +16,7 @@ using System.IO;
 using Application = System.Windows.Forms.Application;
 using System.Linq;
 using Tekla.Structures;
+using System.Diagnostics;
 
 namespace Prism
 {
@@ -37,7 +38,7 @@ namespace Prism
 			StartFunction();
 
 			try
-			{
+			{ 
 				if (!await Task.Run(() => InitialSetup(StageTypes.Prelim1, false, "x", "x", statusStrip_Mat, MaterialStatusLabel))) { EndFunction(0); return; }
 
 				if (!await Task.Run(() => _selectedObjects.MaterialButton1op(_projectData, (int)StageTypes.Prelim1, statusStrip_Mat, MaterialStatusLabel))) { EndFunction(0); return; }
@@ -201,40 +202,6 @@ namespace Prism
 			EndFunction(1);
 		}
 
-		private async void btn_FabMisc_Click(object sender, EventArgs e)
-		{
-			StartFunction();
-
-			if (!await Task.Run(() => InitialSetup(StageTypes.Bolt, false))) { EndFunction(0); return; }
-
-			/*   var mySolid = _selectedObjects.SelectedModelParts[0].GetSolid();
-               var mySolid2 = _selectedObjects.SelectedModelParts[1].GetSolid();
-
-               var bolts = _selectedObjects.SelectedModelParts[0].GetBolts();
-               var bolt3s = _selectedObjects.SelectedModelParts[1].GetBolts();
-
-
-               FaceEnumerator faceEnum = mySolid.GetFaceEnumerator();
-
-               int solid1Faces = 0;
-               while (faceEnum.MoveNext())
-               {
-                   solid1Faces++;
-               }
-
-               FaceEnumerator faceEnum2 = mySolid2.GetFaceEnumerator();
-
-               int solid2Faces = 0;
-               while (faceEnum2.MoveNext())
-               {
-                   solid2Faces++;
-               }
-            */
-			// await Task.Run(() => FabMisc.FabMiscOp(txt_SiteDate.Text, _selectedObjects, false, null));
-
-			EndFunction(1);
-		}
-
 		private void btnCreatePackage1_Click_1(object sender, EventArgs e)
 		{
 			try
@@ -273,60 +240,79 @@ namespace Prism
 			}
 		}
 
-		private async void btn_SpecialOperations_Click(object sender, EventArgs e)
+		private void btn_SendFabPack_Click(object sender, EventArgs e)
 		{
-		//	PrismMacroBuilder.RunPrismDrawingReport(@"C:\\TeklaStructuresModels2023\\Sandbox\\PlotFiles");
 			StartFunction();
 
+			ReportManager repoMan = new ReportManager(_projectData, phaseNumber.Text, issueNumber.Text);
+			if (!File.Exists(repoMan.Folders.FabPath))
+			{
+				MessageBox.Show(this, $"The file {repoMan.Folders.FabPath} does not exist, adjust your phase and issue number to continue", "File does not exist", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return;
+			}
+
+			EmailWriter.WritePreparedEmail(Path.Combine(repoMan.Folders.FabPath, "Fab Email Text.txt"));
+
+			EndFunction(1);
+		}
+
+		private async void btn_SpecialOperations_Click(object sender, EventArgs e)
+		{
+		//	Logging.AddToFabCompleteCount();
+			string TeklaEnvi = string.Empty;
+			TeklaStructuresSettings.GetAdvancedOption("XS_ROLE_INI", ref TeklaEnvi);
 			ReportManager repoman = new ReportManager(_projectData, "IFC", "02");
-			repoman.Folders.CreateFabFolders();
+				_selectedObjects = new SelectedObjects("C:\\TeklaStructuresModels\\2021 models\\Sandbox\\PrismIFCExportTest\\", StageTypes.Check2, repoman.PhaseNum, repoman.IssueNum, _model, Constants.SpecialOperationUser());
 
-			_selectedObjects = new SelectedObjects("C:\\TeklaStructuresModels\\2021 models\\Sandbox\\PrismIFCExportTest\\", StageTypes.Check2, repoman.PhaseNum, repoman.IssueNum, _model, Constants.SpecialOperationUser());
-		   
-			IFCExporter.ExportIndividualIFC(_selectedObjects, repoman.Folders.IfcPath, statusStrip_Fab, StatusLabel);
-			//bool boltOrderAdded = false;
-		//	await Task.Run(() => FabMisc.FabMiscOp(_model, txt_SiteDate.Text, _selectedObjects, false, repoman, 1, _projectData, false, statusStrip_Fab, StatusLabel, out boltOrderAdded));
+			//RenamePdfFiles("C:\\TeklaStructuresModels2021\\C1820 GE HPC\\PlotFiles");
 
-			//  ModelModifiers.PerformNumbering();
+			//	PrismMacroBuilder.RunPrismDrawingReport(@"C:\\TeklaStructuresModels2023\\Sandbox\\PlotFiles");
+			/*	StartFunction();
 
+				
+				repoman.Folders.CreateFabFolders();
 
-			/*    string packType = "Orders\\Material";
-				string serverLocation = $@"\\sfrplc.local\public\Do Issues\{repoman.ProjectData.ProjNumber}\{repoman.PhaseNum}\{packType}";
+			
 
-				CopyToServer(repoman.Folders.MatPath, serverLocation);
+				IFCExporter.ExportIndividualIFC(_selectedObjects, repoman.Folders.IfcPath, statusStrip_Fab, StatusLabel);
 
-				repoman = new ReportManager(_projectData, "100", "02");
-				packType = "Orders\\Material";
-				serverLocation = $@"\\sfrplc.local\public\Do Issues\{repoman.ProjectData.ProjNumber}\{repoman.PhaseNum}\{packType}";
+				//bool boltOrderAdded = false;
+				//	await Task.Run(() => FabMisc.FabMiscOp(_model, txt_SiteDate.Text, _selectedObjects, false, repoman, 1, _projectData, false, statusStrip_Fab, StatusLabel, out boltOrderAdded));
 
-				CopyToServer(repoman.Folders.MatPath, serverLocation);
-
-				repoman = new ReportManager(_projectData, "100", "01");
-				packType = "Orders\\Bolts";
-				serverLocation = $@"\\sfrplc.local\public\Do Issues\{repoman.ProjectData.ProjNumber}\{repoman.PhaseNum}\{packType}";
-
-				CopyToServer(repoman.Folders.BoltPath, serverLocation);*/
+				//  ModelModifiers.PerformNumbering();
 
 
-			// 
+				/*    string packType = "Orders\\Material";
+					string serverLocation = $@"\\sfrplc.local\public\Do Issues\{repoman.ProjectData.ProjNumber}\{repoman.PhaseNum}\{packType}";
 
-			//	QrCodeGenerator.ApplyQrCode(_selectedObjects.PrismParts, _projectData, repoman.Folders.QrCodePath);
+					CopyToServer(repoman.Folders.MatPath, serverLocation);
 
+					repoman = new ReportManager(_projectData, "100", "02");
+					packType = "Orders\\Material";
+					serverLocation = $@"\\sfrplc.local\public\Do Issues\{repoman.ProjectData.ProjNumber}\{repoman.PhaseNum}\{packType}";
+
+					CopyToServer(repoman.Folders.MatPath, serverLocation);
+
+					repoman = new ReportManager(_projectData, "100", "01");
+					packType = "Orders\\Bolts";
+					serverLocation = $@"\\sfrplc.local\public\Do Issues\{repoman.ProjectData.ProjNumber}\{repoman.PhaseNum}\{packType}";
+
+					CopyToServer(repoman.Folders.BoltPath, serverLocation);*/
+
+			//QrCodeGenerator.ApplyQrCode(_selectedObjects.PrismParts, _projectData, repoman.Folders.QrCodePath);
 
 			// MovePackToDirectory("C:\\TeklaStructuresModels2023\\Sandbox\\Prism Packages\\C1991-120-FAB-ISSUE01");
 
-			/*
-
-             if (!await Task.Run(() => InitialSetup(StageTypes.Check1, false, "x", "x", statusStrip_Det, DetailingStatusLabel))) { EndFunction(0); return; }
+		/*	if (!await Task.Run(() => InitialSetup(StageTypes.Check1, false, "x", "x", statusStrip_Det, DetailingStatusLabel))) { EndFunction(0); return; }
 
              FolderManager fm = new FolderManager(_projectData, "100", "01");
              fm.CreateFabFolders();
 
-             QrCodeGenerator.ApplyQrCode(_selectedObjects.PrismParts, _projectData, fm.IfcPath, fm.QrCodePath);
-			*/
+             QrCodeGenerator.ApplyQrCode(_selectedObjects.PrismParts, _projectData, fm.QrCodePath);
+			
 			//IFCExporter.ExportIndividualIFC(_selectedObjects, repoman.Folders.IfcPath, "");
 
-			EndFunction(1);
+			EndFunction(1);*/
 		}
 
 		private bool CopyToServer(string sourceDir, string serverLocation)
@@ -397,7 +383,7 @@ namespace Prism
 			SetStatusLabels("Gathering Parts");
 			ModelChecker.ClearOldLists();
 			_selectedObjects = new SelectedObjects(_projectData.ProjPath, stageType, phaseNum, issueNum, _model, Constants.SpecialOperationUser(), toolStrip, statusLabel);
-	
+
 			if (!PartsSelected()) return false;
 
 			if (!NumberingIsUpToDate(stageType)) return false;
@@ -492,6 +478,7 @@ namespace Prism
 			if (!success)
 			{
 				EndFunction(0);
+				return;
 			}
 
 			bool boltOrderAdded = false;
@@ -517,7 +504,7 @@ namespace Prism
 			MovePackToDirectory(myReportManager.Folders.FabPath, AdvancedSettingType.DirectoryFabPack, phaseNum);
 			if (boltOrderAdded) MovePackToDirectory(myReportManager.Folders.BoltPath, AdvancedSettingType.DirectoryBolts, phaseNum);
 
-			Logging.AddToFabCompleteCount(Constants.ModelProjectInforLocation(_projectData.ProjNumberAndGuid));
+			Logging.AddToFabCompleteCount();
 
 			EndFunction(1);
 		}
@@ -950,7 +937,7 @@ namespace Prism
 				phaseNumber.BackColor = Color.LightCoral;
 			}
 			CheckForFabButton();
-			CheckForBoltOrderButton();
+			CheckForFabEmailButton();
 
 			if (Constants.SpecialOperationUser())
 			{
@@ -969,7 +956,7 @@ namespace Prism
 				issueNumber.BackColor = Color.LightCoral;
 			}
 			CheckForFabButton();
-			CheckForBoltOrderButton();
+			CheckForFabEmailButton();
 		}
 
 		private void issueNumber_KeyPress(object sender, KeyPressEventArgs e)
@@ -1133,17 +1120,17 @@ namespace Prism
 			}
 		}
 
-		private void CheckForBoltOrderButton()
+		private void CheckForFabEmailButton()
 		{
 			if (phaseNumber.Text.Length > 0 & issueNumber.Text.Length > 1)
 			{
-				btn_FabMisc.Enabled = true;
-				btn_FabMisc.BackColor = Color.Chartreuse;
+				btn_SendFabPack.Enabled = true;
+				btn_SendFabPack.BackColor = Color.Chartreuse;
 			}
 			else
 			{
-				btn_FabMisc.Enabled = false;
-				btn_FabMisc.BackColor = Color.Gainsboro;
+				btn_SendFabPack.Enabled = false;
+				btn_SendFabPack.BackColor = Color.White;
 			}
 		}
 
@@ -1280,6 +1267,5 @@ namespace Prism
 				return;
 			}
 		}
-
 	}
 }

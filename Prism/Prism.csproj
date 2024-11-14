@@ -26,7 +26,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>48</ApplicationRevision>
+    <ApplicationRevision>55</ApplicationRevision>
     <ApplicationVersion>5.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -329,7 +329,6 @@
     <Compile Include="Managers\ChangeManager\MyICurve.cs" />
     <Compile Include="Managers\ChangeManager\MyPlane.cs" />
     <Compile Include="Managers\ChangeManager\MyWelds.cs" />
-    <Compile Include="Managers\ChangeManager\SerializationWrapper.cs" />
     <Compile Include="Managers\ChangeManager\SevFace.cs" />
     <Compile Include="Managers\ChangeManager\SteelComponentComparer.cs" />
     <Compile Include="Managers\ChangeManager\SteelItemBase.cs" />
@@ -541,6 +540,7 @@
     <Content Include="Resources\element_catalog_cross_section.bmp" />
     <Content Include="Resources\element_catalog_cross_section_sketch.bmp" />
     <Content Include="Resources\element_catalog_cross_section_user.bmp" />
+    <None Include="Resources\Envelope.png" />
     <Content Include="Resources\prtyp_tree_1.bmp" />
     <Content Include="Resources\prtyp_tree_10.bmp" />
     <Content Include="Resources\prtyp_tree_11.bmp" />
