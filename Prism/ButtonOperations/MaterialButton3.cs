@@ -45,7 +45,7 @@ namespace Prism.ButtonOperations
                                 
                 myObjects.AddPrelimMarks(projectData);
 
-                reportManager.CreateMaterialReports(myObjects, orderType, stageType);
+                reportManager.CreateMaterialReports(myObjects, orderType, stageType, toolStrip, tssl);
 
                 myObjects.OmittedParts = MoveOmitMaterial(orderType, myObjects, myObjects.GetFabsecParts(), model);
                 

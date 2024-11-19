@@ -86,7 +86,7 @@ namespace Prism
 
             fabsecCarcasses.SelectParts();
             myReportManager.CreateG2Assy();
-            BswxExporter.ExportBSWX(myObjects, myReportManager.Folders.CarcassOrderPath, projectData, myReportManager.PhaseNum, myReportManager.IssueNum, Enums.StageTypes.Prelim3);
+            BswxExporter.ExportBSWX(myObjects, myReportManager.Folders.CarcassOrderPath, projectData, myReportManager.PhaseNum, myReportManager.IssueNum, Enums.StageTypes.Prelim3, toolStrip, tssl);
             ModelModifiers.RemoveLog(myReportManager.Folders.CarcassOrderPath);
 
             myObjects.PrismParts.SelectParts();

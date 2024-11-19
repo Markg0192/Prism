@@ -35,12 +35,12 @@ namespace Prism
 
 			MyMarks = new List<string>();
 
-			bool runNewMethod = false;
+			bool runNewMethod = true;
 
-			if (isSpecialUser)
+		/*	if (isSpecialUser)
 			{
 				runNewMethod = PrismWarnings.TryTheNewSelectionMethod();
-			}
+			}*/
 			if (runNewMethod)
 			{
 				CreatePartListFromReport(projectPath, model, phaseNum, issueNum);

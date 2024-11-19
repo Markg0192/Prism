@@ -15,23 +15,15 @@ namespace Prism
 		{
 			//if (ModelChecker.IsCurrentUser("dean.johnston",  "mark.gibson", "ian.partridge"))
 			{
-				await RunIFCExport(GetDistinctByPartMark(selectedObjects.GetMainParts()), myFolder, toolStrip, statusLabel);
+				await RunIFCExport(selectedObjects.GetDistinctByPartMark(selectedObjects.GetMainParts()), myFolder, toolStrip, statusLabel);
 				selectedObjects.PrismParts.SelectParts();
 			}
-		}
-
-		private static List<PrismPart> GetDistinctByPartMark(List<PrismPart> prismParts)
-		{
-			return prismParts
-				.GroupBy(part => part.PartMark)
-				.Select(group => group.First())
-				.ToList();
 		}
 
 		private static async Task RunIFCExport(List<PrismPart> prismParts, string localFolder, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
 		{
 			int numberOfParts = prismParts.Count;
-			 int currentPartNo = 1;
+			int currentPartNo = 1;
 			Tekla.Structures.Model.UI.ModelObjectSelector MS = new Tekla.Structures.Model.UI.ModelObjectSelector();
 
 			await Task.Run(() =>
@@ -43,7 +35,7 @@ namespace Prism
 					// Since UI updates must be on the UI thread, use Invoke or BeginInvoke to update the status label
 					toolStrip.Invoke(new Action(() =>
 					{
-						UpdateStatusLabel(toolStrip, statusLabel, currentPartNo, numberOfParts);
+						statusLabel.Text = $"Exporting IFC: {currentPartNo} of {numberOfParts}";
 					}));
 
 					currentPartNo++;
@@ -83,14 +75,6 @@ namespace Prism
 			{
 				File.Delete(file);
 			}
-		}
-
-		private static void UpdateStatusLabel(ToolStrip toolStrip, ToolStripStatusLabel statusLabel, int currentFileCount, int desiredFileCount)
-		{
-			toolStrip.Invoke(new System.Action(() =>
-			{
-				statusLabel.Text = $"Exporting IFC: {currentFileCount} of {desiredFileCount}";
-			}));
 		}
 	}
 }

@@ -86,14 +86,14 @@ namespace Prism.ButtonOperations
 				return (false, totalNcRequired);
 
 			// Await the ProcessAndPrintDrawings method and handle the result tuple
-			var (success, drawingManager) = await ProcessAndPrintDrawings(cpuCounter, myObjects.GetNonSeversafeParts(), model, projectData, phaseNumber, issueNumber, reportManager, toolStrip, tssl, myObjects.PrismDrawings);
+			var (success, drawingManager) = await ProcessAndPrintDrawings(myObjects, cpuCounter, myObjects.GetNonSeversafeParts(), model, projectData, phaseNumber, issueNumber, reportManager, toolStrip, tssl, myObjects.PrismDrawings);
 			if (!success)
 				return (false, totalNcRequired);
 
 			// Use the DrawingManager to assign total NC required
 			totalNcRequired = drawingManager.NumberOfNcRequired;
 
-			myObjects.ExportBSWX(reportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType);
+			myObjects.ExportBSWX(reportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType, toolStrip, tssl);
 
 			// Create fabrication reports
 			reportManager.CreateFabReports(myObjects.GetNonSeversafeParts(), myObjects.PrismBoltGroups, teklaVersion, toolStrip, tssl);
@@ -104,6 +104,11 @@ namespace Prism.ButtonOperations
 
 			// Export IFC
 			await IFCExporter.ExportIndividualIFC(myObjects, reportManager.Folders.IfcPath, toolStrip, tssl);
+
+			toolStrip.Invoke(new Action(() =>
+			{
+				tssl.Text = $"Forming emails.";
+			}));
 
 			// Remove unused folders
 			reportManager.Folders.RemoveUnusedFolders();
@@ -144,19 +149,20 @@ namespace Prism.ButtonOperations
 				{
 					combinedParts.Add(new PrismPart(p));
 				}
+
 				ModelModifiers.SelectParts(combinedParts);
 
 				SelectedObjects objects = new SelectedObjects(projectData.ProjPath, stageType, phaseNumber, issueNumber, model, Constants.SpecialOperationUser(), ts, tssl);
 
 				// Await the async method and handle the result tuple
-				var (success, drawingManager) = await ProcessAndPrintDrawings(cpuCounter, objects.PrismParts, model, projectData, phaseNumber, issueNumber, reportManager, ts, tssl, objects.PrismDrawings);
+				var (success, drawingManager) = await ProcessAndPrintDrawings(objects, cpuCounter, objects.PrismParts, model, projectData, phaseNumber, issueNumber, reportManager, ts, tssl, objects.PrismDrawings);
 				if (!success)
 					return (false, totalNcRequired);
 
 				// Use the drawingManager to set totalNcRequired
 				totalNcRequired = drawingManager.NumberOfNcRequired;
 
-				objects.ExportBSWX(reportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType);
+				objects.ExportBSWX(reportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType, ts, tssl);
 
 				reportManager.CreateFabReports(objects.PrismParts, objects.PrismBoltGroups, teklaVersion, ts, tssl);
 
@@ -181,26 +187,26 @@ namespace Prism.ButtonOperations
 			return (true, totalNcRequired);
 		}
 
-		private static async Task<(bool success, DrawingManager drawingManager)> ProcessAndPrintDrawings(CpuCounter cpuCounter, List<PrismPart> partsToSelect, Model model, PrismProjectData projectData, string phaseNumber, string issueNumber, ReportManager reportManager, ToolStrip toolStrip, ToolStripStatusLabel statusLabel, List<PrismDrawing> drawings)
+		private static async Task<(bool success, DrawingManager drawingManager)> ProcessAndPrintDrawings(SelectedObjects selectedObjects, CpuCounter cpuCounter, List<PrismPart> partsToSelect, Model model, PrismProjectData projectData, string phaseNumber, string issueNumber, ReportManager reportManager, ToolStrip toolStrip, ToolStripStatusLabel statusLabel, List<PrismDrawing> drawings)
 		{
 			CpuSpeedCheck(cpuCounter);
 			ReportManager.SelectDrawingsInDocManager(partsToSelect);
 
 			CpuSpeedCheck(cpuCounter);
-			DrawingManager drawingManager = new DrawingManager(model, projectData, phaseNumber, issueNumber, reportManager.Folders.FabPath, drawings);
+			DrawingManager drawingManager = new DrawingManager(model, projectData, phaseNumber, issueNumber, reportManager.Folders.FabPath);
 
 			if (!CheckForProblemsWithDrawings(drawingManager, projectData.ProjNumber, out bool createDrawings)) return (false, null);
-
-		/*	string TeklaEnvi = string.Empty;
-			TeklaStructuresSettings.GetAdvancedOption("XS_ROLE_INI", ref TeklaEnvi);
-
-			if (TeklaEnvi.Contains("SEV_GENERAL"))
-			{
-				QrCodeGenerator.ApplyQrCode(partsToSelect, projectData, reportManager.Folders.QrCodePath, drawingManager, toolStrip, statusLabel);
-			}*/
-
+			
 			if (createDrawings)
 			{
+				string TeklaEnvi = string.Empty;
+				TeklaStructuresSettings.GetAdvancedOption("XS_ROLE_INI", ref TeklaEnvi);
+
+				if (TeklaEnvi.Contains("GENERAL") || TeklaEnvi.Contains("PORTAL"))
+				{
+					await QrCodeGenerator.ApplyQrCode(selectedObjects, projectData, reportManager.Folders.QrCodePath, drawingManager, toolStrip, statusLabel);
+				}
+
 				CpuSpeedCheck(cpuCounter);
 				PrismMacroBuilder.IssueAndLockStampOff();
 				List<int> drawingCount = NewCountDrawings(drawingManager);

@@ -9,6 +9,7 @@ using System;
 using System.Linq;
 using System.Windows.Forms;
 using Newtonsoft.Json.Linq;
+using System.Threading.Tasks;
 
 namespace Prism
 {
@@ -124,7 +125,7 @@ namespace Prism
 		public readonly string BoltReportPrefix;
 		public readonly string CarcassReportPrefix;
 
-		public void CreateMaterialReports(SelectedObjects selectedObjects, string orderType, StageTypes stageType)
+		public void CreateMaterialReports(SelectedObjects selectedObjects, string orderType, StageTypes stageType, ToolStrip toolStrip, ToolStripStatusLabel tssl)
 		{
 			if (!orderType.Contains("Order Bolts"))
 			{
@@ -135,32 +136,32 @@ namespace Prism
 				{
 					case "Order Material":
 						ProcessMaterial(selectedObjects, stageType, true, fabsecPresent, nonFabsecPresent,
-							_report1Pname, _output1Pname, _report2PgName, _output2PgName);
+							_report1Pname,  _output1Pname, toolStrip, tssl, _report2PgName, _output2PgName);
 						break;
 
 					case "Add Material":
 						ProcessMaterial(selectedObjects, stageType, true, fabsecPresent, nonFabsecPresent,
-							_report1PAname, _output1PAname, _report2PgName, _output2PgName);
+							_report1PAname,  _output1PAname, toolStrip, tssl,_report2PgName, _output2PgName);
 						break;
 
 					case "Omit Material":
 						ProcessMaterial(selectedObjects, stageType, false, fabsecPresent, nonFabsecPresent,
-							_report1POname, _output1POname, _report2PgName, _output2PgName);
+							_report1POname, _output1POname, toolStrip, tssl, _report2PgName, _output2PgName);
 						break;
 
 					case "Order Special Fittings":
 						ProcessMaterial(selectedObjects, stageType, true, false, nonFabsecPresent,
-							_report1PFname, _output1PFname);
+							  _report1PFname, _output1PFname, toolStrip, tssl);
 						break;
 
 					case "Add Special Fittings":
 						ProcessMaterial(selectedObjects, stageType, true, false, nonFabsecPresent,
-							_report1PFAname, _output1PFAname);
+							_report1PFAname, _output1PFAname, toolStrip, tssl);
 						break;
 
 					case "Omit Special Fittings":
 						ProcessMaterial(selectedObjects, stageType, false, false, nonFabsecPresent,
-							_report1PFOname, _output1PFOname);
+							_report1PFOname, _output1PFOname, toolStrip, tssl);
 						break;
 
 					default:
@@ -171,12 +172,12 @@ namespace Prism
 			}
 		}
 
-		private void ProcessMaterial(SelectedObjects selectedObjects, StageTypes stageType, bool createBSWX, bool fabsecPresent, bool nonFabsecPresent, string nonFabsecReportName,
-		string nonFabsecOutputName, string fabsecReportName = null, string fabsecOutputName = null)
+		private void ProcessMaterial(SelectedObjects selectedObjects, StageTypes stageType, bool createBSWX, bool fabsecPresent, bool nonFabsecPresent, string nonFabsecReportName, 
+			string nonFabsecOutputName, ToolStrip toolStrip, ToolStripStatusLabel tssl, string fabsecReportName = null, string fabsecOutputName = null)
 		{
 			if (createBSWX)
 			{
-				selectedObjects.ExportBSWX(Folders.MatPath, ProjectData, PhaseNum, IssueNum, stageType);
+			    selectedObjects.ExportBSWX(Folders.MatPath, ProjectData, PhaseNum, IssueNum, stageType, toolStrip, tssl);
 				ModelModifiers.RemoveLog(Folders.MatPath);
 			}
 

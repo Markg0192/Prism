@@ -165,6 +165,12 @@ namespace Prism
 			RemoveSheetNumbersFromAllDrawings(reportManager.Folders.FabPath);
 
 			PrismMacroBuilder.ClearPrintDialog();
+
+			toolStrip.Invoke(new Action(() =>
+			{
+				statusLabel.Text = "Exporting BSWX";
+			}));
+
 		}
 
 
@@ -200,6 +206,11 @@ namespace Prism
 
 			// Wait asynchronously for printing to complete
 			await WaitForPrintingAsync(printFolder, desiredFileCount, toolStrip, statusLabel, drawingType);
+			
+			toolStrip.Invoke(new Action(() =>
+			{
+				statusLabel.Text = "Adding issue stamp.";
+			}));
 
 			// Issue and lock stamp the drawings
 			PrismMacroBuilder.IssueAndLockStampOn();

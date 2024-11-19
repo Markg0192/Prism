@@ -258,11 +258,13 @@ namespace Prism
 
 		private async void btn_SpecialOperations_Click(object sender, EventArgs e)
 		{
+
+			EmailWriter.WriteFabEmail(null, null, "", "", "", "", "", true);
 		//	Logging.AddToFabCompleteCount();
-			string TeklaEnvi = string.Empty;
-			TeklaStructuresSettings.GetAdvancedOption("XS_ROLE_INI", ref TeklaEnvi);
-			ReportManager repoman = new ReportManager(_projectData, "IFC", "02");
-				_selectedObjects = new SelectedObjects("C:\\TeklaStructuresModels\\2021 models\\Sandbox\\PrismIFCExportTest\\", StageTypes.Check2, repoman.PhaseNum, repoman.IssueNum, _model, Constants.SpecialOperationUser());
+		//	string TeklaEnvi = string.Empty;
+		//	TeklaStructuresSettings.GetAdvancedOption("XS_ROLE_INI", ref TeklaEnvi);
+		//	ReportManager repoman = new ReportManager(_projectData, "IFC", "02");
+		//		_selectedObjects = new SelectedObjects("C:\\TeklaStructuresModels\\2021 models\\Sandbox\\PrismIFCExportTest\\", StageTypes.Check2, repoman.PhaseNum, repoman.IssueNum, _model, Constants.SpecialOperationUser());
 
 			//RenamePdfFiles("C:\\TeklaStructuresModels2021\\C1820 GE HPC\\PlotFiles");
 
@@ -700,12 +702,12 @@ namespace Prism
 				ModelModifiers.SelectSpecialTaggedInSelection(_selectedObjects);
 				ModelModifiers.AddPrelimMarks(_selectedObjects, _projectData);
 				_selectedObjects = new SelectedObjects(myReportManager.Folders.MatPath, stageType, myReportManager.PhaseNum, myReportManager.IssueNum, _model, Constants.SpecialOperationUser()); // we reset selected objects here (because we just changed the selection)
-				myReportManager.CreateMaterialReports(_selectedObjects, orderType, stageType);
+				myReportManager.CreateMaterialReports(_selectedObjects, orderType, stageType, toolStrip, statusLabel);
 			}
 			else
 			{
 				ModelModifiers.AddPrelimMarks(_selectedObjects, _projectData);
-				myReportManager.CreateMaterialReports(_selectedObjects, orderType, stageType);
+				myReportManager.CreateMaterialReports(_selectedObjects, orderType, stageType, toolStrip, statusLabel);
 			}
 
 			if (runDrawings)
@@ -848,7 +850,7 @@ namespace Prism
 			{
 
 				if (!myReportManager.Folders.CreateMatFolder(false)) { EndFunction(0); return false; };
-				myReportManager.CreateMaterialReports(_selectedObjects, orderType, StageTypes.Prelim3);
+				myReportManager.CreateMaterialReports(_selectedObjects, orderType, StageTypes.Prelim3, toolStrip, tssl);
 				if (!MaterialButton3.FinishOrder(_selectedObjects, (int)StageTypes.Prelim3, _projectData, myReportManager.MatReportPrefix,
 					orderType, myReportManager, txt_MatSiteDate.Text, toolStrip, tssl)) { return false; }
 			}
