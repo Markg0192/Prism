@@ -252,7 +252,7 @@ namespace Prism
                         default:
                             break;
                     }
-                    ModelModifiers.ModifyAttribute(p.Part, 3, projData, null, false, true);
+                    ModelModifiers.ModifyAttribute(p, 3, projData, null, false, true);
                 }
             }
             RoundHandrailMeters();

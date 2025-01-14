@@ -55,8 +55,8 @@ namespace Prism
 			foreach (PrismPart myMainPart in selectedObjects.GetMainParts())
 			{
 				GetUnorderedParts(myMainPart.Part);
-				GetPartsWithoutAFinish(myMainPart.Part);
-				CheckForIntumescentLoading(myMainPart.Part);
+				GetPartsWithoutAFinish(myMainPart);
+				CheckForIntumescentLoading(myMainPart);
 
 				ArrayList mySecondaries = myMainPart.Part.GetAssembly().GetSecondaries();
 				foreach (Part mySecondaryPart in mySecondaries)
@@ -499,11 +499,11 @@ namespace Prism
 			}
 		}
 
-		public static void GetPartsWithoutAFinish(this Part mainPart)
+		public static void GetPartsWithoutAFinish(this PrismPart mainPart)
 		{
 			if (mainPart.Finish.Length == 0)
 			{
-				HasNoFinish.Add(new PrismPart(mainPart));
+				HasNoFinish.Add(mainPart);
 			}
 		}
 
@@ -535,41 +535,23 @@ namespace Prism
 			}
 		}
 
-		private static void CheckForIntumescentLoading(this Part mainPart)
+		private static void CheckForIntumescentLoading(this PrismPart mainPart)
 		{
 			if (mainPart.Finish.StartsWith(GdomValues.IntumescentCode))
 			{
-				RetrieveDftAndWft(mainPart, ModelUDA.FireDFT(), ModelUDA.FireWFT(), out string dft, out string wft, out double dftNum, out double wftNum);
-				if (IsMissingProperties(dft, dftNum, wft, wftNum))
+				if (IsMissingProperties(mainPart.SherwinDft, mainPart.SherwinWft))
 				{
-					RetrieveDftAndWft(mainPart, ModelUDA.HempelFireDFT(), ModelUDA.HempelFireWFT(), out string hempDft, out string hempWft, out double hempDftNum, out double hempWftNum);
-					if (IsMissingProperties(hempDft, hempDftNum, hempWft, hempWftNum))
+					if (IsMissingProperties(mainPart.HempelDft, mainPart.HempelWft))
 					{
-						RetrieveDftAndWft(mainPart, ModelUDA.HempelOldFireDFT(), ModelUDA.HempelOldFireWFT(), out string oldHempDft, out string oldHempWft, out double oldHempDftNum, out double oldHempWftNum);
-						if (IsMissingProperties(oldHempDft, oldHempDftNum, oldHempWft, oldHempWftNum))
-						{
-							PartsWithoutIntumescentLoading.Add(new PrismPart(mainPart));
-						}
+						PartsWithoutIntumescentLoading.Add(mainPart);
 					}
 				}
 			}
 		}
 
-		private static void RetrieveDftAndWft(Part part, string dftUda, string wftUda, out string dftString, out string wftString, out double dftDouble, out double wftDouble)
+		private static bool IsMissingProperties(string dft, string wft)
 		{
-			dftString = "";
-			wftString = "";
-			dftDouble = 0;
-			wftDouble = 0;
-			part.GetUserProperty(dftUda, ref dftString);
-			part.GetUserProperty(dftUda, ref dftDouble);
-			part.GetUserProperty(wftUda, ref wftString);
-			part.GetUserProperty(wftUda, ref wftDouble);
-		}
-
-		private static bool IsMissingProperties(string dft, double dftNum, string wft, double wftNum)
-		{
-			return string.IsNullOrEmpty(dft) && dftNum == 0 && string.IsNullOrEmpty(wft) && wftNum == 0;
+			return string.IsNullOrEmpty(dft) && string.IsNullOrEmpty(wft);
 		}
 
 		public static bool NameAndClassAign(SelectedObjects myObjects)
@@ -611,5 +593,5 @@ namespace Prism
 			return userNames.Any(userName => string.Equals(Environment.UserName, userName, StringComparison.OrdinalIgnoreCase));
 		}
 	}
-	
+
 }
