@@ -431,7 +431,7 @@ namespace Prism
 
         public static void DebugLog(string debugText, string modelName)
         {
-            if (Environment.UserName == "mark. gibson")
+           // if (Environment.UserName == "mark. gibson")
             {
                 string[] content = new string[]
                 {

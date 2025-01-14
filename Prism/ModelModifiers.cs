@@ -84,24 +84,39 @@ namespace Prism
 		{
 			string firstVNo = "";
 			string secondVNo = "";
+
+			// Read current properties once
 			p.GetUserProperty(ModelUDA.FirstVariationNumber(), ref firstVNo);
-			if (firstVNo == "")
+			p.GetUserProperty(ModelUDA.SecondVariationNumber(), ref secondVNo);
+
+			// 1) If first is empty, fill it and exit
+			if (string.IsNullOrEmpty(firstVNo))
 			{
 				p.SetUserProperty(ModelUDA.FirstVariationNumber(), variationNumber);
+				return;
 			}
-			else
+
+			// 2) If first is NOT empty, check second:
+			//    If second is empty AND first != new variation => fill second
+			if (string.IsNullOrEmpty(secondVNo))
 			{
-				p.GetUserProperty(ModelUDA.SecondVariationNumber(), ref secondVNo);
-				if (secondVNo == "")
+				// If first equals new, do nothing, so just check if they're different
+				if (firstVNo != variationNumber)
 				{
 					p.SetUserProperty(ModelUDA.SecondVariationNumber(), variationNumber);
 				}
-				else
-				{
-					p.SetUserProperty(ModelUDA.FirstVariationNumber(), variationNumber);
-				}
+				return;
 			}
 
+			// 3) Both slots are filled.
+			//    If first == new or second == new => do nothing (avoid duplication).
+			if (firstVNo == variationNumber || secondVNo == variationNumber)
+			{
+				return;
+			}
+
+			// 4) Otherwise, both are filled, neither match new => replace first
+			p.SetUserProperty(ModelUDA.FirstVariationNumber(), variationNumber);
 		}
 
 		public static bool ModifyAttributes(this List<PrismPart> selectedObjects, int stageNumber, PrismProjectData projectData,
@@ -116,7 +131,7 @@ namespace Prism
 			{
 				if (totalCount > 0) UpdateStatusLabelWithProcessCount(ref currentCount, toolStrip, statusLabel, totalCount);
 
-				if (!ModifyAttribute(part.Part, stageNumber, projectData, td, isSpecialFittingOrder, isSeversafe))
+				if (!ModifyAttribute(part, stageNumber, projectData, td, isSpecialFittingOrder, isSeversafe))
 				{
 					return false;
 				}
@@ -142,35 +157,74 @@ namespace Prism
 			}
 		}
 
-		public static bool ModifyAttribute(Part part, int stageNumber, PrismProjectData projectData, TableData uniClassTable, bool isSpecialFittingOrder = false, bool isSeversafe = false)
+		public static bool ModifyAttribute(PrismPart prismPart, int stageNumber, PrismProjectData projectData, TableData uniClassTable, bool isSpecialFittingOrder = false, bool isSeversafe = false)
 		{
-			if (isSpecialFittingOrder) part.SetUserProperty(ModelUDA.Pre_Ordered(), 1);
-			part.SetUserProperty(ModelUDA.CurrentStageName(stageNumber), projectData.Full);
-			part.SetUserProperty(ModelUDA.CurrentStageDate(stageNumber), projectData.Date);
+			if (isSpecialFittingOrder) prismPart.Part.SetUserProperty(ModelUDA.Pre_Ordered(), 1);
+
+			prismPart.Part.SetUserProperty(ModelUDA.CurrentStageName(stageNumber), projectData.Full);
+			prismPart.Part.SetUserProperty(ModelUDA.CurrentStageDate(stageNumber), projectData.Date);
+
 			if (stageNumber == 3 && !isSeversafe)
 			{
-				TableRow row = UniClassCodes.GetUniClassDetailForPart(projectData.ProjNumberAndGuid, part, uniClassTable);
+				TableRow row = UniClassCodes.GetUniClassDetailForPart(projectData.ProjNumberAndGuid, prismPart.Part, uniClassTable);
 				if (row != null)
 				{
-					part.SetUserProperty("SEV-UDA-130", row.Code);
-					part.SetUserProperty("SEV-UDA-131", row.Title);
+					prismPart.Part.SetUserProperty("SEV-UDA-130", row.Code);
+					prismPart.Part.SetUserProperty("SEV-UDA-131", row.Title);
 				}
 			}
-			if (stageNumber == 7)
+
+			if (IsDetail3(stageNumber))
 			{
-				part.SetUserProperty(ModelUDA.PartMarkAtFab(), part.GetPartMark());
+				CheckForAndFixNegativeDftWfts(prismPart);
 			}
-			if (stageNumber == 7 && !Operation.IsNumberingUpToDate(part))
+
+			if (IsFabStage(stageNumber))
+			{
+				prismPart.Part.SetUserProperty(ModelUDA.PartMarkAtFab(), prismPart.PartMark);
+			}
+
+			if (IsFabStage(stageNumber) && prismPart.NumbersOutOfDate)
 			{
 				return PrismWarnings.NumbersNoLongerUpToDate();
 			}
 
 			if (projectData.IsVariation)
 			{
-				SetVariationAttribute(projectData.VariationNumber, part);
+				SetVariationAttribute(projectData.VariationNumber, prismPart.Part);
 			}
 
 			return true;
+		}
+
+		private static bool IsFabStage(int stageNumber)
+		{
+			return stageNumber == 7;
+		}
+
+		private static bool IsDetail3(int stageNumber)
+		{
+			return stageNumber == 6;
+		}
+
+		private static void CheckForAndFixNegativeDftWfts(PrismPart pPart)
+		{
+			if (pPart.SherwinDft.Contains("-"))
+			{
+				pPart.Part.SetUserProperty(ModelUDA.FireDFT(), 0);
+			}
+			if (pPart.SherwinWft.Contains("-"))
+			{
+				pPart.Part.SetUserProperty(ModelUDA.FireWFT(), 0);
+			}
+			if (pPart.HempelDft.Contains("-"))
+			{
+				pPart.Part.SetUserProperty(ModelUDA.HempelFireDFT(), 0);
+			}
+			if (pPart.HempelWft.Contains("-"))
+			{
+				pPart.Part.SetUserProperty(ModelUDA.HempelFireWFT(), 0);
+			}
 		}
 
 		public static void StampBoltUDA(List<BoltGroup> allBolts, string name, string date, string phaseNumber, string issueNumber)
@@ -230,21 +284,36 @@ namespace Prism
 		public static void AddPrelimMarks(this SelectedObjects selectedObjects, PrismProjectData pData)
 		{
 			int currentLastNumber = Logging.GetLastUsedPrelim(pData.ProjNumberAndGuid);
+
+			Logging.DebugLog("current last number" + currentLastNumber.ToString(), "model");
+
 			string prelimPrefix = Logging.GetAdvancedSetting(pData.ProjNumberAndGuid, AdvancedSettingType.PrelimPrefix);
 
+Logging.DebugLog("prelim prefix" + prelimPrefix, "model");
+
+			int parts = selectedObjects.PrismParts.Count;
+			Logging.DebugLog("Parts found = " + parts.ToString(), "model");
+
+			int loop = 0;
 			foreach (PrismPart p in selectedObjects.PrismParts)
 			{
+				loop++;
+				Logging.DebugLog("Part " + loop.ToString(), "model");
+
 				if (p.Part.GetPrelimMark().Length == 0)
 				{
 					if (currentLastNumber == 0)
 					{
 						Console.WriteLine("Failed to read last number");
+						Logging.DebugLog("Failed to read last number", "model");
+
 						currentLastNumber = 1;
 						Logging.SetLastUsedPrelim(pData.ProjNumberAndGuid, currentLastNumber);
 					}
 					else
 					{
 						Console.WriteLine("Last number read" + currentLastNumber);
+						Logging.DebugLog("Last number read" + currentLastNumber, "model");
 					}
 					p.Part.SetUserProperty(ModelUDA.PrelimMark(), prelimPrefix + currentLastNumber.ToString());
 
@@ -252,6 +321,7 @@ namespace Prism
 				}
 			}
 
+			Logging.DebugLog("Complete", "model");
 			Logging.SetLastUsedPrelim(pData.ProjNumberAndGuid, currentLastNumber);
 		}
 

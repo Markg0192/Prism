@@ -16,6 +16,7 @@ namespace Prism
 				IsFrozen = information[5].TrimEnd(' ').TrimStart(' ') == "1";
 				IsLocked = information[6].TrimEnd(' ').TrimStart(' ') == "1";
 				ChangeMessage = information[7].TrimEnd(' ').TrimStart(' ');
+				ChangeMessage = ChangeMessage.Contains("Issued drawing changed") ? "" : ChangeMessage;
 				DrawingFolder = GetDrawingType(information[4].TrimEnd(' ').TrimStart(' '), DrawingType);
 				DrawingId = Convert.ToInt32(information[9].TrimEnd(' ').TrimStart(' '));
 			}
@@ -28,6 +29,7 @@ namespace Prism
 				IsFrozen = information[5].TrimEnd(' ').TrimStart(' ') == "1";
 				IsLocked = information[6].TrimEnd(' ').TrimStart(' ') == "1";
 				ChangeMessage = information[7].TrimEnd(' ').TrimStart(' ');
+				ChangeMessage = ChangeMessage.Contains("Issued drawing changed") ? "" : ChangeMessage;
 				DrawingFolder = GetDrawingType(information[4].TrimEnd(' ').TrimStart(' '), DrawingType);
 				DrawingId = Convert.ToInt32(information[9].TrimEnd(' ').TrimStart(' '));
 			}

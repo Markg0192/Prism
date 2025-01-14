@@ -220,9 +220,11 @@ namespace Prism
 		{
 			try
 			{
-				if (!PrismWarnings.RocketButtonCheck()) return;
+				StartFunction();
 
-				if (!await Task.Run(() => InitialSetup(StageTypes.RocketPacket, false))) { EndFunction(0); return; }
+				if (!PrismWarnings.RocketButtonCheck()) { EndFunction(0); return; }
+
+				if (!await Task.Run(() => InitialSetup(StageTypes.FAB, false))) { EndFunction(0); return; }
 
 				int rocketPartLimit = 100;
 				int numberOfSelectedParts = _selectedObjects.PrismParts.Count;
@@ -233,6 +235,7 @@ namespace Prism
 				}
 
 				CreatePackageAsync(StageTypes.RocketPacket);
+			    EndFunction(1); 
 			}
 			catch (Exception ex)
 			{
@@ -384,7 +387,11 @@ namespace Prism
 		{
 			SetStatusLabels("Gathering Parts");
 			ModelChecker.ClearOldLists();
-			_selectedObjects = new SelectedObjects(_projectData.ProjPath, stageType, phaseNum, issueNum, _model, Constants.SpecialOperationUser(), toolStrip, statusLabel);
+
+			if (stageType != StageTypes.RocketPacket)
+			{
+				_selectedObjects = new SelectedObjects(_projectData.ProjPath, stageType, phaseNum, issueNum, _model, Constants.SpecialOperationUser(), toolStrip, statusLabel);
+			}
 
 			if (!PartsSelected()) return false;
 
@@ -451,7 +458,7 @@ namespace Prism
 
 			ModelModifiers.VariationCheck(_projectData, txt_Variation_Fab.Text, cmb_VariationType_Fab.Text);
 
-			if (!await Task.Run(() => InitialSetup(StageTypes.FAB, stageType == StageTypes.FAB, phaseNum, issueNum, statusStrip_Fab, StatusLabel))) { EndFunction(0); return; }
+			if (!await Task.Run(() => InitialSetup(stageType, stageType == StageTypes.FAB, phaseNum, issueNum, statusStrip_Fab, StatusLabel))) { EndFunction(0); return; }
 
 			if (!_selectedObjects.NumbersUpToDate) { SetStatusLabels("Numbers not up to date"); EndFunction(0); return; }
 

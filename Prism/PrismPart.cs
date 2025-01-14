@@ -30,6 +30,12 @@ namespace Prism
 			string drawingRevision = "";
 			Part.GetReportProperty("ASSEMBLY.DRAWING.REVISION.MARK", ref drawingRevision);
 			DrawingRevision = drawingRevision;
+
+			SherwinDft = GetStringProperty(p, ModelUDA.FireDFT());
+			SherwinWft = GetStringProperty(p, ModelUDA.FireWFT());
+			HempelDft = GetStringProperty(p, ModelUDA.HempelFireDFT());
+			HempelWft = GetStringProperty(p, ModelUDA.HempelFireWFT());
+			Finish = Part.Finish;
 		}
 
 		public PrismPart(string[] items, Model model)
@@ -52,6 +58,12 @@ namespace Prism
 			if (IsMainPart) Assembly = Part.GetAssembly();
 			ModelObject = Part;
 			DrawingRevision = Trim(items[11]);
+
+			SherwinDft = Trim(items[12]);
+			SherwinWft = Trim(items[13]);
+			HempelDft = Trim(items[14]);
+			HempelWft = Trim(items[15]);
+			Finish = Trim(items[16]);
 		}
 
 		private string Trim(string s)
@@ -59,7 +71,12 @@ namespace Prism
 			return s.TrimEnd(' ').TrimStart(' ');
 		}
 
+		public string Finish {  get; set; }
 		public string DrawingRevision { get; set; }
+		public string SherwinDft { get; set; }
+		public string SherwinWft { get; set; }
+		public string HempelDft { get; set; }
+		public string HempelWft { get; set; }
 		public bool NumbersOutOfDate { get; set; }
 		public string PartMark { get; set; }
 		public bool StartNumberDoesntMatch { get; set; }
@@ -95,6 +112,13 @@ namespace Prism
 				return phase;
 			}
 			return null;
+		}
+
+		private string GetStringProperty(Part part, string reportProperty)
+		{
+			string value = "";
+			part.GetReportProperty(reportProperty, ref value);
+			return value;
 		}
 
 		private bool IsSeversafePart(string name)
