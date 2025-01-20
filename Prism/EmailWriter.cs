@@ -179,7 +179,17 @@ namespace Prism
 
 		public static void WriteFabEmail(PrismProjectData projData, SelectedObjects objects, string fabPrefix, string issueNumber, string phaseNumber, string siteDate, string fabPath, bool zipFileCanBeAttached)
 		{
-			double fittingsToAssemblyWeightRatio = Math.Round((objects.FittingWeight / objects.MainPartWeight) * 100, 1);
+			double fittingsToAssemblyWeightRatio = 0;
+			if (objects.MainPartWeight != 0)
+			{
+				fittingsToAssemblyWeightRatio = Math.Round((objects.FittingWeight / objects.MainPartWeight) * 100, 1);
+			}
+			else
+			{
+				// Decide what you want to do if MainPartWeight is zero
+				fittingsToAssemblyWeightRatio = 100; // or some default value
+			}
+
 			double totalWeight = objects.MainPartWeight + objects.FittingWeight;
 			ExecuteEmailAction(outlookApp =>
 			{
