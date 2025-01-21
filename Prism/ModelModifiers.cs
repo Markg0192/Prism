@@ -101,7 +101,7 @@ namespace Prism
 			if (string.IsNullOrEmpty(secondVNo))
 			{
 				// If first equals new, do nothing, so just check if they're different
-				if (firstVNo != variationNumber)
+				if (ParseString(firstVNo) != ParseString(variationNumber))
 				{
 					p.SetUserProperty(ModelUDA.SecondVariationNumber(), variationNumber);
 				}
@@ -110,13 +110,24 @@ namespace Prism
 
 			// 3) Both slots are filled.
 			//    If first == new or second == new => do nothing (avoid duplication).
-			if (firstVNo == variationNumber || secondVNo == variationNumber)
+			if (ParseString(firstVNo) == ParseString(variationNumber) || ParseString(secondVNo) == ParseString(variationNumber))
 			{
 				return;
 			}
 
 			// 4) Otherwise, both are filled, neither match new => replace first
 			p.SetUserProperty(ModelUDA.FirstVariationNumber(), variationNumber);
+		}
+
+		public static string ParseString(string input)
+		{
+			// 1. Remove any 'V', 'O', '.', '-' (case-insensitive)
+			string cleaned = Regex.Replace(input, "[VO\\.-]", "", RegexOptions.IgnoreCase);
+
+			// 2. Remove leading zeros
+			cleaned = cleaned.TrimStart('0');
+
+			return cleaned;
 		}
 
 		public static bool ModifyAttributes(this List<PrismPart> selectedObjects, int stageNumber, PrismProjectData projectData,
@@ -187,11 +198,6 @@ namespace Prism
 			if (IsFabStage(stageNumber) && prismPart.NumbersOutOfDate)
 			{
 				return PrismWarnings.NumbersNoLongerUpToDate();
-			}
-
-			if (projectData.IsVariation)
-			{
-				SetVariationAttribute(projectData.VariationNumber, prismPart.Part);
 			}
 
 			return true;
@@ -289,23 +295,18 @@ namespace Prism
 
 			string prelimPrefix = Logging.GetAdvancedSetting(pData.ProjNumberAndGuid, AdvancedSettingType.PrelimPrefix);
 
-Logging.DebugLog("prelim prefix" + prelimPrefix, "model");
-
 			int parts = selectedObjects.PrismParts.Count;
-			Logging.DebugLog("Parts found = " + parts.ToString(), "model");
 
 			int loop = 0;
 			foreach (PrismPart p in selectedObjects.PrismParts)
 			{
 				loop++;
-				Logging.DebugLog("Part " + loop.ToString(), "model");
 
 				if (p.Part.GetPrelimMark().Length == 0)
 				{
 					if (currentLastNumber == 0)
 					{
 						Console.WriteLine("Failed to read last number");
-						Logging.DebugLog("Failed to read last number", "model");
 
 						currentLastNumber = 1;
 						Logging.SetLastUsedPrelim(pData.ProjNumberAndGuid, currentLastNumber);
@@ -313,15 +314,18 @@ Logging.DebugLog("prelim prefix" + prelimPrefix, "model");
 					else
 					{
 						Console.WriteLine("Last number read" + currentLastNumber);
-						Logging.DebugLog("Last number read" + currentLastNumber, "model");
 					}
+
 					p.Part.SetUserProperty(ModelUDA.PrelimMark(), prelimPrefix + currentLastNumber.ToString());
 
+					if (pData.IsVariation)
+					{
+						SetVariationAttribute(pData.VariationNumber, p.Part);
+					}
 					currentLastNumber++;
 				}
 			}
 
-			Logging.DebugLog("Complete", "model");
 			Logging.SetLastUsedPrelim(pData.ProjNumberAndGuid, currentLastNumber);
 		}
 
