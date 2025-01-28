@@ -129,7 +129,7 @@ namespace Prism
 
 			Logging.DebugLog("drawingList made", "");
 		}
-		
+
 		/*  public static void NewPrintDrawings(ReportManager reportManager, DrawingManager drawingManager, List<int> drawingCount, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
 		  { 
 			  if (drawingManager.GetDrawingFolder(Enums.DrawingFolder.ASS).Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\ASS", 0, 1, reportManager, true, toolStrip, statusLabel);
@@ -206,7 +206,7 @@ namespace Prism
 
 			// Wait asynchronously for printing to complete
 			await WaitForPrintingAsync(printFolder, desiredFileCount, toolStrip, statusLabel, drawingType);
-			
+
 			toolStrip.Invoke(new Action(() =>
 			{
 				statusLabel.Text = "Adding issue stamp.";
@@ -235,30 +235,43 @@ namespace Prism
 
 		private static void RenamePdfFilesInDirectory(string directoryPath)
 		{
+			// Get all PDFs in the folder
 			string[] pdfFiles = Directory.GetFiles(directoryPath, "*.pdf");
 
 			foreach (string filePath in pdfFiles)
 			{
 				string fileName = Path.GetFileNameWithoutExtension(filePath);
 
-				// Check if filename contains " - 1" and remove it if found
-				if (fileName.Contains(" - 1"))
-				{
-					string newFileName = fileName.Replace(" - 1", "") + ".pdf";
-					string newFilePath = Path.Combine(directoryPath, newFileName);
+				// Try removing " - 1" given to multi-draings if present
+				TryRenameIfContains(filePath, directoryPath, fileName, " - 1");
 
-					File.Move(filePath, newFilePath);
-
-				}
-				// Check if filename contains " - 1" and remove it if found
-				if (fileName.Contains(" - 2"))
-				{
-					string newFileName = fileName.Replace(" - 2", "") + ".pdf";
-					string newFilePath = Path.Combine(directoryPath, newFileName);
-
-					File.Move(filePath, newFilePath);
-				}
+				// Try removing " - 2" given to multo-drawings if present
+				TryRenameIfContains(filePath, directoryPath, fileName, " - 2");
 			}
+		}
+
+		/// <summary>
+		/// Checks if the fileName contains a given pattern. If so, it removes the pattern,
+		/// constructs a new file path, and renames the file—provided no file with that
+		/// name already exists.
+		/// </summary>
+		private static void TryRenameIfContains(string oldFilePath, string directoryPath, string fileName,	string patternToRemove)
+		{
+			// If the filename doesn't contain the pattern, do nothing
+			if (!fileName.Contains(patternToRemove))
+				return;
+
+			// Build the base name without the pattern (e.g., remove " - 1")
+			string baseName = fileName.Replace(patternToRemove, string.Empty);
+			string newFileName = baseName + ".pdf";
+			string newFilePath = Path.Combine(directoryPath, newFileName);
+
+			// If a file of the new name already exists, skip renaming
+			if (File.Exists(newFilePath))
+				return;
+
+			// Rename
+			File.Move(oldFilePath, newFilePath);
 		}
 
 		public List<PrismDrawing> GetFrozenDrawings()
