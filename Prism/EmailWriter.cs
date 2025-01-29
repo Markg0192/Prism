@@ -187,7 +187,7 @@ namespace Prism
 			else
 			{
 				// Decide what you want to do if MainPartWeight is zero
-				fittingsToAssemblyWeightRatio = 100; // or some default value
+				fittingsToAssemblyWeightRatio = 100; //because then 100% is fittings (plate/angle)
 			}
 
 			double totalWeight = objects.MainPartWeight + objects.FittingWeight;

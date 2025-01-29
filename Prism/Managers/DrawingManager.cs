@@ -170,9 +170,7 @@ namespace Prism
 			{
 				statusLabel.Text = "Exporting BSWX";
 			}));
-
 		}
-
 
 		/*	public static void PrintAndIssueDrawings(string issueFolder, string issuePath, List<int> drawingCount, string folderPath, int countIndex1, int countIndex2, ReportManager reportManager, bool isAss, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
 			{
@@ -182,7 +180,6 @@ namespace Prism
 
 				PrismMacroBuilder.IssueAndLockStampOn();
 			}*/
-
 
 		/*public static void PrintAndIssueDrawings(string issueFolder, string issuePath, List<int> drawingCount, string folderPath, int countIndex1, int countIndex2, ReportManager reportManager, bool isAss, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
         {
