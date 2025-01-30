@@ -32,7 +32,7 @@ namespace Prism
 
 			Parallel.ForEach(distinctParts, part =>
 			{
-				CreateQrCode(part.PartMark + "-" + part.DrawingRevision, data, qrCodeFolderPath);
+				CreateQrCode(part.PartMark, data, qrCodeFolderPath);
 			});
 
 			//	GetDrawingsAndInsertQrCodes(drawingHandler, drawingManager, qrCodeFolderPath, data, ts, tssl);
@@ -128,7 +128,7 @@ namespace Prism
 		private static string CreateUrlPathFromPart(string partMark, PrismProjectData data)
 		{
 			string projectNumber = data.ProjNumber.Substring(1, 4); //substring removes the C from the start
-			return $@"https://devtest.severfield.com:44355/?fileName={projectNumber}%5CIFC%5C{partMark}.ifc";
+			return $@"http://drawingscan.severfield.com/otiswebextclient/Drawings?Contract={projectNumber}&Drawing={partMark}";		
 		}
 
 		private static void GenerateAndSaveQrCode(string url, string filePath)
@@ -201,11 +201,11 @@ namespace Prism
 			var stopwatch = new System.Diagnostics.Stopwatch();
 
 			stopwatch.Restart();
-			string codePath = Path.Combine(qrCodeFolderPath, partMark + "-0" + ".png");
+			string codePath = Path.Combine(qrCodeFolderPath, partMark + ".png");
 			Console.WriteLine($"[InsertCode] Path combine for codePath took: {stopwatch.ElapsedMilliseconds} ms");
 
 			stopwatch.Restart();
-			string shortCodePath = Path.Combine(".\\Prism Packages\\QR Codes", partMark + "-0.png");
+			string shortCodePath = Path.Combine(".\\Prism Packages\\QR Codes", partMark + ".png");
 			Console.WriteLine($"[InsertCode] Path combine for shortCodePath took: {stopwatch.ElapsedMilliseconds} ms");
 
 			stopwatch.Restart();
