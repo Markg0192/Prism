@@ -201,11 +201,11 @@ namespace Prism
 			var stopwatch = new System.Diagnostics.Stopwatch();
 
 			stopwatch.Restart();
-			string codePath = Path.Combine(qrCodeFolderPath, partMark + "-0" + ".png");
+			string codePath = Path.Combine(qrCodeFolderPath, partMark + ".png");
 			Console.WriteLine($"[InsertCode] Path combine for codePath took: {stopwatch.ElapsedMilliseconds} ms");
 
 			stopwatch.Restart();
-			string shortCodePath = Path.Combine(".\\Prism Packages\\QR Codes", partMark + "-0.png");
+			string shortCodePath = Path.Combine(".\\Prism Packages\\QR Codes", partMark + ".png");
 			Console.WriteLine($"[InsertCode] Path combine for shortCodePath took: {stopwatch.ElapsedMilliseconds} ms");
 
 			stopwatch.Restart();
