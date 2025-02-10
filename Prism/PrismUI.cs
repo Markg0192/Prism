@@ -206,7 +206,7 @@ namespace Prism
 		{
 			try
 			{
-				Logging.DebugLog("create package start", "");
+				//Logging.DebugLog("create package start", "");
 				CreatePackageAsync(StageTypes.FAB);
 			}
 			catch (Exception ex)
@@ -707,13 +707,13 @@ namespace Prism
 			if (orderAction == 2) //User wants to order using special fitting tags
 			{
 				ModelModifiers.SelectSpecialTaggedInSelection(_selectedObjects);
-				ModelModifiers.AddPrelimMarks(_selectedObjects, _projectData);
+				if (!ModelModifiers.AddPrelimMarks(_selectedObjects, _projectData, toolStrip, statusLabel)) return false;
 				_selectedObjects = new SelectedObjects(myReportManager.Folders.MatPath, stageType, myReportManager.PhaseNum, myReportManager.IssueNum, _model, Constants.SpecialOperationUser()); // we reset selected objects here (because we just changed the selection)
 				myReportManager.CreateMaterialReports(_selectedObjects, orderType, stageType, toolStrip, statusLabel);
 			}
 			else
 			{
-				ModelModifiers.AddPrelimMarks(_selectedObjects, _projectData);
+				if (!ModelModifiers.AddPrelimMarks(_selectedObjects, _projectData, toolStrip, statusLabel)) return false;
 				myReportManager.CreateMaterialReports(_selectedObjects, orderType, stageType, toolStrip, statusLabel);
 			}
 
@@ -1176,7 +1176,12 @@ namespace Prism
 
 		private void SetNextPrelimToUseLabel()
 		{
-			lbl_NextPrelim.Text = Logging.GetLastUsedPrelim(_projectData.ProjNumberAndGuid).ToString();
+			if (Logging.GetLastUsedPrelim(_projectData.ProjNumberAndGuid) is int currentLastNumber)
+			{ lbl_NextPrelim.Text = currentLastNumber.ToString(); }
+			else
+			{
+				lbl_NextPrelim.Text = "Error";
+			}
 		}
 
 		private void btn_PrelimLabelRefresh_Click(object sender, EventArgs e)

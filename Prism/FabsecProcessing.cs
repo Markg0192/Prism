@@ -444,6 +444,7 @@ namespace Prism
 			foreach (PrismPart carcass in fabsecList)
 			{
 				Beam b = carcass.Part as Beam;
+
 				double length = ModelModifiers.GetPartLength(b);
 				carcass.Part.SetUserProperty(ModelUDA.FabsecOrderLength(), Math.Round(length, 0).ToString());
 

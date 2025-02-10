@@ -126,7 +126,21 @@ namespace Prism
             CreateOkWithReportForm(notUpToDateMessage, notUpToDateTitle, failedParts, "");
         }
 
-        public static void PrelimNumberStartReset(int old, int newP)
+		public static void PrelimSaveFailure()
+		{
+			string notUpToDateMessage = $"Prism has failed to contact servers and save the last used prelim, please fix this manually using reset perlim no, in the advanced settings.\r\r{Warning}";
+			const string notUpToDateTitle = "Prelim number failure.";
+			CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+		}
+
+		public static void GetLastUsedPrelimFailed()
+		{
+			string notUpToDateMessage = $"Prism has failed to contact servers and receive the last used prelim, please try again. If this persists, contact help.\r\r{Warning}";
+			const string notUpToDateTitle = "Prelim number failure.";
+			CreateOKForm(notUpToDateMessage, notUpToDateTitle);
+		}
+		
+		public static void PrelimNumberStartReset(int old, int newP)
         {
             string notUpToDateMessage = $"Prelim numbering start point has been modified from {old} to {newP}";
             string notUpToDateTitle = "Prelim start modified";
