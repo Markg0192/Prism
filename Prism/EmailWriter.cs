@@ -182,7 +182,7 @@ namespace Prism
 			double fittingsToAssemblyWeightRatio = 0;
 			if (objects.MainPartWeight != 0)
 			{
-				fittingsToAssemblyWeightRatio = Math.Round((objects.FittingWeight / objects.MainPartWeight) * 100, 1);
+				fittingsToAssemblyWeightRatio = Math.Round((objects.FittingWeight / (objects.MainPartWeight + objects.FittingWeight)) * 100, 1);
 			}
 			else
 			{
