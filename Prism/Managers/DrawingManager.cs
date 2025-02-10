@@ -122,12 +122,12 @@ namespace Prism
 		public DrawingManager(Model model, PrismProjectData projectData, string phaseNum, string issueNum, string packagePath)
 		{
 			_folders = new FolderManager(projectData, phaseNum, issueNum);
-			Logging.DebugLog("folder manaager made", "");
+			//Logging.DebugLog("folder manaager made", "");
 			_model = model;
 
 			CreateReportAndGetDrawingInfo(packagePath);
 
-			Logging.DebugLog("drawingList made", "");
+			//Logging.DebugLog("drawingList made", "");
 		}
 
 		/*  public static void NewPrintDrawings(ReportManager reportManager, DrawingManager drawingManager, List<int> drawingCount, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)

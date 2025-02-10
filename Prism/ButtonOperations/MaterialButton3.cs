@@ -42,8 +42,8 @@ namespace Prism.ButtonOperations
                 if (!reportManager.Folders.CreateMatFolder(false)) return false;
 
                 //  if (!Order.Fabsecs(fabsecsPresent, myReportManager, model, projectData, phaseNumber, issueNumber, myObjects, stageNumber, originalFabsecs, fabsecCarcasses)) { return false; }
-                                
-                myObjects.AddPrelimMarks(projectData);
+
+                if (!myObjects.AddPrelimMarks(projectData, toolStrip, tssl)) return false;
 
                 reportManager.CreateMaterialReports(myObjects, orderType, stageType, toolStrip, tssl);
 

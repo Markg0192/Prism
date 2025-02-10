@@ -27,6 +27,7 @@ namespace Prism
 
 		public SelectedObjects(string projectPath, StageTypes stageType, string phaseNum, string issueNum, Model model, bool isSpecialUser, ToolStrip toolStrip = null, ToolStripStatusLabel statusLabel = null)
 		{
+			Model = model;
 			NumbersUpToDate = true;
 			MyDrawingHandler = new DrawingHandler();
 
@@ -56,6 +57,7 @@ namespace Prism
 			FittingWeight = Math.Round(FittingWeight / 1000, 3);
 		}
 
+		public Model Model;
 		public double SmallestX = 100000000;
 		public double SmallestY = 100000000;
 		public double SmallestZ = 100000000;

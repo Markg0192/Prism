@@ -18,6 +18,8 @@ using System.Threading;
 using System.Windows.Forms;
 using Prism.CustomDialogs;
 using System.Text.RegularExpressions;
+using System.Data;
+using static Tekla.Structures.Filtering.Categories.TaskFilterExpressions;
 
 namespace Prism
 {
@@ -140,7 +142,7 @@ namespace Prism
 
 			foreach (PrismPart part in selectedObjects)
 			{
-				if (totalCount > 0) UpdateStatusLabelWithProcessCount(ref currentCount, toolStrip, statusLabel, totalCount);
+				if (totalCount > 0) UpdateStatusLabel(ref currentCount, toolStrip, statusLabel, totalCount, "Updating Prism Attributes");
 
 				if (!ModifyAttribute(part, stageNumber, projectData, td, isSpecialFittingOrder, isSeversafe))
 				{
@@ -148,24 +150,6 @@ namespace Prism
 				}
 			}
 			return true;
-		}
-
-		private static void UpdateStatusLabelWithProcessCount(ref int processedCount, ToolStrip toolStrip, ToolStripStatusLabel statusLabel, int totalCount)
-		{
-			int currentCount = Interlocked.Increment(ref processedCount);
-			double progressPercentage = (double)currentCount / totalCount * 100;
-
-			// Throttle UI updates to maintain responsiveness
-			if (currentCount % 5 == 0 || currentCount == totalCount)
-			{
-				toolStrip.Invoke(new System.Action(() =>
-				{
-					if (currentCount < totalCount)
-					{
-						statusLabel.Text = $"Updating Prism Attributes: {currentCount} of {totalCount} ({progressPercentage:N1}%)";
-					}
-				}));
-			}
 		}
 
 		public static bool ModifyAttribute(PrismPart prismPart, int stageNumber, PrismProjectData projectData, TableData uniClassTable, bool isSpecialFittingOrder = false, bool isSeversafe = false)
@@ -287,46 +271,134 @@ namespace Prism
 			}
 		}
 
-		public static void AddPrelimMarks(this SelectedObjects selectedObjects, PrismProjectData pData)
+		/// <summary>
+		/// Adds Prelim marks to the parts within the selected objects.
+		/// The method retrieves the current last used Prelim number from the model data files and an optional Prelim prefix from advanced settings.
+		/// It then iterates through each part, assigning a new Prelim mark (consisting of the prefix and a sequential number) to parts that lack one.
+		/// If the current phase/order is a variation, a variation attribute is also applied.
+		/// Finally, the method updates the stored last used Prelim number with the new value.
+		/// </summary>
+		public static bool AddPrelimMarks(this SelectedObjects selectedObjects, PrismProjectData pData, ToolStrip ts, ToolStripStatusLabel tssl)
 		{
-			int currentLastNumber = Logging.GetLastUsedPrelim(pData.ProjNumberAndGuid);
-
-			Logging.DebugLog("current last number" + currentLastNumber.ToString(), "model");
-
-			string prelimPrefix = Logging.GetAdvancedSetting(pData.ProjNumberAndGuid, AdvancedSettingType.PrelimPrefix);
-
-			int parts = selectedObjects.PrismParts.Count;
-
-			int loop = 0;
-			foreach (PrismPart p in selectedObjects.PrismParts)
+			// Retrieve the last used prelim value from the project info.
+			if (Logging.GetLastUsedPrelim(pData.ProjNumberAndGuid) is int currentLastNumber)
 			{
-				loop++;
+				// Get the prelim prefix advanced setting.
+				string prelimPrefix = Logging.GetAdvancedSetting(pData.ProjNumberAndGuid, AdvancedSettingType.PrelimPrefix);
 
-				if (p.Part.GetPrelimMark().Length == 0)
+				// If no valid number was retrieved, default to 1.
+				if (currentLastNumber == 0)
 				{
-					if (currentLastNumber == 0)
-					{
-						Console.WriteLine("Failed to read last number");
+					currentLastNumber = 1;
+				}
 
-						currentLastNumber = 1;
-						Logging.SetLastUsedPrelim(pData.ProjNumberAndGuid, currentLastNumber);
-					}
-					else
-					{
-						Console.WriteLine("Last number read" + currentLastNumber);
-					}
+				List<PrismPart> partsToRecievePrelim = selectedObjects.PrismParts.Where(x => string.IsNullOrWhiteSpace(x.Prelim)).ToList();
 
-					p.Part.SetUserProperty(ModelUDA.PrelimMark(), prelimPrefix + currentLastNumber.ToString());
+				// Save the updated last used prelim value back to storage.
+				if (!Logging.SetLastUsedPrelim(pData.ProjNumberAndGuid, currentLastNumber + partsToRecievePrelim.Count)) return false;
 
+				int total = partsToRecievePrelim.Count;
+				int count = 1;
+				// Iterate over all parts that need a prelim mark.
+				foreach (PrismPart p in partsToRecievePrelim)
+				{
+					UpdateStatusLabel(ref count, ts, tssl, total, "Applying Prelim Marks");
+					// Compose the prelim mark by joining the prefix and the current number.
+					string prelimMark = prelimPrefix + currentLastNumber.ToString();
+
+					// Set the user property for the prelim mark.
+					p.Part.SetUserProperty(ModelUDA.PrelimMark(), prelimMark);
+
+					// If this project variation requires additional attributes, set them.
 					if (pData.IsVariation)
 					{
 						SetVariationAttribute(pData.VariationNumber, p.Part);
 					}
+
 					currentLastNumber++;
 				}
+
+				SelectedObjects refreshedSelectedPartsForChecking = new SelectedObjects(pData.ProjPath, StageTypes.Prelim3, "", "", selectedObjects.Model, false);
+
+				int numberBeforeDuplicateChecking = currentLastNumber;
+				CheckForAndFixDuplicatePrelims(refreshedSelectedPartsForChecking, prelimPrefix, ref currentLastNumber, ts, tssl);
+
+				//if currentLastNumber has changed since going into CheckForAndFixDuplicatePrelims, we need to write this to the model data
+				if (numberBeforeDuplicateChecking != currentLastNumber)
+				{
+					if (!Logging.SetLastUsedPrelim(pData.ProjNumberAndGuid, currentLastNumber)) return false;
+				}
+				return true;
 			}
 
-			Logging.SetLastUsedPrelim(pData.ProjNumberAndGuid, currentLastNumber);
+			PrismWarnings.GetLastUsedPrelimFailed();
+			return false;
+		}
+
+		private static void UpdateStatusLabel(ref int processedCount, ToolStrip toolStrip, ToolStripStatusLabel statusLabel, int totalCount, string countType)
+		{
+			// Safely increment the processed count.
+			int currentCount = Interlocked.Increment(ref processedCount);
+			double progressPercentage = (double)currentCount / totalCount * 100;
+
+			// Calculate the ideal update interval as 5% of the total.
+			int idealInterval = (int)Math.Ceiling(totalCount * 0.05);
+			// Clamp the update interval between 5 and 250.
+			int updateInterval = Math.Max(5, Math.Min(idealInterval, 150));
+
+			// Throttle UI updates to maintain responsiveness:
+			if (currentCount % updateInterval == 0 || currentCount == totalCount)
+			{
+				toolStrip.Invoke(new Action(() =>
+				{
+					statusLabel.Text = $"{countType} {currentCount} of {totalCount}({progressPercentage:N1}%";
+				}));
+			}
+		}
+
+		/// <summary>
+		/// Checks the Prelims of the fresly got prism parts (which now should all have prelims), and checks for duplicating marks.
+		/// If a duplicate is found, assigns a new unique Prelim number (using the given prefix and starting from currentLastNumber).
+		/// The currentLastNumber is incremented as new numbers are assigned.
+		/// </summary>
+		/// <param name="selectedObjects">The freshly loaded set of parts to validate.</param>
+		/// <param name="prelimPrefix">The prefix to use when composing a new Prelim mark.</param>
+		/// <param name="currentLastNumber">The current last used number; passed by reference so that it is updated as new numbers are assigned.</param>
+		public static void CheckForAndFixDuplicatePrelims(SelectedObjects selectedObjects, string prelimPrefix, ref int currentLastNumber, ToolStrip ts, ToolStripStatusLabel tssl)
+		{
+			// Use a HashSet to track the Prelim values already encountered.
+			HashSet<string> seenPrelims = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+			List<PrismPart> partsWithAPrelim = selectedObjects.PrismParts.Where(x => !string.IsNullOrWhiteSpace(x.Prelim)).ToList();
+
+			int total = partsWithAPrelim.Count;
+			int count = 1;
+			// Loop through all parts.
+			foreach (PrismPart part in partsWithAPrelim)
+			{
+				UpdateStatusLabel(ref count, ts, tssl, total, "Validating Prelim Mark");
+
+				// If this Prelim has already been encountered, it's a duplicate.
+				if (seenPrelims.Contains(part.Prelim))
+				{
+					// Compose a new unique Prelim mark.
+					string newPrelim = prelimPrefix + currentLastNumber.ToString();
+
+					// Update the part's property with the new value.
+					part.Part.SetUserProperty(ModelUDA.PrelimMark(), newPrelim);
+
+					// Add the new Prelim to the set.
+					seenPrelims.Add(newPrelim);
+
+					// Increment the current last number for the next assignment.
+					currentLastNumber++;
+				}
+				else
+				{
+					// If not a duplicate, add the value to the seen set.
+					seenPrelims.Add(part.Prelim);
+				}
+			}
 		}
 
 		public static List<PrismPart> SelectSpecialTaggedInSelection(SelectedObjects selectedObjects)
@@ -761,7 +833,7 @@ namespace Prism
 		private static void SetColouring(List<ModelObject> myParts, Color color, bool reset)
 		{
 			if (reset)
-			{ 
+			{
 				ModelObjectVisualization.SetTemporaryStateForAll(new Color(0.5, 0.5, 0.5, 0.2));
 			}
 			ModelObjectVisualization.SetTemporaryState(myParts, color);

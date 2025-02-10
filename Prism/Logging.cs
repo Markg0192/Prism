@@ -203,14 +203,80 @@ namespace Prism
             WebService.WriteAllLinesWithArray(filePathLine, content, additonalString);
         }
 
-        public static int GetLastUsedPrelim(string jobName)
-        {
-            string lastUsedPrelimLine = WebService.ReadSpecificLine(Constants.PrismModelData, 1, Constants.ModelProjectInforLocation(jobName));
-            string lastusedPrelim = lastUsedPrelimLine.Split(':')[1].Trim();
-            return Convert.ToInt32(lastusedPrelim);
-        }
+		/// <summary>
+		/// Retrieves the "last used Prelim" value from the project info file stored in the model data folder.
+		/// This method validates the response by reading the value repeatedly until three consistent answers are received.
+		/// The extra validation is necessary to handle intermittent connectivity issues that can result in inconsistent values.
+		/// </summary>
+		/// <param name="jobName">The project number and GUID identifying the projects Model data folder.</param>
+		/// <returns>The last used prelim value as an integer.</returns>
+		/// <exception cref="Exception">Thrown if a consistent value is not retrieved after the maximum number of attempts.</exception>
+		public static int? GetLastUsedPrelim(string jobName)
+		{
+			const int requiredMatches = 3;
+			const int maxAttempts = 10;
+			const int delayMilliseconds = 250;
 
-        public static string GetAdvancedSetting(string jobName, Enums.AdvancedSettingType settingType)
+			int? lastPrelimValue = null;
+			int consistentCount = 0;
+			int attempts = 0;
+
+			while (attempts < maxAttempts)
+			{
+				attempts++;
+				string line = WebService.ReadSpecificLine(Constants.PrismModelData, 1, Constants.ModelProjectInforLocation(jobName));
+
+				// Ensure the line is not null or whitespace.
+				if (string.IsNullOrWhiteSpace(line))
+				{
+					// Optionally log an error here.
+					System.Threading.Thread.Sleep(delayMilliseconds);
+					continue;
+				}
+
+				// Validate the expected format: "Next prelim to use: (number)"
+				string[] parts = line.Split(new[] { ':' }, 2);
+				if (parts.Length < 2)
+				{
+					// Error: Unexpected format.
+					System.Threading.Thread.Sleep(delayMilliseconds);
+					continue;
+				}
+
+				string prelimText = parts[1].Trim();
+				if (!int.TryParse(prelimText, out int currentPrelim))
+				{
+					// Error: Parsing failed.
+					System.Threading.Thread.Sleep(delayMilliseconds);
+					continue;
+				}
+
+				// Check if the current reading matches the previous one.
+				if (lastPrelimValue.HasValue && lastPrelimValue.Value == currentPrelim)
+				{
+					consistentCount++;
+				}
+				else
+				{
+					// Reset if the value is different.
+					lastPrelimValue = currentPrelim;
+					consistentCount = 1;
+				}
+
+				// Return if we have enough consistent readings.
+				if (consistentCount >= requiredMatches)
+				{
+					return lastPrelimValue.Value;
+				}
+
+				// Wait before the next attempt to avoid hammering the web service.
+				System.Threading.Thread.Sleep(delayMilliseconds);
+			}
+
+            return lastPrelimValue;
+		}
+
+		public static string GetAdvancedSetting(string jobName, Enums.AdvancedSettingType settingType)
         {
             string fullSettingLine = WebService.ReadSpecificLine(Constants.PrismModelData, (int)settingType, Constants.ModelProjectAdvancedSettingLocation(jobName));
 
@@ -245,14 +311,55 @@ namespace Prism
         {
             WebService.WriteToSpecificLine(Constants.PrismModelData, (int)settingType, settingType.ToString() + ":split: ", Constants.ModelProjectAdvancedSettingLocation(jobName));
         }
-       
-        public static void SetLastUsedPrelim(string jobName, int lastUsedPrelim)
-        {
-            string content = $"Next prelim to use: {lastUsedPrelim}";
-            WebService.WriteToSpecificLine(Constants.PrismModelData, 1, content, Constants.ModelProjectInforLocation(jobName));
-        }
 
-        public static void UpdateFrozenDrawingCount(string jobName, int frozenDrawings, int unFrozenDrawings)
+        /// <summary>
+        /// Here we set the last used Prelim, this writes to our model data log to store the last used number, ready for next time.
+        /// We validate this by waiting a short delay and reading the line back, if the re-read line does not match what should have been written
+        /// we wait and try again, we do this up to 10 times if we have to, to ensure the number is properly saved.
+        /// </summary>
+        /// <exception cref="Exception"></exception>
+		public static bool SetLastUsedPrelim(string jobName, int lastUsedPrelim)
+		{
+			// Build the content to be written.
+			string content = $"Next prelim to use: {lastUsedPrelim}";
+
+			// Define constants for retry logic.
+			const int maxAttempts = 10;
+			const int delayMilliseconds = 250;
+			int attempts = 0;
+			bool isWritten = false;
+
+			while (attempts < maxAttempts && !isWritten)
+			{
+				attempts++;
+
+				// Write the content to the specified line.
+				WebService.WriteToSpecificLine(Constants.PrismModelData, 1, content, Constants.ModelProjectInforLocation(jobName));
+
+				// Wait a short period to allow the write operation to complete.
+				System.Threading.Thread.Sleep(delayMilliseconds);
+
+				// Read the line back from the file.
+				string readBack = WebService.ReadSpecificLine(Constants.PrismModelData, 1, Constants.ModelProjectInforLocation(jobName));
+
+				// Compare the written content with what was read (trim extra whitespace for safety).
+				if (readBack.Trim() == content.Trim())
+				{
+					isWritten = true;
+				}
+			}
+
+			// If after maxAttempts the content still doesn't match, the write has failed.
+			if (!isWritten)
+			{
+                PrismWarnings.PrelimSaveFailure();
+				return false;
+			}
+
+            return true;
+		}
+
+		public static void UpdateFrozenDrawingCount(string jobName, int frozenDrawings, int unFrozenDrawings)
         {
             string frozenDrawingLine = WebService.ReadSpecificLine(Constants.PrismModelData, 4, Constants.ModelProjectInforLocation(jobName));
             string frozenDrawingCount1 = frozenDrawingLine.Split('=')[1].Trim();
