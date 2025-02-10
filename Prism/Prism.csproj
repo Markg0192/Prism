@@ -26,7 +26,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>11</ApplicationRevision>
+    <ApplicationRevision>12</ApplicationRevision>
     <ApplicationVersion>5.1.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -382,6 +382,7 @@
     <Compile Include="UniClassCodes.cs" />
     <Compile Include="UserProperties.cs" />
     <Compile Include="UserProperty.cs" />
+    <Compile Include="Validation\VersionValidation.cs" />
     <Compile Include="Web References\ExternalService\Reference.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

@@ -16,7 +16,8 @@ using System.IO;
 using Application = System.Windows.Forms.Application;
 using System.Linq;
 using Tekla.Structures;
-using System.Diagnostics;
+using Newtonsoft.Json;
+using Prism.Validation;
 
 namespace Prism
 {
@@ -38,7 +39,7 @@ namespace Prism
 			StartFunction();
 
 			try
-			{ 
+			{
 				if (!await Task.Run(() => InitialSetup(StageTypes.Prelim1, false, "x", "x", statusStrip_Mat, MaterialStatusLabel))) { EndFunction(0); return; }
 
 				if (!await Task.Run(() => _selectedObjects.MaterialButton1op(_projectData, (int)StageTypes.Prelim1, statusStrip_Mat, MaterialStatusLabel))) { EndFunction(0); return; }
@@ -235,7 +236,7 @@ namespace Prism
 				}
 
 				CreatePackageAsync(StageTypes.RocketPacket);
-			    EndFunction(1); 
+				EndFunction(1);
 			}
 			catch (Exception ex)
 			{
@@ -263,11 +264,11 @@ namespace Prism
 		{
 
 			EmailWriter.WriteFabEmail(null, null, "", "", "", "", "", true);
-		//	Logging.AddToFabCompleteCount();
-		//	string TeklaEnvi = string.Empty;
-		//	TeklaStructuresSettings.GetAdvancedOption("XS_ROLE_INI", ref TeklaEnvi);
-		//	ReportManager repoman = new ReportManager(_projectData, "IFC", "02");
-		//		_selectedObjects = new SelectedObjects("C:\\TeklaStructuresModels\\2021 models\\Sandbox\\PrismIFCExportTest\\", StageTypes.Check2, repoman.PhaseNum, repoman.IssueNum, _model, Constants.SpecialOperationUser());
+			//	Logging.AddToFabCompleteCount();
+			//	string TeklaEnvi = string.Empty;
+			//	TeklaStructuresSettings.GetAdvancedOption("XS_ROLE_INI", ref TeklaEnvi);
+			//	ReportManager repoman = new ReportManager(_projectData, "IFC", "02");
+			//		_selectedObjects = new SelectedObjects("C:\\TeklaStructuresModels\\2021 models\\Sandbox\\PrismIFCExportTest\\", StageTypes.Check2, repoman.PhaseNum, repoman.IssueNum, _model, Constants.SpecialOperationUser());
 
 			//RenamePdfFiles("C:\\TeklaStructuresModels2021\\C1820 GE HPC\\PlotFiles");
 
@@ -308,16 +309,16 @@ namespace Prism
 
 			// MovePackToDirectory("C:\\TeklaStructuresModels2023\\Sandbox\\Prism Packages\\C1991-120-FAB-ISSUE01");
 
-		/*	if (!await Task.Run(() => InitialSetup(StageTypes.Check1, false, "x", "x", statusStrip_Det, DetailingStatusLabel))) { EndFunction(0); return; }
+			/*	if (!await Task.Run(() => InitialSetup(StageTypes.Check1, false, "x", "x", statusStrip_Det, DetailingStatusLabel))) { EndFunction(0); return; }
 
-             FolderManager fm = new FolderManager(_projectData, "100", "01");
-             fm.CreateFabFolders();
+				 FolderManager fm = new FolderManager(_projectData, "100", "01");
+				 fm.CreateFabFolders();
 
-             QrCodeGenerator.ApplyQrCode(_selectedObjects.PrismParts, _projectData, fm.QrCodePath);
-			
-			//IFCExporter.ExportIndividualIFC(_selectedObjects, repoman.Folders.IfcPath, "");
+				 QrCodeGenerator.ApplyQrCode(_selectedObjects.PrismParts, _projectData, fm.QrCodePath);
 
-			EndFunction(1);*/
+				//IFCExporter.ExportIndividualIFC(_selectedObjects, repoman.Folders.IfcPath, "");
+
+				EndFunction(1);*/
 		}
 
 		private bool CopyToServer(string sourceDir, string serverLocation)
@@ -781,6 +782,7 @@ namespace Prism
 			Prism.Properties.Settings.Default.UniqueId = key;
 			Prism.Properties.Settings.Default.Save();
 
+			VersionValidation.ValidateAppVersion();
 
 			//if webservice is a succes save the key
 			if (!CheckModelConnection()) return;
@@ -1215,11 +1217,21 @@ namespace Prism
 
 		private void PrismUI_Shown(object sender, EventArgs e)
 		{
-			Cursor = Cursors.WaitCursor;
-			Update();
-			InitializePrism();
-			pnl_Home.BackgroundImage = Resources.watereddownlogo;
-			Cursor = Cursors.Default;
+			try
+			{
+				Cursor = Cursors.WaitCursor;
+				Update();
+				InitializePrism();
+				pnl_Home.BackgroundImage = Resources.watereddownlogo;
+			}
+			catch (Exception ex)
+			{
+				EndWithException(ex);
+			}
+			finally
+			{
+				Cursor = Cursors.Default; // Ensures cursor resets even on error
+			}
 		}
 
 		private void miscToolStripMenuItem_Click(object sender, EventArgs e)

@@ -23,13 +23,13 @@ using System.Runtime.InteropServices;
 
 // Version information for an assembly consists of the following four values:
 //
-//      Major Version
-//      Minor Version
-//      Build Number
-//      3```	
+//      Major Version -> Forced update - updated when the program goes through a major change
+//      Minor Version -> Forced update - updated when the program goes through a non-major but still critical change
+//      Build Number -> unused
+//      3```	-> Not enforced update - used for all minor changes/bug-fixes
 //
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("5.1.0.10")]
-[assembly: AssemblyFileVersion("5.1.0.10")]
+[assembly: AssemblyVersion("5.1.0.11")]
+[assembly: AssemblyFileVersion("5.1.0.11")]
