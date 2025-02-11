@@ -651,6 +651,7 @@ namespace Prism
 			AddFilesFromFolder(reportManager.Folders.FabPath + "\\PRT", uniqueFiles);
 			AddFilesFromFolder(reportManager.Folders.FabPath + "\\FIT", uniqueFiles);
 
+
 			// Count the unique files
 			return uniqueFiles.Count == numberOfFilesCreated;
 		}
@@ -665,7 +666,7 @@ namespace Prism
 					string fileName = Path.GetFileNameWithoutExtension(file);
 
 					// Split by dash and take the first part, then remove any remaining file extension
-					string baseFileName = fileName.Contains('-') ? fileName.Split('-')[0] : fileName.Split('.')[0];
+					string baseFileName = fileName.Contains('-') ? fileName.Split('-')[0].TrimEnd() : fileName.Split('.')[0].TrimEnd();
 					uniqueFiles.Add(baseFileName);
 				}
 			}
@@ -720,8 +721,9 @@ namespace Prism
 
 			if (runDrawings)
 			{
-				ReportManager.SelectDrawingsInDocManager(null);
-				DrawingManager dm = new DrawingManager(_model, _projectData, txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text, myReportManager.Folders.MatFolder);
+				DrawingManager dm = DrawingManager.Create(_model, _projectData, _selectedObjects.PrismParts, txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text, myReportManager.Folders.MatFolder, toolStrip, statusLabel);
+				if (dm == null) return false;
+
 				if (dm.GetDrawingFolder(Enums.DrawingFolder.Default).Count != 0) { PrismWarnings.IncorrectlyAssignedDrawings(); return false; }
 
 				List<int> drawingCount = new List<int> { 0, dm.GetDrawingByType("W").Count };

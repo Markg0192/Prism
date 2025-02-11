@@ -4,123 +4,125 @@ using Model = Tekla.Structures.Model.Model;
 
 namespace Prism
 {
-    public static class Order
-    {
-        public static void ShearStuds(string orderType, ReportManager myReportManager, string siteDate)
-        {
-            OrderBolts(orderType, myReportManager, siteDate);
-        }
+	public static class Order
+	{
+		public static void ShearStuds(string orderType, ReportManager myReportManager, string siteDate)
+		{
+			OrderBolts(orderType, myReportManager, siteDate);
+		}
 
-        public static bool BoltsSeversafeAndHdBolts(string orderType, ReportManager myReportManager, string siteDate, Model model, SelectedObjects myObjects, PrismProjectData projectData, out bool orderRequired)
-        {
-            orderRequired = false;
-            if (orderType.Contains("Bolts"))
-            {
-                orderRequired = true;
-                return OrderBolts(orderType, myReportManager, siteDate);
-            }
+		public static bool BoltsSeversafeAndHdBolts(string orderType, ReportManager myReportManager, string siteDate, Model model, SelectedObjects myObjects, PrismProjectData projectData, out bool orderRequired)
+		{
+			orderRequired = false;
+			if (orderType.Contains("Bolts"))
+			{
+				orderRequired = true;
+				return OrderBolts(orderType, myReportManager, siteDate);
+			}
 
-            if (orderType.Contains("Seversafe"))
-            {
-                orderRequired = true;
-                return OrderSeversafe(model, myObjects, siteDate, myReportManager, projectData);
-            }
+			if (orderType.Contains("Seversafe"))
+			{
+				orderRequired = true;
+				return OrderSeversafe(model, myObjects, siteDate, myReportManager, projectData);
+			}
 
-            if (orderType == "Order HD Bolts") //Order HD bolts not an option therefore this statement is never true(for now) 
-            {
-                orderRequired = true;
-                return OrderHoldingDownBolts(myObjects, myReportManager, projectData.ProjNumberAndName); //Doesn't do anything..
-            }
-            return true;
-        }
+			if (orderType == "Order HD Bolts") //Order HD bolts not an option therefore this statement is never true(for now) 
+			{
+				orderRequired = true;
+				return OrderHoldingDownBolts(myObjects, myReportManager, projectData.ProjNumberAndName); //Doesn't do anything..
+			}
+			return true;
+		}
 
-        public static bool FabsecCarcasses(ReportManager myReportManager, Model model, PrismProjectData projectData,
-            SelectedObjects myObjects, int stageNumber, string orderType, string orderDate, int typeOfOrder, ToolStrip toolStrip, ToolStripStatusLabel tssl)
-        {
-            if (typeOfOrder == 1)
-            {
-                return FabsecProcessing.CreateFabsecCarcasses(myObjects, projectData, model);
-            }
-            if (typeOfOrder == 2)
-            {
-                if (!FabsecProcessing.AddCarcassToSelection(model, myObjects, out List<PrismPart> originalFabsecs, out List<PrismPart> fabsecCarcasses)) return false;
-                return OrderFabsecCarcasses(myReportManager, model, projectData, myObjects, stageNumber, originalFabsecs, fabsecCarcasses, orderType, orderDate, toolStrip, tssl);
-            }
-            return false;
-        }
+		public static bool FabsecCarcasses(ReportManager myReportManager, Model model, PrismProjectData projectData,
+			SelectedObjects myObjects, int stageNumber, string orderType, string orderDate, int typeOfOrder, ToolStrip toolStrip, ToolStripStatusLabel tssl)
+		{
+			if (typeOfOrder == 1)
+			{
+				return FabsecProcessing.CreateFabsecCarcasses(myObjects, projectData, model);
+			}
+			if (typeOfOrder == 2)
+			{
+				if (!FabsecProcessing.AddCarcassToSelection(model, myObjects, out List<PrismPart> originalFabsecs, out List<PrismPart> fabsecCarcasses)) return false;
+				return OrderFabsecCarcasses(myReportManager, model, projectData, myObjects, stageNumber, originalFabsecs, fabsecCarcasses, orderType, orderDate, toolStrip, tssl);
+			}
+			return false;
+		}
 
-        private static bool OrderSeversafe(Model model, SelectedObjects myObjects, string siteDate, ReportManager myReportManager, PrismProjectData projectData)
-        {
-            int divisionNo = PrismWarnings.DivsionFrom();
-            if (divisionNo == 0) { PrismWarnings.Cancelled(); return false; }
+		private static bool OrderSeversafe(Model model, SelectedObjects myObjects, string siteDate, ReportManager myReportManager, PrismProjectData projectData)
+		{
+			int divisionNo = PrismWarnings.DivsionFrom();
+			if (divisionNo == 0) { PrismWarnings.Cancelled(); return false; }
 
-            SeversafeOrder.CreateSeversafeOrder(model, myObjects.GetSeversafeParts(), siteDate, myReportManager, divisionNo, myReportManager.EpoReportPrefix, projectData);
-            return true;
-        }
+			SeversafeOrder.CreateSeversafeOrder(model, myObjects.GetSeversafeParts(), siteDate, myReportManager, divisionNo, myReportManager.EpoReportPrefix, projectData);
+			return true;
+		}
 
-        private static bool OrderBolts(string orderType, ReportManager reportManager, string siteDate)
-        {
-            int typeOfOrder = PrismWarnings.BoltOrderType();
+		private static bool OrderBolts(string orderType, ReportManager reportManager, string siteDate)
+		{
+			int typeOfOrder = PrismWarnings.BoltOrderType();
 
-            if (!reportManager.Folders.CreateBoltFolder()) return false;
+			if (!reportManager.Folders.CreateBoltFolder()) return false;
 
-            if (typeOfOrder == 1) { reportManager.CreateSelectedBoltList(reportManager.BoltReportPrefix, orderType); }
-            else reportManager.CreateBoltList(reportManager.BoltReportPrefix, orderType);
+			if (typeOfOrder == 1) { reportManager.CreateSelectedBoltList(reportManager.BoltReportPrefix, orderType); }
+			else reportManager.CreateBoltList(reportManager.BoltReportPrefix, orderType);
 
-            reportManager.Folders.ZipFolder(reportManager.Folders.BoltPath);
-            EmailWriter.WriteBoltOrderEmail(reportManager.ProjectData, reportManager.BoltReportPrefix, reportManager.IssueNum, reportManager.PhaseNum, siteDate, reportManager.Folders.BoltPath);
-            return true;
-        }
+			reportManager.Folders.ZipFolder(reportManager.Folders.BoltPath);
+			EmailWriter.WriteBoltOrderEmail(reportManager.ProjectData, reportManager.BoltReportPrefix, reportManager.IssueNum, reportManager.PhaseNum, siteDate, reportManager.Folders.BoltPath);
+			return true;
+		}
 
-        public static bool OrderFabsecCarcasses(ReportManager myReportManager, Model model, PrismProjectData projectData,
-         SelectedObjects myObjects, int stageNumber, List<PrismPart> originalFabsecs, List<PrismPart> fabsecCarcasses, string orderType, string orderDate, ToolStrip toolStrip, ToolStripStatusLabel tssl)
-        {
-            if (!myReportManager.Folders.CreateFabsecCarcassFolder()) return false;
-            ReportManager.SelectDrawingsInDocManager(null);
-            DrawingManager dm = new DrawingManager(model, projectData, myReportManager.PhaseNum, myReportManager.IssueNum, myReportManager.Folders.CarcassOrderPath);
-            if (dm.GetDrawingFolder(Enums.DrawingFolder.Default).Count != 0) { PrismWarnings.IncorrectlyAssignedDrawings(); return false; }
+		public static bool OrderFabsecCarcasses(ReportManager myReportManager, Model model, PrismProjectData projectData,
+		 SelectedObjects myObjects, int stageNumber, List<PrismPart> originalFabsecs, List<PrismPart> fabsecCarcasses, string orderType, string orderDate, ToolStrip toolStrip, ToolStripStatusLabel tssl)
+		{
+			if (!myReportManager.Folders.CreateFabsecCarcassFolder()) return false;
 
-            List<int> drawingCount = new List<int> { 0, dm.GetDrawingFolder(Enums.DrawingFolder.PGC).Count };
-            DrawingManager.PrintAndIssueDrawings(myReportManager.Folders.FabsecCarcassFolder, myReportManager.Folders.CarcassOrderPath, drawingCount, "\\PGC", 0, 1, myReportManager, false, toolStrip, tssl);
-            PrismMacroBuilder.ClearPrintDialog();
+			DrawingManager dm = DrawingManager.Create(model, projectData, fabsecCarcasses, myReportManager.PhaseNum, myReportManager.IssueNum, myReportManager.Folders.CarcassOrderPath, toolStrip, tssl);
+			if (dm == null) return false;
 
-            fabsecCarcasses.SelectParts();
-            myReportManager.CreateG2Assy();
-            BswxExporter.ExportBSWX(myObjects, myReportManager.Folders.CarcassOrderPath, projectData, myReportManager.PhaseNum, myReportManager.IssueNum, Enums.StageTypes.Prelim3, toolStrip, tssl);
-            ModelModifiers.RemoveLog(myReportManager.Folders.CarcassOrderPath);
+			if (dm.GetDrawingFolder(Enums.DrawingFolder.Default).Count != 0) { PrismWarnings.IncorrectlyAssignedDrawings(); return false; }
 
-            myObjects.PrismParts.SelectParts();
+			List<int> drawingCount = new List<int> { 0, dm.GetDrawingFolder(Enums.DrawingFolder.PGC).Count };
+			DrawingManager.PrintAndIssueDrawings(myReportManager.Folders.FabsecCarcassFolder, myReportManager.Folders.CarcassOrderPath, drawingCount, "\\PGC", 0, 1, myReportManager, false, toolStrip, tssl);
+			PrismMacroBuilder.ClearPrintDialog();
 
-            if (!originalFabsecs.ModifyAttributes(stageNumber, projectData, toolStrip, tssl)) { return false; }
-            foreach(PrismPart fabsec in originalFabsecs)
-            {
-                ModelModifiers.ModifyUDA(fabsec.Part, ModelUDA.FabsecCarcassOrdered(), projectData.Date);
-            }
-            model.CommitChanges();
+			fabsecCarcasses.SelectParts();
+			myReportManager.CreateG2Assy();
+			BswxExporter.ExportBSWX(myObjects, myReportManager.Folders.CarcassOrderPath, projectData, myReportManager.PhaseNum, myReportManager.IssueNum, Enums.StageTypes.Prelim3, toolStrip, tssl);
+			ModelModifiers.RemoveLog(myReportManager.Folders.CarcassOrderPath);
 
-            myReportManager.Folders.ZipFolder(myReportManager.Folders.CarcassOrderPath);
+			myObjects.PrismParts.SelectParts();
 
-            PrismWarnings.MaterialOrderComplete(projectData);
+			if (!originalFabsecs.ModifyAttributes(stageNumber, projectData, toolStrip, tssl)) { return false; }
+			foreach (PrismPart fabsec in originalFabsecs)
+			{
+				ModelModifiers.ModifyUDA(fabsec.Part, ModelUDA.FabsecCarcassOrdered(), projectData.Date);
+			}
+			model.CommitChanges();
 
-            EmailWriter.WriteFabsecCarcassEmail(myReportManager.ProjectData, myReportManager.CarcassReportPrefix, myReportManager.IssueNum, myReportManager.PhaseNum, orderDate, myReportManager.Folders.CarcassOrderPath);
+			myReportManager.Folders.ZipFolder(myReportManager.Folders.CarcassOrderPath);
 
-            return true;
-        }
+			PrismWarnings.MaterialOrderComplete(projectData);
 
-        private static bool OrderHoldingDownBolts(SelectedObjects selectedObjects, ReportManager reportManager, string projectName)
-        {
-            List<PrismPart> myHDBolts = HDBolts.GetHdBoltItems(selectedObjects, true);
-            ModelModifiers.SelectParts(myHDBolts);
-            reportManager.CreateHDBoltList(); // currently does nothing
-            Logging.LogProgress(projectName, "Material 3 - HD Bolts", 0, selectedObjects.GetMainParts().Count);
-            return true;
-        }
+			EmailWriter.WriteFabsecCarcassEmail(myReportManager.ProjectData, myReportManager.CarcassReportPrefix, myReportManager.IssueNum, myReportManager.PhaseNum, orderDate, myReportManager.Folders.CarcassOrderPath);
 
-        private static void HDBoltTopNutAndWasher(SelectedObjects selectedObjects, ReportManager reportManager)
-        {
-            List<PrismPart> myHDBolts = HDBolts.GetHdBoltItems(selectedObjects, false);
-            ModelModifiers.SelectParts(myHDBolts);
-            reportManager.CreateHDBoltList(); // currently does nothing
-        }
-    }
+			return true;
+		}
+
+		private static bool OrderHoldingDownBolts(SelectedObjects selectedObjects, ReportManager reportManager, string projectName)
+		{
+			List<PrismPart> myHDBolts = HDBolts.GetHdBoltItems(selectedObjects, true);
+			ModelModifiers.SelectParts(myHDBolts);
+			reportManager.CreateHDBoltList(); // currently does nothing
+			Logging.LogProgress(projectName, "Material 3 - HD Bolts", 0, selectedObjects.GetMainParts().Count);
+			return true;
+		}
+
+		private static void HDBoltTopNutAndWasher(SelectedObjects selectedObjects, ReportManager reportManager)
+		{
+			List<PrismPart> myHDBolts = HDBolts.GetHdBoltItems(selectedObjects, false);
+			ModelModifiers.SelectParts(myHDBolts);
+			reportManager.CreateHDBoltList(); // currently does nothing
+		}
+	}
 }
