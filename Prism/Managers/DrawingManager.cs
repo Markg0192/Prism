@@ -1,17 +1,12 @@
-﻿using System;
+﻿using Prism.Validation;
+using System;
 using System.Collections.Generic;
-using System.Data.OleDb;
 using System.IO;
-using System.IO.Packaging;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Tekla.Structures.Model;
-using Tekla.Structures.Model.Operations;
 using static Prism.Enums;
-using static Tekla.Structures.Catalogs.AttributeConfiguration;
 using Task = System.Threading.Tasks.Task;
 
 namespace Prism
@@ -29,47 +24,128 @@ namespace Prism
 		public List<PrismDrawing> Drawings = new List<PrismDrawing>();
 		public int NumberOfNcRequired { get; set; }
 
-		/// <summary>
-		/// /// Create the report and then read data
-		/// </summary>
-		public void CreateReportAndGetDrawingInfo(string packagePath)
+		public bool CreateReportAndGetDrawingInfo(string packagePath, List<PrismPart> prismParts, ToolStrip toolStrip, ToolStripStatusLabel tssl)
 		{
-			PrismMacroBuilder.SelectDrawings();
-			PrismMacroBuilder.RunPrismDrawingReport(packagePath);
-			//  string teklaReportLocation = "C:\\TeklaStructuresModels2023\\Sandbox\\PrismDrawing_List.rpt";
+			const int maxAttempts = 3;
+			const string reportFileName = "PrismDrawing_List.xsr";
+			const int fileLockTimeoutSeconds = 15;
 
-			//	string teklaReportLocation = "C:\\Sev_Firm_2021\\Reports\\Prism\\PrismDrawing_List.rpt";// Path.Combine(FirmFolderLoc.ReportTemplates(), "PrismDrawing_List.rpt");
-			string newReportLocation = Path.Combine(packagePath, "PrismDrawing_List.xsr");
+			bool valid = false;
 
-			if (!CreateReportAndWait(/*teklaReportLocation, */newReportLocation)) return;
-
-			// wait until Tekla Structures has unlocked the file, or timeout
-			if (!IfLockedWait(newReportLocation, 15)) return;
-
-			// read the report
-			using (var reader = new StreamReader(newReportLocation))
+			for (int attempt = 1; attempt <= maxAttempts; attempt++)
 			{
-				string line;
-				while ((line = reader.ReadLine()) != null)
-				{
-					var items = line.Split(',');
+				UpdateLabel(toolStrip, tssl, attempt);
 
-					if (items.Length >= 8)
+				// Clear previous drawings and generate a new report file
+				Drawings.Clear();
+				string reportPath = Path.Combine(packagePath, reportFileName);
+				if (!GenerateReport(packagePath, reportPath, fileLockTimeoutSeconds))
+				{
+					return false;
+				}
+
+				// Read the report file and populate the Drawings list
+				ReadReportAndPopulateDrawings(reportPath);
+
+				// Validate that all prism parts have an associated drawing
+				List<PrismPart> missingParts = ValidateDrawingSelection.ValidateSelection(Drawings, prismParts);
+				if (missingParts.Count > 0)
+				{
+					// On the final attempt, show a warning and exit.
+					if (attempt == maxAttempts)
 					{
-						Drawings.Add(new PrismDrawing(items));
+						PrismWarnings.DrawingAndPartSelectionMisMatch(missingParts);
+						return false;
 					}
+					// Otherwise, the loop continues to retry.
+				}
+				else
+				{
+					valid = true;
+					break;  // Everything is valid—exit the retry loop.
 				}
 			}
 
-			File.Delete(newReportLocation);
+			// Calculate the number of NC data files required based on valid drawings.
+			// We return he number of drawings for this only counting them if they are distinct, one of a kind, in the list.
+			NumberOfNcRequired = Drawings
+				.Where(d => d.DrawingFolder == DrawingFolder.ASS
+						 || d.DrawingFolder == DrawingFolder.FIT
+						 || d.DrawingFolder == DrawingFolder.PRT)
+				.Select(d => d.DrawingNumber).Distinct().Count();
 
-			NumberOfNcRequired = Drawings.Count(d => d.DrawingFolder == DrawingFolder.ASS) + Drawings.Count(d => d.DrawingFolder == DrawingFolder.FIT) + Drawings.Count(d => d.DrawingFolder == DrawingFolder.PRT);
+			return valid;
 		}
 
-		public bool CreateReportAndWait(/*string teklaReportLocation, */string newReportLocation)
+		/// <summary>
+		/// Runs the macros to generate the report and waits for the file to be ready.
+		/// </summary>
+		private bool GenerateReport(string packagePath, string reportPath, int fileLockTimeoutSeconds)
 		{
-			// Operation.CreateReportFromSelected(teklaReportLocation, newReportLocation, "", "", "");
+			// Execute macros that select drawings and run the report.
+			PrismMacroBuilder.SelectDrawings();
+			PrismMacroBuilder.RunPrismDrawingReport(packagePath);
 
+			// Wait for the report to be created.
+			if (!CreateReportAndWait(reportPath))
+			{
+				return false;
+			}
+
+			// Wait until the file is unlocked, or exit if it times out.
+			if (!IfLockedWait(reportPath, fileLockTimeoutSeconds))
+			{
+				return false;
+			}
+
+			return true;
+		}
+
+		/// <summary>
+		/// Reads the report file line by line and populates the Drawings list, then deletes the report file.
+		/// </summary>
+		private void ReadReportAndPopulateDrawings(string reportPath)
+		{
+			// Ensure we delete the file even if an exception occurs.
+			try
+			{
+				using (var reader = new StreamReader(reportPath))
+				{
+					string line;
+					while ((line = reader.ReadLine()) != null)
+					{
+						var items = line.Split(',');
+						if (items.Length >= 8)
+						{
+							Drawings.Add(new PrismDrawing(items));
+						}
+					}
+				}
+			}
+			finally
+			{
+				if (File.Exists(reportPath))
+				{
+					File.Delete(reportPath);
+				}
+			}
+		}
+
+		private void UpdateLabel(ToolStrip ts, ToolStripStatusLabel tssl, int attempt)
+		{
+			string labelText = "Gathering drawing information.";
+			if(attempt > 1)
+			{
+				labelText = $"Attempt {attempt - 1} failed, trying again.";
+			}
+			ts.Invoke(new Action(() =>
+			{
+				tssl.Text = labelText;
+			}));
+		}
+
+		public bool CreateReportAndWait(string newReportLocation)
+		{
 			int waitTime = 0;
 			const int maxWaitTime = 10000; // 10 seconds
 
@@ -119,28 +195,39 @@ namespace Prism
 			}
 		}
 
-		public DrawingManager(Model model, PrismProjectData projectData, string phaseNum, string issueNum, string packagePath)
+		// Private constructor ensures that instances are only created through the factory method.
+		private DrawingManager(Model model, PrismProjectData projectData, string phaseNum, string issueNum)
 		{
 			_folders = new FolderManager(projectData, phaseNum, issueNum);
-			//Logging.DebugLog("folder manaager made", "");
 			_model = model;
-
-			CreateReportAndGetDrawingInfo(packagePath);
-
-			//Logging.DebugLog("drawingList made", "");
 		}
 
-		/*  public static void NewPrintDrawings(ReportManager reportManager, DrawingManager drawingManager, List<int> drawingCount, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
-		  { 
-			  if (drawingManager.GetDrawingFolder(Enums.DrawingFolder.ASS).Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\ASS", 0, 1, reportManager, true, toolStrip, statusLabel);
-			  if (drawingManager.GetDrawingFolder(Enums.DrawingFolder.FIT).Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\FIT", 2, 3, reportManager, false, toolStrip, statusLabel);
-			  if (drawingManager.GetDrawingFolder(Enums.DrawingFolder.PGC).Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\PGC", 6, 7, reportManager, false, toolStrip, statusLabel);
-			  if (drawingManager.GetDrawingFolder(Enums.DrawingFolder.PRT).Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\PRT", 8, 9, reportManager, false, toolStrip, statusLabel);
-			  if (drawingManager.GetDrawingFolder(Enums.DrawingFolder.SHA).Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\SHA", 10, 11, reportManager, false, toolStrip, statusLabel);         
-			  if (drawingManager.GetDrawingFolder(Enums.DrawingFolder.WLD).Count != 0) PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\WLD", 12, 13, reportManager, true, toolStrip, statusLabel);
+		/// <summary>
+		/// Factory method that creates a DrawingManager.
+		/// If drawing validation fails, the user is asked if they want to continue anyway.
+		/// Returns null if the user chooses not to continue.
+		/// </summary>
+		public static DrawingManager Create(Model model, PrismProjectData projectData, List<PrismPart> myParts,	string phaseNum,
+			string issueNum, string packagePath, ToolStrip ts, ToolStripStatusLabel tssl)	
+		{
+			// Create the instance.
+			var manager = new DrawingManager(model, projectData, phaseNum, issueNum);
 
-			  PrismMacroBuilder.ClearPrintDialog();
-		  }*/
+			// Attempt to create the report and get drawing info.
+			bool valid = manager.CreateReportAndGetDrawingInfo(packagePath, myParts, ts, tssl);
+
+			// If validation fails, offer the user a chance to continue.
+			if (!valid)
+			{
+				if (!PrismWarnings.MissingDrawingsFound())
+				{
+					// The user chose not to continue.
+					return null;
+				}
+			}
+
+			return manager;
+		}
 
 		public static async Task NewPrintDrawings(ReportManager reportManager, DrawingManager drawingManager, List<int> drawingCount, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
 		{
@@ -171,25 +258,6 @@ namespace Prism
 				statusLabel.Text = "Exporting BSWX";
 			}));
 		}
-
-		/*	public static void PrintAndIssueDrawings(string issueFolder, string issuePath, List<int> drawingCount, string folderPath, int countIndex1, int countIndex2, ReportManager reportManager, bool isAss, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
-			{
-				PrismMacroBuilder.PrintSelectedDrawings(Constants.PrismPackageFolderName + "\\\\" + issueFolder, folderPath, drawingCount[countIndex1], drawingCount[countIndex2], isAss);
-
-				WaitForPrinting(issuePath + folderPath, drawingCount[countIndex2], toolStrip, statusLabel, folderPath);
-
-				PrismMacroBuilder.IssueAndLockStampOn();
-			}*/
-
-		/*public static void PrintAndIssueDrawings(string issueFolder, string issuePath, List<int> drawingCount, string folderPath, int countIndex1, int countIndex2, ReportManager reportManager, bool isAss, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
-        {
-           // Thread.Sleep(2000);
-            PrismMacroBuilder.PrintSelectedDrawings(Constants.PrismPackageFolderName + "\\\\" + issueFolder, folderPath, drawingCount[countIndex1], drawingCount[countIndex2], isAss);
-           // WaitForPrinting(issuePath + folderPath, drawingCount[countIndex2], toolStrip, statusLabel, folderPath);
-			await WaitForPrintingAsync(printFolder, desiredFileCount, toolStrip, statusLabel, drawingType);
-
-			PrismMacroBuilder.IssueAndLockStampOn();
-        }*/
 
 		public static async Task PrintAndIssueDrawings(string issueFolder, string issuePath, List<int> drawingCount, string folderPath, int countIndex1, int countIndex2, ReportManager reportManager, bool isAss, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
 		{
@@ -366,64 +434,6 @@ namespace Prism
 				{
 					Console.WriteLine("Desired file count reached.");
 				}
-			}
-		}
-
-		private static void WaitForPrinting(string printFolder, int desiredFileCount, ToolStrip toolStrip, ToolStripStatusLabel statusLabel, string drawingType)
-		{
-			string folderPath = printFolder;
-
-			FileSystemWatcher watcher = new FileSystemWatcher(folderPath);
-			watcher.EnableRaisingEvents = true;
-			watcher.IncludeSubdirectories = false;
-
-			int currentFileCount = Directory.GetFiles(folderPath).Length;
-			int previousFileCount = currentFileCount;
-			bool countIncreased = false;
-
-			watcher.Created += (sender, e) =>
-			{
-				currentFileCount++;
-				UpdateStatusLabel(toolStrip, statusLabel, currentFileCount, desiredFileCount, drawingType.Substring(1));
-
-				if (currentFileCount >= desiredFileCount)
-				{
-					watcher.EnableRaisingEvents = false; // Stop watching the folder
-				}
-
-				countIncreased = true; // File created, set flag to true
-			};
-
-			while (currentFileCount < desiredFileCount)
-			{
-				Thread.Sleep(8000); // Delay for 10 seconds before checking again
-
-				if (!countIncreased)
-				{
-					PrismWarnings.DrawingPrintFailed();
-					watcher.EnableRaisingEvents = false;
-					break;
-				}
-
-				int fileCountAfterCheck = Directory.GetFiles(folderPath).Length;
-
-				if (fileCountAfterCheck > previousFileCount)
-				{
-					previousFileCount = fileCountAfterCheck;
-					countIncreased = true; // Files increased, set flag to true
-				}
-				else
-				{
-					countIncreased = false; // No new files found, set flag to false
-				}
-
-				currentFileCount = fileCountAfterCheck;
-				UpdateStatusLabel(toolStrip, statusLabel, currentFileCount, desiredFileCount, drawingType.Substring(1));
-			}
-
-			if (currentFileCount >= desiredFileCount)
-			{
-				Console.WriteLine("Desired file count reached.");
 			}
 		}
 

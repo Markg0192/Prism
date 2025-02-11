@@ -190,10 +190,8 @@ namespace Prism.ButtonOperations
 		private static async Task<(bool success, DrawingManager drawingManager)> ProcessAndPrintDrawings(SelectedObjects selectedObjects, CpuCounter cpuCounter, List<PrismPart> partsToSelect, Model model, PrismProjectData projectData, string phaseNumber, string issueNumber, ReportManager reportManager, ToolStrip toolStrip, ToolStripStatusLabel statusLabel, List<PrismDrawing> drawings)
 		{
 			CpuSpeedCheck(cpuCounter);
-			ReportManager.SelectDrawingsInDocManager(partsToSelect);
-
-			CpuSpeedCheck(cpuCounter);
-			DrawingManager drawingManager = new DrawingManager(model, projectData, phaseNumber, issueNumber, reportManager.Folders.FabPath);
+			DrawingManager drawingManager = DrawingManager.Create(model, projectData, partsToSelect, phaseNumber, issueNumber, reportManager.Folders.FabPath, toolStrip, statusLabel);
+			if (drawingManager == null) return (false, null);
 
 			if (!CheckForProblemsWithDrawings(drawingManager, projectData.ProjNumber, out bool createDrawings)) return (false, null);
 			

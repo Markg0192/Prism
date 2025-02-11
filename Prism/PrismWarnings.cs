@@ -227,7 +227,7 @@ namespace Prism
             return CreateYesNoForm(notUpToDateMessage, notUpToDateTitle);
         }
 
-        public static bool RunSpecialFittingDrawings()
+		public static bool RunSpecialFittingDrawings()
         {
             const string notUpToDateMessage = "Have you created drawings for these special fittings? If so would you like to include these in the order?.";
             const string notUpToDateTitle = "Special fittings.";
@@ -311,7 +311,14 @@ namespace Prism
             return CreateYesNoForm(notUpToDateMessage, notUpToDateTitle);
         }
 
-        public static bool FabsecsGreenAlreadyOn()
+		public static bool MissingDrawingsFound()
+		{
+			const string notUpToDateMessage = "Drawing gathering failed, do you want to continue anyway?";
+			const string notUpToDateTitle = "Drawing gather failed.";
+			return CreateYesNoForm(notUpToDateMessage, notUpToDateTitle);
+		}
+
+		public static bool FabsecsGreenAlreadyOn()
         {
             const string notUpToDateMessage = "Careful: This check processes fabsecs by setting unique marking and adding green to selected members.\n" + 
                 "It looks like you have done this already on some selected parts. Are you sure you want to do this again? Clicking no will skip the fabsec processing" +
@@ -353,7 +360,14 @@ namespace Prism
             CreateOkWithReportForm(notUpToDateMessage, notUpToDateTitle, failedParts, "Execution class missing");
         }
 
-        public static void StartNumbersDontMatch(List<PrismPart> failedParts)
+       	public static void DrawingAndPartSelectionMisMatch(List<PrismPart> failedParts)
+		{
+			const string notUpToDateMessage = "Prism cannot find a drawing for every part selected, prism will continue anyway, see report for missing drawings.";
+			const string notUpToDateTitle = "Missing drawings.";
+			CreateOkWithReportForm(notUpToDateMessage, notUpToDateTitle, failedParts, "Missing drawings.");
+		}
+
+		public static void StartNumbersDontMatch(List<PrismPart> failedParts)
         {
             const string notUpToDateMessage = "You have primary members and secondary parts of the same assembly with mismatching start numbers, please correct this to continue.";
             const string notUpToDateTitle = "Mismatching numbers";
