@@ -243,7 +243,10 @@ namespace Prism
                         case string name when name.Contains("SS-KK-TYPE-14-6"):
                             AddExternalKlamp();
                             break;
-                        case string name when name.Contains("SS-KK-TYPE-15-6"):
+						case string name when name.Contains("SWIVEL"):
+							AddSwivelKlamp();
+							break;
+						case string name when name.Contains("SS-KK-TYPE-15-6"):
                             AddCornerKlamp();
                             break;
                         case string name when name.Contains("SS-KK-TYPE-18-6"):
@@ -276,7 +279,12 @@ namespace Prism
             SleeveJoints++;
         }
 
-        private static void CountKickFlat(Part p)
+		private static void AddSwivelKlamp()
+		{
+			AngleSwivelBends++;
+		}
+
+		private static void CountKickFlat(Part p)
         {
             KickFlatLength += ModelModifiers.GetPartLength(p) / 1000;
         }
