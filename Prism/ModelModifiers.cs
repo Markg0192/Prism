@@ -664,6 +664,10 @@ namespace Prism
 			ms.Select(selectList);
 			foreach (Part part in selectList)
 			{
+				if(part is PolyBeam polybeam && polybeam.Contour.ContourPoints.Count <= 2)
+				{
+					continue;
+				}
 				part.Modify();
 			}
 		}
