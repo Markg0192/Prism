@@ -256,6 +256,10 @@ namespace Prism
 		{
 			foreach (PrismPart part in selectedModelParts)
 			{
+				if (part.Part is PolyBeam polybeam && polybeam.Contour.ContourPoints.Count <= 2)
+				{
+					continue;
+				}
 				part.Part.SetUserProperty(ModelUDA.FabStampUDA(), ModelUDA.FabStamp(phaseNumber, issueNumber));
 				part.Part.Modify();
 			}
