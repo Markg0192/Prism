@@ -100,7 +100,7 @@ namespace Prism
 					else { ModelChecker.ClearOldLists(); }
 
 
-					if (!await Task.Run(() => _selectedObjects.MaterialButton3op(_projectData, myReportManager,
+					if (!await Task.Run(() => _selectedObjects.MaterialButton3op(_projectData, myReportManager, _teklaVersion,
 						orderType, (int)StageTypes.Prelim3, StageTypes.Prelim3, _model, txt_MatSiteDate.Text, statusStrip_Mat, MaterialStatusLabel))) { EndFunction(0); return; }
 
 					_model.CommitChanges();
@@ -727,7 +727,7 @@ namespace Prism
 				if (dm.GetDrawingFolder(Enums.DrawingFolder.Default).Count != 0) { PrismWarnings.IncorrectlyAssignedDrawings(); return false; }
 
 				List<int> drawingCount = new List<int> { 0, dm.GetDrawingByType("W").Count };
-				DrawingManager.PrintAndIssueDrawings(myReportManager.Folders.MatFolder, myReportManager.Folders.MatPath, drawingCount, "\\SPC", 0, 1, myReportManager, false, toolStrip, statusLabel);
+				DrawingManager.PrintAndIssueDrawings(myReportManager.Folders.MatFolder, myReportManager.Folders.MatPath, drawingCount, "\\SPC", 0, 1, myReportManager, false, _teklaVersion, toolStrip, statusLabel);
 				PrismMacroBuilder.ClearPrintDialog();
 			}
 			return true;

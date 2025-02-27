@@ -11,7 +11,7 @@ namespace Prism.ButtonOperations
 {
     public static class MaterialButton3
     {
-        public static bool MaterialButton3op(this SelectedObjects myObjects, PrismProjectData projectData,ReportManager reportManager,
+        public static bool MaterialButton3op(this SelectedObjects myObjects, PrismProjectData projectData,ReportManager reportManager, string teklaVersion,
             string orderType, int stageNumber, StageTypes stageType, Model model, string siteDate, ToolStrip toolStrip, ToolStripStatusLabel tssl)
         {
            
@@ -27,7 +27,7 @@ namespace Prism.ButtonOperations
             {
                 typeOfOrder = PrismWarnings.FabsecCarcassAction();
                 //If there are fabsecs present the we need to add the carcass to the selection instead of those in the model space
-                if (!FabsecOrderWorker(myObjects, orderType, reportManager, model, projectData, stageNumber, siteDate, typeOfOrder, toolStrip, tssl)) return false;
+                if (!FabsecOrderWorker(myObjects, orderType, reportManager, model, projectData, stageNumber, siteDate, typeOfOrder, teklaVersion, toolStrip, tssl)) return false;
             }
 
             else
@@ -56,7 +56,7 @@ namespace Prism.ButtonOperations
         }
 
         private static bool FabsecOrderWorker(SelectedObjects myObjects, string orderType, ReportManager myReportManager, Model model,
-            PrismProjectData projectData, int stageNumber, string siteDate, int typeOfOrder, 
+            PrismProjectData projectData, int stageNumber, string siteDate, int typeOfOrder, string teklaVersion,
             ToolStrip toolStrip, ToolStripStatusLabel tssl)
         {
             List<PrismPart> fabsecParts = myObjects.GetFabsecParts();
@@ -71,7 +71,7 @@ namespace Prism.ButtonOperations
 
                 if (!CheckFabsecOrderStatusAgainstRequiredActions(fabsecParts, typeOfOrder)) return false;
 
-                bool fabsecCarcassOrdering = Order.FabsecCarcasses(myReportManager, model, projectData, myObjects, stageNumber, orderType, siteDate, typeOfOrder, toolStrip, tssl);
+                bool fabsecCarcassOrdering = Order.FabsecCarcasses(myReportManager, model, projectData, teklaVersion, myObjects, stageNumber, orderType, siteDate, typeOfOrder, toolStrip, tssl);
                 return fabsecCarcassOrdering;
             }
             if (orderType.Contains("Fabsec Carcass") && (orderType.Contains("Add") || orderType.Contains("Omit")))

@@ -229,25 +229,25 @@ namespace Prism
 			return manager;
 		}
 
-		public static async Task NewPrintDrawings(ReportManager reportManager, DrawingManager drawingManager, List<int> drawingCount, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
+		public static async Task NewPrintDrawings(ReportManager reportManager, DrawingManager drawingManager, List<int> drawingCount, string teklaVersion, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
 		{
 			if (drawingManager.GetDrawingFolder(Enums.DrawingFolder.ASS).Count != 0)
-				await PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\ASS", 0, 1, reportManager, true, toolStrip, statusLabel);
+				await PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\ASS", 0, 1, reportManager, true, teklaVersion, toolStrip, statusLabel);
 
 			if (drawingManager.GetDrawingFolder(Enums.DrawingFolder.FIT).Count != 0)
-				await PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\FIT", 2, 3, reportManager, false, toolStrip, statusLabel);
+				await PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\FIT", 2, 3, reportManager, false, teklaVersion, toolStrip, statusLabel);
 
 			if (drawingManager.GetDrawingFolder(Enums.DrawingFolder.PGC).Count != 0)
-				await PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\PGC", 6, 7, reportManager, false, toolStrip, statusLabel);
+				await PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\PGC", 6, 7, reportManager, false, teklaVersion, toolStrip, statusLabel);
 
 			if (drawingManager.GetDrawingFolder(Enums.DrawingFolder.PRT).Count != 0)
-				await PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\PRT", 8, 9, reportManager, false, toolStrip, statusLabel);
+				await PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\PRT", 8, 9, reportManager, false, teklaVersion, toolStrip, statusLabel);
 
 			if (drawingManager.GetDrawingFolder(Enums.DrawingFolder.SHA).Count != 0)
-				await PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\SHA", 10, 11, reportManager, false, toolStrip, statusLabel);
+				await PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\SHA", 10, 11, reportManager, false, teklaVersion, toolStrip, statusLabel);
 
 			if (drawingManager.GetDrawingFolder(Enums.DrawingFolder.WLD).Count != 0)
-				await PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\WLD", 12, 13, reportManager, true, toolStrip, statusLabel);
+				await PrintAndIssueDrawings(reportManager.Folders.FabFolder, reportManager.Folders.FabPath, drawingCount, "\\WLD", 12, 13, reportManager, true, teklaVersion, toolStrip, statusLabel);
 
 			RemoveSheetNumbersFromAllDrawings(reportManager.Folders.FabPath);
 
@@ -259,10 +259,10 @@ namespace Prism
 			}));
 		}
 
-		public static async Task PrintAndIssueDrawings(string issueFolder, string issuePath, List<int> drawingCount, string folderPath, int countIndex1, int countIndex2, ReportManager reportManager, bool isAss, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
+		public static async Task PrintAndIssueDrawings(string issueFolder, string issuePath, List<int> drawingCount, string folderPath, int countIndex1, int countIndex2, ReportManager reportManager, bool isAss, string teklaVersion, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
 		{
 			// Initiate printing of selected drawings
-			PrismMacroBuilder.PrintSelectedDrawings(Constants.PrismPackageFolderName + "\\\\" + issueFolder, folderPath, drawingCount[countIndex1], drawingCount[countIndex2], isAss);
+			PrismMacroBuilder.PrintSelectedDrawings(Constants.PrismPackageFolderName + "\\\\" + issueFolder, folderPath, drawingCount[countIndex1], drawingCount[countIndex2], isAss, teklaVersion);
 
 			// Calculate the print folder and desired file count based on inputs
 			string printFolder = issuePath + folderPath;
