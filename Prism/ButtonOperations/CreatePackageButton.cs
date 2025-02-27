@@ -86,7 +86,7 @@ namespace Prism.ButtonOperations
 				return (false, totalNcRequired);
 
 			// Await the ProcessAndPrintDrawings method and handle the result tuple
-			var (success, drawingManager) = await ProcessAndPrintDrawings(myObjects, cpuCounter, myObjects.GetNonSeversafeParts(), model, projectData, phaseNumber, issueNumber, reportManager, toolStrip, tssl, myObjects.PrismDrawings);
+			var (success, drawingManager) = await ProcessAndPrintDrawings(myObjects, cpuCounter, myObjects.GetNonSeversafeParts(), model, projectData, phaseNumber, issueNumber, reportManager, toolStrip, tssl, myObjects.PrismDrawings, teklaVersion);
 			if (!success)
 				return (false, totalNcRequired);
 
@@ -155,7 +155,7 @@ namespace Prism.ButtonOperations
 				SelectedObjects objects = new SelectedObjects(projectData.ProjPath, stageType, phaseNumber, issueNumber, model, Constants.SpecialOperationUser(), ts, tssl);
 
 				// Await the async method and handle the result tuple
-				var (success, drawingManager) = await ProcessAndPrintDrawings(objects, cpuCounter, objects.PrismParts, model, projectData, phaseNumber, issueNumber, reportManager, ts, tssl, objects.PrismDrawings);
+				var (success, drawingManager) = await ProcessAndPrintDrawings(objects, cpuCounter, objects.PrismParts, model, projectData, phaseNumber, issueNumber, reportManager, ts, tssl, objects.PrismDrawings, teklaVersion);
 				if (!success)
 					return (false, totalNcRequired);
 
@@ -187,7 +187,8 @@ namespace Prism.ButtonOperations
 			return (true, totalNcRequired);
 		}
 
-		private static async Task<(bool success, DrawingManager drawingManager)> ProcessAndPrintDrawings(SelectedObjects selectedObjects, CpuCounter cpuCounter, List<PrismPart> partsToSelect, Model model, PrismProjectData projectData, string phaseNumber, string issueNumber, ReportManager reportManager, ToolStrip toolStrip, ToolStripStatusLabel statusLabel, List<PrismDrawing> drawings)
+		private static async Task<(bool success, DrawingManager drawingManager)> ProcessAndPrintDrawings(SelectedObjects selectedObjects, CpuCounter cpuCounter, List<PrismPart> partsToSelect, Model model, PrismProjectData projectData, string phaseNumber, string issueNumber, 
+			ReportManager reportManager, ToolStrip toolStrip, ToolStripStatusLabel statusLabel, List<PrismDrawing> drawings, string teklaVersion)
 		{
 			CpuSpeedCheck(cpuCounter);
 			DrawingManager drawingManager = DrawingManager.Create(model, projectData, partsToSelect, phaseNumber, issueNumber, reportManager.Folders.FabPath, toolStrip, statusLabel);
@@ -208,7 +209,7 @@ namespace Prism.ButtonOperations
 				CpuSpeedCheck(cpuCounter);
 				PrismMacroBuilder.IssueAndLockStampOff();
 				List<int> drawingCount = NewCountDrawings(drawingManager);
-				await DrawingManager.NewPrintDrawings(reportManager, drawingManager, drawingCount, toolStrip, statusLabel);
+				await DrawingManager.NewPrintDrawings(reportManager, drawingManager, drawingCount, teklaVersion, toolStrip, statusLabel);
 			}
 
 			return (true, drawingManager);

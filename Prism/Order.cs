@@ -34,7 +34,7 @@ namespace Prism
 			return true;
 		}
 
-		public static bool FabsecCarcasses(ReportManager myReportManager, Model model, PrismProjectData projectData,
+		public static bool FabsecCarcasses(ReportManager myReportManager, Model model, PrismProjectData projectData, string teklaVersion,
 			SelectedObjects myObjects, int stageNumber, string orderType, string orderDate, int typeOfOrder, ToolStrip toolStrip, ToolStripStatusLabel tssl)
 		{
 			if (typeOfOrder == 1)
@@ -44,7 +44,7 @@ namespace Prism
 			if (typeOfOrder == 2)
 			{
 				if (!FabsecProcessing.AddCarcassToSelection(model, myObjects, out List<PrismPart> originalFabsecs, out List<PrismPart> fabsecCarcasses)) return false;
-				return OrderFabsecCarcasses(myReportManager, model, projectData, myObjects, stageNumber, originalFabsecs, fabsecCarcasses, orderType, orderDate, toolStrip, tssl);
+				return OrderFabsecCarcasses(myReportManager, model, projectData, teklaVersion, myObjects, stageNumber, originalFabsecs, fabsecCarcasses, orderType, orderDate, toolStrip, tssl);
 			}
 			return false;
 		}
@@ -72,7 +72,7 @@ namespace Prism
 			return true;
 		}
 
-		public static bool OrderFabsecCarcasses(ReportManager myReportManager, Model model, PrismProjectData projectData,
+		public static bool OrderFabsecCarcasses(ReportManager myReportManager, Model model, PrismProjectData projectData, string teklaVersion,
 		 SelectedObjects myObjects, int stageNumber, List<PrismPart> originalFabsecs, List<PrismPart> fabsecCarcasses, string orderType, string orderDate, ToolStrip toolStrip, ToolStripStatusLabel tssl)
 		{
 			if (!myReportManager.Folders.CreateFabsecCarcassFolder()) return false;
@@ -83,7 +83,7 @@ namespace Prism
 			if (dm.GetDrawingFolder(Enums.DrawingFolder.Default).Count != 0) { PrismWarnings.IncorrectlyAssignedDrawings(); return false; }
 
 			List<int> drawingCount = new List<int> { 0, dm.GetDrawingFolder(Enums.DrawingFolder.PGC).Count };
-			DrawingManager.PrintAndIssueDrawings(myReportManager.Folders.FabsecCarcassFolder, myReportManager.Folders.CarcassOrderPath, drawingCount, "\\PGC", 0, 1, myReportManager, false, toolStrip, tssl);
+			DrawingManager.PrintAndIssueDrawings(myReportManager.Folders.FabsecCarcassFolder, myReportManager.Folders.CarcassOrderPath, drawingCount, "\\PGC", 0, 1, myReportManager, false, teklaVersion, toolStrip, tssl);
 			PrismMacroBuilder.ClearPrintDialog();
 
 			fabsecCarcasses.SelectParts();

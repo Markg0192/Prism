@@ -541,8 +541,9 @@ namespace Prism
 			Operation.RunMacro(Constants.SelectedDrawings);
 		}
 
-		public static void PrintSelectedDrawings(string fileToPrintTo, string folderName, int startPoint, int drawingCount, bool isAss)
+		public static void PrintSelectedDrawings(string fileToPrintTo, string folderName, int startPoint, int drawingCount, bool isAss, string teklaVersion)
 		{
+			int printColour = teklaVersion == "2024.0" ? 2 : 1;
 			// string drawingType = isAss ? "\"albl_Assembly_drawings\"" : "\"albl_single_part_drawings\"";
 
 			string printLocation = $".\\\\{fileToPrintTo}";
@@ -580,7 +581,7 @@ namespace Prism
 						"                wpf.View(\"DPMPrinterFeature.DPMPrinterViewWindow\").Find(\"AID_PDFPD_SettingsTabControl\", \"AID_PDFPD_ParentStackPanel\", \"AID_PDFPD_PrintTargetStackPanel\", \"AID_PDFPD_PDFRadio\").As.ToggleButton.State.SetChecked();" + Environment.NewLine +
 						"                wpf.View(\"DPMPrinterFeature.DPMPrinterViewWindow\").Find(\"AID_PDFPD_SettingsTabControl\", \"AID_PDFPD_ParentStackPanel\", \"AID_PDFPD_OrientationPanel\", \"AID_PDFPD_Orientation\").As.Selector.Select(0);" + Environment.NewLine +
 						"                wpf.View(\"DPMPrinterFeature.DPMPrinterViewWindow\").Find(\"AID_PDFPD_SettingsTabControl\", \"AID_PDFPD_ParentStackPanel\", \"AID_PDFPD_CenterDrawingOnPaper\").As.ToggleButton.State.SetChecked();" + Environment.NewLine +
-						"                wpf.View(\"DPMPrinterFeature.DPMPrinterViewWindow\").Find(\"AID_PDFPD_SettingsTabControl\", \"AID_PDFPD_ParentStackPanel\", \"AID_PDFPD_ColorPanel\", \"AID_PDFPD_Color\").As.Selector.Select(1);" + Environment.NewLine +
+					   $"                wpf.View(\"DPMPrinterFeature.DPMPrinterViewWindow\").Find(\"AID_PDFPD_SettingsTabControl\", \"AID_PDFPD_ParentStackPanel\", \"AID_PDFPD_ColorPanel\", \"AID_PDFPD_Color\").As.Selector.Select({printColour});" + Environment.NewLine +
 						"                wpf.View(\"DPMPrinterFeature.DPMPrinterViewWindow\").Find(\"AID_PDFPD_SettingsTabControl\", \"AID_PDFPD_ParentStackPanel\", \"AID_PDFPD_OutputToSingleFile\").As.ToggleButton.State.SetUnchecked();" + Environment.NewLine +
 						"                wpf.View(\"DPMPrinterFeature.DPMPrinterViewWindow\").Find(\"AID_PDFPD_SettingsTabControl\", \"AID_PDFPD_ParentStackPanel\", \"AID_PDFPD_OpenFileWhenFinished\").As.ToggleButton.State.SetUnchecked();" + Environment.NewLine +
 						"                wpf.View(\"DPMPrinterFeature.DPMPrinterViewWindow\").Find(\"AID_PDFPD_SettingsTabControl\", \"AID_PDFPD_ParentStackPanel\", \"AID_PDFPD_OpenFolderWhenFinished\").As.ToggleButton.State.SetUnchecked();" + Environment.NewLine +
