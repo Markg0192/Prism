@@ -252,11 +252,6 @@ namespace Prism
 			RemoveSheetNumbersFromAllDrawings(reportManager.Folders.FabPath);
 
 			PrismMacroBuilder.ClearPrintDialog();
-
-			toolStrip.Invoke(new Action(() =>
-			{
-				statusLabel.Text = "Exporting BSWX";
-			}));
 		}
 
 		public static async Task PrintAndIssueDrawings(string issueFolder, string issuePath, List<int> drawingCount, string folderPath, int countIndex1, int countIndex2, ReportManager reportManager, bool isAss, string teklaVersion, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)

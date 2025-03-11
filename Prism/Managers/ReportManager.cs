@@ -10,6 +10,7 @@ using System.Linq;
 using System.Windows.Forms;
 using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
+using Task = System.Threading.Tasks.Task;
 
 namespace Prism
 {
@@ -172,12 +173,12 @@ namespace Prism
 			}
 		}
 
-		private void ProcessMaterial(SelectedObjects selectedObjects, StageTypes stageType, bool createBSWX, bool fabsecPresent, bool nonFabsecPresent, string nonFabsecReportName, 
+		private async void ProcessMaterial(SelectedObjects selectedObjects, StageTypes stageType, bool createBSWX, bool fabsecPresent, bool nonFabsecPresent, string nonFabsecReportName, 
 			string nonFabsecOutputName, ToolStrip toolStrip, ToolStripStatusLabel tssl, string fabsecReportName = null, string fabsecOutputName = null)
 		{
 			if (createBSWX)
 			{
-			    selectedObjects.ExportBSWX(Folders.MatPath, ProjectData, PhaseNum, IssueNum, stageType, toolStrip, tssl);
+			    await selectedObjects.ExportBSWX(Folders.MatPath, ProjectData, PhaseNum, IssueNum, stageType, toolStrip, tssl);
 				ModelModifiers.RemoveLog(Folders.MatPath);
 			}
 
@@ -235,7 +236,7 @@ namespace Prism
 
 		}
 
-		public async void CreateFabReports(List<PrismPart> partsList, List<PrismBoltGroup> boltList, string teklaVersion, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
+		public async Task CreateFabReports(List<PrismPart> partsList, List<PrismBoltGroup> boltList, string teklaVersion, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
 		{
 			while (Operation.IsMacroRunning()) // Wait until macro for selecting drawings in the document manager is complete before moving on
 			{
@@ -266,6 +267,20 @@ namespace Prism
 			}
 
 			UpdateStatusLabel(toolStrip, statusLabel, "Creating NC Data");
+			await Task.Yield(); // Allow UI to update
+
+			await Task.Run(() => CreateNC(teklaVersion));
+
+			UpdateStatusLabel(toolStrip, statusLabel, "Creating Reports");
+			await Task.Yield();
+			await Task.Run(() => CreateReports(boltList, create3Report, create4Report, createPgReport, shopBoltsPresent, siteBoltsPresent));
+
+			UpdateStatusLabel(toolStrip, statusLabel, "Converting Reports To PDF");
+			await Task.Yield();
+			await Task.Run(() => TextToPDF(Folders.ReportPath));
+
+
+		/*	UpdateStatusLabel(toolStrip, statusLabel, "Creating NC Data");
 
 			CreateNC(teklaVersion);
 
@@ -275,7 +290,7 @@ namespace Prism
 
 			UpdateStatusLabel(toolStrip, statusLabel, "Converting Reports To PDF");
 
-			TextToPDF(Folders.ReportPath);
+			TextToPDF(Folders.ReportPath);*/
 
 			ModelModifiers.SelectParts(partsList);
 		}

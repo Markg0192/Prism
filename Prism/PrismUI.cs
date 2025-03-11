@@ -18,6 +18,9 @@ using System.Linq;
 using Tekla.Structures;
 using Newtonsoft.Json;
 using Prism.Validation;
+using System.IO.Packaging;
+using System.Security.Cryptography;
+using System.Diagnostics;
 
 namespace Prism
 {
@@ -256,19 +259,24 @@ namespace Prism
 			}
 
 			EmailWriter.WritePreparedEmail(Path.Combine(repoMan.Folders.FabPath, "Fab Email Text.txt"));
-
+		
 			EndFunction(1);
 		}
 
 		private async void btn_SpecialOperations_Click(object sender, EventArgs e)
 		{
-
-			EmailWriter.WriteFabEmail(null, null, "", "", "", "", "", true);
-			//	Logging.AddToFabCompleteCount();
-			//	string TeklaEnvi = string.Empty;
-			//	TeklaStructuresSettings.GetAdvancedOption("XS_ROLE_INI", ref TeklaEnvi);
-			//	ReportManager repoman = new ReportManager(_projectData, "IFC", "02");
-			//		_selectedObjects = new SelectedObjects("C:\\TeklaStructuresModels\\2021 models\\Sandbox\\PrismIFCExportTest\\", StageTypes.Check2, repoman.PhaseNum, repoman.IssueNum, _model, Constants.SpecialOperationUser());
+			Stopwatch time = Stopwatch.StartNew();	
+			time.Start();
+			//await QrCodeGenerator.ProcessPdfFilesAsync("C:\\TeklaStructuresModels2023\\C2083 HEL16 - Single\\Prism Packages\\C2083-11-FAB-ISSUE01\\ASS", "C:\\TeklaStructuresModels2023\\C2083 HEL16 - Single\\Prism Packages\\QR Codes");
+		    QrCodeGenerator.ProcessPdfFiles("C:\\TeklaStructuresModels2023\\Prism Demo Model\\PlotFiles", "C:\\TeklaStructuresModels2023\\Prism Demo Model\\Prism Packages\\QR Codes");
+			Console.WriteLine(time.Elapsed);
+			Console.WriteLine("");
+			//	EmailWriter.WriteFabEmail(null, null, "", "", "", "", "", true);
+		//	Logging.AddToFabCompleteCount();
+		//	string TeklaEnvi = string.Empty;
+		//	TeklaStructuresSettings.GetAdvancedOption("XS_ROLE_INI", ref TeklaEnvi);
+		//	ReportManager repoman = new ReportManager(_projectData, "IFC", "02");
+		//		_selectedObjects = new SelectedObjects("C:\\TeklaStructuresModels\\2021 models\\Sandbox\\PrismIFCExportTest\\", StageTypes.Check2, repoman.PhaseNum, repoman.IssueNum, _model, Constants.SpecialOperationUser());
 
 			//RenamePdfFiles("C:\\TeklaStructuresModels2021\\C1820 GE HPC\\PlotFiles");
 
