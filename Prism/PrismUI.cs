@@ -125,7 +125,7 @@ namespace Prism
 
 		private string MaterialFolderType(string orderType, FolderManager folders, out AdvancedSettingType setting)
 		{
-			if (orderType.Contains("Material"))
+			if (orderType.Contains("Material") || orderType.Contains("Special"))
 			{
 				setting = AdvancedSettingType.DirectoryMaterial;
 				return folders.MatPath;
@@ -729,7 +729,7 @@ namespace Prism
 
 			if (runDrawings)
 			{
-				DrawingManager dm = DrawingManager.Create(_model, _projectData, _selectedObjects.PrismParts, txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text, myReportManager.Folders.MatFolder, toolStrip, statusLabel);
+				DrawingManager dm = DrawingManager.Create(_model, _projectData, _selectedObjects.PrismParts, txt_MaterialPhaseNumber.Text, txt_MaterialIssueNumber.Text, myReportManager.Folders.MatPath, toolStrip, statusLabel);
 				if (dm == null) return false;
 
 				if (dm.GetDrawingFolder(Enums.DrawingFolder.Default).Count != 0) { PrismWarnings.IncorrectlyAssignedDrawings(); return false; }
