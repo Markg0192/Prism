@@ -1,6 +1,7 @@
 ﻿using Prism.Managers.ChangeManager;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -93,10 +94,10 @@ namespace Prism.ButtonOperations
 			// Use the DrawingManager to assign total NC required
 			totalNcRequired = drawingManager.NumberOfNcRequired;
 
-			myObjects.ExportBSWX(reportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType, toolStrip, tssl);
+			await myObjects.ExportBSWX(reportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType, toolStrip, tssl);
 
 			// Create fabrication reports
-			reportManager.CreateFabReports(myObjects.GetNonSeversafeParts(), myObjects.PrismBoltGroups, teklaVersion, toolStrip, tssl);
+			await reportManager.CreateFabReports(myObjects.GetNonSeversafeParts(), myObjects.PrismBoltGroups, teklaVersion, toolStrip, tssl);
 
 			// Modify attributes of non-seversafe parts
 			if (!myObjects.GetNonSeversafeParts().ModifyAttributes((int)stageType, projectData, toolStrip, tssl))
@@ -162,9 +163,9 @@ namespace Prism.ButtonOperations
 				// Use the drawingManager to set totalNcRequired
 				totalNcRequired = drawingManager.NumberOfNcRequired;
 
-				objects.ExportBSWX(reportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType, ts, tssl);
+				await objects.ExportBSWX(reportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType, ts, tssl);
 
-				reportManager.CreateFabReports(objects.PrismParts, objects.PrismBoltGroups, teklaVersion, ts, tssl);
+			    await reportManager.CreateFabReports(objects.PrismParts, objects.PrismBoltGroups, teklaVersion, ts, tssl);
 
 				if (!objects.PrismParts.ModifyAttributes((int)stageType, projectData, ts, tssl))
 					return (false, totalNcRequired);
@@ -206,13 +207,75 @@ namespace Prism.ButtonOperations
 					await QrCodeGenerator.ApplyQrCode(selectedObjects, projectData, reportManager.Folders.QrCodePath, drawingManager, toolStrip, statusLabel);
 				}
 
+				HijackPaperSizesForDrawings(Path.Combine(projectData.ProjPath, "attributes"));
+
 				CpuSpeedCheck(cpuCounter);
 				PrismMacroBuilder.IssueAndLockStampOff();
 				List<int> drawingCount = NewCountDrawings(drawingManager);
+				
 				await DrawingManager.NewPrintDrawings(reportManager, drawingManager, drawingCount, teklaVersion, toolStrip, statusLabel);
+				
+				toolStrip.Invoke(new Action(() =>
+				{
+					statusLabel.Text = "Adding QR codes to pdfs";
+				}));
+
+				await QrCodeGenerator.ProcessPdfFilesAsync(reportManager.Folders.FabPath + "\\ASS", reportManager.Folders.QrCodePath);
+				
+				toolStrip.Invoke(new Action(() =>
+				{
+					statusLabel.Text = "QR coding done";
+				}));
 			}
 
 			return (true, drawingManager);
+		}
+
+		private static void HijackPaperSizesForDrawings(string folderPath)
+		{
+			string filePath = Path.Combine(folderPath, "PaperSizesForDrawings.dat");
+
+			if (File.Exists(filePath))
+			{
+				var lines = File.ReadAllLines(filePath);
+				bool fileModified = false;
+
+				for (int i = 0; i < lines.Length; i++)
+				{
+					// Split the line by commas and trim extra whitespace.
+					var tokens = lines[i]
+						.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+						.Select(token => token.Trim())
+						.ToArray();
+
+					// Check if the line has at least two tokens and the first token starts with "A0x".
+					if (tokens.Length >= 2 && tokens[0].StartsWith("A0x"))
+					{
+						// Extract the numeric part from the first token.
+						string numberPart = tokens[0].Substring(3); // Remove "A0x"
+						if (int.TryParse(numberPart, out int firstTokenNumber) &&
+							int.TryParse(tokens[1], out int secondTokenNumber))
+						{
+							int expectedValue = firstTokenNumber + 10;
+
+							// Only update if the second token does not already equal expectedValue.
+							if (secondTokenNumber != expectedValue)
+							{
+								tokens[1] = expectedValue.ToString();
+								// Reconstruct the line with consistent formatting.
+								lines[i] = string.Join(", ", tokens);
+								fileModified = true;
+							}
+						}
+					}
+				}
+
+				// Write the file only if modifications were made.
+				if (fileModified)
+				{
+					File.WriteAllLines(filePath, lines);
+				}
+			}
 		}
 
 		private static bool CheckForProblemsWithDrawings(DrawingManager drawingManager, string projectNumber, out bool createDrawings)
