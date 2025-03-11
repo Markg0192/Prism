@@ -279,8 +279,8 @@ namespace Prism
 		public static string GetAdvancedSetting(string jobName, Enums.AdvancedSettingType settingType)
         {
             string fullSettingLine = WebService.ReadSpecificLine(Constants.PrismModelData, (int)settingType, Constants.ModelProjectAdvancedSettingLocation(jobName));
-
-            if (string.IsNullOrEmpty(fullSettingLine))
+			//string fullSettingLine = WebService.ReadSpecificLine(Constants.PrismModelData, (int)settingType, Constants.ModelProjectAdvancedSettingLocation(jobName));
+			if (string.IsNullOrEmpty(fullSettingLine))
             {
                 WriteSettingLine(settingType, jobName);
                 fullSettingLine = WebService.ReadSpecificLine(Constants.PrismModelData, (int)settingType, Constants.ModelProjectAdvancedSettingLocation(jobName));
