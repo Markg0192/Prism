@@ -24,10 +24,13 @@
     <UpdateInterval>7</UpdateInterval>
     <UpdateIntervalUnits>Days</UpdateIntervalUnits>
     <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
+    <UpdateRequired>true</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>20</ApplicationRevision>
-    <ApplicationVersion>5.2.0.%2a</ApplicationVersion>
+    <MinimumRequiredVersion>5.3.0.2</MinimumRequiredVersion>
+    <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
+    <WebPage>publish.htm</WebPage>
+    <ApplicationRevision>3</ApplicationRevision>
+    <ApplicationVersion>5.3.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
@@ -142,6 +145,7 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.EnterpriseServices" />
     <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Management" />
     <Reference Include="System.Memory, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
@@ -560,6 +564,7 @@
     <Content Include="Resources\element_catalog_cross_section.bmp" />
     <Content Include="Resources\element_catalog_cross_section_sketch.bmp" />
     <Content Include="Resources\element_catalog_cross_section_user.bmp" />
+    <None Include="Web References\ExternalService\ExternalService.disco" />
     <None Include="Resources\Envelope.png" />
     <Content Include="Resources\prtyp_tree_1.bmp" />
     <Content Include="Resources\prtyp_tree_10.bmp" />
@@ -580,7 +585,6 @@
     <None Include="Resources\Delivery.png" />
     <None Include="Resources\NewPackageButton.png" />
     <None Include="Resources\Rocket.png" />
-    <None Include="Web References\ExternalService\ExternalService.disco" />
     <None Include="Resources\Severfield.PNG" />
     <None Include="Resources\NewRefresh.png" />
     <None Include="Resources\Gears1.png" />

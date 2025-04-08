@@ -23,16 +23,17 @@ namespace Prism.ExternalService {
     
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9032.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Web.Services.WebServiceBindingAttribute(Name="WebService1Soap", Namespace="http://www.severfield.com/")]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(object[][]))]
     public partial class WebService1 : System.Web.Services.Protocols.SoapHttpClientProtocol {
         
         private AuthHeader authHeaderValueField;
         
         private System.Threading.SendOrPostCallback HelloWorldOperationCompleted;
+        
+        private System.Threading.SendOrPostCallback AddRecordToAppUseDatabaseOperationCompleted;
         
         private System.Threading.SendOrPostCallback WriteToSpecificLineOperationCompleted;
         
@@ -59,20 +60,6 @@ namespace Prism.ExternalService {
         private System.Threading.SendOrPostCallback FileExistsOperationCompleted;
         
         private System.Threading.SendOrPostCallback CreateNewDirectoryOperationCompleted;
-        
-        private System.Threading.SendOrPostCallback WriteToExcelOperationCompleted;
-        
-        private System.Threading.SendOrPostCallback ReadFromExcelOperationCompleted;
-        
-        private System.Threading.SendOrPostCallback WriteToExcelRangeOperationCompleted;
-        
-        private System.Threading.SendOrPostCallback ReadFromExcelRangeOperationCompleted;
-        
-        private System.Threading.SendOrPostCallback CreateNewExcelSheetOperationCompleted;
-        
-        private System.Threading.SendOrPostCallback TestDoMurlingThingOperationCompleted;
-        
-        private System.Threading.SendOrPostCallback SetComponentParametersOperationCompleted;
         
         private System.Threading.SendOrPostCallback ValidUserOperationCompleted;
         
@@ -127,6 +114,9 @@ namespace Prism.ExternalService {
         public event HelloWorldCompletedEventHandler HelloWorldCompleted;
         
         /// <remarks/>
+        public event AddRecordToAppUseDatabaseCompletedEventHandler AddRecordToAppUseDatabaseCompleted;
+        
+        /// <remarks/>
         public event WriteToSpecificLineCompletedEventHandler WriteToSpecificLineCompleted;
         
         /// <remarks/>
@@ -166,27 +156,6 @@ namespace Prism.ExternalService {
         public event CreateNewDirectoryCompletedEventHandler CreateNewDirectoryCompleted;
         
         /// <remarks/>
-        public event WriteToExcelCompletedEventHandler WriteToExcelCompleted;
-        
-        /// <remarks/>
-        public event ReadFromExcelCompletedEventHandler ReadFromExcelCompleted;
-        
-        /// <remarks/>
-        public event WriteToExcelRangeCompletedEventHandler WriteToExcelRangeCompleted;
-        
-        /// <remarks/>
-        public event ReadFromExcelRangeCompletedEventHandler ReadFromExcelRangeCompleted;
-        
-        /// <remarks/>
-        public event CreateNewExcelSheetCompletedEventHandler CreateNewExcelSheetCompleted;
-        
-        /// <remarks/>
-        public event TestDoMurlingThingCompletedEventHandler TestDoMurlingThingCompleted;
-        
-        /// <remarks/>
-        public event SetComponentParametersCompletedEventHandler SetComponentParametersCompleted;
-        
-        /// <remarks/>
         public event ValidUserCompletedEventHandler ValidUserCompleted;
         
         /// <remarks/>
@@ -214,6 +183,44 @@ namespace Prism.ExternalService {
             if ((this.HelloWorldCompleted != null)) {
                 System.Web.Services.Protocols.InvokeCompletedEventArgs invokeArgs = ((System.Web.Services.Protocols.InvokeCompletedEventArgs)(arg));
                 this.HelloWorldCompleted(this, new HelloWorldCompletedEventArgs(invokeArgs.Results, invokeArgs.Error, invokeArgs.Cancelled, invokeArgs.UserState));
+            }
+        }
+        
+        /// <remarks/>
+        [System.Web.Services.Protocols.SoapHeaderAttribute("AuthHeaderValue")]
+        [System.Web.Services.Protocols.SoapDocumentMethodAttribute("http://www.severfield.com/AddRecordToAppUseDatabase", RequestNamespace="http://www.severfield.com/", ResponseNamespace="http://www.severfield.com/", Use=System.Web.Services.Description.SoapBindingUse.Literal, ParameterStyle=System.Web.Services.Protocols.SoapParameterStyle.Wrapped)]
+        public bool AddRecordToAppUseDatabase(string createdBy, string appName, string funcName, string email, [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)] System.Nullable<int> nRecords) {
+            object[] results = this.Invoke("AddRecordToAppUseDatabase", new object[] {
+                        createdBy,
+                        appName,
+                        funcName,
+                        email,
+                        nRecords});
+            return ((bool)(results[0]));
+        }
+        
+        /// <remarks/>
+        public void AddRecordToAppUseDatabaseAsync(string createdBy, string appName, string funcName, string email, System.Nullable<int> nRecords) {
+            this.AddRecordToAppUseDatabaseAsync(createdBy, appName, funcName, email, nRecords, null);
+        }
+        
+        /// <remarks/>
+        public void AddRecordToAppUseDatabaseAsync(string createdBy, string appName, string funcName, string email, System.Nullable<int> nRecords, object userState) {
+            if ((this.AddRecordToAppUseDatabaseOperationCompleted == null)) {
+                this.AddRecordToAppUseDatabaseOperationCompleted = new System.Threading.SendOrPostCallback(this.OnAddRecordToAppUseDatabaseOperationCompleted);
+            }
+            this.InvokeAsync("AddRecordToAppUseDatabase", new object[] {
+                        createdBy,
+                        appName,
+                        funcName,
+                        email,
+                        nRecords}, this.AddRecordToAppUseDatabaseOperationCompleted, userState);
+        }
+        
+        private void OnAddRecordToAppUseDatabaseOperationCompleted(object arg) {
+            if ((this.AddRecordToAppUseDatabaseCompleted != null)) {
+                System.Web.Services.Protocols.InvokeCompletedEventArgs invokeArgs = ((System.Web.Services.Protocols.InvokeCompletedEventArgs)(arg));
+                this.AddRecordToAppUseDatabaseCompleted(this, new AddRecordToAppUseDatabaseCompletedEventArgs(invokeArgs.Results, invokeArgs.Error, invokeArgs.Cancelled, invokeArgs.UserState));
             }
         }
         
@@ -646,252 +653,6 @@ namespace Prism.ExternalService {
         
         /// <remarks/>
         [System.Web.Services.Protocols.SoapHeaderAttribute("AuthHeaderValue")]
-        [System.Web.Services.Protocols.SoapDocumentMethodAttribute("http://www.severfield.com/WriteToExcel", RequestNamespace="http://www.severfield.com/", ResponseNamespace="http://www.severfield.com/", Use=System.Web.Services.Description.SoapBindingUse.Literal, ParameterStyle=System.Web.Services.Protocols.SoapParameterStyle.Wrapped)]
-        public bool WriteToExcel(int filePathLine, int row, int col, string content, string additionalPath) {
-            object[] results = this.Invoke("WriteToExcel", new object[] {
-                        filePathLine,
-                        row,
-                        col,
-                        content,
-                        additionalPath});
-            return ((bool)(results[0]));
-        }
-        
-        /// <remarks/>
-        public void WriteToExcelAsync(int filePathLine, int row, int col, string content, string additionalPath) {
-            this.WriteToExcelAsync(filePathLine, row, col, content, additionalPath, null);
-        }
-        
-        /// <remarks/>
-        public void WriteToExcelAsync(int filePathLine, int row, int col, string content, string additionalPath, object userState) {
-            if ((this.WriteToExcelOperationCompleted == null)) {
-                this.WriteToExcelOperationCompleted = new System.Threading.SendOrPostCallback(this.OnWriteToExcelOperationCompleted);
-            }
-            this.InvokeAsync("WriteToExcel", new object[] {
-                        filePathLine,
-                        row,
-                        col,
-                        content,
-                        additionalPath}, this.WriteToExcelOperationCompleted, userState);
-        }
-        
-        private void OnWriteToExcelOperationCompleted(object arg) {
-            if ((this.WriteToExcelCompleted != null)) {
-                System.Web.Services.Protocols.InvokeCompletedEventArgs invokeArgs = ((System.Web.Services.Protocols.InvokeCompletedEventArgs)(arg));
-                this.WriteToExcelCompleted(this, new WriteToExcelCompletedEventArgs(invokeArgs.Results, invokeArgs.Error, invokeArgs.Cancelled, invokeArgs.UserState));
-            }
-        }
-        
-        /// <remarks/>
-        [System.Web.Services.Protocols.SoapHeaderAttribute("AuthHeaderValue")]
-        [System.Web.Services.Protocols.SoapDocumentMethodAttribute("http://www.severfield.com/ReadFromExcel", RequestNamespace="http://www.severfield.com/", ResponseNamespace="http://www.severfield.com/", Use=System.Web.Services.Description.SoapBindingUse.Literal, ParameterStyle=System.Web.Services.Protocols.SoapParameterStyle.Wrapped)]
-        public string ReadFromExcel(int filePathLine, int row, int col, string addtionalLine) {
-            object[] results = this.Invoke("ReadFromExcel", new object[] {
-                        filePathLine,
-                        row,
-                        col,
-                        addtionalLine});
-            return ((string)(results[0]));
-        }
-        
-        /// <remarks/>
-        public void ReadFromExcelAsync(int filePathLine, int row, int col, string addtionalLine) {
-            this.ReadFromExcelAsync(filePathLine, row, col, addtionalLine, null);
-        }
-        
-        /// <remarks/>
-        public void ReadFromExcelAsync(int filePathLine, int row, int col, string addtionalLine, object userState) {
-            if ((this.ReadFromExcelOperationCompleted == null)) {
-                this.ReadFromExcelOperationCompleted = new System.Threading.SendOrPostCallback(this.OnReadFromExcelOperationCompleted);
-            }
-            this.InvokeAsync("ReadFromExcel", new object[] {
-                        filePathLine,
-                        row,
-                        col,
-                        addtionalLine}, this.ReadFromExcelOperationCompleted, userState);
-        }
-        
-        private void OnReadFromExcelOperationCompleted(object arg) {
-            if ((this.ReadFromExcelCompleted != null)) {
-                System.Web.Services.Protocols.InvokeCompletedEventArgs invokeArgs = ((System.Web.Services.Protocols.InvokeCompletedEventArgs)(arg));
-                this.ReadFromExcelCompleted(this, new ReadFromExcelCompletedEventArgs(invokeArgs.Results, invokeArgs.Error, invokeArgs.Cancelled, invokeArgs.UserState));
-            }
-        }
-        
-        /// <remarks/>
-        [System.Web.Services.Protocols.SoapHeaderAttribute("AuthHeaderValue")]
-        [System.Web.Services.Protocols.SoapDocumentMethodAttribute("http://www.severfield.com/WriteToExcelRange", RequestNamespace="http://www.severfield.com/", ResponseNamespace="http://www.severfield.com/", Use=System.Web.Services.Description.SoapBindingUse.Literal, ParameterStyle=System.Web.Services.Protocols.SoapParameterStyle.Wrapped)]
-        public bool WriteToExcelRange(int filePathLine, int startRow, int startCol, [System.Xml.Serialization.XmlArrayItemAttribute("ArrayOfAnyType")] [System.Xml.Serialization.XmlArrayItemAttribute(NestingLevel=1)] object[][] content, string addtionalPath) {
-            object[] results = this.Invoke("WriteToExcelRange", new object[] {
-                        filePathLine,
-                        startRow,
-                        startCol,
-                        content,
-                        addtionalPath});
-            return ((bool)(results[0]));
-        }
-        
-        /// <remarks/>
-        public void WriteToExcelRangeAsync(int filePathLine, int startRow, int startCol, object[][] content, string addtionalPath) {
-            this.WriteToExcelRangeAsync(filePathLine, startRow, startCol, content, addtionalPath, null);
-        }
-        
-        /// <remarks/>
-        public void WriteToExcelRangeAsync(int filePathLine, int startRow, int startCol, object[][] content, string addtionalPath, object userState) {
-            if ((this.WriteToExcelRangeOperationCompleted == null)) {
-                this.WriteToExcelRangeOperationCompleted = new System.Threading.SendOrPostCallback(this.OnWriteToExcelRangeOperationCompleted);
-            }
-            this.InvokeAsync("WriteToExcelRange", new object[] {
-                        filePathLine,
-                        startRow,
-                        startCol,
-                        content,
-                        addtionalPath}, this.WriteToExcelRangeOperationCompleted, userState);
-        }
-        
-        private void OnWriteToExcelRangeOperationCompleted(object arg) {
-            if ((this.WriteToExcelRangeCompleted != null)) {
-                System.Web.Services.Protocols.InvokeCompletedEventArgs invokeArgs = ((System.Web.Services.Protocols.InvokeCompletedEventArgs)(arg));
-                this.WriteToExcelRangeCompleted(this, new WriteToExcelRangeCompletedEventArgs(invokeArgs.Results, invokeArgs.Error, invokeArgs.Cancelled, invokeArgs.UserState));
-            }
-        }
-        
-        /// <remarks/>
-        [System.Web.Services.Protocols.SoapHeaderAttribute("AuthHeaderValue")]
-        [System.Web.Services.Protocols.SoapDocumentMethodAttribute("http://www.severfield.com/ReadFromExcelRange", RequestNamespace="http://www.severfield.com/", ResponseNamespace="http://www.severfield.com/", Use=System.Web.Services.Description.SoapBindingUse.Literal, ParameterStyle=System.Web.Services.Protocols.SoapParameterStyle.Wrapped)]
-        [return: System.Xml.Serialization.XmlArrayItemAttribute("ArrayOfAnyType")]
-        [return: System.Xml.Serialization.XmlArrayItemAttribute(NestingLevel=1)]
-        public object[][] ReadFromExcelRange(int filePathLine, int startRow, int startCol, int endRow, int endCol, string additionalPath) {
-            object[] results = this.Invoke("ReadFromExcelRange", new object[] {
-                        filePathLine,
-                        startRow,
-                        startCol,
-                        endRow,
-                        endCol,
-                        additionalPath});
-            return ((object[][])(results[0]));
-        }
-        
-        /// <remarks/>
-        public void ReadFromExcelRangeAsync(int filePathLine, int startRow, int startCol, int endRow, int endCol, string additionalPath) {
-            this.ReadFromExcelRangeAsync(filePathLine, startRow, startCol, endRow, endCol, additionalPath, null);
-        }
-        
-        /// <remarks/>
-        public void ReadFromExcelRangeAsync(int filePathLine, int startRow, int startCol, int endRow, int endCol, string additionalPath, object userState) {
-            if ((this.ReadFromExcelRangeOperationCompleted == null)) {
-                this.ReadFromExcelRangeOperationCompleted = new System.Threading.SendOrPostCallback(this.OnReadFromExcelRangeOperationCompleted);
-            }
-            this.InvokeAsync("ReadFromExcelRange", new object[] {
-                        filePathLine,
-                        startRow,
-                        startCol,
-                        endRow,
-                        endCol,
-                        additionalPath}, this.ReadFromExcelRangeOperationCompleted, userState);
-        }
-        
-        private void OnReadFromExcelRangeOperationCompleted(object arg) {
-            if ((this.ReadFromExcelRangeCompleted != null)) {
-                System.Web.Services.Protocols.InvokeCompletedEventArgs invokeArgs = ((System.Web.Services.Protocols.InvokeCompletedEventArgs)(arg));
-                this.ReadFromExcelRangeCompleted(this, new ReadFromExcelRangeCompletedEventArgs(invokeArgs.Results, invokeArgs.Error, invokeArgs.Cancelled, invokeArgs.UserState));
-            }
-        }
-        
-        /// <remarks/>
-        [System.Web.Services.Protocols.SoapHeaderAttribute("AuthHeaderValue")]
-        [System.Web.Services.Protocols.SoapDocumentMethodAttribute("http://www.severfield.com/CreateNewExcelSheet", RequestNamespace="http://www.severfield.com/", ResponseNamespace="http://www.severfield.com/", Use=System.Web.Services.Description.SoapBindingUse.Literal, ParameterStyle=System.Web.Services.Protocols.SoapParameterStyle.Wrapped)]
-        public bool CreateNewExcelSheet(int filePathLine, string sheetName, string additionalPath) {
-            object[] results = this.Invoke("CreateNewExcelSheet", new object[] {
-                        filePathLine,
-                        sheetName,
-                        additionalPath});
-            return ((bool)(results[0]));
-        }
-        
-        /// <remarks/>
-        public void CreateNewExcelSheetAsync(int filePathLine, string sheetName, string additionalPath) {
-            this.CreateNewExcelSheetAsync(filePathLine, sheetName, additionalPath, null);
-        }
-        
-        /// <remarks/>
-        public void CreateNewExcelSheetAsync(int filePathLine, string sheetName, string additionalPath, object userState) {
-            if ((this.CreateNewExcelSheetOperationCompleted == null)) {
-                this.CreateNewExcelSheetOperationCompleted = new System.Threading.SendOrPostCallback(this.OnCreateNewExcelSheetOperationCompleted);
-            }
-            this.InvokeAsync("CreateNewExcelSheet", new object[] {
-                        filePathLine,
-                        sheetName,
-                        additionalPath}, this.CreateNewExcelSheetOperationCompleted, userState);
-        }
-        
-        private void OnCreateNewExcelSheetOperationCompleted(object arg) {
-            if ((this.CreateNewExcelSheetCompleted != null)) {
-                System.Web.Services.Protocols.InvokeCompletedEventArgs invokeArgs = ((System.Web.Services.Protocols.InvokeCompletedEventArgs)(arg));
-                this.CreateNewExcelSheetCompleted(this, new CreateNewExcelSheetCompletedEventArgs(invokeArgs.Results, invokeArgs.Error, invokeArgs.Cancelled, invokeArgs.UserState));
-            }
-        }
-        
-        /// <remarks/>
-        [System.Web.Services.Protocols.SoapHeaderAttribute("AuthHeaderValue")]
-        [System.Web.Services.Protocols.SoapDocumentMethodAttribute("http://www.severfield.com/TestDoMurlingThing", RequestNamespace="http://www.severfield.com/", ResponseNamespace="http://www.severfield.com/", Use=System.Web.Services.Description.SoapBindingUse.Literal, ParameterStyle=System.Web.Services.Protocols.SoapParameterStyle.Wrapped)]
-        public string[] TestDoMurlingThing(string input) {
-            object[] results = this.Invoke("TestDoMurlingThing", new object[] {
-                        input});
-            return ((string[])(results[0]));
-        }
-        
-        /// <remarks/>
-        public void TestDoMurlingThingAsync(string input) {
-            this.TestDoMurlingThingAsync(input, null);
-        }
-        
-        /// <remarks/>
-        public void TestDoMurlingThingAsync(string input, object userState) {
-            if ((this.TestDoMurlingThingOperationCompleted == null)) {
-                this.TestDoMurlingThingOperationCompleted = new System.Threading.SendOrPostCallback(this.OnTestDoMurlingThingOperationCompleted);
-            }
-            this.InvokeAsync("TestDoMurlingThing", new object[] {
-                        input}, this.TestDoMurlingThingOperationCompleted, userState);
-        }
-        
-        private void OnTestDoMurlingThingOperationCompleted(object arg) {
-            if ((this.TestDoMurlingThingCompleted != null)) {
-                System.Web.Services.Protocols.InvokeCompletedEventArgs invokeArgs = ((System.Web.Services.Protocols.InvokeCompletedEventArgs)(arg));
-                this.TestDoMurlingThingCompleted(this, new TestDoMurlingThingCompletedEventArgs(invokeArgs.Results, invokeArgs.Error, invokeArgs.Cancelled, invokeArgs.UserState));
-            }
-        }
-        
-        /// <remarks/>
-        [System.Web.Services.Protocols.SoapHeaderAttribute("AuthHeaderValue")]
-        [System.Web.Services.Protocols.SoapDocumentMethodAttribute("http://www.severfield.com/SetComponentParameters", RequestNamespace="http://www.severfield.com/", ResponseNamespace="http://www.severfield.com/", Use=System.Web.Services.Description.SoapBindingUse.Literal, ParameterStyle=System.Web.Services.Protocols.SoapParameterStyle.Wrapped)]
-        public string[] SetComponentParameters() {
-            object[] results = this.Invoke("SetComponentParameters", new object[0]);
-            return ((string[])(results[0]));
-        }
-        
-        /// <remarks/>
-        public void SetComponentParametersAsync() {
-            this.SetComponentParametersAsync(null);
-        }
-        
-        /// <remarks/>
-        public void SetComponentParametersAsync(object userState) {
-            if ((this.SetComponentParametersOperationCompleted == null)) {
-                this.SetComponentParametersOperationCompleted = new System.Threading.SendOrPostCallback(this.OnSetComponentParametersOperationCompleted);
-            }
-            this.InvokeAsync("SetComponentParameters", new object[0], this.SetComponentParametersOperationCompleted, userState);
-        }
-        
-        private void OnSetComponentParametersOperationCompleted(object arg) {
-            if ((this.SetComponentParametersCompleted != null)) {
-                System.Web.Services.Protocols.InvokeCompletedEventArgs invokeArgs = ((System.Web.Services.Protocols.InvokeCompletedEventArgs)(arg));
-                this.SetComponentParametersCompleted(this, new SetComponentParametersCompletedEventArgs(invokeArgs.Results, invokeArgs.Error, invokeArgs.Cancelled, invokeArgs.UserState));
-            }
-        }
-        
-        /// <remarks/>
-        [System.Web.Services.Protocols.SoapHeaderAttribute("AuthHeaderValue")]
         [System.Web.Services.Protocols.SoapDocumentMethodAttribute("http://www.severfield.com/ValidUser", RequestNamespace="http://www.severfield.com/", ResponseNamespace="http://www.severfield.com/", Use=System.Web.Services.Description.SoapBindingUse.Literal, ParameterStyle=System.Web.Services.Protocols.SoapParameterStyle.Wrapped)]
         public bool ValidUser() {
             object[] results = this.Invoke("ValidUser", new object[0]);
@@ -938,7 +699,7 @@ namespace Prism.ExternalService {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.9037.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.9032.0")]
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
@@ -1033,11 +794,11 @@ namespace Prism.ExternalService {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9032.0")]
     public delegate void HelloWorldCompletedEventHandler(object sender, HelloWorldCompletedEventArgs e);
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9032.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     public partial class HelloWorldCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
@@ -1059,11 +820,37 @@ namespace Prism.ExternalService {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9032.0")]
+    public delegate void AddRecordToAppUseDatabaseCompletedEventHandler(object sender, AddRecordToAppUseDatabaseCompletedEventArgs e);
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9032.0")]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    public partial class AddRecordToAppUseDatabaseCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        internal AddRecordToAppUseDatabaseCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        /// <remarks/>
+        public bool Result {
+            get {
+                this.RaiseExceptionIfNecessary();
+                return ((bool)(this.results[0]));
+            }
+        }
+    }
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9032.0")]
     public delegate void WriteToSpecificLineCompletedEventHandler(object sender, WriteToSpecificLineCompletedEventArgs e);
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9032.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     public partial class WriteToSpecificLineCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
@@ -1085,23 +872,23 @@ namespace Prism.ExternalService {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9032.0")]
     public delegate void WriteAllLinesWithArrayCompletedEventHandler(object sender, System.ComponentModel.AsyncCompletedEventArgs e);
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9032.0")]
     public delegate void WriteAppendStringToFileCompletedEventHandler(object sender, System.ComponentModel.AsyncCompletedEventArgs e);
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9032.0")]
     public delegate void WriteAppendStringsToFileCompletedEventHandler(object sender, System.ComponentModel.AsyncCompletedEventArgs e);
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9032.0")]
     public delegate void ReadSpecificLineCompletedEventHandler(object sender, ReadSpecificLineCompletedEventArgs e);
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9032.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     public partial class ReadSpecificLineCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
@@ -1123,11 +910,11 @@ namespace Prism.ExternalService {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9032.0")]
     public delegate void ReadAllLinesIntoArrayCompletedEventHandler(object sender, ReadAllLinesIntoArrayCompletedEventArgs e);
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9032.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     public partial class ReadAllLinesIntoArrayCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
@@ -1149,11 +936,11 @@ namespace Prism.ExternalService {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9032.0")]
     public delegate void GetDirectoriesCompletedEventHandler(object sender, GetDirectoriesCompletedEventArgs e);
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9032.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     public partial class GetDirectoriesCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
@@ -1175,11 +962,11 @@ namespace Prism.ExternalService {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9032.0")]
     public delegate void DirectoryExistsCompletedEventHandler(object sender, DirectoryExistsCompletedEventArgs e);
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9032.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     public partial class DirectoryExistsCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
@@ -1201,11 +988,11 @@ namespace Prism.ExternalService {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9032.0")]
     public delegate void GetDirectoryNameCompletedEventHandler(object sender, GetDirectoryNameCompletedEventArgs e);
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9032.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     public partial class GetDirectoryNameCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
@@ -1227,11 +1014,11 @@ namespace Prism.ExternalService {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9032.0")]
     public delegate void DirectoryGetFilesCompletedEventHandler(object sender, DirectoryGetFilesCompletedEventArgs e);
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9032.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     public partial class DirectoryGetFilesCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
@@ -1253,15 +1040,15 @@ namespace Prism.ExternalService {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9032.0")]
     public delegate void CreateDirectoryCompletedEventHandler(object sender, System.ComponentModel.AsyncCompletedEventArgs e);
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9032.0")]
     public delegate void FileExistsCompletedEventHandler(object sender, FileExistsCompletedEventArgs e);
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9032.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     public partial class FileExistsCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
@@ -1283,197 +1070,15 @@ namespace Prism.ExternalService {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9032.0")]
     public delegate void CreateNewDirectoryCompletedEventHandler(object sender, System.ComponentModel.AsyncCompletedEventArgs e);
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
-    public delegate void WriteToExcelCompletedEventHandler(object sender, WriteToExcelCompletedEventArgs e);
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    public partial class WriteToExcelCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        internal WriteToExcelCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        /// <remarks/>
-        public bool Result {
-            get {
-                this.RaiseExceptionIfNecessary();
-                return ((bool)(this.results[0]));
-            }
-        }
-    }
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
-    public delegate void ReadFromExcelCompletedEventHandler(object sender, ReadFromExcelCompletedEventArgs e);
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    public partial class ReadFromExcelCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        internal ReadFromExcelCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        /// <remarks/>
-        public string Result {
-            get {
-                this.RaiseExceptionIfNecessary();
-                return ((string)(this.results[0]));
-            }
-        }
-    }
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
-    public delegate void WriteToExcelRangeCompletedEventHandler(object sender, WriteToExcelRangeCompletedEventArgs e);
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    public partial class WriteToExcelRangeCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        internal WriteToExcelRangeCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        /// <remarks/>
-        public bool Result {
-            get {
-                this.RaiseExceptionIfNecessary();
-                return ((bool)(this.results[0]));
-            }
-        }
-    }
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
-    public delegate void ReadFromExcelRangeCompletedEventHandler(object sender, ReadFromExcelRangeCompletedEventArgs e);
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    public partial class ReadFromExcelRangeCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        internal ReadFromExcelRangeCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        /// <remarks/>
-        public object[][] Result {
-            get {
-                this.RaiseExceptionIfNecessary();
-                return ((object[][])(this.results[0]));
-            }
-        }
-    }
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
-    public delegate void CreateNewExcelSheetCompletedEventHandler(object sender, CreateNewExcelSheetCompletedEventArgs e);
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    public partial class CreateNewExcelSheetCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        internal CreateNewExcelSheetCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        /// <remarks/>
-        public bool Result {
-            get {
-                this.RaiseExceptionIfNecessary();
-                return ((bool)(this.results[0]));
-            }
-        }
-    }
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
-    public delegate void TestDoMurlingThingCompletedEventHandler(object sender, TestDoMurlingThingCompletedEventArgs e);
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    public partial class TestDoMurlingThingCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        internal TestDoMurlingThingCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        /// <remarks/>
-        public string[] Result {
-            get {
-                this.RaiseExceptionIfNecessary();
-                return ((string[])(this.results[0]));
-            }
-        }
-    }
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
-    public delegate void SetComponentParametersCompletedEventHandler(object sender, SetComponentParametersCompletedEventArgs e);
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    public partial class SetComponentParametersCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        internal SetComponentParametersCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        /// <remarks/>
-        public string[] Result {
-            get {
-                this.RaiseExceptionIfNecessary();
-                return ((string[])(this.results[0]));
-            }
-        }
-    }
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9032.0")]
     public delegate void ValidUserCompletedEventHandler(object sender, ValidUserCompletedEventArgs e);
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9032.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     public partial class ValidUserCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
