@@ -265,7 +265,11 @@ namespace Prism
 
 		private async void btn_SpecialOperations_Click(object sender, EventArgs e)
 		{
-			Stopwatch time = Stopwatch.StartNew();	
+			
+		//	WebService.AddRecordToAppUseDatabase("MG", "Fully live Test", "TestFunc", "Test@severfield.com", 10);
+
+
+			/*Stopwatch time = Stopwatch.StartNew();	
 			time.Start();
 			//await QrCodeGenerator.ProcessPdfFilesAsync("C:\\TeklaStructuresModels2023\\C2083 HEL16 - Single\\Prism Packages\\C2083-11-FAB-ISSUE01\\ASS", "C:\\TeklaStructuresModels2023\\C2083 HEL16 - Single\\Prism Packages\\QR Codes");
 		    QrCodeGenerator.ProcessPdfFiles("C:\\TeklaStructuresModels2023\\Prism Demo Model\\PlotFiles", "C:\\TeklaStructuresModels2023\\Prism Demo Model\\Prism Packages\\QR Codes");

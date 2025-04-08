@@ -5,203 +5,212 @@ using Tekla.Structures.Model;
 
 namespace Prism
 {
-    public static class Logging
-    {
-        public static void UpdateUserUseCount(string userName)
-        {
-            Dictionary<string, int> userCounts = new Dictionary<string, int>();
+	public static class Logging
+	{
+		private const string _primaryMaterialButtonText = "Button: Primary material checks";
+		private const string _secondaryMaterialButtonText = "Button: Secondary material checks and Fabsec Processing";
+		private const string _materialOrderPackageButtonText = "Button: Compile material order package";
+		private const string _primaryDetailButtonText = "Button: Primary detailing checks";
+		private const string _secondaryDetailButtonText = "Button: Secondary detailing checks and Column Orientation marking";
+		private const string _tertiaryDetailButtonText = "Button: Tertiary detailing checks and Drawing creation";
+		private const string _fabricationPackageButtonText = "Button: Compile Fabrication package";
+		private const string _autoFix = "AUTO-FIX ";
 
-            // Read existing log
-            foreach (string line in WebService.ReadAllLinesIntoArray(Constants.PrismUserUserLogLocation, ""))
-            {
-                if (!line.StartsWith("------log started"))
-                {
-                    string[] parts = line.Split('-');
-                    if (parts.Length == 2 && int.TryParse(parts[1], out int count))
-                    {
-                        userCounts[parts[0]] = count;
-                    }
-                }
-            }
+		public static void UpdateUserUseCount(string userName)
+		{
+			Dictionary<string, int> userCounts = new Dictionary<string, int>();
 
-            // Update user count
-            if (userCounts.ContainsKey(userName))
-            {
-                userCounts[userName]++;
-            }
-            else
-            {
-                userCounts[userName] = 1;
-            }
+			// Read existing log
+			foreach (string line in WebService.ReadAllLinesIntoArray(Constants.PrismUserUserLogLocation, ""))
+			{
+				if (!line.StartsWith("------log started"))
+				{
+					string[] parts = line.Split('-');
+					if (parts.Length == 2 && int.TryParse(parts[1], out int count))
+					{
+						userCounts[parts[0]] = count;
+					}
+				}
+			}
 
-            // Prepare data for writing
-            List<string> newContent = new List<string> { "---------------------------This log was started on 21/08/23-------" };
-            foreach (var entry in userCounts)
-            {
-                newContent.Add($"{entry.Key}-{entry.Value}");
-            }
+			// Update user count
+			if (userCounts.ContainsKey(userName))
+			{
+				userCounts[userName]++;
+			}
+			else
+			{
+				userCounts[userName] = 1;
+			}
 
-            // Write updated log using your methods
-            WebService.WriteAllLinesWithArray(Constants.PrismUserUserLogLocation, newContent.ToArray(), "");
-        }
+			// Prepare data for writing
+			List<string> newContent = new List<string> { "---------------------------This log was started on 21/08/23-------" };
+			foreach (var entry in userCounts)
+			{
+				newContent.Add($"{entry.Key}-{entry.Value}");
+			}
 
-        public static void CreateModelLog(PrismProjectData pData)
-        {
-            //this method checks the model data folder on our server for a folder named after the users current model, if it does not exist we create it
-            bool newLogExists = false;
-            bool oldLogExists = false;
-            foreach (string folder in WebService.GetDirectories(Constants.PrismDataLogLocation, ""))
-            {
-                if (WebService.FileExists(folder, 8, pData.ProjNumberAndGuid))
-                {
-                    newLogExists = true;
-                    break;
-                }
-            }
-            if (!newLogExists)
-            {
-                foreach (string folder in WebService.GetDirectories(Constants.PrismDataLogLocation, ""))
-                {
-                    if (WebService.FileExists(folder, 8, pData.ProjNumberAndName))
-                    {
-                        oldLogExists = true;
-                        break;
-                    }
-                }
-                if (oldLogExists)
-                {
-                    CreateNewLogUsingOldLog(pData);
-                }
-            }
+			// Write updated log using your methods
+			WebService.WriteAllLinesWithArray(Constants.PrismUserUserLogLocation, newContent.ToArray(), "");
+		}
 
-            if (!newLogExists && !oldLogExists)
-            {
-                WebService.CreateNewDirectory(Constants.PrismModelData, pData.ProjNumberAndGuid);
+		public static void CreateModelLog(PrismProjectData pData)
+		{
+			//this method checks the model data folder on our server for a folder named after the users current model, if it does not exist we create it
+			bool newLogExists = false;
+			bool oldLogExists = false;
+			foreach (string folder in WebService.GetDirectories(Constants.PrismDataLogLocation, ""))
+			{
+				if (WebService.FileExists(folder, 8, pData.ProjNumberAndGuid))
+				{
+					newLogExists = true;
+					break;
+				}
+			}
+			if (!newLogExists)
+			{
+				foreach (string folder in WebService.GetDirectories(Constants.PrismDataLogLocation, ""))
+				{
+					if (WebService.FileExists(folder, 8, pData.ProjNumberAndName))
+					{
+						oldLogExists = true;
+						break;
+					}
+				}
+				if (oldLogExists)
+				{
+					CreateNewLogUsingOldLog(pData);
+				}
+			}
 
-                WebService.CreateNewDirectory(Constants.PrismModelData, pData.ProjNumberAndGuid + "\\FAB XMLs");
+			if (!newLogExists && !oldLogExists)
+			{
+				WebService.CreateNewDirectory(Constants.PrismModelData, pData.ProjNumberAndGuid);
 
-                WriteFirstDataLog(Constants.PrismModelData, Constants.ModelProjectInforLocation(pData.ProjNumberAndGuid), pData.pInfo);
+				WebService.CreateNewDirectory(Constants.PrismModelData, pData.ProjNumberAndGuid + "\\FAB XMLs");
 
-                WriteAdvancedSettings(Constants.PrismModelData, Constants.ModelProjectAdvancedSettingLocation(pData.ProjNumberAndGuid));
-                
-                PrismWarnings.FirstTimeInTheModel();
-            }
-        }
+				WriteFirstDataLog(Constants.PrismModelData, Constants.ModelProjectInforLocation(pData.ProjNumberAndGuid), pData.pInfo);
 
-        public static void WriteAdvancedSettings(int filePathLine, string additonalString)
-        {
-            string split = ":split: ";
-            string[] content = new string[]
-            {
-                $"{Enums.AdvancedSettingType.PrelimPrefix.ToString()}{split} ",
-                $"{Enums.AdvancedSettingType.FabPackType.ToString()}{split} By Phase",
-                $"{Enums.AdvancedSettingType.DirectoryMaterial.ToString()}{split} ",
-                $"{Enums.AdvancedSettingType.DirectoryCarcasses.ToString()}{split} ",
-                $"{Enums.AdvancedSettingType.DirectoryBolts.ToString()}{split} ",
-                $"{Enums.AdvancedSettingType.DirectorySeversafe.ToString()}{split} ",
-                $"{Enums.AdvancedSettingType.DirectoryFabPack.ToString()}{split} ",
-                $"{Enums.AdvancedSettingType.DirectoryVariation.ToString()}{split} ",
-                $"{Enums.AdvancedSettingType.FabsecGreen.ToString()}{split}",
-                $"",
-                $"",
-                $"",
-                $"",
-                $"",
-                $"",
-                $"",
-                $"",
-                $"",
-                $""
-            };
+				WriteAdvancedSettings(Constants.PrismModelData, Constants.ModelProjectAdvancedSettingLocation(pData.ProjNumberAndGuid));
 
-            WebService.WriteAllLinesWithArray(filePathLine, content, additonalString);
-        }
+				PrismWarnings.FirstTimeInTheModel();
+			}
+		}
 
-        private static void CreateNewLogUsingOldLog(PrismProjectData pData)
-        {
-            WebService.CreateNewDirectory(Constants.PrismModelData, pData.ProjNumberAndGuid);
+		public static void WriteAdvancedSettings(int filePathLine, string additonalString)
+		{
+			string split = ":split: ";
+			string[] content = new string[]
+			{
+				$"{Enums.AdvancedSettingType.PrelimPrefix.ToString()}{split} ",
+				$"{Enums.AdvancedSettingType.FabPackType.ToString()}{split} By Phase",
+				$"{Enums.AdvancedSettingType.DirectoryMaterial.ToString()}{split} ",
+				$"{Enums.AdvancedSettingType.DirectoryCarcasses.ToString()}{split} ",
+				$"{Enums.AdvancedSettingType.DirectoryBolts.ToString()}{split} ",
+				$"{Enums.AdvancedSettingType.DirectorySeversafe.ToString()}{split} ",
+				$"{Enums.AdvancedSettingType.DirectoryFabPack.ToString()}{split} ",
+				$"{Enums.AdvancedSettingType.DirectoryVariation.ToString()}{split} ",
+				$"{Enums.AdvancedSettingType.FabsecGreen.ToString()}{split}",
+				$"",
+				$"",
+				$"",
+				$"",
+				$"",
+				$"",
+				$"",
+				$"",
+				$"",
+				$""
+			};
 
-            string[] array = WebService.ReadAllLinesIntoArray(Constants.PrismDataLogLocation, Constants.ModelProjectInforLocation(pData.ProjNumberAndName));
+			WebService.WriteAllLinesWithArray(filePathLine, content, additonalString);
+		}
 
-            string[] newArray = UpdateToNewLayout(array);
+		private static void CreateNewLogUsingOldLog(PrismProjectData pData)
+		{
+			WebService.CreateNewDirectory(Constants.PrismModelData, pData.ProjNumberAndGuid);
 
-            WebService.WriteAllLinesWithArray(Constants.PrismDataLogLocation, newArray, Constants.ModelProjectInforLocation(pData.ProjNumberAndGuid));
+			string[] array = WebService.ReadAllLinesIntoArray(Constants.PrismDataLogLocation, Constants.ModelProjectInforLocation(pData.ProjNumberAndName));
 
-            string[] oldLogOverwrite = new string[] { $"File overwritten, now exists as {pData.ProjNumberAndGuid}\r", "Old info before copy:\r" };
+			string[] newArray = UpdateToNewLayout(array);
 
-            // Concatenate oldLogOverwrite and array
-            string[] combinedArray = oldLogOverwrite.Concat(array).ToArray();
+			WebService.WriteAllLinesWithArray(Constants.PrismDataLogLocation, newArray, Constants.ModelProjectInforLocation(pData.ProjNumberAndGuid));
 
-            WebService.WriteAllLinesWithArray(Constants.PrismDataLogLocation, combinedArray, Constants.ModelProjectInforLocation(pData.ProjNumberAndName));
+			string[] oldLogOverwrite = new string[] { $"File overwritten, now exists as {pData.ProjNumberAndGuid}\r", "Old info before copy:\r" };
 
-            WebService.CreateNewDirectory(Constants.PrismModelData, pData.ProjNumberAndGuid + "\\FAB XMLs");
-        }
+			// Concatenate oldLogOverwrite and array
+			string[] combinedArray = oldLogOverwrite.Concat(array).ToArray();
 
-        private static string[] UpdateToNewLayout(string[] array)
-        {
-            if (array.Length < 20)
-            {
-                // Resize the array to length 15
-                Array.Resize(ref array, 22);
-            }
+			WebService.WriteAllLinesWithArray(Constants.PrismDataLogLocation, combinedArray, Constants.ModelProjectInforLocation(pData.ProjNumberAndName));
 
-            if (array.Length > 5 && array[5] != "------------Uniclass Codes----------------")
-            {
-                array[4] = "";
-                array[5] = "------------Uniclass Codes----------------";
-                array[6] = "---Filter------------Code----------------Title";
-                array[7] = "UniClass-Beam*****Ss_20_20_75_35*****Steel beam systems";
-                array[8] = "UniClass-Column****Ss_20_30_75_35*****Steel column systems";
-                array[9] = "UniClass-Heavy*****Ss_20_10_75_35*****Heavy steel framing systems";
-                array[10] = "UniClass-Light******Ss_20_10_75_45*****Light steel framing systems";
-                for (int i = 11; i < 15; i++)
-                {
-                    array[i] = "********";
-                }
+			WebService.CreateNewDirectory(Constants.PrismModelData, pData.ProjNumberAndGuid + "\\FAB XMLs");
+		}
 
-                for (int i = 15; i < array.Length; i++)
-                {
-                    array[i] = "";
-                }
-            }
-            return array;
-        }
+		private static string[] UpdateToNewLayout(string[] array)
+		{
+			if (array.Length < 20)
+			{
+				// Resize the array to length 15
+				Array.Resize(ref array, 22);
+			}
 
-        public static void WriteFirstDataLog(int filePathLine, string additonalString, ProjectInfo pInfo)
-        {
-            int currentLastNumber = 0;
-            pInfo.GetUserProperty(ModelUDA.LastUsedPrelim(), ref currentLastNumber);
+			if (array.Length > 5 && array[5] != "------------Uniclass Codes----------------")
+			{
+				array[4] = "";
+				array[5] = "------------Uniclass Codes----------------";
+				array[6] = "---Filter------------Code----------------Title";
+				array[7] = "UniClass-Beam*****Ss_20_20_75_35*****Steel beam systems";
+				array[8] = "UniClass-Column****Ss_20_30_75_35*****Steel column systems";
+				array[9] = "UniClass-Heavy*****Ss_20_10_75_35*****Heavy steel framing systems";
+				array[10] = "UniClass-Light******Ss_20_10_75_45*****Light steel framing systems";
+				for (int i = 11; i < 15; i++)
+				{
+					array[i] = "********";
+				}
 
-            string[] content = new string[]
-            {
-                $"Next prelim to use: {currentLastNumber}",
-                "Material orders processed: 0",
-                "Fab packages created: 0",
-                "Frozen drawing count: Frozen = 0, Un - Frozen = 0",
-                "",
-                "------------Uniclass Codes----------------",
-                "---Filter------------Code----------------Title",
-                "UniClass-Beam*****Ss_20_20_75_35*****Steel beam systems",
-                "UniClass-Column****Ss_20_30_75_35*****Steel column systems",
-                "UniClass-Heavy*****Ss_20_10_75_35*****Heavy steel framing systems",
-                "UniClass-Light******Ss_20_10_75_45*****Light steel framing systems",
-                "********",
-                "********",
-                "********",
-                "********",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                ""
-            };
+				for (int i = 15; i < array.Length; i++)
+				{
+					array[i] = "";
+				}
+			}
+			return array;
+		}
 
-            WebService.WriteAllLinesWithArray(filePathLine, content, additonalString);
-        }
+		public static void WriteFirstDataLog(int filePathLine, string additonalString, ProjectInfo pInfo)
+		{
+			int currentLastNumber = 0;
+			pInfo.GetUserProperty(ModelUDA.LastUsedPrelim(), ref currentLastNumber);
+
+			string[] content = new string[]
+			{
+				$"Next prelim to use: {currentLastNumber}",
+				"Material orders processed: 0",
+				"Fab packages created: 0",
+				"Frozen drawing count: Frozen = 0, Un - Frozen = 0",
+				"",
+				"------------Uniclass Codes----------------",
+				"---Filter------------Code----------------Title",
+				"UniClass-Beam*****Ss_20_20_75_35*****Steel beam systems",
+				"UniClass-Column****Ss_20_30_75_35*****Steel column systems",
+				"UniClass-Heavy*****Ss_20_10_75_35*****Heavy steel framing systems",
+				"UniClass-Light******Ss_20_10_75_45*****Light steel framing systems",
+				"********",
+				"********",
+				"********",
+				"********",
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+				""
+			};
+
+			WebService.WriteAllLinesWithArray(filePathLine, content, additonalString);
+		}
 
 		/// <summary>
 		/// Retrieves the "last used Prelim" value from the project info file stored in the model data folder.
@@ -273,51 +282,51 @@ namespace Prism
 				System.Threading.Thread.Sleep(delayMilliseconds);
 			}
 
-            return lastPrelimValue;
+			return lastPrelimValue;
 		}
 
 		public static string GetAdvancedSetting(string jobName, Enums.AdvancedSettingType settingType)
-        {
-            string fullSettingLine = WebService.ReadSpecificLine(Constants.PrismModelData, (int)settingType, Constants.ModelProjectAdvancedSettingLocation(jobName));
+		{
+			string fullSettingLine = WebService.ReadSpecificLine(Constants.PrismModelData, (int)settingType, Constants.ModelProjectAdvancedSettingLocation(jobName));
 			//string fullSettingLine = WebService.ReadSpecificLine(Constants.PrismModelData, (int)settingType, Constants.ModelProjectAdvancedSettingLocation(jobName));
 			if (string.IsNullOrEmpty(fullSettingLine))
-            {
-                WriteSettingLine(settingType, jobName);
-                fullSettingLine = WebService.ReadSpecificLine(Constants.PrismModelData, (int)settingType, Constants.ModelProjectAdvancedSettingLocation(jobName));
-            }
+			{
+				WriteSettingLine(settingType, jobName);
+				fullSettingLine = WebService.ReadSpecificLine(Constants.PrismModelData, (int)settingType, Constants.ModelProjectAdvancedSettingLocation(jobName));
+			}
 
-            string lastusedPrelim = ExtractSettingValue(fullSettingLine);
-            return lastusedPrelim;
-        }
+			string lastusedPrelim = ExtractSettingValue(fullSettingLine);
+			return lastusedPrelim;
+		}
 
-        private static string ExtractSettingValue(string fullSettingLine)
-        {
-            const string splitMarker = ":split:";
+		private static string ExtractSettingValue(string fullSettingLine)
+		{
+			const string splitMarker = ":split:";
 
-            if (fullSettingLine.Contains(splitMarker))
-            {
-                string[] setting = fullSettingLine.Split(new string[] { splitMarker }, StringSplitOptions.None);
-                return setting.Length > 1 ? setting[1].Trim() : string.Empty;
-            }
-            else
-            {
-                int firstColonIndex = fullSettingLine.IndexOf(':');
-                return firstColonIndex != -1 ? fullSettingLine.Substring(firstColonIndex + 1).Trim() : string.Empty;
-            }
-        }
+			if (fullSettingLine.Contains(splitMarker))
+			{
+				string[] setting = fullSettingLine.Split(new string[] { splitMarker }, StringSplitOptions.None);
+				return setting.Length > 1 ? setting[1].Trim() : string.Empty;
+			}
+			else
+			{
+				int firstColonIndex = fullSettingLine.IndexOf(':');
+				return firstColonIndex != -1 ? fullSettingLine.Substring(firstColonIndex + 1).Trim() : string.Empty;
+			}
+		}
 
 
-        private static void WriteSettingLine(Enums.AdvancedSettingType settingType,string jobName)
-        {
-            WebService.WriteToSpecificLine(Constants.PrismModelData, (int)settingType, settingType.ToString() + ":split: ", Constants.ModelProjectAdvancedSettingLocation(jobName));
-        }
+		private static void WriteSettingLine(Enums.AdvancedSettingType settingType, string jobName)
+		{
+			WebService.WriteToSpecificLine(Constants.PrismModelData, (int)settingType, settingType.ToString() + ":split: ", Constants.ModelProjectAdvancedSettingLocation(jobName));
+		}
 
-        /// <summary>
-        /// Here we set the last used Prelim, this writes to our model data log to store the last used number, ready for next time.
-        /// We validate this by waiting a short delay and reading the line back, if the re-read line does not match what should have been written
-        /// we wait and try again, we do this up to 10 times if we have to, to ensure the number is properly saved.
-        /// </summary>
-        /// <exception cref="Exception"></exception>
+		/// <summary>
+		/// Here we set the last used Prelim, this writes to our model data log to store the last used number, ready for next time.
+		/// We validate this by waiting a short delay and reading the line back, if the re-read line does not match what should have been written
+		/// we wait and try again, we do this up to 10 times if we have to, to ensure the number is properly saved.
+		/// </summary>
+		/// <exception cref="Exception"></exception>
 		public static bool SetLastUsedPrelim(string jobName, int lastUsedPrelim)
 		{
 			// Build the content to be written.
@@ -352,236 +361,294 @@ namespace Prism
 			// If after maxAttempts the content still doesn't match, the write has failed.
 			if (!isWritten)
 			{
-                PrismWarnings.PrelimSaveFailure();
+				PrismWarnings.PrelimSaveFailure();
 				return false;
 			}
 
-            return true;
+			return true;
 		}
 
 		public static void UpdateFrozenDrawingCount(string jobName, int frozenDrawings, int unFrozenDrawings)
-        {
-            string frozenDrawingLine = WebService.ReadSpecificLine(Constants.PrismModelData, 4, Constants.ModelProjectInforLocation(jobName));
-            string frozenDrawingCount1 = frozenDrawingLine.Split('=')[1].Trim();
-            string frozenDrawingCount2 = (Convert.ToInt32(frozenDrawingCount1.Split(',')[0].Trim()) + frozenDrawings).ToString();
+		{
+			string frozenDrawingLine = WebService.ReadSpecificLine(Constants.PrismModelData, 4, Constants.ModelProjectInforLocation(jobName));
+			string frozenDrawingCount1 = frozenDrawingLine.Split('=')[1].Trim();
+			string frozenDrawingCount2 = (Convert.ToInt32(frozenDrawingCount1.Split(',')[0].Trim()) + frozenDrawings).ToString();
 
-            string unFrozenDrawingCount = (Convert.ToInt32(frozenDrawingLine.Split('=')[2].Trim()) + unFrozenDrawings).ToString();
+			string unFrozenDrawingCount = (Convert.ToInt32(frozenDrawingLine.Split('=')[2].Trim()) + unFrozenDrawings).ToString();
 
-            string content = $"Frozen drawing count: Frozen = {frozenDrawingCount2}, Un-Frozen = {unFrozenDrawingCount}";
-            WebService.WriteToSpecificLine(Constants.PrismModelData, 4, content, Constants.ModelProjectInforLocation(jobName));
-        }
+			string content = $"Frozen drawing count: Frozen = {frozenDrawingCount2}, Un-Frozen = {unFrozenDrawingCount}";
+			WebService.WriteToSpecificLine(Constants.PrismModelData, 4, content, Constants.ModelProjectInforLocation(jobName));
+		}
 
-        public static void AddToMaterialOrderProcessedCount(string jobName)
-        {
-            int linetoWriteTo = 2;
-            string materialProcessedLine = WebService.ReadSpecificLine(Constants.PrismModelData, linetoWriteTo, jobName);
-            string materialProcessedCount = materialProcessedLine.Split(':')[1].Trim();
-            int newMaterialProcessedCount = Convert.ToInt32(materialProcessedCount) + 1;
-            string content = $"Material orders processed: {newMaterialProcessedCount}";
-            WebService.WriteToSpecificLine(Constants.PrismModelData, linetoWriteTo, content, jobName);
-        }
+		public static void AddToMaterialOrderProcessedCount(string jobName)
+		{
+			int linetoWriteTo = 2;
+			string materialProcessedLine = WebService.ReadSpecificLine(Constants.PrismModelData, linetoWriteTo, jobName);
+			string materialProcessedCount = materialProcessedLine.Split(':')[1].Trim();
+			int newMaterialProcessedCount = Convert.ToInt32(materialProcessedCount) + 1;
+			string content = $"Material orders processed: {newMaterialProcessedCount}";
+			WebService.WriteToSpecificLine(Constants.PrismModelData, linetoWriteTo, content, jobName);
+		}
 
-        public static void AddToFabCompleteCount()
-        {
-            int linetoWriteTo = 5;
-            string fabCompleteLine = WebService.ReadSpecificLine(Constants.PrismTotalUseLogLocation, linetoWriteTo, "");
-            string fabCompleteCount = fabCompleteLine.Split(':')[1].Trim();
-            int newFabCompleteCount = Convert.ToInt32(fabCompleteCount) + 1;
-            string content = $"Fab packages created: {newFabCompleteCount}";
-            WebService.WriteToSpecificLine(Constants.PrismTotalUseLogLocation, linetoWriteTo, content, "");
-        }
+		public static void AddToFabCompleteCount()
+		{
+			int linetoWriteTo = 5;
+			string fabCompleteLine = WebService.ReadSpecificLine(Constants.PrismTotalUseLogLocation, linetoWriteTo, "");
+			string fabCompleteCount = fabCompleteLine.Split(':')[1].Trim();
+			int newFabCompleteCount = Convert.ToInt32(fabCompleteCount) + 1;
+			string content = $"Fab packages created: {newFabCompleteCount}";
+			WebService.WriteToSpecificLine(Constants.PrismTotalUseLogLocation, linetoWriteTo, content, "");
+		}
 
-        public static void LogProgress(string modelName, string buttonPress, int autoFixCount, int totalObjects)
-        {
-            if (Environment.UserName != "mark.gibson")
-            {
-                bool isPrelimReset = buttonPress.StartsWith("PRELIM RESET");
-                string textType1 = isPrelimReset ? "Number before reset:" : "Assemblies processed:";
-                string textType2 = isPrelimReset ? "Number after reset:" : "Auto-Fix count:";
+		public static void LogProgress(string modelName, string buttonPress, int autoFixCount, int totalObjects)
+		{
+			//if (Environment.UserName != "mark.gibson")
+			{
+				bool isPrelimReset = buttonPress.StartsWith("PRELIM RESET");
+				string textType1 = isPrelimReset ? "Number before reset:" : "Assemblies processed:";
+				string textType2 = isPrelimReset ? "Number after reset:" : "Auto-Fix count:";
 
-                string[] content = new string[]
-                {
-                    "--------------------------------------------------------------------------------------------------",
-                    $"{DateTime.Now} - User: {Environment.UserName} - Model: {modelName}",
-                    $"Button press: {buttonPress} - {textType1} {totalObjects} - {textType2} {autoFixCount}"
-                };
+				string[] content = new string[]
+				{
+					"--------------------------------------------------------------------------------------------------",
+					$"{DateTime.Now} - User: {Environment.UserName} - Model: {modelName}",
+					$"Button press: {buttonPress} - {textType1} {totalObjects} - {textType2} {autoFixCount}"
+				};
 
-                WebService.WriteAppendStringsToFile(Constants.PrismLogLocation, content, "");
-                CountTimesUsed(autoFixCount, totalObjects, buttonPress);
-                UpdateUserUseCount(Environment.UserName);
-            }
-        }
+				WebService.WriteAppendStringsToFile(Constants.PrismLogLocation, content, "");
 
-        private static void CountTimesUsed(int autoFixCount, int totalObjects, string buttonPress)
-        {
-            int addToFabPacks = buttonPress == "Fab Package" ? 1 : 0;
+				LogToDataBase(buttonPress, totalObjects, autoFixCount);
+				CountTimesUsed(autoFixCount, totalObjects, buttonPress);
+				UpdateUserUseCount(Environment.UserName);
+			}
+		}
 
-            string[] content = WebService.ReadAllLinesIntoArray(Constants.PrismTotalUseLogLocation, "");
+		private static void LogToDataBase(string buttonPress, int totalObjects, int autoFixCount)
+		{
+			bool isAutoFix = autoFixCount > 0;
+			string buttonPressText = DetermineButtonPress(buttonPress, false);
 
-            string timesUsedLine = content[1];
-            string partsUsedLine = content[2];
-            string autoFixLine = content[3];
-            string fabPacksMade = content[4];
+			string emailString = "@severfield.com";
+			if (Environment.UserDomainName != "SFRPLC") { emailString = "@external.com"; }
+			string userName = Environment.UserName;
 
-            int newTimesUsed = SplitStringAndAddToNumber(timesUsedLine, 1);
-            int newPartsUsed = SplitStringAndAddToNumber(partsUsedLine, totalObjects);
-            int newAutoFixed = SplitStringAndAddToNumber(autoFixLine, autoFixCount);
-            int newFabPack = SplitStringAndAddToNumber(fabPacksMade, addToFabPacks);
+			WebService.AddRecordToAppUseDatabase(userName, "Prism", buttonPressText, userName + emailString, totalObjects);
+			if (isAutoFix)
+			{
+				buttonPressText = DetermineButtonPress(buttonPress, true);
+				WebService.AddRecordToAppUseDatabase(userName, "Prism", buttonPressText, userName + emailString, autoFixCount);
+			}
+		}
 
-            string[] newContent = new string[]
-            {
-                "---------------------------This log was started on 04/04/23-------",
-                $"Times used: {newTimesUsed}",
-                $"Parts processed: {newPartsUsed}",
-                $"Auto-Fix count: {newAutoFixed}",
-                $"Fabrication packages created: {newFabPack}"
-            };
+		private static string DetermineButtonPress(string buttonPress, bool isAutoFix)
+		{
+			string autoFixText = isAutoFix ? _autoFix : "";
 
-            if (newTimesUsed % 1000 == 0)
-            {
-                string[] content2 = new string[]
-               {
-                    "--------------------------------------------------------------------------------------------------",
-                    $"{DateTime.Now} - User: {Environment.UserName}",
-                    $"Times used = {newTimesUsed}"
-               };
+			switch (true)
+			{
+				case true when buttonPress == "Material 1":
+					return InsertAutoFix(_primaryMaterialButtonText, autoFixText);
 
-                WebService.WriteAppendStringsToFile(Constants.PrismLogLocation, content2, "");
-                PrismWarnings.BigTimeUsage(newTimesUsed);
-            }
+				case true when buttonPress.Contains("Material 2"):
+					return InsertAutoFix(_secondaryMaterialButtonText, autoFixText);
 
-            WebService.WriteAllLinesWithArray(Constants.PrismTotalUseLogLocation, newContent, "");
-        }
+				case true when buttonPress.Contains("Material 3"):
+					return InsertAutoFix(_materialOrderPackageButtonText, autoFixText);
 
-        private static int SplitStringAndAddToNumber(string stringToSplit, int numberToAdd)
-        {
-            string splitString = stringToSplit.Split(':')[1].Trim();
-            return Convert.ToInt32(splitString) + numberToAdd;
-        }
+				case true when buttonPress.Contains("Detail 1"):
+					return InsertAutoFix(_primaryDetailButtonText, autoFixText);
 
-        public static void LoginMessage(string modelName, string message)
-        {
-            if (Environment.UserName != "mark.gibson")
-            {
-                string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
-                string[] content = new string[]
-                {                    
-                    "--------------------------------------------------------------------------------------------------",
-                    $"{DateTime.Now} - User: {Environment.UserName} - Model: {modelName}",
-                    $"Version {version} - {message}"
-                };
+				case true when buttonPress.Contains("Detail 2"):
+					return InsertAutoFix(_secondaryDetailButtonText, autoFixText);
 
-                WebService.WriteAppendStringsToFile(Constants.PrismLoginLogLocation, content, "");
-            }
-        }
+				case true when buttonPress.Contains("Detail 3"):
+					return InsertAutoFix(_tertiaryDetailButtonText, autoFixText);
 
-        public static void NCFailed(string modelName, string phaseNumber, string issueNumber, string teklaVersion, string ncLocation, int totalNcRequired, int totalNcCreated)
-        {
-            if (Environment.UserName != "mark.gibson")
-            {
-                string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
-                string[] content = new string[]
-                {
-                    "--------------------------------------------------------------------------------------------------",
-                    $"{DateTime.Now} - User: {Environment.UserName} - Model: {modelName}",
-                    $"Tekla version {teklaVersion}",
-                    $"Phase - {phaseNumber} Issue - {issueNumber}",
-                    $"NC Failed - Prism {version}",
-                    $"NC Location - {ncLocation}",
-                    $"NC Required  {totalNcRequired} - Nc Created {totalNcCreated}"
-                };
+				case true when buttonPress.Contains("FAB") || buttonPress.Contains("Rocket"):
+					return InsertAutoFix(_fabricationPackageButtonText, autoFixText);
 
-                WebService.WriteAppendStringsToFile(11, content, "");
-            }
-        }
+				default:
+					return "ERROR";
+			}
+		}
 
-        public static void NCCreated(string modelName, string phaseNumber, string issueNumber, string teklaVersion, string ncLocation, int totalNcRequired, int totalNcCreated)
-        {
-            if (Environment.UserName != "mark.gibson")
-            {
-                string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
-                string[] content = new string[]
-                {
-                    "--------------------------------------------------------------------------------------------------",
-                    $"{DateTime.Now} - User: {Environment.UserName} - Model: {modelName}",
-                    $"Tekla version {teklaVersion}",
-                    $"Phase - {phaseNumber} Issue - {issueNumber}",
-                    $"NC Created - Prism {version}",
-                    $"NC Location - {ncLocation}",
-                    $"NC Required  {totalNcRequired} - Nc Created {totalNcCreated}"
-                };
+		private static string InsertAutoFix(string originalText, string autoFixText)
+		{
+			// Replace "Button:" with "Button{autoFixText}:"
+			return originalText.Replace("Button:", $"{autoFixText}Button:");
+		}
 
-                WebService.WriteAppendStringsToFile(10, content, "");
-            }
-        }
 
-        public static void ExceptionError(string modelName, string teklaVersion, string message, string stackTrace)
-        {
-           // if (Environment.UserName != "mark.gibson")
-            {
-                string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
-                string[] content = new string[]
-                {
-                    "",
-                    "---------------------------------------------------------------------------------------------------------",
-                    $"{DateTime.Now} - User: {Environment.UserName} - Model: {modelName} - Tekla version: {teklaVersion}",
-                    $"Tekla version {teklaVersion}",                    
-                    "-----------------------------------",
-                    message,
-                    "-----------------------------------",
-                    stackTrace
-                };
+		private static void CountTimesUsed(int autoFixCount, int totalObjects, string buttonPress)
+		{
+			int addToFabPacks = buttonPress == "Fab Package" ? 1 : 0;
 
-                WebService.WriteAppendStringsToFile(12, content, "");
-            }
-        }
+			string[] content = WebService.ReadAllLinesIntoArray(Constants.PrismTotalUseLogLocation, "");
 
-        public static void DebugLog(string debugText, string modelName)
-        {
-           // if (Environment.UserName == "mark. gibson")
-            {
-                string[] content = new string[]
-                {
-                    "--------------------------------------------------------------------------------------------------",
-                    $"{DateTime.Now} - User: {Environment.UserName} - Model: {modelName}",
-                    $"{debugText}"
-                };
+			string timesUsedLine = content[1];
+			string partsUsedLine = content[2];
+			string autoFixLine = content[3];
+			string fabPacksMade = content[4];
 
-                WebService.WriteAppendStringsToFile(Constants.PrismDebugLogLoction, content, "");
-            }
-        }
+			int newTimesUsed = SplitStringAndAddToNumber(timesUsedLine, 1);
+			int newPartsUsed = SplitStringAndAddToNumber(partsUsedLine, totalObjects);
+			int newAutoFixed = SplitStringAndAddToNumber(autoFixLine, autoFixCount);
+			int newFabPack = SplitStringAndAddToNumber(fabPacksMade, addToFabPacks);
 
-        public static void UnAssignedDrawings(string modelName, DrawingManager dm)
-        {
-            List<string> contentList = new List<string>
-            {
-                "--------------------------------------------------------------------------------------------------",
-                $"{DateTime.Now} - User: {Environment.UserName} - Model: {modelName}"
-            };
+			string[] newContent = new string[]
+			{
+				"---------------------------This log was started on 04/04/23-------",
+				$"Times used: {newTimesUsed}",
+				$"Parts processed: {newPartsUsed}",
+				$"Auto-Fix count: {newAutoFixed}",
+				$"Fabrication packages created: {newFabPack}"
+			};
 
-            foreach (PrismDrawing drawing in dm.GetDrawingFolder(Enums.DrawingFolder.Default))
-            {
-                contentList.Add($"Drawing ID No: {drawing.DrawingPartName}");
-                contentList.Add($"Drawing type: {drawing.DrawingType}");
-            }
+			if (newTimesUsed % 1000 == 0)
+			{
+				string[] content2 = new string[]
+			   {
+					"--------------------------------------------------------------------------------------------------",
+					$"{DateTime.Now} - User: {Environment.UserName}",
+					$"Times used = {newTimesUsed}"
+			   };
 
-            int assCount = dm.GetDrawingFolder(Enums.DrawingFolder.ASS).Count;
-            if (assCount != 0) contentList.Add($"ASS Drawings Found: {assCount}");
-            int fitCount = dm.GetDrawingFolder(Enums.DrawingFolder.FIT).Count;
-            if (fitCount != 0) contentList.Add($"FIT Drawings Found: {fitCount}");
-            int prtCount = dm.GetDrawingFolder(Enums.DrawingFolder.PRT).Count;
-            if (prtCount != 0) contentList.Add($"PRT Drawings Found: {prtCount}");
-            int shaCount = dm.GetDrawingFolder(Enums.DrawingFolder.SHA).Count;
-            if (shaCount != 0) contentList.Add($"SHA Drawings Found: {shaCount}");
-            int pgcCount = dm.GetDrawingFolder(Enums.DrawingFolder.PGC).Count;
-            if (pgcCount != 0) contentList.Add($"PGC Drawings Found: {pgcCount}");
-            int wldCount = dm.GetDrawingFolder(Enums.DrawingFolder.WLD).Count;
-            if (wldCount != 0) contentList.Add($"WLD Drawings Found: {wldCount}");
+				WebService.WriteAppendStringsToFile(Constants.PrismLogLocation, content2, "");
+				PrismWarnings.BigTimeUsage(newTimesUsed);
+			}
 
-            string[] content = contentList.ToArray();
+			WebService.WriteAllLinesWithArray(Constants.PrismTotalUseLogLocation, newContent, "");
+		}
 
-            WebService.WriteAppendStringsToFile(Constants.PrismUnassignedDrawingsLocation, content, "");
+		private static int SplitStringAndAddToNumber(string stringToSplit, int numberToAdd)
+		{
+			string splitString = stringToSplit.Split(':')[1].Trim();
+			return Convert.ToInt32(splitString) + numberToAdd;
+		}
 
-        }
-    }
+		public static void LoginMessage(string modelName, string message)
+		{
+			if (Environment.UserName != "mark.gibson")
+			{
+				string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+				string[] content = new string[]
+				{
+					"--------------------------------------------------------------------------------------------------",
+					$"{DateTime.Now} - User: {Environment.UserName} - Model: {modelName}",
+					$"Version {version} - {message}"
+				};
+
+				WebService.WriteAppendStringsToFile(Constants.PrismLoginLogLocation, content, "");
+			}
+		}
+
+		public static void NCFailed(string modelName, string phaseNumber, string issueNumber, string teklaVersion, string ncLocation, int totalNcRequired, int totalNcCreated)
+		{
+			if (Environment.UserName != "mark.gibson")
+			{
+				string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+				string[] content = new string[]
+				{
+					"--------------------------------------------------------------------------------------------------",
+					$"{DateTime.Now} - User: {Environment.UserName} - Model: {modelName}",
+					$"Tekla version {teklaVersion}",
+					$"Phase - {phaseNumber} Issue - {issueNumber}",
+					$"NC Failed - Prism {version}",
+					$"NC Location - {ncLocation}",
+					$"NC Required  {totalNcRequired} - Nc Created {totalNcCreated}"
+				};
+
+				WebService.WriteAppendStringsToFile(11, content, "");
+			}
+		}
+
+		public static void NCCreated(string modelName, string phaseNumber, string issueNumber, string teklaVersion, string ncLocation, int totalNcRequired, int totalNcCreated)
+		{
+			if (Environment.UserName != "mark.gibson")
+			{
+				string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+				string[] content = new string[]
+				{
+					"--------------------------------------------------------------------------------------------------",
+					$"{DateTime.Now} - User: {Environment.UserName} - Model: {modelName}",
+					$"Tekla version {teklaVersion}",
+					$"Phase - {phaseNumber} Issue - {issueNumber}",
+					$"NC Created - Prism {version}",
+					$"NC Location - {ncLocation}",
+					$"NC Required  {totalNcRequired} - Nc Created {totalNcCreated}"
+				};
+
+				WebService.WriteAppendStringsToFile(10, content, "");
+			}
+		}
+
+		public static void ExceptionError(string modelName, string teklaVersion, string message, string stackTrace)
+		{
+			// if (Environment.UserName != "mark.gibson")
+			{
+				string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+				string[] content = new string[]
+				{
+					"",
+					"---------------------------------------------------------------------------------------------------------",
+					$"{DateTime.Now} - User: {Environment.UserName} - Model: {modelName} - Tekla version: {teklaVersion}",
+					$"Tekla version {teklaVersion}",
+					"-----------------------------------",
+					message,
+					"-----------------------------------",
+					stackTrace
+				};
+
+				WebService.WriteAppendStringsToFile(12, content, "");
+			}
+		}
+
+		public static void DebugLog(string debugText, string modelName)
+		{
+			// if (Environment.UserName == "mark. gibson")
+			{
+				string[] content = new string[]
+				{
+					"--------------------------------------------------------------------------------------------------",
+					$"{DateTime.Now} - User: {Environment.UserName} - Model: {modelName}",
+					$"{debugText}"
+				};
+
+				WebService.WriteAppendStringsToFile(Constants.PrismDebugLogLoction, content, "");
+			}
+		}
+
+		public static void UnAssignedDrawings(string modelName, DrawingManager dm)
+		{
+			List<string> contentList = new List<string>
+			{
+				"--------------------------------------------------------------------------------------------------",
+				$"{DateTime.Now} - User: {Environment.UserName} - Model: {modelName}"
+			};
+
+			foreach (PrismDrawing drawing in dm.GetDrawingFolder(Enums.DrawingFolder.Default))
+			{
+				contentList.Add($"Drawing ID No: {drawing.DrawingPartName}");
+				contentList.Add($"Drawing type: {drawing.DrawingType}");
+			}
+
+			int assCount = dm.GetDrawingFolder(Enums.DrawingFolder.ASS).Count;
+			if (assCount != 0) contentList.Add($"ASS Drawings Found: {assCount}");
+			int fitCount = dm.GetDrawingFolder(Enums.DrawingFolder.FIT).Count;
+			if (fitCount != 0) contentList.Add($"FIT Drawings Found: {fitCount}");
+			int prtCount = dm.GetDrawingFolder(Enums.DrawingFolder.PRT).Count;
+			if (prtCount != 0) contentList.Add($"PRT Drawings Found: {prtCount}");
+			int shaCount = dm.GetDrawingFolder(Enums.DrawingFolder.SHA).Count;
+			if (shaCount != 0) contentList.Add($"SHA Drawings Found: {shaCount}");
+			int pgcCount = dm.GetDrawingFolder(Enums.DrawingFolder.PGC).Count;
+			if (pgcCount != 0) contentList.Add($"PGC Drawings Found: {pgcCount}");
+			int wldCount = dm.GetDrawingFolder(Enums.DrawingFolder.WLD).Count;
+			if (wldCount != 0) contentList.Add($"WLD Drawings Found: {wldCount}");
+
+			string[] content = contentList.ToArray();
+
+			WebService.WriteAppendStringsToFile(Constants.PrismUnassignedDrawingsLocation, content, "");
+
+		}
+	}
 }

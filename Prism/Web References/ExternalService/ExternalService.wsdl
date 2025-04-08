@@ -24,6 +24,24 @@
         </s:sequence>
         <s:anyAttribute />
       </s:complexType>
+      <s:element name="AddRecordToAppUseDatabase">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="createdBy" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="appName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="funcName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="email" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="nRecords" nillable="true" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AddRecordToAppUseDatabaseResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="AddRecordToAppUseDatabaseResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
       <s:element name="WriteToSpecificLine">
         <s:complexType>
           <s:sequence>
@@ -212,128 +230,6 @@
       <s:element name="CreateNewDirectoryResponse">
         <s:complexType />
       </s:element>
-      <s:element name="WriteToExcel">
-        <s:complexType>
-          <s:sequence>
-            <s:element minOccurs="1" maxOccurs="1" name="filePathLine" type="s:int" />
-            <s:element minOccurs="1" maxOccurs="1" name="row" type="s:int" />
-            <s:element minOccurs="1" maxOccurs="1" name="col" type="s:int" />
-            <s:element minOccurs="0" maxOccurs="1" name="content" type="s:string" />
-            <s:element minOccurs="0" maxOccurs="1" name="additionalPath" type="s:string" />
-          </s:sequence>
-        </s:complexType>
-      </s:element>
-      <s:element name="WriteToExcelResponse">
-        <s:complexType>
-          <s:sequence>
-            <s:element minOccurs="1" maxOccurs="1" name="WriteToExcelResult" type="s:boolean" />
-          </s:sequence>
-        </s:complexType>
-      </s:element>
-      <s:element name="ReadFromExcel">
-        <s:complexType>
-          <s:sequence>
-            <s:element minOccurs="1" maxOccurs="1" name="filePathLine" type="s:int" />
-            <s:element minOccurs="1" maxOccurs="1" name="row" type="s:int" />
-            <s:element minOccurs="1" maxOccurs="1" name="col" type="s:int" />
-            <s:element minOccurs="0" maxOccurs="1" name="addtionalLine" type="s:string" />
-          </s:sequence>
-        </s:complexType>
-      </s:element>
-      <s:element name="ReadFromExcelResponse">
-        <s:complexType>
-          <s:sequence>
-            <s:element minOccurs="0" maxOccurs="1" name="ReadFromExcelResult" type="s:string" />
-          </s:sequence>
-        </s:complexType>
-      </s:element>
-      <s:element name="WriteToExcelRange">
-        <s:complexType>
-          <s:sequence>
-            <s:element minOccurs="1" maxOccurs="1" name="filePathLine" type="s:int" />
-            <s:element minOccurs="1" maxOccurs="1" name="startRow" type="s:int" />
-            <s:element minOccurs="1" maxOccurs="1" name="startCol" type="s:int" />
-            <s:element minOccurs="0" maxOccurs="1" name="content" type="tns:ArrayOfArrayOfAnyType" />
-            <s:element minOccurs="0" maxOccurs="1" name="addtionalPath" type="s:string" />
-          </s:sequence>
-        </s:complexType>
-      </s:element>
-      <s:complexType name="ArrayOfArrayOfAnyType">
-        <s:sequence>
-          <s:element minOccurs="0" maxOccurs="unbounded" name="ArrayOfAnyType" nillable="true" type="tns:ArrayOfAnyType" />
-        </s:sequence>
-      </s:complexType>
-      <s:complexType name="ArrayOfAnyType">
-        <s:sequence>
-          <s:element minOccurs="0" maxOccurs="unbounded" name="anyType" nillable="true" />
-        </s:sequence>
-      </s:complexType>
-      <s:element name="WriteToExcelRangeResponse">
-        <s:complexType>
-          <s:sequence>
-            <s:element minOccurs="1" maxOccurs="1" name="WriteToExcelRangeResult" type="s:boolean" />
-          </s:sequence>
-        </s:complexType>
-      </s:element>
-      <s:element name="ReadFromExcelRange">
-        <s:complexType>
-          <s:sequence>
-            <s:element minOccurs="1" maxOccurs="1" name="filePathLine" type="s:int" />
-            <s:element minOccurs="1" maxOccurs="1" name="startRow" type="s:int" />
-            <s:element minOccurs="1" maxOccurs="1" name="startCol" type="s:int" />
-            <s:element minOccurs="1" maxOccurs="1" name="endRow" type="s:int" />
-            <s:element minOccurs="1" maxOccurs="1" name="endCol" type="s:int" />
-            <s:element minOccurs="0" maxOccurs="1" name="additionalPath" type="s:string" />
-          </s:sequence>
-        </s:complexType>
-      </s:element>
-      <s:element name="ReadFromExcelRangeResponse">
-        <s:complexType>
-          <s:sequence>
-            <s:element minOccurs="0" maxOccurs="1" name="ReadFromExcelRangeResult" type="tns:ArrayOfArrayOfAnyType" />
-          </s:sequence>
-        </s:complexType>
-      </s:element>
-      <s:element name="CreateNewExcelSheet">
-        <s:complexType>
-          <s:sequence>
-            <s:element minOccurs="1" maxOccurs="1" name="filePathLine" type="s:int" />
-            <s:element minOccurs="0" maxOccurs="1" name="sheetName" type="s:string" />
-            <s:element minOccurs="0" maxOccurs="1" name="additionalPath" type="s:string" />
-          </s:sequence>
-        </s:complexType>
-      </s:element>
-      <s:element name="CreateNewExcelSheetResponse">
-        <s:complexType>
-          <s:sequence>
-            <s:element minOccurs="1" maxOccurs="1" name="CreateNewExcelSheetResult" type="s:boolean" />
-          </s:sequence>
-        </s:complexType>
-      </s:element>
-      <s:element name="TestDoMurlingThing">
-        <s:complexType>
-          <s:sequence>
-            <s:element minOccurs="0" maxOccurs="1" name="input" type="s:string" />
-          </s:sequence>
-        </s:complexType>
-      </s:element>
-      <s:element name="TestDoMurlingThingResponse">
-        <s:complexType>
-          <s:sequence>
-            <s:element minOccurs="0" maxOccurs="1" name="TestDoMurlingThingResult" type="tns:ArrayOfString" />
-          </s:sequence>
-        </s:complexType>
-      </s:element>
-      <s:element name="SetComponentParameters">
-        <s:complexType />
-      </s:element>
-      <s:element name="SetComponentParametersResponse">
-        <s:complexType>
-          <s:sequence>
-            <s:element minOccurs="0" maxOccurs="1" name="SetComponentParametersResult" type="tns:ArrayOfString" />
-          </s:sequence>
-        </s:complexType>
-      </s:element>
       <s:element name="ValidUser">
         <s:complexType />
       </s:element>
@@ -353,6 +249,15 @@
     <wsdl:part name="parameters" element="tns:HelloWorldResponse" />
   </wsdl:message>
   <wsdl:message name="HelloWorldAuthHeader">
+    <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
+  </wsdl:message>
+  <wsdl:message name="AddRecordToAppUseDatabaseSoapIn">
+    <wsdl:part name="parameters" element="tns:AddRecordToAppUseDatabase" />
+  </wsdl:message>
+  <wsdl:message name="AddRecordToAppUseDatabaseSoapOut">
+    <wsdl:part name="parameters" element="tns:AddRecordToAppUseDatabaseResponse" />
+  </wsdl:message>
+  <wsdl:message name="AddRecordToAppUseDatabaseAuthHeader">
     <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
   </wsdl:message>
   <wsdl:message name="WriteToSpecificLineSoapIn">
@@ -472,69 +377,6 @@
   <wsdl:message name="CreateNewDirectoryAuthHeader">
     <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
   </wsdl:message>
-  <wsdl:message name="WriteToExcelSoapIn">
-    <wsdl:part name="parameters" element="tns:WriteToExcel" />
-  </wsdl:message>
-  <wsdl:message name="WriteToExcelSoapOut">
-    <wsdl:part name="parameters" element="tns:WriteToExcelResponse" />
-  </wsdl:message>
-  <wsdl:message name="WriteToExcelAuthHeader">
-    <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
-  </wsdl:message>
-  <wsdl:message name="ReadFromExcelSoapIn">
-    <wsdl:part name="parameters" element="tns:ReadFromExcel" />
-  </wsdl:message>
-  <wsdl:message name="ReadFromExcelSoapOut">
-    <wsdl:part name="parameters" element="tns:ReadFromExcelResponse" />
-  </wsdl:message>
-  <wsdl:message name="ReadFromExcelAuthHeader">
-    <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
-  </wsdl:message>
-  <wsdl:message name="WriteToExcelRangeSoapIn">
-    <wsdl:part name="parameters" element="tns:WriteToExcelRange" />
-  </wsdl:message>
-  <wsdl:message name="WriteToExcelRangeSoapOut">
-    <wsdl:part name="parameters" element="tns:WriteToExcelRangeResponse" />
-  </wsdl:message>
-  <wsdl:message name="WriteToExcelRangeAuthHeader">
-    <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
-  </wsdl:message>
-  <wsdl:message name="ReadFromExcelRangeSoapIn">
-    <wsdl:part name="parameters" element="tns:ReadFromExcelRange" />
-  </wsdl:message>
-  <wsdl:message name="ReadFromExcelRangeSoapOut">
-    <wsdl:part name="parameters" element="tns:ReadFromExcelRangeResponse" />
-  </wsdl:message>
-  <wsdl:message name="ReadFromExcelRangeAuthHeader">
-    <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
-  </wsdl:message>
-  <wsdl:message name="CreateNewExcelSheetSoapIn">
-    <wsdl:part name="parameters" element="tns:CreateNewExcelSheet" />
-  </wsdl:message>
-  <wsdl:message name="CreateNewExcelSheetSoapOut">
-    <wsdl:part name="parameters" element="tns:CreateNewExcelSheetResponse" />
-  </wsdl:message>
-  <wsdl:message name="CreateNewExcelSheetAuthHeader">
-    <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
-  </wsdl:message>
-  <wsdl:message name="TestDoMurlingThingSoapIn">
-    <wsdl:part name="parameters" element="tns:TestDoMurlingThing" />
-  </wsdl:message>
-  <wsdl:message name="TestDoMurlingThingSoapOut">
-    <wsdl:part name="parameters" element="tns:TestDoMurlingThingResponse" />
-  </wsdl:message>
-  <wsdl:message name="TestDoMurlingThingAuthHeader">
-    <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
-  </wsdl:message>
-  <wsdl:message name="SetComponentParametersSoapIn">
-    <wsdl:part name="parameters" element="tns:SetComponentParameters" />
-  </wsdl:message>
-  <wsdl:message name="SetComponentParametersSoapOut">
-    <wsdl:part name="parameters" element="tns:SetComponentParametersResponse" />
-  </wsdl:message>
-  <wsdl:message name="SetComponentParametersAuthHeader">
-    <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
-  </wsdl:message>
   <wsdl:message name="ValidUserSoapIn">
     <wsdl:part name="parameters" element="tns:ValidUser" />
   </wsdl:message>
@@ -548,6 +390,10 @@
     <wsdl:operation name="HelloWorld">
       <wsdl:input message="tns:HelloWorldSoapIn" />
       <wsdl:output message="tns:HelloWorldSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="AddRecordToAppUseDatabase">
+      <wsdl:input message="tns:AddRecordToAppUseDatabaseSoapIn" />
+      <wsdl:output message="tns:AddRecordToAppUseDatabaseSoapOut" />
     </wsdl:operation>
     <wsdl:operation name="WriteToSpecificLine">
       <wsdl:input message="tns:WriteToSpecificLineSoapIn" />
@@ -601,34 +447,6 @@
       <wsdl:input message="tns:CreateNewDirectorySoapIn" />
       <wsdl:output message="tns:CreateNewDirectorySoapOut" />
     </wsdl:operation>
-    <wsdl:operation name="WriteToExcel">
-      <wsdl:input message="tns:WriteToExcelSoapIn" />
-      <wsdl:output message="tns:WriteToExcelSoapOut" />
-    </wsdl:operation>
-    <wsdl:operation name="ReadFromExcel">
-      <wsdl:input message="tns:ReadFromExcelSoapIn" />
-      <wsdl:output message="tns:ReadFromExcelSoapOut" />
-    </wsdl:operation>
-    <wsdl:operation name="WriteToExcelRange">
-      <wsdl:input message="tns:WriteToExcelRangeSoapIn" />
-      <wsdl:output message="tns:WriteToExcelRangeSoapOut" />
-    </wsdl:operation>
-    <wsdl:operation name="ReadFromExcelRange">
-      <wsdl:input message="tns:ReadFromExcelRangeSoapIn" />
-      <wsdl:output message="tns:ReadFromExcelRangeSoapOut" />
-    </wsdl:operation>
-    <wsdl:operation name="CreateNewExcelSheet">
-      <wsdl:input message="tns:CreateNewExcelSheetSoapIn" />
-      <wsdl:output message="tns:CreateNewExcelSheetSoapOut" />
-    </wsdl:operation>
-    <wsdl:operation name="TestDoMurlingThing">
-      <wsdl:input message="tns:TestDoMurlingThingSoapIn" />
-      <wsdl:output message="tns:TestDoMurlingThingSoapOut" />
-    </wsdl:operation>
-    <wsdl:operation name="SetComponentParameters">
-      <wsdl:input message="tns:SetComponentParametersSoapIn" />
-      <wsdl:output message="tns:SetComponentParametersSoapOut" />
-    </wsdl:operation>
     <wsdl:operation name="ValidUser">
       <wsdl:input message="tns:ValidUserSoapIn" />
       <wsdl:output message="tns:ValidUserSoapOut" />
@@ -641,6 +459,16 @@
       <wsdl:input>
         <soap:body use="literal" />
         <soap:header message="tns:HelloWorldAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddRecordToAppUseDatabase">
+      <soap:operation soapAction="http://www.severfield.com/AddRecordToAppUseDatabase" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:AddRecordToAppUseDatabaseAuthHeader" part="AuthHeader" use="literal" />
       </wsdl:input>
       <wsdl:output>
         <soap:body use="literal" />
@@ -776,76 +604,6 @@
         <soap:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
-    <wsdl:operation name="WriteToExcel">
-      <soap:operation soapAction="http://www.severfield.com/WriteToExcel" style="document" />
-      <wsdl:input>
-        <soap:body use="literal" />
-        <soap:header message="tns:WriteToExcelAuthHeader" part="AuthHeader" use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="ReadFromExcel">
-      <soap:operation soapAction="http://www.severfield.com/ReadFromExcel" style="document" />
-      <wsdl:input>
-        <soap:body use="literal" />
-        <soap:header message="tns:ReadFromExcelAuthHeader" part="AuthHeader" use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="WriteToExcelRange">
-      <soap:operation soapAction="http://www.severfield.com/WriteToExcelRange" style="document" />
-      <wsdl:input>
-        <soap:body use="literal" />
-        <soap:header message="tns:WriteToExcelRangeAuthHeader" part="AuthHeader" use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="ReadFromExcelRange">
-      <soap:operation soapAction="http://www.severfield.com/ReadFromExcelRange" style="document" />
-      <wsdl:input>
-        <soap:body use="literal" />
-        <soap:header message="tns:ReadFromExcelRangeAuthHeader" part="AuthHeader" use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="CreateNewExcelSheet">
-      <soap:operation soapAction="http://www.severfield.com/CreateNewExcelSheet" style="document" />
-      <wsdl:input>
-        <soap:body use="literal" />
-        <soap:header message="tns:CreateNewExcelSheetAuthHeader" part="AuthHeader" use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="TestDoMurlingThing">
-      <soap:operation soapAction="http://www.severfield.com/TestDoMurlingThing" style="document" />
-      <wsdl:input>
-        <soap:body use="literal" />
-        <soap:header message="tns:TestDoMurlingThingAuthHeader" part="AuthHeader" use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetComponentParameters">
-      <soap:operation soapAction="http://www.severfield.com/SetComponentParameters" style="document" />
-      <wsdl:input>
-        <soap:body use="literal" />
-        <soap:header message="tns:SetComponentParametersAuthHeader" part="AuthHeader" use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
     <wsdl:operation name="ValidUser">
       <soap:operation soapAction="http://www.severfield.com/ValidUser" style="document" />
       <wsdl:input>
@@ -864,6 +622,16 @@
       <wsdl:input>
         <soap12:body use="literal" />
         <soap12:header message="tns:HelloWorldAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddRecordToAppUseDatabase">
+      <soap12:operation soapAction="http://www.severfield.com/AddRecordToAppUseDatabase" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:AddRecordToAppUseDatabaseAuthHeader" part="AuthHeader" use="literal" />
       </wsdl:input>
       <wsdl:output>
         <soap12:body use="literal" />
@@ -994,76 +762,6 @@
       <wsdl:input>
         <soap12:body use="literal" />
         <soap12:header message="tns:CreateNewDirectoryAuthHeader" part="AuthHeader" use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="WriteToExcel">
-      <soap12:operation soapAction="http://www.severfield.com/WriteToExcel" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-        <soap12:header message="tns:WriteToExcelAuthHeader" part="AuthHeader" use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="ReadFromExcel">
-      <soap12:operation soapAction="http://www.severfield.com/ReadFromExcel" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-        <soap12:header message="tns:ReadFromExcelAuthHeader" part="AuthHeader" use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="WriteToExcelRange">
-      <soap12:operation soapAction="http://www.severfield.com/WriteToExcelRange" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-        <soap12:header message="tns:WriteToExcelRangeAuthHeader" part="AuthHeader" use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="ReadFromExcelRange">
-      <soap12:operation soapAction="http://www.severfield.com/ReadFromExcelRange" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-        <soap12:header message="tns:ReadFromExcelRangeAuthHeader" part="AuthHeader" use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="CreateNewExcelSheet">
-      <soap12:operation soapAction="http://www.severfield.com/CreateNewExcelSheet" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-        <soap12:header message="tns:CreateNewExcelSheetAuthHeader" part="AuthHeader" use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="TestDoMurlingThing">
-      <soap12:operation soapAction="http://www.severfield.com/TestDoMurlingThing" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-        <soap12:header message="tns:TestDoMurlingThingAuthHeader" part="AuthHeader" use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetComponentParameters">
-      <soap12:operation soapAction="http://www.severfield.com/SetComponentParameters" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-        <soap12:header message="tns:SetComponentParametersAuthHeader" part="AuthHeader" use="literal" />
       </wsdl:input>
       <wsdl:output>
         <soap12:body use="literal" />
