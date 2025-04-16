@@ -17,5 +17,10 @@ namespace Prism.CustomDialogs
             AuthKeyInputString = txt_AutheKeyInput.Text;
             Close();
         }
-    }
+
+		private void btn_Close_Click(object sender, EventArgs e)
+		{
+			Close();
+		}
+	}
 }

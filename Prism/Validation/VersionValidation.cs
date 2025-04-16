@@ -11,8 +11,8 @@ namespace Prism.Validation
 			RunVersionValidation();
 		}
 
-		private static readonly string _noticeFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "update_notice.txt");
-		private const int _gracePeriodDays = 7;
+		private static readonly string _noticeFilePath = "C:\\temp\\update_notice.txt";
+			private const int _gracePeriodDays = 7;
 		private static readonly int _latestVersionLine = 13; //this is the line number on DevServerLog for the path of the latest version log
 
 		/// <summary>
@@ -117,6 +117,7 @@ namespace Prism.Validation
 
 		private static void SaveFirstNoticeDate(DateTime date)
 		{
+			if (!Directory.Exists("C:\\temp\\")) Directory.CreateDirectory("C:\\temp");
 			File.WriteAllText(_noticeFilePath, date.ToString("o")); // ISO 8601 format
 		}
 
@@ -126,14 +127,13 @@ namespace Prism.Validation
 			{
 				WebService.WriteAppendStringToFile(14, $"\r---------------\rUser {Environment.UserName} has updated to {newVersion}.", "");
 				File.Delete(_noticeFilePath);
-
 			}
 		}
 
 		// Model for deserializing JSON
 		public class VersionInfo
-	{
-		public string LatestVersion { get; set; }
+		{
+			public string LatestVersion { get; set; }
+		}
 	}
-}
 }

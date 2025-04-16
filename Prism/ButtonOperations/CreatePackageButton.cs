@@ -97,7 +97,7 @@ namespace Prism.ButtonOperations
 			await myObjects.ExportBSWX(reportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType, toolStrip, tssl);
 
 			// Create fabrication reports
-			await reportManager.CreateFabReports(myObjects.GetNonSeversafeParts(), myObjects.PrismBoltGroups, teklaVersion, toolStrip, tssl);
+			await reportManager.CreateFabReports(myObjects, myObjects.PrismBoltGroups, teklaVersion, toolStrip, tssl);
 
 			// Modify attributes of non-seversafe parts
 			if (!myObjects.GetNonSeversafeParts().ModifyAttributes((int)stageType, projectData, toolStrip, tssl))
@@ -165,7 +165,7 @@ namespace Prism.ButtonOperations
 
 				await objects.ExportBSWX(reportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType, ts, tssl);
 
-			    await reportManager.CreateFabReports(objects.PrismParts, objects.PrismBoltGroups, teklaVersion, ts, tssl);
+			    await reportManager.CreateFabReports(objects, objects.PrismBoltGroups, teklaVersion, ts, tssl);
 
 				if (!objects.PrismParts.ModifyAttributes((int)stageType, projectData, ts, tssl))
 					return (false, totalNcRequired);
