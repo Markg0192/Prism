@@ -137,12 +137,12 @@ namespace Prism
 				{
 					case "Order Material":
 						ProcessMaterial(selectedObjects, stageType, true, fabsecPresent, nonFabsecPresent,
-							_report1Pname,  _output1Pname, toolStrip, tssl, _report2PgName, _output2PgName);
+							_report1Pname, _output1Pname, toolStrip, tssl, _report2PgName, _output2PgName);
 						break;
 
 					case "Add Material":
 						ProcessMaterial(selectedObjects, stageType, true, fabsecPresent, nonFabsecPresent,
-							_report1PAname,  _output1PAname, toolStrip, tssl,_report2PgName, _output2PgName);
+							_report1PAname, _output1PAname, toolStrip, tssl, _report2PgName, _output2PgName);
 						break;
 
 					case "Omit Material":
@@ -173,12 +173,12 @@ namespace Prism
 			}
 		}
 
-		private async void ProcessMaterial(SelectedObjects selectedObjects, StageTypes stageType, bool createBSWX, bool fabsecPresent, bool nonFabsecPresent, string nonFabsecReportName, 
+		private async void ProcessMaterial(SelectedObjects selectedObjects, StageTypes stageType, bool createBSWX, bool fabsecPresent, bool nonFabsecPresent, string nonFabsecReportName,
 			string nonFabsecOutputName, ToolStrip toolStrip, ToolStripStatusLabel tssl, string fabsecReportName = null, string fabsecOutputName = null)
 		{
 			if (createBSWX)
 			{
-			    await selectedObjects.ExportBSWX(Folders.MatPath, ProjectData, PhaseNum, IssueNum, stageType, toolStrip, tssl);
+				await selectedObjects.ExportBSWX(Folders.MatPath, ProjectData, PhaseNum, IssueNum, stageType, toolStrip, tssl);
 				ModelModifiers.RemoveLog(Folders.MatPath);
 			}
 
@@ -236,7 +236,7 @@ namespace Prism
 
 		}
 
-		public async Task CreateFabReports(List<PrismPart> partsList, List<PrismBoltGroup> boltList, string teklaVersion, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
+		public async Task CreateFabReports(SelectedObjects myObjects, List<PrismBoltGroup> boltList, string teklaVersion, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
 		{
 			while (Operation.IsMacroRunning()) // Wait until macro for selecting drawings in the document manager is complete before moving on
 			{
@@ -252,11 +252,13 @@ namespace Prism
 			bool siteBoltsPresent = false;
 			if (boltList.Count > 0)
 			{
-				shopBoltsPresent = boltList.Any(pbg => pbg!=null && pbg.isShop && !pbg.isShearStud && !pbg.isOrdered);   //is a shop bolt but not a shear stud
+				shopBoltsPresent = boltList.Any(pbg => pbg != null && pbg.isShop && !pbg.isShearStud && !pbg.isOrdered);   //is a shop bolt but not a shear stud
 				siteBoltsPresent = boltList.Any(pbg => !pbg.isShop && !pbg.isShearStud && !pbg.isOrdered); //Is neither shop bolt or shear stud
-
 			}
-			foreach (PrismPart part in partsList)
+			
+			List<PrismPart> nonSeversafeParts = myObjects.GetNonSeversafeParts();
+			
+			foreach (PrismPart part in nonSeversafeParts)
 			{
 				sectionSize = part.Part.Profile.ProfileString.Substring(0, 2);
 				bool isFitting = sectionSize == "PL" || sectionSize == "RS" || sectionSize == "FL";
@@ -266,33 +268,31 @@ namespace Prism
 				if (isFitting) create4Report = true;
 			}
 
-			UpdateStatusLabel(toolStrip, statusLabel, "Creating NC Data");
-			await Task.Yield(); // Allow UI to update
-
-			await Task.Run(() => CreateNC(teklaVersion));
-
 			UpdateStatusLabel(toolStrip, statusLabel, "Creating Reports");
 			await Task.Yield();
 			await Task.Run(() => CreateReports(boltList, create3Report, create4Report, createPgReport, shopBoltsPresent, siteBoltsPresent));
+
+			UpdateStatusLabel(toolStrip, statusLabel, "Creating NC Data");
+			await Task.Yield(); // Allow UI to update
+			await Task.Run(() => CreateNC(teklaVersion, myObjects));
 
 			UpdateStatusLabel(toolStrip, statusLabel, "Converting Reports To PDF");
 			await Task.Yield();
 			await Task.Run(() => TextToPDF(Folders.ReportPath));
 
+			/*	UpdateStatusLabel(toolStrip, statusLabel, "Creating NC Data");
 
-		/*	UpdateStatusLabel(toolStrip, statusLabel, "Creating NC Data");
+				CreateNC(teklaVersion);
 
-			CreateNC(teklaVersion);
+				UpdateStatusLabel(toolStrip, statusLabel, "Creating Reports");
 
-			UpdateStatusLabel(toolStrip, statusLabel, "Creating Reports");
+				CreateReports(boltList, create3Report, create4Report, createPgReport, shopBoltsPresent, siteBoltsPresent);
 
-			CreateReports(boltList, create3Report, create4Report, createPgReport, shopBoltsPresent, siteBoltsPresent);
+				UpdateStatusLabel(toolStrip, statusLabel, "Converting Reports To PDF");
 
-			UpdateStatusLabel(toolStrip, statusLabel, "Converting Reports To PDF");
+				TextToPDF(Folders.ReportPath);*/
 
-			TextToPDF(Folders.ReportPath);*/
-
-			ModelModifiers.SelectParts(partsList);
+			ModelModifiers.SelectParts(nonSeversafeParts);
 		}
 
 		private void UpdateStatusLabel(ToolStrip toolStrip, ToolStripStatusLabel statusLabel, string labelMessage)
@@ -349,7 +349,7 @@ namespace Prism
 			}
 		}
 
-		private void CreateNC(string version)
+		private void CreateNC(string version, SelectedObjects myObjects)
 		{
 			//The name of the settings used changed from tekla 2021 -> 2023, so, we set up and run both here,
 			if (version.Contains("2021"))
@@ -371,10 +371,14 @@ namespace Prism
 				string profilesMain2023 = "-SEV-PROFILES-MAIN";
 				string profilesSec2023 = "-SEV-PROFILES-SEC";
 				string profilesHollow2023 = "-SEV-PROFILES-MAIN-HOLLOW";
+
+				ModelModifiers.SelectParts(myObjects.GetSecondaryParts());
 				Operation.CreateNCFilesFromSelected(platesSec2023, Folders.NcPath + "\\", false, "", true);
-				Operation.CreateNCFilesFromSelected(profilesMain2023, Folders.NcPath + "\\", true, "", true);
-				Operation.CreateNCFilesFromSelected(profilesHollow2023, Folders.NcPath + "\\", true, "", true);
 				Operation.CreateNCFilesFromSelected(profilesSec2023, Folders.NcPath + "\\", false, "", true);
+
+				ModelModifiers.SelectParts(myObjects.GetMainParts());
+				Operation.CreateNCFilesFromSelected(profilesHollow2023, Folders.NcPath + "\\", true, "", true);
+				Operation.CreateNCFilesFromSelected(profilesMain2023, Folders.NcPath + "\\", true, "", true);
 			}
 			// Wait for the folder to have contents or timeout after 10 seconds
 			WaitForFolderContents(Folders.NcPath, TimeSpan.FromSeconds(30));

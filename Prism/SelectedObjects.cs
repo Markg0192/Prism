@@ -137,6 +137,11 @@ namespace Prism
 			return PrismParts.Where(part => part.IsMainPart).ToList();
 		}
 
+		public List<PrismPart> GetSecondaryParts()
+		{
+			return PrismParts.Where(part => !part.IsMainPart).ToList();
+		}
+
 		public List<PrismPart> GetPartsWithOutOfDateNumbers()
 		{
 			return PrismParts.Where(part => part.NumbersOutOfDate).ToList();
