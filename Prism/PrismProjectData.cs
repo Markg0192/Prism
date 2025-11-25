@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Tekla.Structures.Model;
 
 namespace Prism
@@ -8,7 +9,7 @@ namespace Prism
     /// </summary>
     public class PrismProjectData
     {
-        public PrismProjectData(ProjectInfo projectInfo, string modelPath, ExternalService.WebService1 webService)
+        public PrismProjectData(ProjectInfo projectInfo, ModelInfo modelInfo, ExternalService.WebService1 webService)
         {
             pInfo = projectInfo;
             ProjName = projectInfo.Name;
@@ -31,7 +32,10 @@ namespace Prism
                 Initials = new string(new char[] { First.ToCharArray()[0], Last.ToCharArray()[0] }).ToUpper();
             }
 
-            ProjPath = modelPath;
+
+			ModelName = Path.GetFileNameWithoutExtension(modelInfo.ModelName);
+
+			ProjPath = modelInfo.ModelPath;
             WebService = webService;
         }
 
@@ -49,6 +53,7 @@ namespace Prism
         public bool IsVariation = false;
         public ProjectInfo pInfo;
         public ExternalService.WebService1 WebService;
+        public string ModelName;
 
         private string Capitalise(string original)
         {

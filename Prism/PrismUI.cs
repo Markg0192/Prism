@@ -862,7 +862,7 @@ namespace Prism
 				Application.Exit();
 				return false;
 			}
-			_projectData = new PrismProjectData(_model.GetProjectInfo(), _model.GetInfo().ModelPath, _webService);
+			_projectData = new PrismProjectData(_model.GetProjectInfo(), _model.GetInfo(), _webService);
 			return true;
 		}
 
