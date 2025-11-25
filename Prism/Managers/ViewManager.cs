@@ -42,13 +42,13 @@ namespace Prism
 
             view.DisplayCoordinateSystem.AxisX = new Vector(1, 0, 0);
             view.DisplayCoordinateSystem.AxisY = new Vector(1, 0, 0);
-            view.DisplayCoordinateSystem.Origin = new Vector(0, 0, 0);
+            view.DisplayCoordinateSystem.Origin = new Vector(0, 0, obj.SmallestZ - 50);
             view.DisplayType = View.DisplayOrientationType.DISPLAY_3D;
 
             view.Name = ModelUDA.FabStamp(phaseNum, issueNum);
             view.ViewCoordinateSystem.AxisX = new Vector(1, 0, 0);
             view.ViewCoordinateSystem.AxisY = new Vector(0, 1, 0);
-            view.ViewCoordinateSystem.Origin = new Point(0, 0, 0);
+            view.ViewCoordinateSystem.Origin = new Point(0, 0, obj.SmallestZ - 50);
             view.ViewDepthUp = 100000;
             view.ViewDepthDown = 100000;
             view.WorkArea.MinPoint = new Point(obj.SmallestX - 1000, obj.SmallestY - 1000, obj.SmallestZ - 1000);

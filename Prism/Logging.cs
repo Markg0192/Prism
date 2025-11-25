@@ -7,14 +7,14 @@ namespace Prism
 {
 	public static class Logging
 	{
-		private const string _primaryMaterialButtonText = "Button: Primary material checks";
-		private const string _secondaryMaterialButtonText = "Button: Secondary material checks and Fabsec Processing";
-		private const string _materialOrderPackageButtonText = "Button: Compile material order package";
-		private const string _primaryDetailButtonText = "Button: Primary detailing checks";
-		private const string _secondaryDetailButtonText = "Button: Secondary detailing checks and Column Orientation marking";
-		private const string _tertiaryDetailButtonText = "Button: Tertiary detailing checks and Drawing creation";
-		private const string _fabricationPackageButtonText = "Button: Compile Fabrication package";
-		private const string _autoFix = "AUTO-FIX ";
+		internal const string _primaryMaterialButtonText = "Primary material checks";
+		internal const string _secondaryMaterialButtonText = "Secondary material checks and Fabsec Processing";
+		internal const string _materialOrderPackageButtonText = "Compile material order package";
+		internal const string _primaryDetailButtonText = "Primary detailing checks";
+		internal const string _secondaryDetailButtonText = "Secondary detailing checks and Column Orientation marking";
+		internal const string _tertiaryDetailButtonText = "Tertiary detailing checks and Drawing creation";
+		internal const string _fabricationPackageButtonText = "Compile Fabrication package";
+		internal const string _autoFix = "(AF) ";
 
 		public static void UpdateUserUseCount(string userName)
 		{
@@ -474,10 +474,8 @@ namespace Prism
 
 		private static string InsertAutoFix(string originalText, string autoFixText)
 		{
-			// Replace "Button:" with "Button{autoFixText}:"
-			return originalText.Replace("Button:", $"{autoFixText}Button:");
+			return $"{autoFixText}" + originalText;
 		}
-
 
 		private static void CountTimesUsed(int autoFixCount, int totalObjects, string buttonPress)
 		{

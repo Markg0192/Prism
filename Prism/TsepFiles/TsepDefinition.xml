@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TEP Version="1.0">
+
+	<Product Id="Prism" UpgradeCode="15FF4F3F-9546-4EE1-8DF9-4A1B546A4661" Version="5.3" Language="1033"
+		Name="Severfield Prism Extension" Manufacturer="Severfield Corporation"  Description= "Detailer Helper"
+		IconPath="%TEPDEFINITIONFILEFOLDER%\Icon.png"
+			 
+		Type="Extension">
+		<TeklaVersions>
+			<TeklaVersion Name="2099.1"/>
+			<MinTeklaVersion Name="2016.0"/>
+			<MaxTeklaVersion Name="2099.1"/>
+		</TeklaVersions>
+	</Product>
+
+	<SourcePathVariables>
+		<SourcePathVariable Id="TepOutputFolder" Value="%TEPDEFINITIONFILEFOLDER%\output" Comment="This provides the location where the package builder is to save the package."/>
+		<SourcePathVariable Id="BinariesFolder" Value="%TEPDEFINITIONFILEFOLDER%\..\bin\debug\"/>
+		<SourcePathVariable Id="BitmapsFolder" Value="%TEPDEFINITIONFILEFOLDER%\bitmaps"/>
+	</SourcePathVariables>
+
+	<TargetPathVariables>
+		<PathVariable Id="ExtensionsDir" Value="%commonEnvFolder%\extensions\"/>
+		<PathVariable Id="BinariesTargetDirectory" Value="%ExtensionsDir%\Prism\"/>
+		<PathVariable Id="MacroDirectory" Value="%ENVDIR%\common\macros\modeling\"/>
+	</TargetPathVariables>
+
+	<Component Id="TheExtensionComponent" Guid="615B766A-403F-4ED7-99AD-3B0B73B43BA2">
+		<File Id="Prism" Source="%BinariesFolder%\Prism.exe" Target="%BinariesTargetDirectory%"/>
+		<File Id="PrismMacro" Source="%TEPDEFINITIONFILEFOLDER%\Prism.cs" Target="%MacroDirectory%"/>
+		<File Id="PrismMacroImage" Source="%TEPDEFINITIONFILEFOLDER%\Prism.bmp" Target="%MacroDirectory%"/>
+	</Component>
+
+	<Feature Id="TheExtensionFeature" Title="ExtensionFeature">
+		<ComponentRef ReferenceId="TheExtensionComponent" />
+	</Feature>
+</TEP>

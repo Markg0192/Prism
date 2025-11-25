@@ -149,6 +149,7 @@ namespace Prism
 								 $"{_mailNewLine}" +
 								 $"This is the fab package for phase {phaseNumber}, issue {issueNumber}, in {projData.ProjNumber}, {projData.ProjName}.{_mailNewLine}" +
 								 $"{IsPartOfAVariation(projData.IsVariation, projData.VariationNumber)}" +
+								 $"TEKLA MODEL NAME: {projData.ModelName}" + 
 								 $"Please issue this package to the works when possible.{_mailNewLine}" +
 								 $"{_mailNewLine}" +
 								 $"Site date is {SiteDateNote(siteDate)}{_mailNewLine}" +
@@ -199,7 +200,9 @@ namespace Prism
 				email.Body = $"Hello,{_mailNewLine}" +
 								$"{_mailNewLine}" +
 								$"This is the fab package for phase {phaseNumber}, issue {issueNumber}, in {projData.ProjNumber}, {projData.ProjName}.{_mailNewLine}" +
-								$"{IsPartOfAVariation(projData.IsVariation, projData.VariationNumber)}" +
+								$"TEKLA MODEL NAME: {projData.ModelName}.{_mailNewLine}" +
+								$"{_mailNewLine}" +
+								$"{IsPartOfAVariation(projData.IsVariation, projData.VariationNumber)}" +						
 								$"Please issue this package to the works when possible.{_mailNewLine}" +
 								$"{_mailNewLine}" +
 								$"Site date is {SiteDateNote(siteDate)}{_mailNewLine}" +
