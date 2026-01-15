@@ -98,7 +98,7 @@ namespace Prism
 
             try
             {
-                Worksheet worksheet = (Worksheet)workbook.Sheets["Sheet1"];
+                Worksheet worksheet = workbook.Sheets["Sheet1"] as Worksheet    ;
                 string projectNumber = projData.ProjNumber;
                 string projectName = projData.ProjName;
                 string projectAddress = projData.pInfo.Address;
@@ -137,12 +137,12 @@ namespace Prism
 
                 string textBoxName = DetermineDivisionTextBoxName(divisionNo);
 
-                var textBoxShape = worksheet.Shapes.Cast<Shape>()
-                    .FirstOrDefault(shape => shape.Name == textBoxName && shape.Type == Microsoft.Office.Core.MsoShapeType.msoTextBox);
+                Shape textBoxShape = worksheet.Shapes.Cast<Shape>()
+                    .FirstOrDefault(shape => shape.Name == textBoxName);
 
                 if (textBoxShape != null)
                 {
-                    textBoxShape.TextFrame2.TextRange.Text = "X";
+                    //textBoxShape.TextFrame2.TextRange.Text = divisionNo.ToString();
                 }
 
 

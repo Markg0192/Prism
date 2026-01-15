@@ -1,7 +1,7 @@
 ﻿using iText.IO.Image;
 using iText.Kernel.Pdf;
-using Mono.Cecil.Cil;
-using Mono.Cecil.Mdb;
+//using Mono.Cecil.Cil;
+//using Mono.Cecil.Mdb;
 using Prism.Properties;
 using QRCoder;
 using System;

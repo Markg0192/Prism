@@ -81,7 +81,7 @@ namespace Prism
 				string emailBody = string.Join(Environment.NewLine, emailContent.Skip(2));
 
 				// Create a new MailItem
-				MailItem email = (MailItem)outlookApp.CreateItem(OlItemType.olMailItem);
+				MailItem email = outlookApp.CreateItem(OlItemType.olMailItem) as MailItem;
 				email.Subject = emailSubject;
 				email.Body = emailBody;
 
@@ -100,7 +100,7 @@ namespace Prism
 			ExecuteEmailAction(outlookApp =>
 			{
 				// Create a new MailItem
-				MailItem email = (MailItem)outlookApp.CreateItem(OlItemType.olMailItem);
+				MailItem email = outlookApp.CreateItem(OlItemType.olMailItem) as MailItem;
 				email.Subject = $"{fabPrefix} E.P.O. Order{AddVariationNoIfReqd(projData.IsVariation, projData.VariationNumber)}";
 
 				// Set the email body
@@ -194,7 +194,7 @@ namespace Prism
 			double totalWeight = objects.MainPartWeight + objects.FittingWeight;
 			ExecuteEmailAction(outlookApp =>
 			{
-				MailItem email = (MailItem)outlookApp.CreateItem(OlItemType.olMailItem);
+				MailItem email = outlookApp.CreateItem(OlItemType.olMailItem) as MailItem;
 				email.Subject = $"{fabPrefix} Fab Issue{AddVariationNoIfReqd(projData.IsVariation, projData.VariationNumber)}";
 
 				email.Body = $"Hello,{_mailNewLine}" +
@@ -234,7 +234,7 @@ namespace Prism
 		{
 			ExecuteEmailAction(outlookApp =>
 			{
-				MailItem email = (MailItem)outlookApp.CreateItem(OlItemType.olMailItem);
+				MailItem email = outlookApp.CreateItem(OlItemType.olMailItem) as MailItem;
 				email.Subject = $"{fabPrefix} Revised Fab Issue{AddVariationNoIfReqd(projData.IsVariation, projData.VariationNumber)}";
 
 				// Set the body format to HTML
@@ -290,7 +290,7 @@ namespace Prism
 			ExecuteEmailAction(outlookApp =>
 			{
 
-				MailItem email = (MailItem)outlookApp.CreateItem(OlItemType.olMailItem);
+				MailItem email = outlookApp.CreateItem(OlItemType.olMailItem) as MailItem;
 				email.Subject = $"{fabPrefix} Bolt Order{AddVariationNoIfReqd(projData.IsVariation, projData.VariationNumber)}";
 
 				email.Body = $"Hello,{_mailNewLine}" +
@@ -317,7 +317,7 @@ namespace Prism
 		{
 			ExecuteEmailAction(outlookApp =>
 			{
-				MailItem email = (MailItem)outlookApp.CreateItem(OlItemType.olMailItem);
+				MailItem email = outlookApp.CreateItem(OlItemType.olMailItem) as MailItem;
 				email.Subject = $"{fabPrefix} Fabsec Carcass Order{AddVariationNoIfReqd(projData.IsVariation, projData.VariationNumber)}";
 
 				email.Body = $"Hello,{_mailNewLine}" +
@@ -343,7 +343,7 @@ namespace Prism
 		{
 			ExecuteEmailAction(outlookApp =>
 			{
-				MailItem email = (MailItem)outlookApp.CreateItem(OlItemType.olMailItem);
+				MailItem email = outlookApp.CreateItem(OlItemType.olMailItem) as MailItem;
 				email.Subject = $"{fabPrefix} {IssueType(orderType)}{AddVariationNoIfReqd(projData.IsVariation, projData.VariationNumber)}";
 
 				email.Body = $"Hello,{_mailNewLine}" +
@@ -374,7 +374,7 @@ namespace Prism
 		{
 			ExecuteEmailAction(outlookApp =>
 			{
-				MailItem email = (MailItem)outlookApp.CreateItem(OlItemType.olMailItem);
+				MailItem email = outlookApp.CreateItem(OlItemType.olMailItem) as MailItem;
 				email.Subject = $"Request for Prism help - Version No. {version}";
 
 				email.Body = $"Please enter your Prism request here, we will get back to you as soon as possible.{_mailNewLine}" +
