@@ -118,8 +118,25 @@ namespace Prism
 
 		private static string CreateUrlPathFromPart(string partMark, PrismProjectData data)
 		{
-			string projectNumber = data.ProjNumber.Substring(1, 4); //substring removes the C from the start
+			string projectNumber = GetProjectNumber(data.ProjNumber); //substring removes the C from the start
 			return $@"http://drawingscan.severfield.com/otiswebextclient/Drawings?Contract={projectNumber}&Drawing={partMark}";
+		}
+
+		private static string GetProjectNumber(string projNumber)
+		{
+			if (string.IsNullOrEmpty(projNumber))
+				return string.Empty;
+
+			// Remove leading 'C' if present
+			if (projNumber.StartsWith("C"))
+				projNumber = projNumber.Substring(1);
+
+			// Take digits until hitting a non-digit
+			var digits = projNumber.TakeWhile(char.IsDigit).ToArray();
+			var number = new string(digits);
+
+			// Return up to 4 digits
+			return number.Length > 4 ? number.Substring(0, 4) : number;
 		}
 
 		private static void GenerateAndSaveQrCode(string url, string filePath)

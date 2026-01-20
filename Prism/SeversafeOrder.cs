@@ -137,12 +137,12 @@ namespace Prism
 
                 string textBoxName = DetermineDivisionTextBoxName(divisionNo);
 
-                Shape textBoxShape = worksheet.Shapes.Cast<Shape>()
+				Shape textBoxShape = worksheet.Shapes.Cast<Shape>()
                     .FirstOrDefault(shape => shape.Name == textBoxName);
 
                 if (textBoxShape != null)
                 {
-                    //textBoxShape.TextFrame2.TextRange.Text = divisionNo.ToString();
+                    textBoxShape.TextFrame.Characters(0, 1).Text = "X";
                 }
 
 
