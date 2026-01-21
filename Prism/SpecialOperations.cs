@@ -82,9 +82,7 @@ namespace Prism
             Workbook workbook = excel.Workbooks.Add(Type.Missing);
 
             // Create a new Excel worksheet
-            Worksheet worksheet = null;
-            worksheet = (Worksheet)workbook.Sheets["Sheet1"];
-            worksheet = (Worksheet)workbook.ActiveSheet;
+            Worksheet worksheet = workbook.Sheets["Sheet1"] as Worksheet;
 
             // Write data to the Excel worksheet
             worksheet.Cells[1, 1] = "Hello";
