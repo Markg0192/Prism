@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using Tekla.Structures.Model;
 using Tekla.Structures.Model.Operations;
 using System.Collections.Generic;
 using static Prism.Enums;
@@ -8,8 +7,6 @@ using System.Drawing;
 using System;
 using System.Linq;
 using System.Windows.Forms;
-using Newtonsoft.Json.Linq;
-using System.Threading.Tasks;
 using Task = System.Threading.Tasks.Task;
 
 namespace Prism

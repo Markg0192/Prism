@@ -149,7 +149,14 @@ namespace Prism
 			foreach (PrismPart pPart in selectedObjects.GetMainParts())
 			{
 				Beam b = pPart.Part as Beam;
-				if (b != null && (b.Profile.ProfileString.StartsWith("UB") || b.Profile.ProfileString.StartsWith("UKB") || b.Profile.ProfileString.StartsWith("UC") || b.Profile.ProfileString.StartsWith("UKC")))
+				if (b != null && (b.Profile.ProfileString.StartsWith("UB") || b.Profile.ProfileString.StartsWith("UKB") 
+					|| b.Profile.ProfileString.StartsWith("UC") || b.Profile.ProfileString.StartsWith("UKC")
+
+					|| b.Profile.ProfileString.StartsWith("IPE") || b.Profile.ProfileString.StartsWith("IPEA")
+					|| b.Profile.ProfileString.StartsWith("IPN") || b.Profile.ProfileString.StartsWith("HAU")
+					|| b.Profile.ProfileString.StartsWith("HD") || b.Profile.ProfileString.StartsWith("HEM")
+					|| b.Profile.ProfileString.StartsWith("HEA") || b.Profile.ProfileString.StartsWith("HEB")
+					))
 				{
 					if (b.Name == GdomValues.BeamName && Math.Abs(b.StartPoint.Z - b.EndPoint.Z) < tolerance)
 					{
