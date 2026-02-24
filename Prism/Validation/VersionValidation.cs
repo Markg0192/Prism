@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.IO;
 
 namespace Prism.Validation
@@ -30,8 +29,7 @@ namespace Prism.Validation
 			try
 			{
 				string jsonResponse = WebService.ReadSpecificLine(_latestVersionLine, 1, "");
-				var versionInfo = JsonConvert.DeserializeObject<VersionInfo>(jsonResponse);
-				string logVersion = versionInfo.LatestVersion;
+				string logVersion = ExtractLatestVersion(jsonResponse);
 
 				int versionComparison = CompareVersions(currentVersion, logVersion);
 
@@ -57,6 +55,19 @@ namespace Prism.Validation
 			}
 		}
 
+		private static string ExtractLatestVersion(string json)
+		{
+			const string key = "\"LatestVersion\":\"";
+			int start = json.IndexOf(key);
+			if (start < 0) return null;
+
+			start += key.Length;
+			int end = json.IndexOf('"', start);
+			if (end < 0) return null;
+
+			return json.Substring(start, end - start);
+		}
+
 		private static int CompareVersions(string current, string latest)
 		{
 			Version currentVer = new Version(current + ".0");  // Append ".0" to make it valid
@@ -68,7 +79,7 @@ namespace Prism.Validation
 		private static void UpdateVersionFile(string newVersion, string logVersion)
 		{
 			var versionInfo = new VersionInfo { LatestVersion = newVersion };
-			string json = JsonConvert.SerializeObject(versionInfo);
+			string json = "{\"LatestVersion\":\"" + newVersion + "\"}";
 			WebService.WriteAppendStringToFile(14, $"\r---------------\rUser {Environment.UserName} has updated the log version from {logVersion} to {newVersion}", "");
 			WebService.WriteToSpecificLine(13, 1, json, ""); // Assuming this writes to the same file
 		}

@@ -16,11 +16,7 @@ using System.IO;
 using Application = System.Windows.Forms.Application;
 using System.Linq;
 using Tekla.Structures;
-using Newtonsoft.Json;
 using Prism.Validation;
-using System.IO.Packaging;
-using System.Security.Cryptography;
-using System.Diagnostics;
 
 namespace Prism
 {

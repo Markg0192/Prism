@@ -3,15 +3,10 @@ using Tekla.Structures.Model;
 using Attachment = Microsoft.Office.Interop.Outlook.Attachment;
 using Application = Microsoft.Office.Interop.Outlook.Application;
 using System.Collections.Generic;
-using Prism.CustomDialogs;
 using System;
 using System.Windows.Forms;
-using System.Net.NetworkInformation;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
-using static QRCoder.PayloadGenerator;
-using Newtonsoft.Json.Linq;
 
 namespace Prism
 {
