@@ -640,7 +640,12 @@ namespace Prism
 			// new MacroBuilder().Callback("acmd_partnumbers_selected", string.Empty, "main_frame").Run(); 
 			// TeklaStructures.Connect();
 			//  TeklaStructures.CommonTasks.PerformNumbering(false);
-			PrismMacroBuilder.NumberSelected();
+			Application.OpenForms[0].Invoke(new Action(() =>
+			{
+				PrismMacroBuilder.NumberSelected();
+			}));
+
+		//	PrismMacroBuilder.NumberSelected();
 			return PrismWarnings.AreYouHappyWithNumbering();
 		}
 
