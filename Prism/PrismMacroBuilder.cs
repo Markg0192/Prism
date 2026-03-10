@@ -61,7 +61,7 @@ namespace Prism
 			}
 		}
 
-		public static void NumberSelected()
+		public static async void NumberSelected()
 		{
 			var macrodir = "";
 			TeklaStructuresSettings.GetAdvancedOption("XS_MACRO_DIRECTORY", ref macrodir);
@@ -83,6 +83,7 @@ namespace Prism
 						"            {" + Environment.NewLine +
 						"                Tekla.Macros.Wpf.Runtime.IWpfMacroHost wpf = runtime.Get<Tekla.Macros.Wpf.Runtime.IWpfMacroHost>();" + Environment.NewLine +
 						"                wpf.InvokeCommand(\"CommandRepository\", \"Numbering.NumberSeriesOfSelectedObjects\");" + Environment.NewLine +
+						"				 akit.Callback(\"acmd_display_prompt\", \"\", \"main_frame\");" + Environment.NewLine +
 						"            }" + Environment.NewLine +
 						"        }" + Environment.NewLine +
 						"    }";
@@ -93,7 +94,9 @@ namespace Prism
 
 			while (Operation.IsMacroRunning()) // Wait until macro for selecting drawings in the document manager is complete before moving on
 			{
-				System.Threading.Tasks.Task.Delay(10);
+				await Task.Delay(10);
+				//System.Threading.Tasks.Task.Delay(10);
+				//System.Threading.Thread.Sleep(10);
 			}
 		}
 
@@ -481,7 +484,7 @@ namespace Prism
 					"				wpf.InvokeCommand(\"CommandRepository\", \"Reports.CreateReport\");" + Environment.NewLine +
 					"				akit.ListSelect(\"xs_report_dialog\", \"xs_report_list\", new string[] {" + Environment.NewLine +
 					"						\"PrismDrawing_List\"});" + Environment.NewLine +
-			       $"				akit.ValueChange(\"xs_report_dialog\", \"xs_report_file\", \"{updatedPath}\\\\PrismDrawing_List.xsr\");" + Environment.NewLine +
+				   $"				akit.ValueChange(\"xs_report_dialog\", \"xs_report_file\", \"{updatedPath}\\\\PrismDrawing_List.xsr\");" + Environment.NewLine +
 					"				akit.TabChange(\"xs_report_dialog\", \"Container_516\", \"Container_519\");" + Environment.NewLine +
 					"				akit.ValueChange(\"xs_report_dialog\", \"display_created_report\", \"0\");" + Environment.NewLine +
 					"				akit.PushButton(\"xs_report_selected\", \"xs_report_dialog\");" + Environment.NewLine +
@@ -490,7 +493,7 @@ namespace Prism
 					"		}" + Environment.NewLine +
 					"	}";
 
-	        writer.Write(macro);
+			writer.Write(macro);
 			writer.Close();
 			Operation.RunMacro(Constants.RunPrismDrawingList);
 		}
@@ -518,8 +521,8 @@ namespace Prism
 						"                Tekla.Macros.Wpf.Runtime.IWpfMacroHost wpf = runtime.Get<Tekla.Macros.Wpf.Runtime.IWpfMacroHost>();" + Environment.NewLine +
 						"                wpf.InvokeCommand(\"CommandRepository\", \"Drawing.DrawingList\");" + Environment.NewLine +
 
-						"            wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_ShowAllDocuments\").As.Button.Invoke();" + Environment.NewLine +					
-					    "            wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_ButtonSelectDrawings\").As.Button.Invoke();" + Environment.NewLine +
+						"            wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_ShowAllDocuments\").As.Button.Invoke();" + Environment.NewLine +
+						"            wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_ButtonSelectDrawings\").As.Button.Invoke();" + Environment.NewLine +
 
 
 						"                wpf.View(\"DocumentManager.MainWindow\").Find(\"AID_DOCMAN_CategoryList\").As.Selector.DoSelection.With(\"Assembly_And_Single-Part\").Invoke();" + Environment.NewLine +

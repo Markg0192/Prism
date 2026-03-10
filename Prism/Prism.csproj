@@ -29,7 +29,7 @@
     <MinimumRequiredVersion>5.3.0.6</MinimumRequiredVersion>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>9</ApplicationRevision>
+    <ApplicationRevision>11</ApplicationRevision>
     <ApplicationVersion>5.3.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -606,15 +606,15 @@
     <Reference Include="System.Xml" />
     <Reference Include="Tekla.Structures, Version=2023.0.0.0, Culture=neutral, PublicKeyToken=2f04dbe497b71114, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\TeklaStructures\2023.0\bin\Tekla.Structures.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\TeklaStructures\2021.0\nt\bin\plugins\Tekla.Structures.dll</HintPath>
     </Reference>
     <Reference Include="Tekla.Structures.Drawing, Version=2023.0.0.0, Culture=neutral, PublicKeyToken=2f04dbe497b71114, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\TeklaStructures\2023.0\bin\Tekla.Structures.Drawing.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\TeklaStructures\2021.0\nt\bin\plugins\Tekla.Structures.Drawing.dll</HintPath>
     </Reference>
     <Reference Include="Tekla.Structures.Model, Version=2023.0.0.0, Culture=neutral, PublicKeyToken=2f04dbe497b71114, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\TeklaStructures\2023.0\bin\Tekla.Structures.Model.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\TeklaStructures\2021.0\nt\bin\plugins\Tekla.Structures.Model.dll</HintPath>
     </Reference>
     <Reference Include="UIAutomationClient" />
     <Reference Include="UIAutomationTypes" />
