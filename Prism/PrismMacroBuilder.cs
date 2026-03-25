@@ -544,7 +544,7 @@ namespace Prism
 			Operation.RunMacro(Constants.SelectedDrawings);
 		}
 
-		public static void PrintSelectedDrawings(string fileToPrintTo, string folderName, int startPoint, int drawingCount, bool isAss, string teklaVersion)
+		public static async void PrintSelectedDrawings(string fileToPrintTo, string folderName, int startPoint, int drawingCount, bool isAss, string teklaVersion)
 		{
 			int printColour = teklaVersion == "2024.0" ? 2 : 1;
 			// string drawingType = isAss ? "\"albl_Assembly_drawings\"" : "\"albl_single_part_drawings\"";
@@ -602,7 +602,7 @@ namespace Prism
 
 			while (Operation.IsMacroRunning()) // Wait until macro for selecting drawings in the document manager is complete before moving on
 			{
-				System.Threading.Tasks.Task.Delay(10);
+				await Task.Delay(10);
 			}
 		}
 	}
