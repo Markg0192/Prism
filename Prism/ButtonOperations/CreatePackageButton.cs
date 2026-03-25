@@ -332,7 +332,7 @@ namespace Prism.ButtonOperations
 
 		public static void CpuSpeedCheck(CpuCounter cpuCounter)
 		{
-			while (cpuCounter.CheckCPU() > 10)
+			while (cpuCounter.CheckCPU() > 20)
 			{
 				System.Threading.Thread.Sleep(500);
 			}

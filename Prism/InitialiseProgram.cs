@@ -14,8 +14,8 @@ namespace Prism
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-          Application.Run(new PrismUI());
-          // Launcher.Launch(new PrismUI());
+         // Application.Run(new PrismUI());
+           Launcher.Launch(new PrismUI());
         }
     }
 }

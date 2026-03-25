@@ -235,10 +235,10 @@ namespace Prism
 
 		public async Task CreateFabReports(SelectedObjects myObjects, List<PrismBoltGroup> boltList, string teklaVersion, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
 		{
-			while (Operation.IsMacroRunning()) // Wait until macro for selecting drawings in the document manager is complete before moving on
+		/*	while (Operation.IsMacroRunning()) // Wait until macro for selecting drawings in the document manager is complete before moving on
 			{
 				await System.Threading.Tasks.Task.Delay(10);
-			}
+			}*/
 
 			bool create3Report = false;
 			bool create4Report = false;
