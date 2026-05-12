@@ -29,8 +29,8 @@
     <MinimumRequiredVersion>5.3.0.6</MinimumRequiredVersion>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>11</ApplicationRevision>
-    <ApplicationVersion>5.3.0.%2a</ApplicationVersion>
+    <ApplicationRevision>2</ApplicationRevision>
+    <ApplicationVersion>5.7.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
@@ -73,6 +73,7 @@
     <ApplicationIcon>ico.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="BswxPopUpCloser.cs" />
     <Compile Include="CustomDialogs\AdvancedSettings.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -442,6 +443,8 @@
     <Content Include="Resources\element_catalog_cross_section_user.bmp" />
     <None Include="Web References\ExternalService\ExternalService.disco" />
     <None Include="Resources\Envelope.png" />
+    <Content Include="Resources\NewWelder.png" />
+    <None Include="Resources\NewWelder1.png" />
     <Content Include="Resources\prtyp_tree_1.bmp" />
     <Content Include="Resources\prtyp_tree_10.bmp" />
     <Content Include="Resources\prtyp_tree_11.bmp" />
