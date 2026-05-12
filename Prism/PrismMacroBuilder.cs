@@ -83,7 +83,7 @@ namespace Prism
 						"            {" + Environment.NewLine +
 						"                Tekla.Macros.Wpf.Runtime.IWpfMacroHost wpf = runtime.Get<Tekla.Macros.Wpf.Runtime.IWpfMacroHost>();" + Environment.NewLine +
 						"                wpf.InvokeCommand(\"CommandRepository\", \"Numbering.NumberSeriesOfSelectedObjects\");" + Environment.NewLine +
-						"				 akit.Callback(\"acmd_display_prompt\", \"\", \"main_frame\");" + Environment.NewLine +
+		//				"				 akit.Callback(\"acmd_display_prompt\", \"\", \"main_frame\");" + Environment.NewLine +
 						"            }" + Environment.NewLine +
 						"        }" + Environment.NewLine +
 						"    }";

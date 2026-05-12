@@ -90,7 +90,7 @@ namespace Prism.ButtonOperations
 			var (success, drawingManager) = await ProcessAndPrintDrawings(myObjects, cpuCounter, myObjects.GetNonSeversafeParts(), model, projectData, phaseNumber, issueNumber, reportManager, toolStrip, tssl, myObjects.PrismDrawings, teklaVersion);
 			if (!success)
 				return (false, totalNcRequired);
-
+		
 			// Use the DrawingManager to assign total NC required
 			totalNcRequired = drawingManager.NumberOfNcRequired;
 

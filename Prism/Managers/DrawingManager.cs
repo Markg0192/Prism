@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Tekla.Structures.Model;
 using static Prism.Enums;
@@ -254,26 +255,51 @@ namespace Prism
 			PrismMacroBuilder.ClearPrintDialog();
 		}
 
-		public static async Task PrintAndIssueDrawings(string issueFolder, string issuePath, List<int> drawingCount, string folderPath, int countIndex1, int countIndex2, ReportManager reportManager, bool isAss, string teklaVersion, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
+		/// <summary>
+		/// This method turns Tekla drawings into PDF and puts an "Issue" stamp on it to signify it is issued
+		/// It creates a tekla macro for sorting the document manager by file type and then selects drawings based on the relative to values of the drawing count
+		/// these "drawingCounts" represent the start point for the current drawing type and the number of drawings of this type to print
+		/// It then batches and processes these in groups of 50 as Teklas PDF Printer can sometimes struggle with larger chunks of drawings
+		/// Eg. we have 110 drawings, 
+		/// </summary>
+		public static async Task PrintAndIssueDrawings(string issueFolder,string issuePath,	List<int> drawingCount,
+			string folderPath,int countIndex1,	int countIndex2,ReportManager reportManager,bool isAss,	string teklaVersion,
+			ToolStrip toolStrip,ToolStripStatusLabel statusLabel)
 		{
-			// Initiate printing of selected drawings
-			PrismMacroBuilder.PrintSelectedDrawings(Constants.PrismPackageFolderName + "\\\\" + issueFolder, folderPath, drawingCount[countIndex1], drawingCount[countIndex2], isAss, teklaVersion);
+			int start = drawingCount[countIndex1]; // this is where in the total list of drawings this type starts
+			int range = drawingCount[countIndex2]; // this is the count of drawings of the current type
 
-			// Calculate the print folder and desired file count based on inputs
-			string printFolder = issuePath + folderPath;
-			int desiredFileCount = drawingCount[countIndex2];
-			string drawingType = folderPath;  // Assuming folderPath indicates drawing type
+			int finalEndPoint = start + range - 1;
 
-			// Wait asynchronously for printing to complete
-			await WaitForPrintingAsync(printFolder, desiredFileCount, toolStrip, statusLabel, drawingType);
+			int batchSize = 50;
 
-			toolStrip.Invoke(new Action(() =>
+			int currentStart = start;
+
+			while (currentStart <= finalEndPoint)
 			{
-				statusLabel.Text = "Adding issue stamp.";
-			}));
+				int remaining = finalEndPoint - currentStart + 1;
+				int currentCount = Math.Min(batchSize, remaining);
 
-			// Issue and lock stamp the drawings
-			PrismMacroBuilder.IssueAndLockStampOn();
+				PrismMacroBuilder.PrintSelectedDrawings(Constants.PrismPackageFolderName + "\\\\" + issueFolder,
+					folderPath,	currentStart,currentCount,isAss,teklaVersion);
+
+				string printFolder = issuePath + folderPath;
+
+				int desiredFileCount = Directory.GetFiles(printFolder).Length + currentCount;
+
+				string drawingType = folderPath;
+
+				await WaitForPrintingAsync(printFolder, desiredFileCount, toolStrip, statusLabel, drawingType, range);
+
+				toolStrip.Invoke(new Action(() =>
+				{
+					statusLabel.Text = "Adding issue stamp.";
+				}));
+
+				PrismMacroBuilder.IssueAndLockStampOn();
+
+				currentStart += currentCount;
+			}
 		}
 
 		public static void RemoveSheetNumbersFromAllDrawings(string mainDirectoryPath)
@@ -369,7 +395,13 @@ namespace Prism
 			return Drawings.Where(part => part.DrawingType == type).ToList();
 		}
 
-		private static async Task WaitForPrintingAsync(string printFolder, int desiredFileCount, ToolStrip toolStrip, ToolStripStatusLabel statusLabel, string drawingType)
+		/// <summary>
+		/// This method watches the file currently being printed to until the number of files in the folder matches the number of
+		/// drawings currently being printed, as soon as it's hit the task ends. If no new files are creted in a certain timespan then
+		/// it is assumed somthing is wrong with printing and a warning is sent to the user
+		/// </summary>
+		private static async Task WaitForPrintingAsync(string printFolder, int desiredFileCount, ToolStrip toolStrip,
+			ToolStripStatusLabel statusLabel, string drawingType, int totalNumberOfFilesOfCurrentType)
 		{
 			string folderPath = printFolder;
 
@@ -378,51 +410,64 @@ namespace Prism
 				watcher.EnableRaisingEvents = true;
 				watcher.IncludeSubdirectories = false;
 
-				int currentFileCount = Directory.GetFiles(folderPath).Length;
-				int previousFileCount = currentFileCount;
-				bool countIncreased = false;
+				int currentFileCount = Directory.Exists(folderPath)
+					? Directory.GetFiles(folderPath).Length
+					: 0;
 
-				// Update the status immediately upon entering the method
-				UpdateStatusLabel(toolStrip, statusLabel, currentFileCount, desiredFileCount, drawingType.Substring(1));
+				int previousFileCount = currentFileCount;
+
+				// Used to instantly exit when done
+				var tcs = new TaskCompletionSource<bool>();
 
 				watcher.Created += (sender, e) =>
 				{
-					currentFileCount++;
-					UpdateStatusLabel(toolStrip, statusLabel, currentFileCount, desiredFileCount, drawingType.Substring(1));
+					// Recheck actual file count 
+					currentFileCount = Directory.GetFiles(folderPath).Length;
+
+					UpdateStatusLabel(
+						toolStrip,
+						statusLabel,
+						currentFileCount,
+						totalNumberOfFilesOfCurrentType,
+						drawingType.Substring(1));
 
 					if (currentFileCount >= desiredFileCount)
 					{
-						watcher.EnableRaisingEvents = false; // Stop watching the folder
+						watcher.EnableRaisingEvents = false;
+						tcs.TrySetResult(true); // signal completion immediately
 					}
-
-					countIncreased = true; // File created, set flag to true
 				};
 
 				while (currentFileCount < desiredFileCount)
 				{
-					await Task.Delay(10000); // Asynchronous delay, keeping the UI responsive
+					var delayTask = Task.Delay(30000);
 
-					if (!countIncreased)
+					//  Wait for either: completion OR timeout
+					var completedTask = await Task.WhenAny(delayTask, tcs.Task);
+
+					if (completedTask == tcs.Task)
+					{
+						// Finished immediately
+						break;
+					}
+
+					// Fallback check (we need this because sometimes the watcher can miss events)
+					int fileCountAfterCheck = Directory.GetFiles(folderPath).Length;
+
+					if (fileCountAfterCheck >= desiredFileCount)
+					{
+						break;
+					}
+
+					if (fileCountAfterCheck == previousFileCount)
 					{
 						PrismWarnings.DrawingPrintFailed();
 						watcher.EnableRaisingEvents = false;
 						break;
 					}
 
-					int fileCountAfterCheck = Directory.GetFiles(folderPath).Length;
-
-					if (fileCountAfterCheck > previousFileCount)
-					{
-						previousFileCount = fileCountAfterCheck;
-						countIncreased = true; // Files increased, set flag to true
-					}
-					else
-					{
-						countIncreased = false; // No new files found, set flag to false
-					}
-
+					previousFileCount = fileCountAfterCheck;
 					currentFileCount = fileCountAfterCheck;
-					UpdateStatusLabel(toolStrip, statusLabel, currentFileCount, desiredFileCount, drawingType.Substring(1));
 				}
 
 				if (currentFileCount >= desiredFileCount)

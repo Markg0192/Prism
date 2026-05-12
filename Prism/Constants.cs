@@ -59,7 +59,7 @@ namespace Prism
         {
             List<string> specialOperationUsers = new List<string>
             {
-				"mark.gibson"
+				"mark.glibson"
 			};
 
             foreach (string user in specialOperationUsers)
