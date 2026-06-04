@@ -150,7 +150,8 @@ namespace Prism
 		public static void NotUsingLatestVersion(string latestVersion, string currentVersion)
 		{
 			string notUpToDateMessage = $"This is not the latest version of Prism, the latest version is {latestVersion}, you are using {currentVersion}.\r" +
-                "You now have 7 days to get the latest version, Prism will not work after this.\r\rContact ITHelpdesk@severfield.com for the latest install."                ;
+                "You now have 7 days to get the latest version, Prism will not work after this.\r\rContact ITHelpdesk@severfield.com for the latest install." +
+				"Or look in your Severfield Firm Folder -> ~SET UP FILES\\TsepFiles\\Prism for the latest tsep version";
 			string notUpToDateTitle = "Not the latest version";
 			CreateOKForm(notUpToDateMessage, notUpToDateTitle);
 		}
@@ -158,7 +159,8 @@ namespace Prism
 		public static void NotUsingLatestVersionForceUpdate(string latestVersion, string currentVersion)
 		{
             string notUpToDateMessage = $"This is not the latest version of Prism, the latest version is {latestVersion}, you are using {currentVersion}.\r" +
-                "Your grace period for update has expired. Prism will now close.\r\rContact ITHelpdesk@severfield.com for the latest install.";
+                "Your grace period for update has expired. Prism will now close.\r\rContact ITHelpdesk@severfield.com for the latest install."+
+				"Or look in your Severfield Firm Folder -> ~SET UP FILES\\TsepFiles\\Prism for the latest tsep version";
 			string notUpToDateTitle = "Not the latest version";
 			CreateOKForm(notUpToDateMessage, notUpToDateTitle);
 		}
@@ -166,7 +168,8 @@ namespace Prism
 		public static void NotUsingLatestVersionReminderToUpdate(string latestVersion, string currentVersion, double daysLeft)
 		{
 			string notUpToDateMessage = $"This is not the latest version of Prism, the latest version is {latestVersion}, you are using {currentVersion}.\r" +
-					 $"You now have {daysLeft} days to get the latest version, Prism will not work after this\r\rContact ITHelpdesk@severfield.com for the latest install.";
+					 $"You now have {daysLeft} days to get the latest version, Prism will not work after this\r\rContact ITHelpdesk@severfield.com for the latest install." +
+					 "Or look in your Severfield Firm Folder -> ~SET UP FILES\\TsepFiles\\Prism for the latest tsep version";
 			string notUpToDateTitle = "Not the latest version";
 			CreateOKForm(notUpToDateMessage, notUpToDateTitle);
 		}

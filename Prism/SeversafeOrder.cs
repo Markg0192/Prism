@@ -298,6 +298,10 @@ namespace Prism
 		private static void GetSystemLength(Part myPart, Model model, bool isPhaseBreak)
 		{
 			Beam b = myPart as Beam;
+			if (b == null)
+			{
+				return;
+			}
 			var boundingBox = CreateBoundingBox(b, 400);
 			var parts = model.GetModelObjectSelector().GetObjectsByBoundingBox(boundingBox.MaxPoint, boundingBox.MinPoint);
 
