@@ -8,7 +8,6 @@ using System.IO;
 using Application = Microsoft.Office.Interop.Excel.Application;
 using Model = Tekla.Structures.Model.Model;
 using Point = Tekla.Structures.Geometry3d.Point;
-using Tekla.Structures.Geometry3d;
 
 namespace Prism
 {
@@ -38,25 +37,32 @@ namespace Prism
 
 		public static void CreateSeversafeOrder(Model model, List<PrismPart> selectedObjects, string siteDate, ReportManager reportManager, int divisionNo, string reportPrefix, PrismProjectData projData)
 		{
-			ResetAllNumbers();
+			try
+			{
+				ResetAllNumbers();
 
-			CollateOrderableParts(model, selectedObjects, projData);
+				CollateOrderableParts(model, selectedObjects, projData);
 
-			GetFullRailsRequired();
+				GetFullRailsRequired();
 
-			GetFullKickFlatsRequired();
+				GetFullKickFlatsRequired();
 
-			string originalReportName = "\\\\GS Seversafe Order Form (EPO) Rev10.xlsx";
-			string sourcePath = FirmFolderLoc.ReportTemplates() + originalReportName;
+				string originalReportName = "\\\\GS Seversafe Order Form (EPO) Rev10.xlsx";
+				string sourcePath = FirmFolderLoc.ReportTemplates() + originalReportName;
 
-			string destinationPath = reportManager.Folders.EpoPath;
-			string newFileName = reportManager.EpoReportPrefix + ".xlsx";
+				string destinationPath = reportManager.Folders.EpoPath;
+				string newFileName = reportManager.EpoReportPrefix + ".xlsx";
 
+				CopyRenameAndWrite(reportManager.ProjectData, reportManager.PhaseNum, siteDate, sourcePath, destinationPath, newFileName, divisionNo);
 
-			CopyRenameAndWrite(reportManager.ProjectData, reportManager.PhaseNum, siteDate, sourcePath, destinationPath, newFileName, divisionNo);
+				reportManager.Folders.ZipFolder(reportManager.Folders.EpoPath);
 
-			reportManager.Folders.ZipFolder(reportManager.Folders.EpoPath);
-			EmailWriter.WriteEpoEmail(reportManager.ProjectData, reportPrefix, reportManager.IssueNum, reportManager.PhaseNum, siteDate, reportManager.Folders.EpoPath);
+				EmailWriter.WriteEpoEmail(reportManager.ProjectData, reportPrefix, reportManager.IssueNum, reportManager.PhaseNum, siteDate, reportManager.Folders.EpoPath);
+			}
+			catch (Exception ex)
+			{
+				
+			}
 		}
 
 		public static void CopyRenameAndWrite(PrismProjectData projData, string phaseNumber, string deliveryDate, string sourcePath, string destinationPath, string newFileName, int divisionNo)
@@ -65,16 +71,12 @@ namespace Prism
 			{
 				if (File.Exists(sourcePath))
 				{
-					// Create destination directory if it doesn't exist
 					Directory.CreateDirectory(destinationPath);
 
-					// Combine destination path with new file name
 					string destinationFilePath = Path.Combine(destinationPath, newFileName);
 
-					// Copy the file to the new location
 					File.Copy(sourcePath, destinationFilePath);
 
-					// Call the ExcelWriter method to write data to the copied file
 					ExcelWriter(projData, phaseNumber, deliveryDate, destinationFilePath, divisionNo);
 
 					Console.WriteLine("File copied and modified successfully!");
@@ -92,11 +94,14 @@ namespace Prism
 
 		private static void ExcelWriter(PrismProjectData projData, string phaseNumber, string deliveryDate, string filePath, int divisionNo)
 		{
-			Application excelApp = new Application();
-			Workbook workbook = excelApp.Workbooks.Open(filePath);
+			Application excelApp = null;
+			Workbook workbook = null;
 
 			try
 			{
+				excelApp = new Application();
+				workbook = excelApp.Workbooks.Open(filePath);
+
 				Worksheet worksheet = workbook.Sheets["Sheet1"] as Worksheet;
 				string projectNumber = projData.ProjNumber;
 				string projectName = projData.ProjName;
@@ -133,7 +138,6 @@ namespace Prism
 				worksheet.Range["N16:Q16"].Value = LinMeterRun1mPhaseBreak;
 				worksheet.Range["N17:Q17"].Value = LinMeterRun1_8mPhaseBreak;
 
-
 				string textBoxName = DetermineDivisionTextBoxName(divisionNo);
 
 				Shape textBoxShape = worksheet.Shapes.Cast<Shape>()
@@ -144,16 +148,29 @@ namespace Prism
 					textBoxShape.TextFrame.Characters(0, 1).Text = "X";
 				}
 
-
 				workbook.Save();
 			}
 			finally
 			{
-				workbook.Close(false);
-				excelApp.Quit();
+				if (workbook != null)
+				{
+					workbook.Close(false);
+				}
 
-				System.Runtime.InteropServices.Marshal.ReleaseComObject(workbook);
-				System.Runtime.InteropServices.Marshal.ReleaseComObject(excelApp);
+				if (excelApp != null)
+				{
+					excelApp.Quit();
+				}
+
+				if (workbook != null)
+				{
+					System.Runtime.InteropServices.Marshal.ReleaseComObject(workbook);
+				}
+
+				if (excelApp != null)
+				{
+					System.Runtime.InteropServices.Marshal.ReleaseComObject(excelApp);
+				}
 			}
 		}
 
@@ -167,19 +184,19 @@ namespace Prism
 
 		private static string DetermineDivisionTextBoxName(int divisionNo)
 		{
-			if (divisionNo == 1) //Commercial and industrial
+			if (divisionNo == 1)
 			{
 				return "TextBox 21";
 			}
-			if (divisionNo == 2) //Nuclear and infrastructure
+			if (divisionNo == 2)
 			{
 				return "TextBox 22";
 			}
-			if (divisionNo == 3) //Parts and processing
+			if (divisionNo == 3)
 			{
 				return "TextBox 23";
 			}
-			if (divisionNo == 4) //Other
+			if (divisionNo == 4)
 			{
 				return "TextBox 14";
 			}
@@ -188,9 +205,8 @@ namespace Prism
 
 		private static void GetFullKickFlatsRequired()
 		{
-
 			double exactKickFlatRequired = KickFlatLength / 3.700;
-			int extraRails = exactKickFlatRequired > 5 ? 0 : 2; //Add 2 extra rails to have some spare (only when more than 5 is needed overall)
+			int extraRails = exactKickFlatRequired > 5 ? 0 : 2;
 			ToeBoardLengths = (int)Math.Ceiling(exactKickFlatRequired) + extraRails;
 		}
 
@@ -209,6 +225,8 @@ namespace Prism
 
 		public static void CollateOrderableParts(Model model, List<PrismPart> selectedObjects, PrismProjectData projData)
 		{
+			List<SeversafePostCacheItem> postCache = BuildSeversafePostCache(selectedObjects);
+
 			foreach (PrismPart p in selectedObjects)
 			{
 				if (p.Part is Brep post)
@@ -218,45 +236,54 @@ namespace Prism
 						case string name when name.Contains("STANDARD"):
 							Standards++;
 							break;
+
 						case string name when name.Contains("EXTENSION"):
 							ExtensionPieces++;
 							break;
+
 						case string name when name.Contains("SS-TRIMFRAME"):
 							EdgeTrimCradleFrames++;
 							break;
 					}
 				}
-				//if (p.Part is Beam b)
+
+				switch (p.Part.Name)
 				{
-					switch (p.Part.Name)
-					{
-						case string name when name.Contains("HANDRAIL"):
-							AddToHandrail(model, p.Part);
-							break;
-						case string name when name.Contains("PANEL"):
-							AddToPanels(p.Part);
-							break;
-						case string name when name.Contains("KICKFLAT"):
-							CountKickFlat(p.Part);
-							break;
-						case string name when name.Contains("SS-KK-TYPE-14-6"):
-							AddExternalKlamp();
-							break;
-						case string name when name.Contains("SWIVEL"):
-							AddSwivelKlamp();
-							break;
-						case string name when name.Contains("SS-KK-TYPE-15-6"):
-							AddElbowJoint();
-							break;
-						case string name when name.Contains("SS-KK-TYPE-18-6"):
-							AddInternalKlamp(p.Part);
-							break;
-						default:
-							break;
-					}
-					ModelModifiers.ModifyAttribute(p, 3, projData, null, false, true);
+					case string name when name.Contains("HANDRAIL"):
+						AddToHandrail(p.Part, postCache);
+						break;
+
+					case string name when name.Contains("PANEL"):
+						AddToPanels(p.Part);
+						break;
+
+					case string name when name.Contains("KICKFLAT"):
+						CountKickFlat(p.Part);
+						break;
+
+					case string name when name.Contains("SS-KK-TYPE-14-6"):
+						AddExternalKlamp();
+						break;
+
+					case string name when name.Contains("SWIVEL"):
+						AddSwivelKlamp();
+						break;
+
+					case string name when name.Contains("SS-KK-TYPE-15-6"):
+						AddElbowJoint();
+						break;
+
+					case string name when name.Contains("SS-KK-TYPE-18-6"):
+						AddInternalKlamp(p.Part);
+						break;
+
+					default:
+						break;
 				}
+
+				ModelModifiers.ModifyAttribute(p, 3, projData, null, false, true);
 			}
+
 			RoundHandrailMeters();
 		}
 
@@ -288,76 +315,83 @@ namespace Prism
 			KickFlatLength += ModelModifiers.GetPartLength(p) / 1000;
 		}
 
-		private static void AddToHandrail(Model model, Part p)
+		private static void AddToHandrail(Part p, List<SeversafePostCacheItem> postCache)
 		{
 			RunningHandrailLength += ModelModifiers.GetPartLength(p) / 1000;
-			if (p.Class == "10") { GetSystemLength(p, model, true); }
-			else { GetSystemLength(p, model, false); }
+
+			if (p.Class == "10")
+			{
+				GetSystemLength(p, postCache, true);
+			}
+			else
+			{
+				GetSystemLength(p, postCache, false);
+			}
 		}
 
-		private static void GetSystemLength(Part myPart, Model model, bool isPhaseBreak)
+		private static void GetSystemLength(Part myPart, List<SeversafePostCacheItem> postCache, bool isPhaseBreak)
 		{
 			Beam b = myPart as Beam;
 			if (b == null)
 			{
 				return;
 			}
-			var boundingBox = CreateBoundingBox(b, 400);
-			var parts = model.GetModelObjectSelector().GetObjectsByBoundingBox(boundingBox.MaxPoint, boundingBox.MinPoint);
-
-			Brep standard = GetPostParts(parts, out bool extensionFound);
 
 			int standardHeight = 1230;
 			int tolerance = 150;
 
-			if (standard != null && Math.Abs(standard.EndPoint.Z + standardHeight - b.EndPoint.Z) < tolerance) //then the rail has a post and is suitably close to the top of it for it to be the upper rail
+			bool extensionFound = false;
+			Brep standard = null;
+
+			double minX = Math.Min(b.StartPoint.X, b.EndPoint.X) - 100;
+			double maxX = Math.Max(b.StartPoint.X, b.EndPoint.X) + 100;
+			double minY = Math.Min(b.StartPoint.Y, b.EndPoint.Y) - 100;
+			double maxY = Math.Max(b.StartPoint.Y, b.EndPoint.Y) + 100;
+			double minZ = Math.Min(b.StartPoint.Z, b.EndPoint.Z) - 3000;
+			double maxZ = Math.Max(b.StartPoint.Z, b.EndPoint.Z) + 100;
+
+			foreach (SeversafePostCacheItem post in postCache)
+			{
+				bool insideBoundingBox =
+					post.EndPoint.X >= minX &&
+					post.EndPoint.X <= maxX &&
+					post.EndPoint.Y >= minY &&
+					post.EndPoint.Y <= maxY &&
+					post.EndPoint.Z >= minZ &&
+					post.EndPoint.Z <= maxZ;
+
+				if (!insideBoundingBox)
+				{
+					continue;
+				}
+
+				if (post.IsStandard)
+				{
+					standard = post.Brep;
+				}
+
+				if (post.IsExtension)
+				{
+					extensionFound = true;
+				}
+			}
+
+			if (standard != null && Math.Abs(standard.EndPoint.Z + standardHeight - b.EndPoint.Z) < tolerance)
 			{
 				UpdateLengthValues(myPart, isPhaseBreak, extensionFound);
 			}
 		}
 
-		private static AABB CreateBoundingBox(Beam b, double offset)
-		{
-			Point startPoint = b.StartPoint;
-			Point endPoint = b.EndPoint;
-			AABB boundingBox = new AABB(
-			new Point(Math.Min(startPoint.X, endPoint.X) - 100, Math.Min(startPoint.Y, endPoint.Y) - 100, Math.Min(startPoint.Z, endPoint.Z) - 3000),
-			new Point(Math.Max(startPoint.X, endPoint.X) + 100, Math.Max(startPoint.Y, endPoint.Y) + 100, Math.Max(startPoint.Z, endPoint.Z) + 100));
-			return boundingBox;
-		}
-
-		private static Brep GetPostParts(ModelObjectEnumerator modelObjects, out bool extensionFound)
-		{
-			Brep standard = null;
-			extensionFound = false;
-
-			foreach (var mObj in modelObjects)
-			{
-				if (mObj is Brep beam)
-				{
-					if (beam.Name.Contains("SS-STANDARD"))
-					{
-						standard = beam;
-					}
-					if (beam.Name.Contains("SS-EXTENSION"))
-					{
-						extensionFound = true;
-					}
-				}
-			}
-
-			return standard;
-		}
-
 		private static void UpdateLengthValues(Part myPart, bool isPhaseBreak, bool extensionFound)
 		{
-			double length = ModelModifiers.GetPartLength(myPart) / 1000; //length is in mm, we need it in m hence the /1000
-			if (extensionFound) // then our rail is part of a 3 rail system
+			double length = ModelModifiers.GetPartLength(myPart) / 1000;
+
+			if (extensionFound)
 			{
 				if (isPhaseBreak) { LinMeterRun1_8mPhaseBreak += length; }
 				else { LinMeterRun1_8mSystem += length; }
 			}
-			else // its part of a 2 rail
+			else
 			{
 				if (isPhaseBreak) { LinMeterRun1mPhaseBreak += length; }
 				else { LinMeterRun1mSystem += length; }
@@ -408,6 +442,43 @@ namespace Prism
 			LinMeterRun1_8mPhaseBreak = 0;
 			RunningHandrailLength = 0;
 			KickFlatLength = 0;
+		}
+
+		private class SeversafePostCacheItem
+		{
+			public Brep Brep { get; set; }
+			public string Name { get; set; }
+			public Point EndPoint { get; set; }
+			public bool IsStandard { get; set; }
+			public bool IsExtension { get; set; }
+		}
+
+		private static List<SeversafePostCacheItem> BuildSeversafePostCache(List<PrismPart> selectedObjects)
+		{
+			var postCache = new List<SeversafePostCacheItem>();
+
+			foreach (PrismPart prismPart in selectedObjects)
+			{
+				if (prismPart.Part is Brep brep)
+				{
+					bool isStandard = brep.Name.Contains("SS-STANDARD");
+					bool isExtension = brep.Name.Contains("SS-EXTENSION");
+
+					if (isStandard || isExtension)
+					{
+						postCache.Add(new SeversafePostCacheItem
+						{
+							Brep = brep,
+							Name = brep.Name,
+							EndPoint = brep.EndPoint,
+							IsStandard = isStandard,
+							IsExtension = isExtension
+						});
+					}
+				}
+			}
+
+			return postCache;
 		}
 	}
 }
