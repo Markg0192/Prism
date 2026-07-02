@@ -60,7 +60,12 @@
             return $"FAB-PHASE{phaseNum}-ISSUE{issueNum}";
         }
 
-        public static string FabStampUDA()
+		public static string FabViewAndFilterStamp(string phaseNum)
+		{
+			return $"FAB-PHASE{phaseNum}";
+		}
+
+		public static string FabStampUDA()
         {
             return "SEV-UDA-126";
         }

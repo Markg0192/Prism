@@ -438,37 +438,69 @@ namespace Prism
 					}
 				};
 
+				DateTime lastProgressTime = DateTime.Now;
+
 				while (currentFileCount < desiredFileCount)
 				{
 					var delayTask = Task.Delay(30000);
-
-					//  Wait for either: completion OR timeout
 					var completedTask = await Task.WhenAny(delayTask, tcs.Task);
 
 					if (completedTask == tcs.Task)
-					{
-						// Finished immediately
 						break;
-					}
 
-					// Fallback check (we need this because sometimes the watcher can miss events)
 					int fileCountAfterCheck = Directory.GetFiles(folderPath).Length;
 
 					if (fileCountAfterCheck >= desiredFileCount)
-					{
 						break;
+
+					if (fileCountAfterCheck > currentFileCount)
+					{
+						// ✅ progress detected
+						lastProgressTime = DateTime.Now;
 					}
 
-					if (fileCountAfterCheck == previousFileCount)
+					currentFileCount = fileCountAfterCheck;
+
+					// ❗ Only fail if no progress for a LONG time
+					if ((DateTime.Now - lastProgressTime).TotalMinutes >= 2)
 					{
 						PrismWarnings.DrawingPrintFailed();
 						watcher.EnableRaisingEvents = false;
 						break;
 					}
-
-					previousFileCount = fileCountAfterCheck;
-					currentFileCount = fileCountAfterCheck;
 				}
+
+				//while (currentFileCount < desiredFileCount)
+				//{
+				//	var delayTask = Task.Delay(30000);
+
+				//	//  Wait for either: completion OR timeout
+				//	var completedTask = await Task.WhenAny(delayTask, tcs.Task);
+
+				//	if (completedTask == tcs.Task)
+				//	{
+				//		// Finished immediately
+				//		break;
+				//	}
+
+				//	// Fallback check (we need this because sometimes the watcher can miss events)
+				//	int fileCountAfterCheck = Directory.GetFiles(folderPath).Length;
+
+				//	if (fileCountAfterCheck >= desiredFileCount)
+				//	{
+				//		break;
+				//	}
+
+				//	if (fileCountAfterCheck == previousFileCount)
+				//	{
+				//		PrismWarnings.DrawingPrintFailed();
+				//		watcher.EnableRaisingEvents = false;
+				//		break;
+				//	}
+
+				//	previousFileCount = fileCountAfterCheck;
+				//	currentFileCount = fileCountAfterCheck;
+				//}
 
 				if (currentFileCount >= desiredFileCount)
 				{

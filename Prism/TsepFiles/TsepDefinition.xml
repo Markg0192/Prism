@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TEP Version="1.0">
 
-	<Product Id="Prism" UpgradeCode="15FF4F3F-9546-4EE1-8DF9-4A1B546A4661" Version="5.7" Language="1033"
+	<Product Id="Prism" UpgradeCode="15FF4F3F-9546-4EE1-8DF9-4A1B546A4661" Version="5.8" Language="1033"
 		Name="Severfield Prism Extension" Manufacturer="Severfield Corporation"  Description= "Detailer Helper"
 		IconPath="%TEPDEFINITIONFILEFOLDER%\Icon.png"
 			 
@@ -27,6 +27,7 @@
 
 	<Component Id="TheExtensionComponent" Guid="615B766A-403F-4ED7-99AD-3B0B73B43BA2">
 		<File Id="Prism" Source="%BinariesFolder%\Prism.exe" Target="%BinariesTargetDirectory%"/>
+		<File Id="QrCoderDll" Source="%BinariesFolder%\QRCoder.dll" Target="%BinariesTargetDirectory%"/>
 		<File Id="PrismMacro" Source="%TEPDEFINITIONFILEFOLDER%\Prism.cs" Target="%MacroDirectory%"/>
 		<File Id="PrismMacroImage" Source="%TEPDEFINITIONFILEFOLDER%\Prism.bmp" Target="%MacroDirectory%"/>
 	</Component>

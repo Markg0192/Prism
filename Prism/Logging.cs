@@ -502,7 +502,7 @@ namespace Prism
 				$"Fabrication packages created: {newFabPack}"
 			};
 
-			if (newTimesUsed % 1000 == 0)
+			if (newTimesUsed % 5000 == 0)
 			{
 				string[] content2 = new string[]
 			   {
