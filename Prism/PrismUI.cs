@@ -41,7 +41,7 @@ namespace Prism
 			{
 				if (!await Task.Run(() => InitialSetup(StageTypes.Prelim1, false, "x", "x", statusStrip_Mat, MaterialStatusLabel))) { EndFunction(0); return; }
 
-				if (!await Task.Run(() => _selectedObjects.MaterialButton1op(_projectData, (int)StageTypes.Prelim1, statusStrip_Mat, MaterialStatusLabel))) { EndFunction(0); return; }
+				if (!await Task.Run(() => _selectedObjects.MaterialButton1op(_projectData, StageTypes.Prelim1, statusStrip_Mat, MaterialStatusLabel))) { EndFunction(0); return; }
 
 				ModelModifiers.RedrawViews();
 			}
@@ -53,15 +53,89 @@ namespace Prism
 			EndFunction(1);
 		}
 
+		public bool InitialiseForExternalUse()
+		{
+			try
+			{
+				InitializePrism();
+
+				if (_model == null)
+				{
+					return false;
+				}
+
+				if (!_model.GetConnectionStatus())
+				{
+					return false;
+				}
+
+				if (_projectData == null)
+				{
+					return false;
+				}
+
+				return true;
+			}
+			catch (Exception exception)
+			{
+				EndWithException(exception);
+				return false;
+			}
+		}
+
+		public async Task<bool> RunMaterial1()
+		{
+			StartFunction();
+
+			try
+			{
+				bool initialSetupSucceeded =
+					await Task.Run(
+						delegate
+						{
+							return InitialSetup(StageTypes.Prelim1, false, "x", "x", statusStrip_Mat, MaterialStatusLabel);
+						});
+
+				if (!initialSetupSucceeded)
+				{
+					EndFunction(0);
+					return false;
+				}
+
+				bool materialOperationSucceeded =
+					await Task.Run(delegate
+						{
+							return _selectedObjects.MaterialButton1op(_projectData, StageTypes.Prelim1, statusStrip_Mat, MaterialStatusLabel);
+						});
+
+				if (!materialOperationSucceeded)
+				{
+					EndFunction(0);
+					return false;
+				}
+
+				ModelModifiers.RedrawViews();
+
+				EndFunction(1);
+				return true;
+			}
+			catch (Exception exception)
+			{
+				EndWithException(exception);
+				return false;
+			}
+		}
+
 		private async void btn_Material2_Click_1(object sender, EventArgs e)
 		{
 			StartFunction();
 
 			try
 			{
-				if (!await Task.Run(() => InitialSetup(StageTypes.Prelim2, true, "x", "x", statusStrip_Mat, MaterialStatusLabel))) { EndFunction(0); return; };
+				if (!await Task.Run(() => InitialSetup(StageTypes.Prelim2, true, "x", "x", statusStrip_Mat, MaterialStatusLabel))) { EndFunction(0); return; }
+				;
 
-				if (!await Task.Run(() => _selectedObjects.MaterialButton2op(txt_StartNumber.Text, (int)StageTypes.Prelim2, _projectData, _model, statusStrip_Mat, MaterialStatusLabel))) { EndFunction(0); return; }
+				if (!await Task.Run(() => _selectedObjects.MaterialButton2op(txt_StartNumber.Text, StageTypes.Prelim2, _projectData, _model, statusStrip_Mat, MaterialStatusLabel))) { EndFunction(0); return; }
 
 				ModelModifiers.RedrawViews();
 			}
@@ -94,7 +168,8 @@ namespace Prism
 				{
 					if (!orderType.Contains("Bolts"))
 					{
-						if (!await Task.Run(() => InitialSetup(StageTypes.Prelim3, true, "x", "x", statusStrip_Mat, MaterialStatusLabel))) { EndFunction(0); return; };
+						if (!await Task.Run(() => InitialSetup(StageTypes.Prelim3, true, "x", "x", statusStrip_Mat, MaterialStatusLabel))) { EndFunction(0); return; }
+						;
 					}
 					else { ModelChecker.ClearOldLists(); }
 
@@ -154,7 +229,7 @@ namespace Prism
 			{
 				if (!await Task.Run(() => InitialSetup(StageTypes.Check1, false, "x", "x", statusStrip_Det, DetailingStatusLabel))) { EndFunction(0); return; }
 
-				if (!await Task.Run(() => _selectedObjects.DetailButton1op(_projectData, (int)StageTypes.Check1, statusStrip_Mat, MaterialStatusLabel))) { EndFunction(0); return; }
+				if (!await Task.Run(() => _selectedObjects.DetailButton1op(_projectData, StageTypes.Check1, statusStrip_Mat, MaterialStatusLabel))) { EndFunction(0); return; }
 			}
 			catch (Exception ex)
 			{
@@ -174,7 +249,7 @@ namespace Prism
 				if (!await Task.Run(() => InitialSetup(StageTypes.Check2, true, "x", "x", statusStrip_Det, DetailingStatusLabel))) { EndFunction(0); return; }
 
 				string orientationType = cmb_ColumnOrientationType.Text; //we need this to avoid cross threading. (unsure why...)
-				if (!await Task.Run(() => _selectedObjects.DetailButton2op(_projectData, (int)StageTypes.Check2, orientationType, txt_PlateOnFlange.Text, statusStrip_Det, DetailingStatusLabel))) { return; }
+				if (!await Task.Run(() => _selectedObjects.DetailButton2op(_projectData, StageTypes.Check2, orientationType, txt_PlateOnFlange.Text, statusStrip_Det, DetailingStatusLabel))) { return; }
 			}
 			catch (Exception ex)
 			{
@@ -192,7 +267,7 @@ namespace Prism
 			{
 				if (!await Task.Run(() => InitialSetup(StageTypes.Check3, true, "x", "x", statusStrip_Det, DetailingStatusLabel))) { EndFunction(0); return; }
 
-				if (!_selectedObjects.DetailButton3op(_projectData, (int)StageTypes.Check3, statusStrip_Mat, MaterialStatusLabel)) { EndFunction(0); return; }
+				if (!_selectedObjects.DetailButton3op(_projectData, StageTypes.Check3, statusStrip_Mat, MaterialStatusLabel)) { EndFunction(0); return; }
 			}
 			catch (Exception ex)
 			{
@@ -255,14 +330,14 @@ namespace Prism
 			}
 
 			EmailWriter.WritePreparedEmail(Path.Combine(repoMan.Folders.FabPath, "Fab Email Text.txt"));
-		
+
 			EndFunction(1);
 		}
 
 		private async void btn_SpecialOperations_Click(object sender, EventArgs e)
 		{
-			
-		//	WebService.AddRecordToAppUseDatabase("MG", "Fully live Test", "TestFunc", "Test@severfield.com", 10);
+
+			//	WebService.AddRecordToAppUseDatabase("MG", "Fully live Test", "TestFunc", "Test@severfield.com", 10);
 
 
 			/*Stopwatch time = Stopwatch.StartNew();	
@@ -868,20 +943,22 @@ namespace Prism
 			if (orderType.Contains("Omit"))
 			{
 
-				if (!myReportManager.Folders.CreateMatFolder(false)) { EndFunction(0); return false; };
+				if (!myReportManager.Folders.CreateMatFolder(false)) { EndFunction(0); return false; }
+				;
 				myReportManager.CreateMaterialReports(_selectedObjects, orderType, StageTypes.Prelim3, toolStrip, tssl);
-				if (!MaterialButton3.FinishOrder(_selectedObjects, (int)StageTypes.Prelim3, _projectData, myReportManager.MatReportPrefix,
+				if (!MaterialButton3.FinishOrder(_selectedObjects, StageTypes.Prelim3, _projectData, myReportManager.MatReportPrefix,
 					orderType, myReportManager, txt_MatSiteDate.Text, toolStrip, tssl)) { return false; }
 			}
 			else
 			{
 				int orderAction = PrismWarnings.SpecialFittingOrder(_model);
 
-				if (!await Task.Run(() => InitialSetup(StageTypes.Prelim3, false))) { EndFunction(0); return false; };
+				if (!await Task.Run(() => InitialSetup(StageTypes.Prelim3, false))) { EndFunction(0); return false; }
+				;
 				if (orderAction == 2 || orderAction == 3) //then user wants to create a material order
 				{
 					if (!OrderSpecials(orderAction, orderType, StageTypes.Prelim3, myReportManager, toolStrip, tssl)) { EndFunction(0); return false; }
-					if (!MaterialButton3.FinishOrder(_selectedObjects, (int)StageTypes.Prelim3, _projectData, myReportManager.MatReportPrefix,
+					if (!MaterialButton3.FinishOrder(_selectedObjects, StageTypes.Prelim3, _projectData, myReportManager.MatReportPrefix,
 					   orderType, myReportManager, txt_MatSiteDate.Text, toolStrip, tssl, true)) { return false; }
 				}
 				if (orderAction == 4 || orderAction == 5) //then user wants to make drawings

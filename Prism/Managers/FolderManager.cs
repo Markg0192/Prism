@@ -151,29 +151,6 @@ namespace Prism
             return true;
         }
 
-        private bool CheckForExistingFolder(string folderPath)
-        {
-            if (Directory.Exists(folderPath))
-            {
-                if(PrismWarnings.FolderAlreadyExists(folderPath))
-                {
-                   Directory.Delete(folderPath, true);
-                    return true;
-                }
-                return false;
-            }
-            var zip = Directory.GetFiles(PrismFileLocaton, "*.zip");
-            if (zip.Contains($"{folderPath}.zip"))
-            {
-                if(PrismWarnings.FolderAlreadyExists($"{folderPath}.zip"))
-                {
-                    File.Delete($"{folderPath}.zip");
-                }
-                return false;
-            }
-            return true;
-        }
-
         private bool CheckAndDeleteFolder(string folderPath)
         {
             bool folderExists = Directory.Exists(folderPath);

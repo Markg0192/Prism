@@ -1,25 +1,28 @@
-﻿using Tekla.Structures.Model;
-using Tekla.Structures.Model.Operations;
-using Tekla.Structures.Geometry3d;
-using Tekla.Structures.Drawing.Automation;
-using System.IO;
-using System.Collections.Generic;
-using Tekla.Structures;
-using System.Linq;
-using System.Collections;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using Tekla.Structures.Model.UI;
-using static Prism.Enums;
-using Part = Tekla.Structures.Model.Part;
-using ModelObject = Tekla.Structures.Model.ModelObject;
+﻿using Prism.CustomDialogs;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Data;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
-using Prism.CustomDialogs;
-using System.Text.RegularExpressions;
-using System.Data;
+using Tekla.Structures;
+using Tekla.Structures.Drawing;
+using Tekla.Structures.Drawing.Automation;
+using Tekla.Structures.Geometry3d;
+using Tekla.Structures.Model;
+using Tekla.Structures.Model.Operations;
+using Tekla.Structures.Model.UI;
+using static Prism.Enums;
+using static QRCoder.PayloadGenerator;
 using static Tekla.Structures.Filtering.Categories.TaskFilterExpressions;
+using ModelObject = Tekla.Structures.Model.ModelObject;
+using Part = Tekla.Structures.Model.Part;
+using View = Tekla.Structures.Model.UI.View;
 
 namespace Prism
 {
@@ -29,33 +32,10 @@ namespace Prism
 	/// </summary>
 	public static class ModelModifiers
 	{
-		/*public static void VariationCheck(string phaseNumber, PrismProjectData projData, string variationNumber)
-		{
-			bool isVariation = phaseNumber.Contains("V") || phaseNumber.Contains("v") || variationNumber != "";
-
-			if (isVariation)
-			{
-				if (PrismWarnings.IsVariation())
-				{
-					if (phaseNumber.Contains("V") || phaseNumber.Contains("v"))
-					{
-						projData.VariationNumber = phaseNumber;
-					}
-					else
-					{
-						projData.VariationNumber = variationNumber;
-					}
-					projData.IsVariation = true;
-
-				}
-			}
-			else { projData.IsVariation = false; }
-		}*/
-
 		public static void VariationCheck(PrismProjectData projData, string variationNumber, string variationType)
 		{
 			// Check if there is any indication of a variation in phaseNumber or variationNumber
-			bool isVariation = !string.IsNullOrEmpty(variationNumber);
+			bool isVariation = !string.IsNullOrEmpty(variationNumber) && variationNumber != "None";
 
 			// If it is a variation and the user accepts it as a variation via the Prism warning
 			if (isVariation && PrismWarnings.IsVariation())
@@ -132,34 +112,72 @@ namespace Prism
 			return cleaned;
 		}
 
-		public static bool ModifyAttributes(this List<PrismPart> selectedObjects, int stageNumber, PrismProjectData projectData,
+		public static bool ModifyAttributes(this List<PrismPart> selectedObjects, StageTypes stageType, PrismProjectData projectData, 
+			Action<int, string> progress, ReportManager reportManager, bool isSpecialFittingOrder = false, bool isSeversafe = false)
+		{
+			int totalCount = selectedObjects.Count;
+
+			progress?.Invoke(0, totalCount == 0 ? "No Prism attributes require updating." : $"Updating Prism attributes: 0 of {totalCount}");
+
+			if (totalCount == 0)
+			{
+				progress?.Invoke(100, "Prism attributes updated.");
+				return true;
+			}
+
+			TableData td = stageType == StageTypes.Prelim3 ? UniClass_Codes.ReadTableData(Constants.ModelProjectInforLocation(projectData.ProjNumberAndGuid)) : null;
+
+			for (int i = 0; i < totalCount; i++)
+			{
+				PrismPart part = selectedObjects[i];
+
+				if (!ModifyAttribute(part, stageType, projectData, td, reportManager, isSpecialFittingOrder, isSeversafe))
+				{
+					progress?.Invoke((int)Math.Round((i / (double)totalCount) * 100.0), $"Failed to update Prism attributes for {part.PartMark}.");
+
+					return false;
+				}
+
+				int completedCount = i + 1;
+				int percentage = (int)Math.Round((completedCount / (double)totalCount) * 100.0);
+
+				progress?.Invoke(percentage, $"Updating Prism attributes: {completedCount} of {totalCount}");
+			}
+
+			progress?.Invoke(100, $"Prism attributes updated for {totalCount} parts.");
+
+			return true;
+		}
+
+		public static bool ModifyAttributes(this List<PrismPart> selectedObjects, StageTypes stageType, PrismProjectData projectData, ReportManager reportManager,
 	 ToolStrip toolStrip, ToolStripStatusLabel statusLabel, bool isSpecialFittingOrder = false, bool isSeversafe = false)
 		{
 			int currentCount = 0;
 			int totalCount = selectedObjects.Count;
 
-			TableData td = stageNumber == 3 ? UniClass_Codes.ReadTableData(Constants.ModelProjectInforLocation(projectData.ProjNumberAndGuid)) : null;
+			TableData td = stageType == StageTypes.Prelim3 ? UniClass_Codes.ReadTableData(Constants.ModelProjectInforLocation(projectData.ProjNumberAndGuid)) : null;
 
 			foreach (PrismPart part in selectedObjects)
 			{
-				if (totalCount > 0) UpdateStatusLabel(ref currentCount, toolStrip, statusLabel, totalCount, "Updating Prism Attributes");
+				//if (totalCount > 0) UpdateStatusLabel(ref currentCount, toolStrip, statusLabel, totalCount, "Updating Prism Attributes");
 
-				if (!ModifyAttribute(part, stageNumber, projectData, td, isSpecialFittingOrder, isSeversafe))
+				if (!ModifyAttribute(part, stageType, projectData, td, reportManager, isSpecialFittingOrder, isSeversafe))
 				{
 					return false;
 				}
 			}
 			return true;
 		}
-
-		public static bool ModifyAttribute(PrismPart prismPart, int stageNumber, PrismProjectData projectData, TableData uniClassTable, bool isSpecialFittingOrder = false, bool isSeversafe = false)
+		
+		public static bool ModifyAttribute(PrismPart prismPart, StageTypes stageType, PrismProjectData projectData, TableData uniClassTable, 
+			ReportManager reportManager, bool isSpecialFittingOrder = false, bool isSeversafe = false)
 		{
 			if (isSpecialFittingOrder) prismPart.Part.SetUserProperty(ModelUDA.Pre_Ordered(), 1);
 
-			prismPart.Part.SetUserProperty(ModelUDA.CurrentStageName(stageNumber), projectData.Full);
-			prismPart.Part.SetUserProperty(ModelUDA.CurrentStageDate(stageNumber), projectData.Date);
+			prismPart.Part.SetUserProperty(ModelUDA.CurrentStageName((int)stageType), projectData.Full);
+			prismPart.Part.SetUserProperty(ModelUDA.CurrentStageDate((int)stageType), projectData.Date);
 
-			if (stageNumber == 3 && !isSeversafe)
+			if (stageType == StageTypes.Prelim3 && !isSeversafe)
 			{
 				TableRow row = UniClassCodes.GetUniClassDetailForPart(projectData.ProjNumberAndGuid, prismPart.Part, uniClassTable);
 				if (row != null)
@@ -167,34 +185,32 @@ namespace Prism
 					prismPart.Part.SetUserProperty("SEV-UDA-130", row.Code);
 					prismPart.Part.SetUserProperty("SEV-UDA-131", row.Title);
 				}
+
+				if (!prismPart.IsFabsec && prismPart.Part is Beam b)
+				{
+					prismPart.Part.SetUserProperty(ModelUDA.FabsecOrderLength(), Math.Round(GetPartLength(b), 0).ToString());
+				}
+
+				prismPart.Part.SetUserProperty(ModelUDA.MaterialStampUDA(), ModelUDA.MaterialStamp(reportManager.PhaseNum, reportManager.IssueNum));
 			}
 
-			if (IsDetail3(stageNumber))
+			if (stageType == StageTypes.Check3)
 			{
 				CheckForAndFixNegativeDftWfts(prismPart);
 			}
 
-			if (IsFabStage(stageNumber))
+			if (stageType == StageTypes.FAB)
 			{
 				prismPart.Part.SetUserProperty(ModelUDA.PartMarkAtFab(), prismPart.PartMark);
+				prismPart.Part.SetUserProperty(ModelUDA.DrawingRevAtFabIssue(), prismPart.DrawingRevision);
 			}
 
-			if (IsFabStage(stageNumber) && prismPart.NumbersOutOfDate)
+			if (stageType == StageTypes.FAB && prismPart.NumbersOutOfDate)
 			{
 				return PrismWarnings.NumbersNoLongerUpToDate();
 			}
 
 			return true;
-		}
-
-		private static bool IsFabStage(int stageNumber)
-		{
-			return stageNumber == 7;
-		}
-
-		private static bool IsDetail3(int stageNumber)
-		{
-			return stageNumber == 6;
 		}
 
 		private static void CheckForAndFixNegativeDftWfts(PrismPart pPart)
@@ -232,21 +248,6 @@ namespace Prism
 			}
 		}
 
-		private static string TimesBoltOrdered(BoltGroup bolts)
-		{
-			string timesOrdered = "";
-			bolts.GetUserProperty(ModelUDA.BoltOrderPhaseNo(), ref timesOrdered);
-
-			if (timesOrdered != "" && timesOrdered.Contains("Times ordered"))
-			{
-				var nu = timesOrdered.Split('=');
-				int newOrderCount = Convert.ToInt32(nu[1]) + 1;
-				return $"Times ordered ={newOrderCount}";
-			}
-
-			return "Times ordered =1";
-		}
-
 		public static string BoltPhaseAndIssue(string phaseNumber, string issueNumber)
 		{
 			return $"Ordered Phase-{phaseNumber} Issue{issueNumber}";
@@ -271,6 +272,16 @@ namespace Prism
 			{
 				pPart.Part.PartNumber.StartNumber = Convert.ToInt32(startNumber);
 				pPart.Part.AssemblyNumber.StartNumber = Convert.ToInt32(startNumber);
+				pPart.Part.Modify();
+			}
+		}
+
+		public static void AddStartNumbers(this List<PrismPart> parts, int startNumber)
+		{
+			foreach (PrismPart pPart in parts)
+			{
+				pPart.Part.PartNumber.StartNumber = startNumber;
+				pPart.Part.AssemblyNumber.StartNumber = startNumber;
 				pPart.Part.Modify();
 			}
 		}
@@ -339,6 +350,62 @@ namespace Prism
 			return false;
 		}
 
+		public static bool AddPrelimMarks(this SelectedObjects selectedObjects, PrismProjectData pData)
+		{
+			// Retrieve the last used prelim value from the project info.
+			if (Logging.GetLastUsedPrelim(pData.ProjNumberAndGuid) is int currentLastNumber)
+			{
+				// Get the prelim prefix advanced setting.
+				string prelimPrefix = Logging.GetAdvancedSetting(pData.ProjNumberAndGuid, AdvancedSettingType.PrelimPrefix);
+
+				// If no valid number was retrieved, default to 1.
+				if (currentLastNumber == 0)
+				{
+					currentLastNumber = 1;
+				}
+
+				List<PrismPart> partsToRecievePrelim = selectedObjects.PrismParts.Where(x => string.IsNullOrWhiteSpace(x.Prelim)).ToList();
+
+				// Save the updated last used prelim value back to storage.
+				if (!Logging.SetLastUsedPrelim(pData.ProjNumberAndGuid, currentLastNumber + partsToRecievePrelim.Count)) return false;
+
+				int total = partsToRecievePrelim.Count;
+				int count = 1;
+				// Iterate over all parts that need a prelim mark.
+				foreach (PrismPart p in partsToRecievePrelim)
+				{
+					// Compose the prelim mark by joining the prefix and the current number.
+					string prelimMark = prelimPrefix + currentLastNumber.ToString();
+
+					// Set the user property for the prelim mark.
+					p.Part.SetUserProperty(ModelUDA.PrelimMark(), prelimMark);
+
+					// If this project variation requires additional attributes, set them.
+					if (pData.IsVariation)
+					{
+						SetVariationAttribute(pData.VariationNumber, p.Part);
+					}
+
+					currentLastNumber++;
+				}
+
+				SelectedObjects refreshedSelectedPartsForChecking = new SelectedObjects(pData.ProjPath, StageTypes.Prelim3, "", "", selectedObjects.Model, false);
+
+				int numberBeforeDuplicateChecking = currentLastNumber;
+				CheckForAndFixDuplicatePrelims(refreshedSelectedPartsForChecking, prelimPrefix, ref currentLastNumber);
+
+				//if currentLastNumber has changed since going into CheckForAndFixDuplicatePrelims, we need to write this to the model data
+				if (numberBeforeDuplicateChecking != currentLastNumber)
+				{
+					if (!Logging.SetLastUsedPrelim(pData.ProjNumberAndGuid, currentLastNumber)) return false;
+				}
+				return true;
+			}
+
+			PrismWarnings.GetLastUsedPrelimFailed();
+			return false;
+		}
+
 		private static void UpdateStatusLabel(ref int processedCount, ToolStrip toolStrip, ToolStripStatusLabel statusLabel, int totalCount, string countType)
 		{
 			// Safely increment the processed count.
@@ -382,6 +449,41 @@ namespace Prism
 			{
 				UpdateStatusLabel(ref count, ts, tssl, total, "Validating Prelim Mark");
 
+				// If this Prelim has already been encountered, it's a duplicate.
+				if (seenPrelims.Contains(part.Prelim))
+				{
+					// Compose a new unique Prelim mark.
+					string newPrelim = prelimPrefix + currentLastNumber.ToString();
+
+					// Update the part's property with the new value.
+					part.Part.SetUserProperty(ModelUDA.PrelimMark(), newPrelim);
+
+					// Add the new Prelim to the set.
+					seenPrelims.Add(newPrelim);
+
+					// Increment the current last number for the next assignment.
+					currentLastNumber++;
+				}
+				else
+				{
+					// If not a duplicate, add the value to the seen set.
+					seenPrelims.Add(part.Prelim);
+				}
+			}
+		}
+
+		public static void CheckForAndFixDuplicatePrelims(SelectedObjects selectedObjects, string prelimPrefix, ref int currentLastNumber)
+		{
+			// Use a HashSet to track the Prelim values already encountered.
+			HashSet<string> seenPrelims = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+			List<PrismPart> partsWithAPrelim = selectedObjects.PrismParts.Where(x => !string.IsNullOrWhiteSpace(x.Prelim)).ToList();
+
+			int total = partsWithAPrelim.Count;
+			int count = 1;
+			// Loop through all parts.
+			foreach (PrismPart part in partsWithAPrelim)
+			{
 				// If this Prelim has already been encountered, it's a duplicate.
 				if (seenPrelims.Contains(part.Prelim))
 				{
@@ -544,6 +646,8 @@ namespace Prism
 			copiedMember.SetUserProperty(ModelUDA.PartMarkAtFab(), p.StageString(ModelUDA.PartMarkAtFab()));
 			copiedMember.SetUserProperty(ModelUDA.FabStampUDA(), p.StageString(ModelUDA.FabStampUDA()));
 
+			p.SetUserProperty(ModelUDA.Length(), "");
+			p.SetUserProperty(ModelUDA.MaterialStampUDA(), "");
 			p.SetUserProperty(ModelUDA.FabsecUniqueNumber(), "");
 			p.SetUserProperty(ModelUDA.PrelimMark(), "");
 			p.SetUserProperty(ModelUDA.PartMarkAtFab(), "");
@@ -586,46 +690,100 @@ namespace Prism
 				HandleMember(p, distanceToMoveInZ, keepOriginal, model, movedParts, isCarcassCreated != "");
 			}
 
+			if (ViewExists(Constants.OmitGraveyrdViewName))
+			{
+				return movedParts;
+			}
+
+			View currentView = GetCurrentView();
+			if (currentView != null)
+			{
+				ViewManager.CreateGraveyardView(currentView);
+			}
+
 			return movedParts;
 		}
 
-		private static void HandleMember(PrismPart fabsec, double distanceToMoveInZ, bool keepOriginal, Model model, List<PrismPart> movedParts, bool isFabsecWithCarcassCreated)
+		public static bool ViewExists(string viewName)
+		{
+			List<string> viewNames = GetAllViewNames();
+
+			return viewNames.Any(name => string.Equals(name, viewName, StringComparison.OrdinalIgnoreCase));
+		}
+
+		public static View GetCurrentView()
+		{
+			ModelViewEnumerator views = ViewHandler.GetVisibleViews();
+
+			while (views.MoveNext())
+			{
+				View view = views.Current;
+
+				if (view != null)
+				{
+					return view;
+				}
+			}
+
+			return null;
+		}
+
+		public static List<string> GetAllViewNames()
+		{
+			List<string> viewNames = new List<string>();
+
+			ModelViewEnumerator views = ViewHandler.GetAllViews();
+
+			while (views.MoveNext())
+			{
+				View view = views.Current;
+
+				if (view != null)
+				{
+					viewNames.Add(view.Name);
+				}
+			}
+
+			return viewNames;
+		}
+
+		private static void HandleMember(PrismPart pPart, double distanceToMoveInZ, bool keepOriginal, Model model, List<PrismPart> movedParts, bool isFabsecWithCarcassCreated)
 		{
 			if (isFabsecWithCarcassCreated)
 			{
-				PrismPart carcass = FabsecProcessing.GetCarcassFromSelected(model, fabsec);
+				PrismPart carcass = FabsecProcessing.GetCarcassFromSelected(model, pPart);
 
 				MoveAndOmitPart(carcass.Part, distanceToMoveInZ * 2, movedParts);
 				if (keepOriginal)
 				{
-					ClearFabsecAttributes(fabsec.Part);
+					ClearAttributes(pPart.Part);
 				}
-				else { fabsec.Part.Delete(); }
+				else { pPart.Part.Delete(); }
 			}
 			else
 			{
 				if (keepOriginal)
 				{
-					CopyAndOmitPart(distanceToMoveInZ, fabsec.Part, movedParts);
-					ClearFabsecAttributes(fabsec.Part);
+					CopyAndOmitPart(distanceToMoveInZ, pPart.Part, movedParts);
+					ClearAttributes(pPart.Part);
 				}
-				else { MoveAndOmitPart(fabsec.Part, distanceToMoveInZ, movedParts); }
+				else { MoveAndOmitPart(pPart.Part, distanceToMoveInZ, movedParts); }
 			}
 		}
 
-		private static void ClearFabsecAttributes(Part fabsec)
+		private static void ClearAttributes(Part part)
 		{
 			for (int i = 0; i < 10; i++)
 			{
-				fabsec.SetUserProperty(ModelUDA.CurrentStageName(i), "");
-				fabsec.SetUserProperty(ModelUDA.CurrentStageDate(i), "");
+				part.SetUserProperty(ModelUDA.CurrentStageName(i), "");
+				part.SetUserProperty(ModelUDA.CurrentStageDate(i), "");
 			}
 
-			fabsec.SetUserProperty(ModelUDA.FabsecUniqueNumber(), "");
-			fabsec.SetUserProperty(ModelUDA.PrelimMark(), "");
-			fabsec.SetUserProperty(ModelUDA.PartMarkAtFab(), "");
-			fabsec.SetUserProperty(ModelUDA.FabStampUDA(), "");
-			fabsec.Modify();
+			part.SetUserProperty(ModelUDA.FabsecUniqueNumber(), "");
+			part.SetUserProperty(ModelUDA.PrelimMark(), "");
+			part.SetUserProperty(ModelUDA.PartMarkAtFab(), "");
+			part.SetUserProperty(ModelUDA.FabStampUDA(), "");
+			part.Modify();
 		}
 
 		private static string StageString(this Part part, string stageType)
@@ -645,8 +803,18 @@ namespace Prism
 				PrismMacroBuilder.NumberSelected();
 			}));
 
-		//	PrismMacroBuilder.NumberSelected();
+			//	PrismMacroBuilder.NumberSelected();
 			return PrismWarnings.AreYouHappyWithNumbering();
+		}
+
+		public static bool PerformNewNumbering()
+		{
+			PrismMacroBuilder.NumberSelected();
+
+			return PrismWarnings.ShowTopmostYesNoMessage(
+				"Are you happy with your numbering?\r\r" +
+				"NOTE: If any numbering dialog is open, please close it before continuing. Prism may fail if you continue while numbering windows are active.",
+				"Confirm Numbering");
 		}
 
 		public static void CreateDrawings(this List<PrismPart> selectedObjects)
@@ -673,7 +841,7 @@ namespace Prism
 			ms.Select(selectList);
 			foreach (Part part in selectList)
 			{
-				if(part is PolyBeam polybeam && polybeam.Contour.ContourPoints.Count <= 2)
+				if (part is PolyBeam polybeam && polybeam.Contour.ContourPoints.Count <= 2)
 				{
 					continue;
 				}

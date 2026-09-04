@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Org.BouncyCastle.Tls;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -36,6 +37,24 @@ namespace Prism
 			return true;
 		}
 
+		public static bool PrepFabsecCarcassesForMaterialOrder(this SelectedObjects selectedObjects, PrismProjectData pData, Model model)
+		{
+			List<PrismPart> myFabsecs = selectedObjects.GetFabsecParts();
+			if (myFabsecs.Count != 0)
+			{
+				bool skipMainFabsecProcessing = !CheckPrismShouldAddGreenToFabsecs(myFabsecs, true);
+				if (!skipMainFabsecProcessing)
+				{
+					myFabsecs.AddUniqueNumbering(model.GetProjectInfo());
+					if (!myFabsecs.AddGreenToCarcasses(pData, model, Enums.StageTypes.PrelimPG)) return false;
+					myFabsecs.SelectParts();
+					if (!ModelModifiers.PerformNewNumbering()) return false;
+				}
+				myFabsecs.SavePrelimNumbers(skipMainFabsecProcessing);
+			}
+			return true;
+		}
+
 		private static bool CheckPrismShouldAddGreenToFabsecs(List<PrismPart> myFabsecs)
 		{
 			foreach (PrismPart p in myFabsecs)
@@ -50,12 +69,46 @@ namespace Prism
 			return true;
 		}
 
+		private static bool CheckPrismShouldAddGreenToFabsecs(List<PrismPart> myFabsecs, bool isNew)
+		{
+			foreach (PrismPart p in myFabsecs)
+			{
+				string attribute = "";
+				p.Part.GetReportProperty(ModelUDA.FabsecNote(), ref attribute);
+				if (attribute != "")
+				{
+					return PrismWarnings.FabsecsGreenAlreadyOn();
+				}
+			}
+			return true;
+		}
+
 		private static void SavePrelimNumbers(this List<PrismPart> modelObjects, string startNumber, bool skip)
 		{
 			foreach (PrismPart p in modelObjects)
 			{
 				p.Part.SetUserProperty(ModelUDA.FabsecStartNumber(), startNumber);
 				if (!skip) p.Part.SetUserProperty(ModelUDA.PrelimMark(), p.Part.GetPartMark());
+			}
+		}
+
+		private static void SavePrelimNumbers(this List<PrismPart> modelObjects, bool skip)
+		{
+			foreach (PrismPart p in modelObjects)
+			{
+				if (!skip) p.Part.SetUserProperty(ModelUDA.PrelimMark(), p.Part.GetPartMark());
+			}
+		}
+
+		public static void AddStartNumberToFabsecUda(this List<PrismPart> modelObjects, int startNumber, Action<int, string> progress)
+		{
+			if (modelObjects.Count > 0)
+			{
+				progress?.Invoke(68, "Updating Fabsec start numbers...");
+				foreach (PrismPart p in modelObjects)
+				{
+					p.Part.SetUserProperty(ModelUDA.FabsecStartNumber(), startNumber.ToString());
+				}
 			}
 		}
 
@@ -74,11 +127,169 @@ namespace Prism
 			fabsecParts.ChangeNumberingFromPGToStandard();
 			model.CommitChanges();
 			myCarcasses.ForceCarcassNumbering(model);
-			if (!myCarcasses.CreateCarcassDrawings(selectedObjects, model)) return false; //Create carcass drawings from the members in the material grave
+
+			if (!myCarcasses.CreateCarcassDrawings(selectedObjects, model, true)) return false; //Create carcass drawings from the members in the material grave
+
 			ModifyAttribute(fabsecParts, ModelUDA.FabsecCarcassInfo(), Constants.FabsecModelShaftIndicator);
 			ModifyAttribute(myCarcasses, ModelUDA.FabsecCarcassInfo(), Constants.FabsecCarcassIndicator);
 			return true;
 		}
+
+		//public static bool CreateFabsecCarcasses(this SelectedObjects selectedObjects, PrismProjectData pData, Model model, bool isForWpfInterface)
+		//{
+		//	List<PrismPart> fabsecParts = selectedObjects.GetFabsecParts();
+
+		//	if (!CheckFabsecOrderStatusAgainstRequiredActions(fabsecParts, 1)) return false;
+
+		//	if (!CheckForCarcass(fabsecParts)) return false;
+
+		//	ModelModifiers.ResetWorkPlane(model);
+
+		//	List<PrismPart> myCarcasses = selectedObjects.GetFabsecParts().CopyPGs(selectedObjects);
+
+		//	RemoveComponentsFromCopiedFabsecs(myCarcasses);
+
+		//	if (!myCarcasses.AddGreenToCarcasses(pData, model, Enums.StageTypes.Unassigned)) return false;
+		//	fabsecParts.ChangeNumberingFromPGToStandard();
+		//	model.CommitChanges();
+		//	myCarcasses.ForceCarcassNumbering(model);
+
+		//	if (!myCarcasses.CreateCarcassDrawings(selectedObjects, model, isForWpfInterface)) return false; //Create carcass drawings from the members in the material grave
+
+		//	ModifyAttribute(fabsecParts, ModelUDA.FabsecCarcassInfo(), Constants.FabsecModelShaftIndicator);
+		//	ModifyAttribute(myCarcasses, ModelUDA.FabsecCarcassInfo(), Constants.FabsecCarcassIndicator);
+		//	return true;
+		//}
+
+		public static bool CreateFabsecCarcasses(this SelectedObjects selectedObjects, PrismProjectData pData, Model model, bool isForWpfInterface)
+		{
+			List<PrismPart> modelFabsecs = selectedObjects.GetFabsecParts();
+
+			if (!CanCreateFabsecCarcass(modelFabsecs)) { return false; }
+
+			ModelModifiers.ResetWorkPlane(model);
+
+			List<PrismPart> carcassFabsecs = modelFabsecs.CopyPGs(selectedObjects);
+
+			RemoveComponentsFromCopiedFabsecs(carcassFabsecs);
+
+			if (!carcassFabsecs.AddGreenToCarcasses(pData, model, Enums.StageTypes.Unassigned)) { return false; }
+
+			modelFabsecs.ChangeNumberingFromPGToStandard();
+
+			model.CommitChanges();
+
+			carcassFabsecs.ForceCarcassNumbering(model);
+
+			if (!carcassFabsecs.CreateCarcassDrawings(selectedObjects, model, isForWpfInterface)) { return false; }
+
+			ModifyAttribute(modelFabsecs, ModelUDA.FabsecCarcassInfo(), Constants.FabsecModelShaftIndicator);
+			ModifyAttribute(carcassFabsecs, ModelUDA.FabsecCarcassInfo(), Constants.FabsecCarcassIndicator);
+
+			return true;
+		}
+
+		private static bool CanCreateFabsecCarcass(List<PrismPart> fabsecParts)
+		{
+			foreach (PrismPart prismPart in fabsecParts)
+			{
+				string materialOrderInfo = string.Empty;
+				string carcassInfo = string.Empty;
+				string carcassOrderInfo = string.Empty;
+
+				prismPart.Part.GetUserProperty(ModelUDA.CurrentStageName(3), ref materialOrderInfo);
+				prismPart.Part.GetUserProperty(ModelUDA.FabsecCarcassInfo(), ref carcassInfo);
+				prismPart.Part.GetUserProperty(ModelUDA.FabsecCarcassOrdered(), ref carcassOrderInfo);
+
+				if (materialOrderInfo.Length == 0)
+				{
+					PrismWarnings.HasNotBeenOrdered();
+					return false;
+				}
+
+				if (carcassInfo == Constants.FabsecModelShaftIndicator)
+				{
+					PrismWarnings.FabsecAlreadyHasCarcass();
+					return false;
+				}
+
+				if (carcassInfo == Constants.FabsecCarcassIndicator)
+				{
+					PrismWarnings.FabsecCarcassSelected();
+					return false;
+				}
+
+				if (carcassOrderInfo.Length != 0)
+				{
+					PrismWarnings.HasAlreadyBeenOrdered();
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		public static bool CheckFabsecOrderStatusAgainstRequiredActions(List<PrismPart> partsList, int typeOfOrder)
+		{
+			foreach (PrismPart prismPart in partsList)
+			{
+				prismPart.Part.GetUnorderedParts();
+
+				string prelimMark = "";
+				prismPart.Part.GetUserProperty(ModelUDA.CurrentStageName(3), ref prelimMark); //Check prism uda material order complete for data    
+				string carcassInfo = "";
+				string carcassOrderInfo = "";
+				prismPart.Part.GetUserProperty(ModelUDA.FabsecCarcassInfo(), ref carcassInfo); //Check prism uda material order complete for data    
+				prismPart.Part.GetUserProperty(ModelUDA.FabsecCarcassOrdered(), ref carcassOrderInfo); //Check prism uda material order complete for data    
+				bool isDrawingCreation = typeOfOrder == 1;
+
+				if (isDrawingCreation)
+				{
+					if (prelimMark.Length == 0)
+					{
+						PrismWarnings.HasNotBeenOrdered();
+						return false;
+						//then it is not ordered, this should be done before creating carcass
+						//return false;
+					}
+					if (carcassInfo.Length != 0)
+					{
+						PrismWarnings.FabsecAlreadyHasCarcass();
+						return false;
+						//then carcass has already been made, this is bad
+					}
+					if (carcassOrderInfo.Length != 0)
+					{
+						PrismWarnings.HasAlreadyBeenOrdered();
+						return false;
+						//then the carcass has already been ordered, this is bad
+					}
+				}
+				else
+				{
+					if (prelimMark.Length == 0)
+					{
+						PrismWarnings.HasNotBeenOrdered();
+						return false;
+						//then material has not been ordered bad
+					}
+					if (carcassInfo.Length == 0)
+					{
+						PrismWarnings.FabsecSelectedDoesNotHaveCarcass();
+						return false;
+						//then carcass has not been created
+					}
+					if (carcassOrderInfo.Length != 0)
+					{
+						PrismWarnings.FabsecCarcassAlreadyOrdered();
+						return false;
+						//then the carcass has not been ordered.
+					}
+				}
+			}
+			return true;
+		}
+
 
 		private static void RemoveComponentsFromCopiedFabsecs(List<PrismPart> copiedFabsecs)
 		{
@@ -323,17 +534,6 @@ namespace Prism
 			}
 		}
 
-		private static void MovePGs(this List<PrismPart> fabsecList, SelectedObjects selectedObjects)
-		{
-			foreach (PrismPart fabsec in fabsecList)
-			{
-				selectedObjects.PrismParts.Remove(fabsec);
-				Vector myVector = new Vector(0, 0, -moveDistance);
-				Operation.MoveObject(fabsec.Part, myVector);
-				fabsec.Part.Select();
-			}
-		}
-
 		private static List<PrismPart> CopyPGs(this List<PrismPart> fabsecList, SelectedObjects selectedObjects)
 		{
 			List<PrismPart> fabsecCarcassList = new List<PrismPart>();
@@ -363,17 +563,6 @@ namespace Prism
 			return stageString;
 		}
 
-		private static void ReMarkModelFabsecs(this List<Part> fabsecList)
-		{
-			foreach (Part fabsec in fabsecList)
-			{
-				fabsec.AssemblyNumber.Prefix = GdomValues.AssemblyPrefix;
-				fabsec.PartNumber.Prefix = GdomValues.AssemblyPartPrefix;
-				fabsec.Class = GdomValues.FabsecClass;
-				fabsec.Modify();
-			}
-		}
-
 		private static bool AddGreenToCarcasses(this List<PrismPart> fabsecCarcassList, PrismProjectData pData, Model model, Enums.StageTypes stageType)
 		{
 			int carcassGreen = 100;
@@ -391,6 +580,7 @@ namespace Prism
 				double lengthBeforeExtension = ModelModifiers.GetPartLength(carcass);
 				carcass.StartPointOffset.Dx -= carcassGreen;
 				carcass.EndPointOffset.Dx += carcassGreen;
+				carcass.SetUserProperty(ModelUDA.FabsecNote(), "Green Added");
 				carcass.Modify();
 				double lengthAfterExtension = ModelModifiers.GetPartLength(carcass);
 
@@ -413,6 +603,7 @@ namespace Prism
 							Beam carcass = pPart.Part as Beam;
 							carcass.StartPointOffset.Dx += carcassGreen;
 							carcass.EndPointOffset.Dx -= carcassGreen;
+							carcass.SetUserProperty(ModelUDA.FabsecNote(), "Green Added");
 							carcass.Modify();
 						}
 					}
@@ -430,6 +621,25 @@ namespace Prism
 			}
 
 			return true;
+		}
+
+		public static void CheckIfCarcassIsSameOrShorterThanOrdered(this List<PrismPart> fabsecCarcasses)
+		{
+			double tolerance = 2;
+
+			foreach (var prismPart in fabsecCarcasses)
+			{
+				Beam carcass = prismPart.Part as Beam;
+				double length = ModelModifiers.GetPartLength(carcass);
+
+				string orderedLength = "";
+				carcass.GetUserProperty(ModelUDA.FabsecOrderLength(), ref orderedLength);
+
+				if (Convert.ToInt32(orderedLength) + 2 < length)
+				{
+					prismPart.PartErrors.Add(Enums.Error.CarcassIsShorterThanOrdered);
+				}
+			}
 		}
 
 		public static void RemoveGreenFromFabsecs(this List<PrismPart> fabsecList, PrismProjectData pData)
@@ -467,6 +677,25 @@ namespace Prism
 
 			fabsecCarcassList.SelectParts();
 			if (!ModelModifiers.PerformNumbering()) return false;
+			DrawingCreator.CreateDrawings(rule, idList, out status);
+			return true;
+		}
+
+		private static bool CreateCarcassDrawings(this List<PrismPart> fabsecCarcassList, SelectedObjects selectedObjects, Model model, bool isForWpfInterface)
+		{
+			FileInfo file = new FileInfo(FirmFolderLoc.FabsecCarcassDrawingWizard());
+			AutoDrawingRule rule = new AutoDrawingRule(file.FullName);
+			AutoDrawingsStatusEnum status;
+			List<Identifier> idList = new List<Identifier>();
+			foreach (PrismPart part in fabsecCarcassList)
+			{
+				idList.Add(part.Part.Identifier);
+			}
+
+			fabsecCarcassList.SelectParts();
+
+			if (!ModelModifiers.PerformNewNumbering()) return false;
+
 			DrawingCreator.CreateDrawings(rule, idList, out status);
 			return true;
 		}

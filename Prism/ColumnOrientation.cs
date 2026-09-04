@@ -86,6 +86,81 @@ namespace Prism
 			}
 		}
 
+		public static int DetailColumnOrientationHoles(SelectedObjects myObjects, string columnOrientationType, string flangeThickness, bool forNewWpf)
+		{
+			double tolerance = 0.5;
+
+			if (columnOrientationType != "None")
+			{
+				List<Beam> columns = new List<Beam>();
+
+				foreach (PrismPart prismPart in myObjects.PrismParts)
+				{
+					Beam b = prismPart.Part as Beam;
+					if (b != null)
+					{
+						if (IsColumnOkForOrientationHoles(b, tolerance))
+						{
+							columns.Add(b);
+						}
+					}
+				}
+
+				foreach (Beam column in columns)
+				{
+					GetMemberProperties(column, out double flangeWidth, out double columnDepth, out double tWeb, out double flangeThick, out double rootRadius);
+
+					ArrayList columnVertices = GetMyColumnVertices(column);
+
+					Point[] vertexPoint = new Point[12];        // get the vertices in an indexed array
+					double minimumX = GetMinAndMaxX(columnVertices, vertexPoint, out double maximumX);
+
+					Point[] vertexPointsAtMax_X = VertexPointsAtMaxX(minimumX, vertexPoint);
+
+					int soPointIndex = GetSetOutPointIndex(vertexPointsAtMax_X, vertexPoint, out Point soPoint);    // index of the soPoint in the vertexPoint array
+
+					Vector flangeVector = new Vector();
+
+					if (soPointIndex == 0)          // "start" vertexPoint, so look at 1 & 11
+					{
+						flangeVector = GetFlangeVector(1, 0, 11, vertexPoint);
+					}
+					else if (soPointIndex == 11)    // "end" vertexPoint,   so look at 0 & 10
+					{
+						flangeVector = GetFlangeVector(0, 11, 10, vertexPoint);
+					}
+					else     // "intermediate" vertexPoint
+					{
+						flangeVector = GetFlangeVector(soPointIndex - 1, soPointIndex, soPointIndex + 1, vertexPoint);
+					}
+
+					if (columnOrientationType == "Holes")
+					{
+						SetOutOrientationHole(column, soPoint, flangeVector, flangeWidth, flangeThick, tWeb, rootRadius);
+					}
+					if (columnOrientationType == "Plate")
+					{
+						DrawOrientationPlate(column, soPoint, flangeVector);
+					}
+					if (columnOrientationType == "Holes and Plate")
+					{
+						if (flangeThick <= Convert.ToInt32(flangeThickness))
+						{
+							SetOutOrientationHole(column, soPoint, flangeVector, flangeWidth, flangeThick, tWeb, rootRadius);
+						}
+						if (flangeThick > Convert.ToInt32(flangeThickness))
+						{
+							DrawOrientationPlate(column, soPoint, flangeVector);
+						}
+					}
+				}
+
+				return columns.Count;
+			}
+
+			return 0;
+		}
+
 		private static bool IsColumnOkForOrientationHoles(Beam b, double tolerance)
 		{
 			var profile = b.Profile.ProfileString;

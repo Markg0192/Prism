@@ -54,8 +54,12 @@
             return "Heet.Results.DFT";
         }
 
+		public static string MaterialStamp(string phaseNum, string issueNum)
+		{
+			return $"MAT-PHASE{phaseNum}-ISSUE{issueNum}";
+		}
 
-        public static string FabStamp(string phaseNum, string issueNum)
+		public static string FabStamp(string phaseNum, string issueNum)
         {
             return $"FAB-PHASE{phaseNum}-ISSUE{issueNum}";
         }
@@ -64,6 +68,11 @@
 		{
 			return $"FAB-PHASE{phaseNum}";
 		}
+
+        public static string MaterialStampUDA()
+        {
+            return "SEV-UDA-351";
+        }
 
 		public static string FabStampUDA()
         {
@@ -189,6 +198,11 @@
             //return "SEV-UDA-125";
         }
 
+        public static string FabsecNote()
+        {
+            return "SEV-UDA-125";
+        }
+
         public static string FabsecCarcassInfo()
         {
             return "SEV-UDA-132";
@@ -209,7 +223,12 @@
             return "SEV-UDA-135";
         }
 
-        public static string NextFabsecPrefixNumber() //Hidden UDA
+		public static string DrawingRevAtFabIssue()
+		{
+			return "SEV-UDA-352";
+		}
+
+		public static string NextFabsecPrefixNumber() //Hidden UDA
         {
             return "PRISM_PG_NEXT_NUMBER";
         }

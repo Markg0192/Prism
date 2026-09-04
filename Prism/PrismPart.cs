@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Tekla.Structures.Model;
+using static Prism.Enums;
+using ModelObject = Tekla.Structures.Model.ModelObject;
+using Part = Tekla.Structures.Model.Part;
 
 namespace Prism
 {
@@ -38,7 +42,7 @@ namespace Prism
 			Finish = Part.Finish;
 		}
 
-		public PrismPart(string[] items, Model model)
+		public PrismPart(string[] items, Model model, StageTypes stageType)
 		{
 			Guid = Trim(items[1]);
 			Prelim = Trim(items[2]);
@@ -50,27 +54,87 @@ namespace Prism
 			Name = Trim(items[8]);
 			IsSeversafe = IsSeversafePart(Name);
 			IsLocked = Trim(items[9]) == "1";
+			if (IsLocked) PartErrors.Add(Enums.Error.PartLocked);
+
 			IsFabsec = Profile.StartsWith("PG");
 			IsFitting = Profile == "PL" || Profile == "RS" || Profile == "FL";
 			PartMark = Trim(items[10]);
 			NumbersOutOfDate = PartMark.Contains("?");
+			if (NumbersOutOfDate && (stageType == StageTypes.FAB || stageType == StageTypes.RocketPacket)) PartErrors.Add(Enums.Error.NumberingNotUpToDate);
+
 			Part = model.SelectModelObject(model.GetIdentifierByGUID(Guid)) as Part;
+
+			
 			if (IsMainPart) Assembly = Part.GetAssembly();
 			ModelObject = Part;
-			DrawingRevision = Trim(items[11]);
+			DrawingRevision = Trim(items[11]); // redundant now because of items 18 which works for both types of drawings. Keeping it so not to mess to much with items order...
 
 			SherwinDft = Trim(items[12]);
 			SherwinWft = Trim(items[13]);
 			HempelDft = Trim(items[14]);
 			HempelWft = Trim(items[15]);
 			Finish = Trim(items[16]);
+			HasDrawing = Trim(items[17]) != "0";
+
+			string trimmedRevNote = Trim(items[18]);
+			string trimmedFolder = Trim(items[19]);
+
+			DrawingFolder drawingFolder;
+
+			HasProperlyAssignedFolder = TryGetDrawingFolder(trimmedFolder, out drawingFolder);
+
+			bool revisionNotRequired =
+				HasProperlyAssignedFolder &&
+				(drawingFolder == DrawingFolder.NotRequired ||
+				 drawingFolder == DrawingFolder.AssNotRequired);
+
+			HasRevision =
+				revisionNotRequired ||
+				(trimmedRevNote != "0" && trimmedRevNote != "");
 		}
+
+		private static string NormaliseFolderName(string value)
+		{
+			if (string.IsNullOrWhiteSpace(value))
+			{
+				return string.Empty;
+			}
+
+			return new string(value
+				.Where(char.IsLetterOrDigit)
+				.ToArray());
+		}
+
+		private static bool TryGetDrawingFolder(string value, out DrawingFolder drawingFolder)
+		{
+			string normalisedValue = NormaliseFolderName(value);
+
+			foreach (DrawingFolder folder in System.Enum.GetValues(typeof(DrawingFolder)))
+			{
+				if (string.Equals(
+					normalisedValue,
+					NormaliseFolderName(folder.ToString()),
+					StringComparison.OrdinalIgnoreCase))
+				{
+					drawingFolder = folder;
+					return true;
+				}
+			}
+
+			drawingFolder = default(DrawingFolder);
+			return false;
+		}
+
+
 
 		private string Trim(string s)
 		{
 			return s.TrimEnd(' ').TrimStart(' ');
 		}
 
+		public bool HasProperlyAssignedFolder { get; set; }
+		public bool HasDrawing { get; set; }
+		public bool HasRevision { get; set; }
 		public string Finish {  get; set; }
 		public string DrawingRevision { get; set; }
 		public string SherwinDft { get; set; }
@@ -98,6 +162,8 @@ namespace Prism
 		public string LotName { get; set; }
 		public bool IsMainPart { get; set; }
 		public double Weight { get; set; }
+
+		public List<Enums.Error> PartErrors = new List<Enums.Error>();
 
 		private Phase GetPhaseFromString(string phaseNumberString)
 		{

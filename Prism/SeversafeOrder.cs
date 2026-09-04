@@ -281,7 +281,7 @@ namespace Prism
 						break;
 				}
 
-				ModelModifiers.ModifyAttribute(p, 3, projData, null, false, true);
+				ModelModifiers.ModifyAttribute(p, Enums.StageTypes.Prelim3, projData, null, null, false, true);
 			}
 
 			RoundHandrailMeters();

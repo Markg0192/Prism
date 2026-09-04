@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -44,7 +45,7 @@ namespace Prism
 			}*/
 			if (runNewMethod)
 			{
-				CreatePartListFromReport(projectPath, model, phaseNum, issueNum);
+				CreatePartListFromReport(projectPath, model, phaseNum, issueNum, stageType);
 				UpdatePartWeights(PrismParts);
 			}
 			else
@@ -57,6 +58,117 @@ namespace Prism
 			FittingWeight = Math.Round(FittingWeight / 1000, 3);
 		}
 
+		public SelectedObjects(string projectPath, StageTypes stageType, string phaseNum, string issueNum, Model model, bool isSpecialUser, Action<int, string> progress, ToolStrip toolStrip = null, ToolStripStatusLabel statusLabel = null)
+		{
+			Model = model;
+			NumbersUpToDate = true;
+			MyDrawingHandler = new DrawingHandler();
+
+			PrismParts = new List<PrismPart>();
+			PrismDrawings = new List<PrismDrawing>();
+			MyMarks = new List<string>();
+
+			bool runNewMethod = true;
+
+			if (runNewMethod)
+			{
+				progress?.Invoke(6, "Creating Tekla selection report...");
+
+				CreatePartListFromReport(projectPath, model, phaseNum, issueNum, stageType, progress);
+
+				progress?.Invoke(11, "Calculating selected part weights...");
+
+				UpdatePartWeights(PrismParts);
+			}
+			else
+			{
+				Moe = new Tekla.Structures.Model.UI.ModelObjectSelector().GetSelectedObjects();
+				ProcessModelObjects(stageType, phaseNum, issueNum, toolStrip, statusLabel);
+			}
+
+			MainPartWeight = Math.Round(MainPartWeight / 1000, 3);
+			FittingWeight = Math.Round(FittingWeight / 1000, 3);
+		}
+
+		private void CreatePartListFromReport(string packagePath, Model model, string phaseNum, string issueNum, StageTypes stageType, Action<int, string> progress = null)
+		{
+			string teklaReportLocation = Path.Combine(FirmFolderLoc.ReportTemplates(), "PrismPart_List.rpt");
+			string newReportLocation = Path.Combine(packagePath, "PrismPart_List.xsr");
+
+			progress?.Invoke(6, "Generating Tekla selection report...");
+
+			if (!CreateReportAndWait(teklaReportLocation, newReportLocation))
+			{
+				return;
+			}
+
+			progress?.Invoke(7, "Waiting for Tekla report...");
+
+			if (!IfLockedWait(newReportLocation, 15))
+			{
+				return;
+			}
+
+			progress?.Invoke(8, "Reading selected objects...");
+
+			List<string[]> reportObjects = File.ReadLines(newReportLocation)
+				.Select(line => line.Split(','))
+				.Where(items => items.Length > 0 && (items[0] == " Part" || items[0] == " Bolt"))
+				.ToList();
+			int totalObjects = reportObjects.Count;
+			int objectCount = 0;
+			int partCount = 0;
+			int boltCount = 0;
+			int lastReportedStep = -1;
+
+			foreach (string[] items in reportObjects)
+			{
+				objectCount++;
+
+				if (items[0] == " Part")
+				{
+					PrismPart newPart = new PrismPart(items, model, stageType);
+
+					PrismParts.Add(newPart);
+					CheckXYZSize(newPart.Part);
+
+					partCount++;
+				}
+				else if (items[0] == " Bolt")
+				{
+					PrismBoltGroup boltGroup = new PrismBoltGroup(items, phaseNum, issueNum, model);
+
+					if (boltGroup != null)
+					{
+						PrismBoltGroups.Add(boltGroup);
+						boltCount++;
+					}
+				}
+
+				if (totalObjects > 0)
+				{
+					int completionPercent = (int)((objectCount / (double)totalObjects) * 100);
+					int currentStep = completionPercent / 10;
+
+					if (currentStep > lastReportedStep)
+					{
+						lastReportedStep = currentStep;
+
+						int progressPercentage = 8 + (int)(completionPercent * 0.04);
+
+						progress?.Invoke(
+							progressPercentage,
+							"Building selected objects... " + completionPercent + "% (" + objectCount + " of " + totalObjects + ")");
+					}
+				}
+			}
+
+			progress?.Invoke(
+				12,
+				"Selection built - " + partCount + " parts and " + boltCount + " bolt groups.");
+
+			File.Delete(newReportLocation);
+		}
 		public Model Model;
 		public double SmallestX = 100000000;
 		public double SmallestY = 100000000;
@@ -255,7 +367,7 @@ namespace Prism
 			}
 		}
 
-		private void CreatePartListFromReport(string packagePath, Model model, string phaseNum, string issueNum)
+		private void CreatePartListFromReport(string packagePath, Model model, string phaseNum, string issueNum, StageTypes stageType)
 		{
 			string teklaReportLocation = Path.Combine(FirmFolderLoc.ReportTemplates(), "PrismPart_List.rpt");
 			string newReportLocation = Path.Combine(packagePath, "PrismPart_List.xsr");
@@ -277,7 +389,7 @@ namespace Prism
 
 					if (items[0] == " Part")
 					{
-						PrismPart newPart = new PrismPart(items, model);
+						PrismPart newPart = new PrismPart(items, model, stageType);
 						PrismParts.Add(newPart);
 						CheckXYZSize(newPart.Part);
 						/*if (items[11].TrimEnd(' ').TrimStart(' ') != "") // then assembly drawing information is available
@@ -531,6 +643,26 @@ namespace Prism
 
 			// If you need a List instead of ConcurrentBag
 			return myBoltsBag.ToList();
+		}
+
+		public static List<ModelObject> GetSelectedParts()
+		{
+			try
+			{
+				List<ModelObject> parts = new List<ModelObject>();
+				ModelObjectEnumerator moe = new Tekla.Structures.Model.UI.ModelObjectSelector().GetSelectedObjects();
+	
+				foreach (var item in moe)
+				{
+					if (item is Part part) { parts.Add(part); }
+				}
+				return parts;
+			}
+			catch (Exception ex)
+			{
+				Debug.WriteLine(ex.Message);
+				return null;
+			}
 		}
 
 		private static List<BoltGroup> GetBoltsFromAssembly(Assembly assembly)

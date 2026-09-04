@@ -170,6 +170,53 @@ namespace Prism
 			}
 		}
 
+		public void CreateMaterialReports(SelectedObjects selectedObjects, string orderType, StageTypes stageType)
+		{
+			if (!orderType.Contains("Order Bolts"))
+			{
+				bool fabsecPresent = selectedObjects.GetFabsecParts().Count > 0;
+				bool nonFabsecPresent = selectedObjects.GetNonFabsecParts().Count > 0;
+
+				switch (orderType)
+				{
+					case "Order Material":
+						ProcessMaterial(selectedObjects, stageType, true, fabsecPresent, nonFabsecPresent,
+							_report1Pname, _output1Pname, _report2PgName, _output2PgName);
+						break;
+
+					case "Add Material":
+						ProcessMaterial(selectedObjects, stageType, true, fabsecPresent, nonFabsecPresent,
+							_report1PAname, _output1PAname, _report2PgName, _output2PgName);
+						break;
+
+					case "Omit Material":
+						ProcessMaterial(selectedObjects, stageType, false, fabsecPresent, nonFabsecPresent,
+							_report1POname, _output1POname, _report2PgName, _output2PgName);
+						break;
+
+					case "Order Special Fittings":
+						ProcessMaterial(selectedObjects, stageType, true, false, nonFabsecPresent,
+							  _report1PFname, _output1PFname);
+						break;
+
+					case "Add Special Fittings":
+						ProcessMaterial(selectedObjects, stageType, true, false, nonFabsecPresent,
+							_report1PFAname, _output1PFAname);
+						break;
+
+					case "Omit Special Fittings":
+						ProcessMaterial(selectedObjects, stageType, false, false, nonFabsecPresent,
+							_report1PFOname, _output1PFOname);
+						break;
+
+					default:
+						throw new ArgumentException($"Unknown order type: {orderType}");
+				}
+
+				TextToPDF(Folders.MatPath);
+			}
+		}
+
 		private async void ProcessMaterial(SelectedObjects selectedObjects, StageTypes stageType, bool createBSWX, bool fabsecPresent, bool nonFabsecPresent, string nonFabsecReportName,
 			string nonFabsecOutputName, ToolStrip toolStrip, ToolStripStatusLabel tssl, string fabsecReportName = null, string fabsecOutputName = null)
 		{
@@ -189,6 +236,27 @@ namespace Prism
 				CreateReport(fabsecReportName, fabsecOutputName);
 			}
 		}
+
+		private async void ProcessMaterial(SelectedObjects selectedObjects, StageTypes stageType, bool createBSWX, bool fabsecPresent, bool nonFabsecPresent, string nonFabsecReportName,
+	string nonFabsecOutputName, string fabsecReportName = null, string fabsecOutputName = null)
+		{
+			if (createBSWX)
+			{
+				await selectedObjects.ExportBSWX(Folders.MatPath, ProjectData, PhaseNum, IssueNum, stageType);
+				ModelModifiers.RemoveLog(Folders.MatPath);
+			}
+
+			if (nonFabsecPresent && !string.IsNullOrEmpty(nonFabsecReportName) && !string.IsNullOrEmpty(nonFabsecOutputName))
+			{
+				CreateReport(nonFabsecReportName, nonFabsecOutputName);
+			}
+
+			if (fabsecPresent && !string.IsNullOrEmpty(fabsecReportName) && !string.IsNullOrEmpty(fabsecOutputName))
+			{
+				CreateReport(fabsecReportName, fabsecOutputName);
+			}
+		}
+
 
 		private void CreateReport(string reportTemplateName, string outputFileName)
 		{
@@ -231,6 +299,57 @@ namespace Prism
 		public void CreateHDBoltList()
 		{
 
+		}
+
+		public async Task CreateFabReports(SelectedObjects myObjects, List<PrismBoltGroup> boltList, string teklaVersion, Action<int, string> progress)
+		{
+			progress?.Invoke(0, "Preparing fabrication reports...");
+
+			bool create3Report = false;
+			bool create4Report = false;
+			bool createPgReport = false;
+			string sectionSize;
+
+			bool shopBoltsPresent = false;
+			bool siteBoltsPresent = false;
+
+			if (boltList.Count > 0)
+			{
+				shopBoltsPresent = boltList.Any(pbg => pbg != null && pbg.isShop && !pbg.isShearStud && !pbg.isOrdered);
+				siteBoltsPresent = boltList.Any(pbg => pbg != null && !pbg.isShop && !pbg.isShearStud && !pbg.isOrdered);
+			}
+
+			List<PrismPart> nonSeversafeParts = myObjects.GetNonSeversafeParts();
+
+			foreach (PrismPart part in nonSeversafeParts)
+			{
+				sectionSize = part.Part.Profile.ProfileString.Substring(0, 2);
+
+				bool isFitting = sectionSize == "PL" || sectionSize == "RS" || sectionSize == "FL";
+				bool isPlateGirder = sectionSize == "PG";
+
+				if (!isFitting && !isPlateGirder) create3Report = true;
+				if (isPlateGirder) createPgReport = true;
+				if (isFitting) create4Report = true;
+			}
+
+			progress?.Invoke(10, "Creating fabrication reports...");
+
+			await Task.Run(() => CreateReports(boltList, create3Report, create4Report, createPgReport, shopBoltsPresent, siteBoltsPresent));
+
+			progress?.Invoke(45, "Creating NC data...");
+
+			await Task.Run(() => CreateNC(teklaVersion, myObjects));
+
+			progress?.Invoke(80, "Converting fabrication reports to PDF...");
+
+			await Task.Run(() => TextToPDF(Folders.ReportPath));
+
+			progress?.Invoke(95, "Restoring selected fabrication parts...");
+
+			ModelModifiers.SelectParts(nonSeversafeParts);
+
+			progress?.Invoke(100, "Fabrication reports and NC data complete.");
 		}
 
 		public async Task CreateFabReports(SelectedObjects myObjects, List<PrismBoltGroup> boltList, string teklaVersion, ToolStrip toolStrip, ToolStripStatusLabel statusLabel)
@@ -288,6 +407,40 @@ namespace Prism
 				UpdateStatusLabel(toolStrip, statusLabel, "Converting Reports To PDF");
 
 				TextToPDF(Folders.ReportPath);*/
+
+			ModelModifiers.SelectParts(nonSeversafeParts);
+		}
+
+		public async Task CreateFabReports(SelectedObjects myObjects, List<PrismBoltGroup> boltList, string teklaVersion)
+		{
+			bool create3Report = false;
+			bool create4Report = false;
+			bool createPgReport = false;
+			string sectionSize;
+
+			bool shopBoltsPresent = false;
+			bool siteBoltsPresent = false;
+			if (boltList.Count > 0)
+			{
+				shopBoltsPresent = boltList.Any(pbg => pbg != null && pbg.isShop && !pbg.isShearStud && !pbg.isOrdered);   //is a shop bolt but not a shear stud
+				siteBoltsPresent = boltList.Any(pbg => !pbg.isShop && !pbg.isShearStud && !pbg.isOrdered); //Is neither shop bolt or shear stud
+			}
+
+			List<PrismPart> nonSeversafeParts = myObjects.GetNonSeversafeParts();
+
+			foreach (PrismPart part in nonSeversafeParts)
+			{
+				sectionSize = part.Part.Profile.ProfileString.Substring(0, 2);
+				bool isFitting = sectionSize == "PL" || sectionSize == "RS" || sectionSize == "FL";
+				bool isPlateGirder = sectionSize == "PG";
+				if (!isFitting && !isPlateGirder) create3Report = true;
+				if (isPlateGirder) createPgReport = true;
+				if (isFitting) create4Report = true;
+			}
+
+			await Task.Run(() => CreateReports(boltList, create3Report, create4Report, createPgReport, shopBoltsPresent, siteBoltsPresent));
+			await Task.Run(() => CreateNC(teklaVersion, myObjects));
+			await Task.Run(() => TextToPDF(Folders.ReportPath));
 
 			ModelModifiers.SelectParts(nonSeversafeParts);
 		}

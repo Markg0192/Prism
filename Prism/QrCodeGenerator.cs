@@ -45,6 +45,45 @@ namespace Prism
 			//	await GetDrawingsAndInsertQrCodes(qrCodeFolderPath, data, ts, tssl, drawingManager.GetDrawingByType("A").Count);
 		}
 
+		public static async Task ApplyQrCode(SelectedObjects selectedObjects, PrismProjectData data, string qrCodeFolderPath, DrawingManager drawingManager, Action<int, string> progress)
+		{
+			List<PrismPart> distinctParts = GetDistinctByPartMark(selectedObjects.GetMainParts());
+			int totalParts = distinctParts.Count;
+			int completedParts = 0;
+			int lastReportedPercentage = -1;
+			object progressLock = new object();
+
+			progress?.Invoke(0, totalParts == 0 ? "No QR codes required." : $"Creating QR codes: 0 of {totalParts}");
+
+			if (totalParts == 0)
+			{
+				progress?.Invoke(100, "QR code creation complete.");
+				return;
+			}
+
+			await Task.Run(() =>
+			{
+				Parallel.ForEach(distinctParts, part =>
+				{
+					CreateQrCode(part.PartMark, data, qrCodeFolderPath);
+
+					int currentCount = Interlocked.Increment(ref completedParts);
+					int percentage = currentCount * 100 / totalParts;
+
+					lock (progressLock)
+					{
+						if (percentage > lastReportedPercentage)
+						{
+							lastReportedPercentage = percentage;
+							progress?.Invoke(percentage, $"Creating QR codes: {currentCount} of {totalParts}");
+						}
+					}
+				});
+			});
+
+			progress?.Invoke(100, $"Created {totalParts} QR codes.");
+		}
+
 		private static List<PrismPart> GetDistinctByPartMark(List<PrismPart> prismParts)
 		{
 			return prismParts
@@ -332,27 +371,54 @@ namespace Prism
 			}
 		}
 
-		public static void ProcessPdfFiles(string pdfFolderPath, string qrCodeFolderPath)
+		public static async Task ProcessPdfFilesAsync(string pdfFolderPath, string qrCodeFolderPath, Action<int, string> progress)
 		{
-			var pdfFiles = Directory.GetFiles(pdfFolderPath, "*.pdf");
+			string[] pdfFiles = Directory.GetFiles(pdfFolderPath, "*.pdf");
 			int totalFiles = pdfFiles.Length;
 			int processedCount = 0;
 
-			foreach (var pdfFile in pdfFiles)
-			{
-				try
-				{
-					ProcessSinglePdfFile(pdfFile, qrCodeFolderPath);
-					processedCount++;
-					Console.WriteLine($"Processed {processedCount} of {totalFiles}: {pdfFile}");
-				}
-				catch (Exception ex)
-				{
-					Console.WriteLine($"Error processing {pdfFile}: {ex.Message}");
-				}
-			}
-		}
+			progress?.Invoke(0, totalFiles == 0 ? "No PDFs require QR codes." : $"Adding QR codes to PDFs: 0 of {totalFiles}");
 
+			if (totalFiles == 0)
+			{
+				progress?.Invoke(100, "PDF QR processing complete.");
+				return;
+			}
+
+			using (var semaphore = new SemaphoreSlim(Environment.ProcessorCount))
+			{
+				var tasks = new List<Task>();
+
+				foreach (string pdfFile in pdfFiles)
+				{
+					await semaphore.WaitAsync().ConfigureAwait(false);
+
+					tasks.Add(Task.Run(() =>
+					{
+						try
+						{
+							ProcessSinglePdfFile(pdfFile, qrCodeFolderPath);
+						}
+						catch (Exception ex)
+						{
+							Console.WriteLine($"Error processing {pdfFile}: {ex.Message}");
+						}
+						finally
+						{
+							int currentCount = Interlocked.Increment(ref processedCount);
+							int percentage = currentCount * 100 / totalFiles;
+
+							progress?.Invoke(percentage, $"Adding QR codes to PDFs: {currentCount} of {totalFiles}");
+							semaphore.Release();
+						}
+					}));
+				}
+
+				await Task.WhenAll(tasks).ConfigureAwait(false);
+			}
+
+			progress?.Invoke(100, $"QR codes added to {totalFiles} PDFs.");
+		}
 
 		/// <summary>
 		/// Processes a single PDF file: strips off any revision suffix,

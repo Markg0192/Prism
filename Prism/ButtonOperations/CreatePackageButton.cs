@@ -9,6 +9,7 @@ using Tekla.Structures;
 using Tekla.Structures.Model;
 using static Prism.Enums;
 using Model = Tekla.Structures.Model.Model;
+using Task = System.Threading.Tasks.Task;
 
 namespace Prism.ButtonOperations
 {
@@ -22,11 +23,7 @@ namespace Prism.ButtonOperations
 
 			if (packagingType.Contains("Lot"))
 			{
-				var groupedBeams = myObjects
-					.GetNonSeversafeParts()
-					.GroupBy(beam => beam.LotName)
-					.Select(group => group.ToList())
-					.ToList();
+				var groupedBeams = myObjects.GetNonSeversafeParts().GroupBy(beam => beam.LotName).Select(group => group.ToList()).ToList();
 
 				foreach (var listOfMembers in groupedBeams)
 				{
@@ -77,6 +74,180 @@ namespace Prism.ButtonOperations
 			}
 		}
 
+		public static async Task<(bool success, DrawingManager drawingManager)> CreateFabPackage(this SelectedObjects myObjects, Model model, 
+			PrismProjectData projectData, string phaseNumber, string issueNumber, StageTypes stageType, string siteDate, bool runSeversafe, string teklaVersion, Action<int, string> progress)
+		{
+			progress?.Invoke(0, "Starting Fab Pack creation...");
+
+			var (success, drawingManager) = await CreateFirstIssue(projectData, phaseNumber, issueNumber, runSeversafe, myObjects, model, stageType, siteDate, teklaVersion, progress);
+
+			if (!success)
+			{
+				return (false, drawingManager);
+			}
+
+			progress?.Invoke(100, "Fab Pack files created.");
+
+			return (true, drawingManager);
+		}
+
+		private static async Task<(bool success, DrawingManager drawingManager)> CreateFirstIssue(PrismProjectData projectData, string phaseNumber, string issueNumber,
+			bool runSeversafe, SelectedObjects myObjects, Model model, StageTypes stageType, string siteDate, string teklaVersion, Action<int, string> progress)
+		{
+			progress?.Invoke(2, "Creating Fab Pack folders...");
+
+			if (!InitialisePackageAndCreateFolders(projectData, phaseNumber, issueNumber, runSeversafe, myObjects, out ReportManager reportManager, out CpuCounter cpuCounter))
+			{
+				return (false, null);
+			}
+
+			progress?.Invoke(5, "Preparing fabrication drawings...");
+
+			Action<int, string> drawingProgress = CreateProgressRange(progress, 5, 55);
+
+			var (success, drawingManager) = await ProcessAndPrintDrawings(myObjects, cpuCounter, myObjects.GetNonSeversafeParts(), model, projectData, phaseNumber, issueNumber, reportManager, myObjects.PrismDrawings, teklaVersion, drawingProgress);
+
+			if (!success)
+			{
+				return (false, drawingManager);
+			}
+
+			progress?.Invoke(55, "Exporting BSWX...");
+
+			await Task.Run(() => myObjects.ExportBSWX(reportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType));
+
+			progress?.Invoke(60, "Creating fabrication reports and NC data...");
+
+			Action<int, string> reportProgress = CreateProgressRange(progress, 60, 75);
+
+			await reportManager.CreateFabReports(myObjects, myObjects.PrismBoltGroups, teklaVersion, reportProgress);
+
+			progress?.Invoke(75, "Updating Prism attributes...");
+
+			Action<int, string> attributeProgress = CreateProgressRange(progress, 75, 82);
+
+			if (!myObjects.GetNonSeversafeParts().ModifyAttributes(stageType, projectData, attributeProgress, reportManager))
+			{
+				return (false, drawingManager);
+			}
+
+			progress?.Invoke(82, "Exporting individual IFCs...");
+
+			Action<int, string> ifcProgress = CreateProgressRange(progress, 82, 92);
+
+			await IFCExporter.ExportIndividualIFC(myObjects, reportManager.Folders.IfcPath, ifcProgress);
+
+			progress?.Invoke(92, "Removing unused Fab Pack folders...");
+
+			reportManager.Folders.RemoveUnusedFolders();
+
+			progress?.Invoke(94, "Creating Fab Pack zip file...");
+
+			bool zipFileCanBeAttached = reportManager.Folders.ZipFolder(reportManager.Folders.FabPath);
+
+			progress?.Invoke(96, "Completing Fab Pack...");
+
+			PrismWarnings.FabPackComplete(projectData, zipFileCanBeAttached);
+
+			progress?.Invoke(97, "Creating Fab Pack email...");
+
+			EmailWriter.WriteFabEmail(projectData, myObjects, reportManager.FabReportPrefix, issueNumber, phaseNumber, siteDate, reportManager.Folders.FabPath, zipFileCanBeAttached);
+
+			progress?.Invoke(100, "Fab Pack creation complete.");
+
+			return (true, drawingManager);
+		}
+
+		private static Action<int, string> CreateProgressRange(Action<int, string> progress, int startPercentage, int endPercentage)
+		{
+			if (progress == null) return null;
+
+			return (percentage, message) =>
+			{
+				int clampedPercentage = Math.Max(0, Math.Min(100, percentage));
+				int mappedPercentage = startPercentage + (int)Math.Round((endPercentage - startPercentage) * (clampedPercentage / 100.0));
+
+				progress(mappedPercentage, message);
+			};
+		}
+
+		private static async Task<(bool success, DrawingManager drawingManager)> ProcessAndPrintDrawings(SelectedObjects selectedObjects, CpuCounter cpuCounter,
+			List<PrismPart> partsToSelect, Model model, PrismProjectData projectData, string phaseNumber, string issueNumber, ReportManager reportManager,
+			List<PrismDrawing> drawings, string teklaVersion, Action<int, string> progress)
+		{
+			progress?.Invoke(0, "Preparing drawing information...");
+
+			CpuSpeedCheck(cpuCounter);
+
+			progress?.Invoke(3, "Reading fabrication drawings...");
+
+			Action<int, string> drawingManagerProgress = CreateProgressRange(progress, 3, 25);
+
+			DrawingManager drawingManager = await Task.Run(() => DrawingManager.Create(model, projectData, partsToSelect, phaseNumber, issueNumber, reportManager.Folders.FabPath, drawingManagerProgress));
+
+			if (drawingManager == null)
+			{
+				return (false, null);
+			}
+
+			progress?.Invoke(25, "Checking fabrication drawings...");
+
+			if (!CheckForProblemsWithDrawings(drawingManager, projectData.ProjNumber, out bool createDrawings))
+			{
+				return (false, null);
+			}
+
+			if (!createDrawings)
+			{
+				progress?.Invoke(100, "Drawing processing complete.");
+				return (true, drawingManager);
+			}
+
+			string TeklaEnvi = string.Empty;
+			TeklaStructuresSettings.GetAdvancedOption("XS_ROLE_INI", ref TeklaEnvi);
+
+			if (TeklaEnvi.Contains("GENERAL") || TeklaEnvi.Contains("PORTAL"))
+			{
+				progress?.Invoke(30, "Preparing drawing QR codes...");
+
+				Action<int, string> qrPreparationProgress = CreateProgressRange(progress, 30, 38);
+
+				await QrCodeGenerator.ApplyQrCode(selectedObjects, projectData, reportManager.Folders.QrCodePath, drawingManager, qrPreparationProgress);
+			}
+			else
+			{
+				progress?.Invoke(38, "Preparing drawings for printing...");
+			}
+
+			progress?.Invoke(38, "Preparing drawing paper sizes...");
+
+			HijackPaperSizesForDrawings(Path.Combine(projectData.ProjPath, "attributes"));
+
+			progress?.Invoke(40, "Waiting for Tekla to be ready...");
+
+			CpuSpeedCheck(cpuCounter);
+
+			PrismMacroBuilder.IssueAndLockStampOff();
+
+			List<int> drawingCount = NewCountDrawings(drawingManager);
+
+			progress?.Invoke(42, "Printing fabrication drawings...");
+
+			Action<int, string> printingProgress = CreateProgressRange(progress, 42, 90);
+
+			await DrawingManager.NewPrintDrawings(reportManager, drawingManager, drawingCount, teklaVersion, printingProgress);
+
+			progress?.Invoke(90, "Adding QR codes to drawing PDFs...");
+
+			Action<int, string> qrPdfProgress = CreateProgressRange(progress, 90, 100);
+
+			await QrCodeGenerator.ProcessPdfFilesAsync(reportManager.Folders.FabPath + "\\ASS", reportManager.Folders.QrCodePath, qrPdfProgress);
+
+			progress?.Invoke(100, "Drawing processing complete.");
+
+			return (true, drawingManager);
+		}
+
 		private static async Task<(bool success, int totalNcRequired)> CreateFirstIssue(PrismProjectData projectData, string phaseNumber, string issueNumber, bool runSeversafe, SelectedObjects myObjects, Model model, StageTypes stageType, string siteDate, string teklaVersion,
 			ToolStrip toolStrip, ToolStripStatusLabel tssl)
 		{
@@ -90,7 +261,7 @@ namespace Prism.ButtonOperations
 			var (success, drawingManager) = await ProcessAndPrintDrawings(myObjects, cpuCounter, myObjects.GetNonSeversafeParts(), model, projectData, phaseNumber, issueNumber, reportManager, toolStrip, tssl, myObjects.PrismDrawings, teklaVersion);
 			if (!success)
 				return (false, totalNcRequired);
-		
+
 			// Use the DrawingManager to assign total NC required
 			totalNcRequired = drawingManager.NumberOfNcRequired;
 
@@ -100,7 +271,7 @@ namespace Prism.ButtonOperations
 			await reportManager.CreateFabReports(myObjects, myObjects.PrismBoltGroups, teklaVersion, toolStrip, tssl);
 
 			// Modify attributes of non-seversafe parts
-			if (!myObjects.GetNonSeversafeParts().ModifyAttributes((int)stageType, projectData, toolStrip, tssl))
+			if (!myObjects.GetNonSeversafeParts().ModifyAttributes(stageType, projectData, reportManager, toolStrip, tssl))
 				return (false, totalNcRequired);
 
 			// Export IFC
@@ -165,9 +336,9 @@ namespace Prism.ButtonOperations
 
 				await objects.ExportBSWX(reportManager.Folders.DspPath, projectData, phaseNumber, issueNumber, stageType, ts, tssl);
 
-			    await reportManager.CreateFabReports(objects, objects.PrismBoltGroups, teklaVersion, ts, tssl);
+				await reportManager.CreateFabReports(objects, objects.PrismBoltGroups, teklaVersion, ts, tssl);
 
-				if (!objects.PrismParts.ModifyAttributes((int)stageType, projectData, ts, tssl))
+				if (!objects.PrismParts.ModifyAttributes(stageType, projectData, reportManager, ts, tssl))
 					return (false, totalNcRequired);
 
 				await IFCExporter.ExportIndividualIFC(objects, reportManager.Folders.IfcPath, ts, tssl);
@@ -188,7 +359,7 @@ namespace Prism.ButtonOperations
 			return (true, totalNcRequired);
 		}
 
-		private static async Task<(bool success, DrawingManager drawingManager)> ProcessAndPrintDrawings(SelectedObjects selectedObjects, CpuCounter cpuCounter, List<PrismPart> partsToSelect, Model model, PrismProjectData projectData, string phaseNumber, string issueNumber, 
+		private static async Task<(bool success, DrawingManager drawingManager)> ProcessAndPrintDrawings(SelectedObjects selectedObjects, CpuCounter cpuCounter, List<PrismPart> partsToSelect, Model model, PrismProjectData projectData, string phaseNumber, string issueNumber,
 			ReportManager reportManager, ToolStrip toolStrip, ToolStripStatusLabel statusLabel, List<PrismDrawing> drawings, string teklaVersion)
 		{
 			CpuSpeedCheck(cpuCounter);
@@ -196,7 +367,7 @@ namespace Prism.ButtonOperations
 			if (drawingManager == null) return (false, null);
 
 			if (!CheckForProblemsWithDrawings(drawingManager, projectData.ProjNumber, out bool createDrawings)) return (false, null);
-			
+
 			if (createDrawings)
 			{
 				string TeklaEnvi = string.Empty;
@@ -212,16 +383,16 @@ namespace Prism.ButtonOperations
 				CpuSpeedCheck(cpuCounter);
 				PrismMacroBuilder.IssueAndLockStampOff();
 				List<int> drawingCount = NewCountDrawings(drawingManager);
-				
+
 				await DrawingManager.NewPrintDrawings(reportManager, drawingManager, drawingCount, teklaVersion, toolStrip, statusLabel);
-				
+
 				toolStrip.Invoke(new Action(() =>
 				{
 					statusLabel.Text = "Adding QR codes to pdfs";
 				}));
 
 				await QrCodeGenerator.ProcessPdfFilesAsync(reportManager.Folders.FabPath + "\\ASS", reportManager.Folders.QrCodePath);
-				
+
 				toolStrip.Invoke(new Action(() =>
 				{
 					statusLabel.Text = "QR coding done";

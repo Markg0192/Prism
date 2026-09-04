@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Web.Services.Description;
+using System.Windows;
 
 namespace Prism.Validation
 {
@@ -10,9 +12,15 @@ namespace Prism.Validation
 			RunVersionValidation();
 		}
 
+		public static void ValidateAppVersion(int newPrismLatestVersion, int newPrismLatestVersionTracking)
+		{
+			RunVersionValidation(newPrismLatestVersion, newPrismLatestVersionTracking);
+		}
+
 		private static readonly string _noticeFilePath = "C:\\temp\\update_notice.txt";
-			private const int _gracePeriodDays = 7;
+		private const int _gracePeriodDays = 7;
 		private static readonly int _latestVersionLine = 13; //this is the line number on DevServerLog for the path of the latest version log
+		private static readonly int _latestVersionUserTracking = 14;
 
 		/// <summary>
 		/// Version Validation uses the webservice to check for a version using a file in the logging locations.
@@ -55,6 +63,41 @@ namespace Prism.Validation
 			}
 		}
 
+		private static void RunVersionValidation(int newPrismLatestVersion, int newPrismLatestVersionTracking)
+		{
+			Version version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+			string currentVersion = $"{version.Major}.{version.Minor}";
+
+			try
+			{
+				string jsonResponse = WebService.ReadSpecificLine(newPrismLatestVersion, 1, "");
+				string logVersion = ExtractLatestVersion(jsonResponse);
+
+				int versionComparison = CompareVersions(currentVersion, logVersion);
+
+				if (versionComparison > 0)
+				{
+					// Current version is higher than the latest version → Update the version file
+					UpdateVersionFile(currentVersion, logVersion, newPrismLatestVersionTracking, newPrismLatestVersion);
+				}
+				else if (versionComparison < 0)
+				{
+					// Current version is older → Trigger warning
+					HandleOutdatedVersion(logVersion, currentVersion, newPrismLatestVersionTracking);
+				}
+				else
+				{
+					// Versions match → Clear notice if exists
+					ClearFirstNoticeDate(currentVersion, newPrismLatestVersionTracking);
+				}
+			}
+			catch (Exception)
+			{
+				throw; // Let the UI handle the error
+			}
+		}
+
+
 		private static string ExtractLatestVersion(string json)
 		{
 			const string key = "\"LatestVersion\":\"";
@@ -76,12 +119,20 @@ namespace Prism.Validation
 			return currentVer.CompareTo(latestVer); // Returns -1, 0, or 1
 		}
 
+		private static void UpdateVersionFile(string newVersion, string logVersion, int newPrismLatestVersionTracking, int newPrismLatestVersion)
+		{
+			var versionInfo = new VersionInfo { LatestVersion = newVersion };
+			string json = "{\"LatestVersion\":\"" + newVersion + "\"}";
+			WebService.WriteAppendStringToFile(newPrismLatestVersionTracking, $"\r---------------\rUser {Environment.UserName} has updated the log version from {logVersion} to {newVersion}", "");
+			WebService.WriteToSpecificLine(newPrismLatestVersion, 1, json, ""); // Assuming this writes to the same file
+		}
+
 		private static void UpdateVersionFile(string newVersion, string logVersion)
 		{
 			var versionInfo = new VersionInfo { LatestVersion = newVersion };
 			string json = "{\"LatestVersion\":\"" + newVersion + "\"}";
-			WebService.WriteAppendStringToFile(14, $"\r---------------\rUser {Environment.UserName} has updated the log version from {logVersion} to {newVersion}", "");
-			WebService.WriteToSpecificLine(13, 1, json, ""); // Assuming this writes to the same file
+			WebService.WriteAppendStringToFile(_latestVersionUserTracking, $"\r---------------\rUser {Environment.UserName} has updated the log version from {logVersion} to {newVersion}", "");
+			WebService.WriteToSpecificLine(_latestVersionLine, 1, json, ""); // Assuming this writes to the same file
 		}
 
 		private static void HandleOutdatedVersion(string latestVersion, string currentVersion)
@@ -91,7 +142,7 @@ namespace Prism.Validation
 			if (firstNoticeDate == null)
 			{
 				SaveFirstNoticeDate(DateTime.Now);
-				WebService.WriteAppendStringToFile(14, $"\r---------------\rUser {Environment.UserName}, version is out of date, theirs {currentVersion}, latest = {latestVersion}, 7 days to update.", "");
+				WebService.WriteAppendStringToFile(_latestVersionUserTracking, $"\r---------------\rUser {Environment.UserName}, version is out of date, theirs {currentVersion}, latest = {latestVersion}, 7 days to update.", "");
 				PrismWarnings.NotUsingLatestVersion(latestVersion, currentVersion);
 			}
 			else
@@ -100,17 +151,89 @@ namespace Prism.Validation
 
 				if (daysLeft > _gracePeriodDays)
 				{
-					WebService.WriteAppendStringToFile(14, $"\r---------------\rUser {Environment.UserName}, version is out of date, theirs {currentVersion}, latest = {latestVersion}, 0 days to update.", "");
+					WebService.WriteAppendStringToFile(_latestVersionUserTracking, $"\r---------------\rUser {Environment.UserName}, version is out of date, theirs {currentVersion}, latest = {latestVersion}, 0 days to update.", "");
 					PrismWarnings.NotUsingLatestVersionForceUpdate(latestVersion, currentVersion);
 					Environment.Exit(0); // Force update
 				}
 				else
 				{
 					int daysRemaining = _gracePeriodDays - (int)Math.Floor(daysLeft);
-					WebService.WriteAppendStringToFile(14, $"\r---------------\rUser {Environment.UserName}, version is out of date, theirs {currentVersion}, latest = {latestVersion}, {daysRemaining} days to update.", "");
+					WebService.WriteAppendStringToFile(_latestVersionUserTracking, $"\r---------------\rUser {Environment.UserName}, version is out of date, theirs {currentVersion}, latest = {latestVersion}, {daysRemaining} days to update.", "");
 					PrismWarnings.NotUsingLatestVersionReminderToUpdate(latestVersion, currentVersion, daysRemaining);
 				}
 			}
+		}
+
+		private static void HandleOutdatedVersion(string latestVersion, string currentVersion, int newPrismLatestVersionTracking)
+		{
+			DateTime? firstNoticeDate = GetFirstNoticeDate();
+
+			if (firstNoticeDate == null)
+			{
+				SaveFirstNoticeDate(DateTime.Now);
+
+				WebService.WriteAppendStringToFile(
+					newPrismLatestVersionTracking,
+					$"\r---------------\rUser {Environment.UserName}, version is out of date, theirs {currentVersion}, latest = {latestVersion}, {_gracePeriodDays} days to update.",
+					"");
+
+				PrismWarnings.ShowTopmostMessage(
+				$"A newer version of Prism is available.\n\n" +
+				$"Installed version: {currentVersion}\n" +
+				$"Latest version: {latestVersion}\n\n" +
+				$"You have 7 days to install the latest version.\n" +
+				"Prism will stop working when the grace period expires.\n\n" +
+				"Install the latest Prism TSEP from:\n" +
+				"Severfield Firm Folder -> ~SET UP FILES\\TsepFiles",
+				"Prism Update Available");
+
+				return;
+			}
+
+			double daysPassed = (DateTime.Now - firstNoticeDate.Value).TotalDays;
+
+			if (daysPassed >= _gracePeriodDays)
+			{
+				WebService.WriteAppendStringToFile(
+					newPrismLatestVersionTracking,
+					$"\r---------------\rUser {Environment.UserName}, version is out of date, theirs {currentVersion}, latest = {latestVersion}, 0 days to update.",
+					"");
+
+				PrismWarnings.ShowTopmostMessage(
+					$"Your version of Prism is out of date.\n\n" +
+					$"Installed version: {currentVersion}\n" +
+					$"Latest version: {latestVersion}\n\n" +
+					"Your update grace period has expired and Prism will now close.\n\n" +
+					"Please install the latest Prism TSEP from:\n" +
+					"Severfield Firm Folder -> ~SET UP FILES\\TsepFiles\n\n" +
+					"If you need assistance, contact ITHelpdesk@severfield.com.",
+					"Prism Update Required");
+
+				Environment.Exit(0);
+
+				return;
+			}
+
+			int daysRemaining = _gracePeriodDays - (int)Math.Floor(daysPassed);
+
+			WebService.WriteAppendStringToFile(
+				newPrismLatestVersionTracking,
+				$"\r---------------\rUser {Environment.UserName}, version is out of date, theirs {currentVersion}, latest = {latestVersion}, {daysRemaining} days to update.",
+				"");
+
+			string remainingText = daysRemaining == 1
+				? "You have 1 day remaining to install the latest version."
+				: $"You have {daysRemaining} days remaining to install the latest version.";
+
+			PrismWarnings.ShowTopmostMessage(
+				$"A newer version of Prism is available.\n\n" +
+				$"Installed version: {currentVersion}\n" +
+				$"Latest version: {latestVersion}\n\n" +
+				$"{remainingText}\n" +
+				"Prism will stop working when the grace period expires.\n\n" +
+				"Install the latest Prism TSEP from:\n" +
+				"Severfield Firm Folder -> ~SET UP FILES\\TsepFiles",
+				"Prism Update Available");
 		}
 
 		// Helper methods
@@ -136,7 +259,16 @@ namespace Prism.Validation
 		{
 			if (File.Exists(_noticeFilePath))
 			{
-				WebService.WriteAppendStringToFile(14, $"\r---------------\rUser {Environment.UserName} has updated to {newVersion}.", "");
+				WebService.WriteAppendStringToFile(_latestVersionUserTracking, $"\r---------------\rUser {Environment.UserName} has updated to {newVersion}.", "");
+				File.Delete(_noticeFilePath);
+			}
+		}
+
+		private static void ClearFirstNoticeDate(string newVersion, int newPrismLatestVersionTracking)
+		{
+			if (File.Exists(_noticeFilePath))
+			{
+				WebService.WriteAppendStringToFile(newPrismLatestVersionTracking, $"\r---------------\rUser {Environment.UserName} has updated to {newVersion}.", "");
 				File.Delete(_noticeFilePath);
 			}
 		}

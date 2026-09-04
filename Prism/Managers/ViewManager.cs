@@ -61,7 +61,28 @@ namespace Prism
             view.Modify();
         }
 
-        private static void SetVisibilitySettings(this View view)
+		public static void CreateGraveyardView(View current)
+		{		
+			var view = new View();
+			view.DisplayType = View.DisplayOrientationType.DISPLAY_3D;
+
+            view.Name = Constants.OmitGraveyrdViewName;
+			view.ViewCoordinateSystem.AxisX = new Vector(1, 0, 0);
+			view.ViewCoordinateSystem.AxisY = new Vector(0, 1, 0);
+			view.ViewCoordinateSystem.Origin = new Point(0, 0, -100000);
+			view.ViewDepthUp = 90000;
+			view.ViewDepthDown = 150000;
+			view.WorkArea.MinPoint = new Point(current.WorkArea.MinPoint.X - 100000, current.WorkArea.MinPoint.Y - 100000, current.WorkArea.MinPoint.Z - 100000);
+			view.WorkArea.MaxPoint = new Point(current.WorkArea.MaxPoint.X + 100000, current.WorkArea.MinPoint.Y + 100000, current.WorkArea.MinPoint.Z + 100000);
+
+			view.SetVisibilitySettings();
+
+			view.SharedView = true;
+			view.Insert();
+			view.Modify();
+		}
+
+		private static void SetVisibilitySettings(this View view)
         {
             view.VisibilitySettings.PartsVisible = true;
             view.VisibilitySettings.PartsVisibleInComponents = true;

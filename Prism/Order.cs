@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+using static Prism.Enums;
 using Model = Tekla.Structures.Model.Model;
 
 namespace Prism
@@ -35,7 +38,7 @@ namespace Prism
 		}
 
 		public static bool FabsecCarcasses(ReportManager myReportManager, Model model, PrismProjectData projectData, string teklaVersion,
-			SelectedObjects myObjects, int stageNumber, string orderType, string orderDate, int typeOfOrder, ToolStrip toolStrip, ToolStripStatusLabel tssl)
+			SelectedObjects myObjects, StageTypes stageType, string orderType, string orderDate, int typeOfOrder, ToolStrip toolStrip, ToolStripStatusLabel tssl)
 		{
 			if (typeOfOrder == 1)
 			{
@@ -44,17 +47,29 @@ namespace Prism
 			if (typeOfOrder == 2)
 			{
 				if (!FabsecProcessing.AddCarcassToSelection(model, myObjects, out List<PrismPart> originalFabsecs, out List<PrismPart> fabsecCarcasses)) return false;
-				return OrderFabsecCarcasses(myReportManager, model, projectData, teklaVersion, myObjects, stageNumber, originalFabsecs, fabsecCarcasses, orderType, orderDate, toolStrip, tssl);
+				return OrderFabsecCarcasses(myReportManager, model, projectData, teklaVersion, myObjects, stageType, originalFabsecs, fabsecCarcasses, orderType, orderDate, toolStrip, tssl);
+			}
+			return false;
+		}
+
+		public static async Task<bool> FabsecCarcasses(ReportManager myReportManager, Model model, PrismProjectData projectData, string teklaVersion,
+		SelectedObjects myObjects, StageTypes stageType, string orderType, string orderDate, int typeOfOrder, Action<int, string> progress )
+		{
+			if (typeOfOrder == 1)
+			{
+				return FabsecProcessing.CreateFabsecCarcasses(myObjects, projectData, model);
+			}
+			if (typeOfOrder == 2)
+			{
+				if (!FabsecProcessing.AddCarcassToSelection(model, myObjects, out List<PrismPart> originalFabsecs, out List<PrismPart> fabsecCarcasses)) return false;
+				return await OrderFabsecCarcasses(myReportManager, model, projectData, teklaVersion, myObjects, stageType, originalFabsecs, fabsecCarcasses, orderType, orderDate, progress);
 			}
 			return false;
 		}
 
 		private static bool OrderSeversafe(Model model, SelectedObjects myObjects, string siteDate, ReportManager myReportManager, PrismProjectData projectData)
 		{
-			int divisionNo = PrismWarnings.DivsionFrom();
-			if (divisionNo == 0) { PrismWarnings.Cancelled(); return false; }
-
-			SeversafeOrder.CreateSeversafeOrder(model, myObjects.GetSeversafeParts(), siteDate, myReportManager, divisionNo, myReportManager.EpoReportPrefix, projectData);
+			SeversafeOrder.CreateSeversafeOrder(model, myObjects.GetSeversafeParts(), siteDate, myReportManager, 1, myReportManager.EpoReportPrefix, projectData);
 			return true;
 		}
 
@@ -73,7 +88,7 @@ namespace Prism
 		}
 
 		public static bool OrderFabsecCarcasses(ReportManager myReportManager, Model model, PrismProjectData projectData, string teklaVersion,
-		 SelectedObjects myObjects, int stageNumber, List<PrismPart> originalFabsecs, List<PrismPart> fabsecCarcasses, string orderType, string orderDate, ToolStrip toolStrip, ToolStripStatusLabel tssl)
+		 SelectedObjects myObjects, StageTypes stageType, List<PrismPart> originalFabsecs, List<PrismPart> fabsecCarcasses, string orderType, string orderDate, ToolStrip toolStrip, ToolStripStatusLabel tssl)
 		{
 			if (!myReportManager.Folders.CreateFabsecCarcassFolder()) return false;
 
@@ -93,7 +108,44 @@ namespace Prism
 
 			myObjects.PrismParts.SelectParts();
 
-			if (!originalFabsecs.ModifyAttributes(stageNumber, projectData, toolStrip, tssl)) { return false; }
+			if (!originalFabsecs.ModifyAttributes(stageType, projectData, myReportManager, toolStrip, tssl)) { return false; }
+			foreach (PrismPart fabsec in originalFabsecs)
+			{
+				ModelModifiers.ModifyUDA(fabsec.Part, ModelUDA.FabsecCarcassOrdered(), projectData.Date);
+			}
+			model.CommitChanges();
+
+			myReportManager.Folders.ZipFolder(myReportManager.Folders.CarcassOrderPath);
+
+			PrismWarnings.MaterialOrderComplete(projectData);
+
+			EmailWriter.WriteFabsecCarcassEmail(myReportManager.ProjectData, myReportManager.CarcassReportPrefix, myReportManager.IssueNum, myReportManager.PhaseNum, orderDate, myReportManager.Folders.CarcassOrderPath);
+
+			return true;
+		}
+
+		public static async Task<bool> OrderFabsecCarcasses(ReportManager myReportManager, Model model, PrismProjectData projectData, string teklaVersion,
+ SelectedObjects myObjects, StageTypes stageType, List<PrismPart> originalFabsecs, List<PrismPart> fabsecCarcasses, string orderType, string orderDate, Action<int, string> progress)
+		{
+			if (!myReportManager.Folders.CreateFabsecCarcassFolder()) return false;
+
+			DrawingManager dm = await DrawingManager.Create(model, projectData, fabsecCarcasses, myReportManager.PhaseNum, myReportManager.IssueNum, myReportManager.Folders.CarcassOrderPath, progress);
+			if (dm == null) return false;
+
+			if (dm.GetDrawingFolder(Enums.DrawingFolder.Default).Count != 0) { PrismWarnings.IncorrectlyAssignedDrawings(); return false; }
+
+			List<int> drawingCount = new List<int> { 0, dm.GetDrawingFolder(Enums.DrawingFolder.PGC).Count };
+			DrawingManager.PrintAndIssueDrawings(myReportManager.Folders.FabsecCarcassFolder, myReportManager.Folders.CarcassOrderPath, drawingCount, "\\PGC", 0, 1, myReportManager, false, teklaVersion);
+			PrismMacroBuilder.ClearPrintDialog();
+
+			fabsecCarcasses.SelectParts();
+			myReportManager.CreateG2Assy();
+			BswxExporter.ExportBSWX(myObjects, myReportManager.Folders.CarcassOrderPath, projectData, myReportManager.PhaseNum, myReportManager.IssueNum, Enums.StageTypes.Prelim3);
+			ModelModifiers.RemoveLog(myReportManager.Folders.CarcassOrderPath);
+
+			myObjects.PrismParts.SelectParts();
+
+			if (!originalFabsecs.ModifyAttributes(stageType, projectData, progress, myReportManager)) { return false; }
 			foreach (PrismPart fabsec in originalFabsecs)
 			{
 				ModelModifiers.ModifyUDA(fabsec.Part, ModelUDA.FabsecCarcassOrdered(), projectData.Date);

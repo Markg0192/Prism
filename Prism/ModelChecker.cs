@@ -138,8 +138,21 @@ namespace Prism
 
 				if (executionClassData == 10)
 				{
+					p.PartErrors.Add(Error.Execution);
 					MissingExecutionClass.Add(p);
 				}
+			}
+		}
+
+		public static void HasExecutionClass(PrismPart mainPart)
+		{
+			int executionClassData = 10;  //this is the number read from teklas UDA when no execution class is applied, we are defaulting to it not having one here
+			mainPart.Part.GetUserProperty(ModelUDA.ExcecutionClass(), ref executionClassData);
+
+			if (executionClassData == 10)
+			{
+				mainPart.PartErrors.Add(Error.Execution);
+				MissingExecutionClass.Add(mainPart);
 			}
 		}
 
@@ -149,7 +162,7 @@ namespace Prism
 			foreach (PrismPart pPart in selectedObjects.GetMainParts())
 			{
 				Beam b = pPart.Part as Beam;
-				if (b != null && (b.Profile.ProfileString.StartsWith("UB") || b.Profile.ProfileString.StartsWith("UKB") 
+				if (b != null && (b.Profile.ProfileString.StartsWith("UB") || b.Profile.ProfileString.StartsWith("UKB")
 					|| b.Profile.ProfileString.StartsWith("UC") || b.Profile.ProfileString.StartsWith("UKC")
 
 					|| b.Profile.ProfileString.StartsWith("IPE") || b.Profile.ProfileString.StartsWith("IPEA")
@@ -160,17 +173,17 @@ namespace Prism
 				{
 					if (b.Name == GdomValues.BeamName && Math.Abs(b.StartPoint.Z - b.EndPoint.Z) < tolerance)
 					{
-						CheckBeamOrientation(b);
+						CheckBeamOrientation(b, pPart);
 					}
 
 					if (b.Name == GdomValues.ColumnName)
 					{
-						CheckColumnOrientation(b);
+						CheckColumnOrientation(b, pPart);
 					}
 
 					if (b.Name.Contains(GdomValues.RafterName))
 					{
-						CheckRafterOrientation(b);
+						CheckRafterOrientation(b, pPart);
 					}
 					if (b.Name == GdomValues.BraceName)
 					{
@@ -178,6 +191,42 @@ namespace Prism
 					}
 				}
 			}
+		}
+
+		public static void MemberOrientation(PrismPart mainPart)
+		{
+			int tolerance = 5;
+
+			Beam b = mainPart.Part as Beam;
+			if (b != null && (b.Profile.ProfileString.StartsWith("UB") || b.Profile.ProfileString.StartsWith("UKB")
+				|| b.Profile.ProfileString.StartsWith("UC") || b.Profile.ProfileString.StartsWith("UKC")
+
+				|| b.Profile.ProfileString.StartsWith("IPE") || b.Profile.ProfileString.StartsWith("IPEA")
+				|| b.Profile.ProfileString.StartsWith("IPN") || b.Profile.ProfileString.StartsWith("HAU")
+				|| b.Profile.ProfileString.StartsWith("HD") || b.Profile.ProfileString.StartsWith("HEM")
+				|| b.Profile.ProfileString.StartsWith("HEA") || b.Profile.ProfileString.StartsWith("HEB")
+				))
+			{
+				if (b.Name == GdomValues.BeamName && Math.Abs(b.StartPoint.Z - b.EndPoint.Z) < tolerance)
+				{
+					CheckBeamOrientation(b, mainPart);
+				}
+
+				if (b.Name == GdomValues.ColumnName)
+				{
+					CheckColumnOrientation(b, mainPart);
+				}
+
+				if (b.Name.Contains(GdomValues.RafterName))
+				{
+					CheckRafterOrientation(b, mainPart);
+				}
+				if (b.Name == GdomValues.BraceName)
+				{
+					// CheckBraceOrientation(b);
+				}
+			}
+
 		}
 
 		private static void CheckBraceOrientation(Beam b)
@@ -248,25 +297,27 @@ namespace Prism
 			}
 		}
 
-		private static void CheckRafterOrientation(Beam b)
+		private static void CheckRafterOrientation(Beam b, PrismPart pPart)
 		{
 			//All rafters must be detailed with start point at the apex, so a simple check to make sure start point is higher than end point will do here
 			if (b.StartPoint.Z < b.EndPoint.Z)
 			{
+				pPart.PartErrors.Add(Error.Orientation);
 				IncorrectOrientation.Add(new PrismPart(b));
 			}
 		}
 
-		private static void CheckColumnOrientation(Beam b)
+		private static void CheckColumnOrientation(Beam b, PrismPart pPart)
 		{
 			//Column rotation must be "FRONT" or "BELOW", therefore "BACK" and "TOP" are wrong, start point must also be lower than end point.
 			if (b.Position.Rotation == Position.RotationEnum.BACK || b.Position.Rotation == Position.RotationEnum.TOP || b.StartPoint.Z > b.EndPoint.Z)
 			{
+				pPart.PartErrors.Add(Error.Orientation);
 				IncorrectOrientation.Add(new PrismPart(b));
 			}
 		}
 
-		private static void CheckBeamOrientation(Beam b)
+		private static void CheckBeamOrientation(Beam b, PrismPart pPart)
 		{
 			bool check1 = false;
 			bool check2 = false;
@@ -286,6 +337,7 @@ namespace Prism
 
 			if (check1 || check2)
 			{
+				pPart.PartErrors.Add(Error.Orientation);
 				IncorrectOrientation.Add(new PrismPart(b));
 			}
 		}
@@ -300,6 +352,7 @@ namespace Prism
 				{
 					if (p.Part.Class != GdomValues.TemporaryObjectClass)
 					{
+						p.PartErrors.Add(Error.NameAndClass);
 						IncorrectNameAndClass.Add(p);
 					}
 				}
@@ -307,8 +360,31 @@ namespace Prism
 				{
 					if (partClass.TryGetValue(p.Part.Name, out var meantToBeClass) && meantToBeClass != null && !meantToBeClass.Contains(p.Part.Class))
 					{
+						p.PartErrors.Add(Error.NameAndClass);
 						IncorrectNameAndClass.Add(p);
 					}
+				}
+			}
+		}
+
+		public static void NameAndClassAligned(PrismPart p)
+		{
+			var partClass = GdomValues.PartClass();
+
+			if (p.Part.Name.IndexOf("TEMP", StringComparison.OrdinalIgnoreCase) >= 0)
+			{
+				if (p.Part.Class != GdomValues.TemporaryObjectClass)
+				{
+					p.PartErrors.Add(Error.NameAndClass);
+					IncorrectNameAndClass.Add(p);
+				}
+			}
+			else
+			{
+				if (partClass.TryGetValue(p.Part.Name, out var meantToBeClass) && meantToBeClass != null && !meantToBeClass.Contains(p.Part.Class))
+				{
+					p.PartErrors.Add(Error.NameAndClass);
+					IncorrectNameAndClass.Add(p);
 				}
 			}
 		}
@@ -328,6 +404,30 @@ namespace Prism
 			if (incompleteParts.Any())
 			{
 				PrismWarnings.PreviousStepIncomplete(incompleteParts);
+				return false;
+			}
+
+			return true;
+		}
+
+		public static bool ArePreviousStepsComplete(SelectedObjects selectedObjects, int stageNumber, bool forWpfInterface)
+		{
+			List<PrismPart> incompleteParts = selectedObjects.GetNonSeversafeParts()
+				.Where(p =>
+				{
+					string userProperty = "";
+					p.Part.GetUserProperty(ModelUDA.PreviousStageName(stageNumber), ref userProperty);
+					return userProperty == "";
+				})
+				.Select(p => p)
+				.ToList();
+
+			if (incompleteParts.Any())
+			{
+				foreach (PrismPart part in incompleteParts)
+				{
+					part.PartErrors.Add(Error.PreviousStepIncomplete);
+				}
 				return false;
 			}
 
@@ -391,7 +491,6 @@ namespace Prism
 			}
 			return true;
 		}
-
 
 		public static IgnoreType PhaseMatchErrors(SelectedObjects selectedObjects, out List<PrismPart> partsWithError)
 		{
@@ -482,10 +581,11 @@ namespace Prism
 				if (p == null)
 				{
 					p = new PrismPart(secondaryPart);
-					selectedObjects.PrismParts.Add(new PrismPart(secondaryPart));
+					selectedObjects.PrismParts.Add(p);
 				}
 				p.StartNumberDoesntMatch = true;
 				p.StartNumber = mainPartNumber;
+				p.PartErrors.Add(Error.SecondaryNumberingMismatch);
 			}
 		}
 
@@ -503,6 +603,7 @@ namespace Prism
 				}
 				p.PhaseDoesntMatchMain = true;
 				p.Phase = mainPart.Phase;
+				p.PartErrors.Add(Error.SecondaryPhasingMismatch);
 			}
 		}
 
@@ -511,6 +612,7 @@ namespace Prism
 			if (mainPart.Finish.Length == 0)
 			{
 				HasNoFinish.Add(mainPart);
+				mainPart.PartErrors.Add(Error.FinishMissing);
 			}
 		}
 
@@ -534,6 +636,7 @@ namespace Prism
 				if (prelimMark.Length == 0)
 				{
 					NotOrderedParts.Add(mainPart);
+
 				}
 				else
 				{
@@ -542,7 +645,21 @@ namespace Prism
 			}
 		}
 
-		private static void CheckForIntumescentLoading(this PrismPart mainPart)
+		public static void CheckPartsAreOrdered(this PrismPart mainPart)
+		{
+			if (!mainPart.Part.Profile.ProfileString.Contains("PLT") && !mainPart.Part.Profile.ProfileString.Contains("FLT"))
+			{
+				string prelimMark = "";
+				mainPart.Part.GetUserProperty(ModelUDA.CurrentStageName(3), ref prelimMark); //Check prism uda material order complete for data    
+				if (prelimMark.Length == 0)
+				{
+					mainPart.PartErrors.Add(Error.PartNotOrdered);
+				}
+			}
+
+		}
+
+		public static void CheckForIntumescentLoading(this PrismPart mainPart)
 		{
 			if (mainPart.Finish.StartsWith(GdomValues.IntumescentCode))
 			{
@@ -551,6 +668,7 @@ namespace Prism
 					if (IsMissingProperties(mainPart.HempelDft, mainPart.HempelWft))
 					{
 						PartsWithoutIntumescentLoading.Add(mainPart);
+						mainPart.PartErrors.Add(Error.IntumescentLoadingMissing);
 					}
 				}
 			}
@@ -561,7 +679,7 @@ namespace Prism
 			return string.IsNullOrEmpty(dft) && string.IsNullOrEmpty(wft);
 		}
 
-		public static bool NameAndClassAign(SelectedObjects myObjects)
+		public static bool NameAndClassAlign(SelectedObjects myObjects)
 		{
 			IncorrectNameAndClass.Clear();
 			NameAndClassAligned(myObjects);

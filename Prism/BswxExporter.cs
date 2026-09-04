@@ -24,6 +24,15 @@ namespace Prism
 			 await RunBswxExport(myInputList, myFolder, modelData, phaseNumber, issueNumber, stageType);
 		 }
 
+		public static async Task ExportBSWX(this SelectedObjects selectedObjects, string myFolder, PrismProjectData modelData, string phaseNumber,
+	string issueNumber, StageTypes stageType)
+		{
+			//To run the bswx exporter we need to give it an input, this input can be an ArrayList, only 1 part is required, the exporter will then create a bswx of all parts selected in the model
+			ArrayList myInputList = new ArrayList
+			 {  selectedObjects.PrismParts[0].Part};
+			await RunBswxExport(myInputList, myFolder, modelData, phaseNumber, issueNumber, stageType);
+		}
+
 		private static async Task RunBswxExport(ArrayList inputList, string myFolder, PrismProjectData modelData, string phaseNumber,
 			string issueNumber, StageTypes stageType)
 		{
