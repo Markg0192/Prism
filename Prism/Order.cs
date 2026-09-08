@@ -8,7 +8,7 @@ using Model = Tekla.Structures.Model.Model;
 namespace Prism
 {
 	public static class Order
-	{
+	{ 
 		public static void ShearStuds(string orderType, ReportManager myReportManager, string siteDate)
 		{
 			OrderBolts(orderType, myReportManager, siteDate);
