@@ -867,7 +867,7 @@ namespace Prism
 			Prism.Properties.Settings.Default.UniqueId = key;
 			Prism.Properties.Settings.Default.Save();
 
-			VersionValidation.ValidateAppVersion();
+			//VersionValidation.ValidateAppVersion();
 
 			//if webservice is a succes save the key
 			if (!CheckModelConnection()) return;
