@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.6.11819.183 stable
+VisualStudioVersion = 18.6.11819.183
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Prism", "Prism\Prism.csproj", "{392CE316-72E3-4B40-9DF7-16C8D7EC84C4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrismNewInterface", "..\PrismNewInterface\PrismNewInterface\PrismNewInterface.csproj", "{E6C21A8F-40B3-4318-8A59-28FF65F5A131}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrismNewInterface", "PrismNewInterface\PrismNewInterface.csproj", "{E6C21A8F-40B3-4318-8A59-28FF65F5A131}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

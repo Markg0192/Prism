@@ -1,0 +1,1072 @@
+﻿<Window x:Class="PrismNewInterface.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Prism Settings"
+        Width="820"
+        Height="580"
+        MinWidth="740"
+        MinHeight="510"
+        WindowStartupLocation="CenterOwner"
+        Background="#F4F6F8"
+        FontFamily="Segoe UI"
+        Icon="New Logo.ico">
+
+    <Window.Resources>
+
+        <SolidColorBrush x:Key="PrimaryBrush"
+                         Color="#2563EB" />
+
+        <SolidColorBrush x:Key="PrimaryHoverBrush"
+                         Color="#1D4ED8" />
+
+        <SolidColorBrush x:Key="BorderBrush"
+                         Color="#D7DEE8" />
+
+        <SolidColorBrush x:Key="SecondaryTextBrush"
+                         Color="#64748B" />
+
+        <Style x:Key="InformationButtonStyle"
+               TargetType="Button">
+
+            <Setter Property="Width"
+                    Value="20" />
+
+            <Setter Property="Height"
+                    Value="20" />
+
+            <Setter Property="Margin"
+                    Value="7,0,0,0" />
+
+            <Setter Property="Padding"
+                    Value="0" />
+
+            <Setter Property="Background"
+                    Value="White" />
+
+            <Setter Property="Foreground"
+                    Value="#2563EB" />
+
+            <Setter Property="BorderBrush"
+                    Value="#93C5FD" />
+
+            <Setter Property="BorderThickness"
+                    Value="1" />
+
+            <Setter Property="FontSize"
+                    Value="10" />
+
+            <Setter Property="FontWeight"
+                    Value="Bold" />
+
+            <Setter Property="Cursor"
+                    Value="Hand" />
+
+            <Setter Property="ToolTip"
+                    Value="Show information" />
+
+            <Setter Property="Template">
+
+                <Setter.Value>
+
+                    <ControlTemplate TargetType="Button">
+
+                        <Border x:Name="InformationBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12">
+
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+
+                            <Trigger Property="IsMouseOver"
+                                     Value="True">
+
+                                <Setter TargetName="InformationBorder"
+                                        Property="Background"
+                                        Value="#EFF6FF" />
+
+                                <Setter TargetName="InformationBorder"
+                                        Property="BorderBrush"
+                                        Value="#2563EB" />
+
+                            </Trigger>
+
+                        </ControlTemplate.Triggers>
+
+                    </ControlTemplate>
+
+                </Setter.Value>
+
+            </Setter>
+
+        </Style>
+
+        <Style x:Key="SectionTitleStyle"
+               TargetType="TextBlock">
+
+            <Setter Property="FontSize"
+                    Value="15" />
+
+            <Setter Property="FontWeight"
+                    Value="SemiBold" />
+
+            <Setter Property="Foreground"
+                    Value="#172033" />
+
+        </Style>
+
+        <Style x:Key="FieldLabelStyle"
+               TargetType="TextBlock">
+
+            <Setter Property="FontSize"
+                    Value="12" />
+
+            <Setter Property="FontWeight"
+                    Value="SemiBold" />
+
+            <Setter Property="Foreground"
+                    Value="#334155" />
+
+            <Setter Property="VerticalAlignment"
+                    Value="Center" />
+
+        </Style>
+
+        <Style x:Key="InputStyle"
+               TargetType="Control">
+
+            <Setter Property="Height"
+                    Value="32" />
+
+            <Setter Property="FontSize"
+                    Value="13" />
+
+            <Setter Property="Padding"
+                    Value="8,3" />
+
+        </Style>
+
+        <Style x:Key="PrimaryButtonStyle"
+               TargetType="Button">
+
+            <Setter Property="Height"
+                    Value="34" />
+
+            <Setter Property="MinWidth"
+                    Value="120" />
+
+            <Setter Property="Padding"
+                    Value="14,5" />
+
+            <Setter Property="Foreground"
+                    Value="White" />
+
+            <Setter Property="Background"
+                    Value="{StaticResource PrimaryBrush}" />
+
+            <Setter Property="BorderBrush"
+                    Value="{StaticResource PrimaryBrush}" />
+
+            <Setter Property="FontWeight"
+                    Value="SemiBold" />
+
+            <Setter Property="Cursor"
+                    Value="Hand" />
+
+            <Setter Property="Template">
+
+                <Setter.Value>
+
+                    <ControlTemplate TargetType="Button">
+
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="5">
+
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+
+                            <Trigger Property="IsMouseOver"
+                                     Value="True">
+
+                                <Setter TargetName="ButtonBorder"
+                                        Property="Background"
+                                        Value="{StaticResource PrimaryHoverBrush}" />
+
+                            </Trigger>
+
+                        </ControlTemplate.Triggers>
+
+                    </ControlTemplate>
+
+                </Setter.Value>
+
+            </Setter>
+
+        </Style>
+
+        <Style x:Key="SecondaryButtonStyle"
+               TargetType="Button">
+
+            <Setter Property="Height"
+                    Value="34" />
+
+            <Setter Property="MinWidth"
+                    Value="86" />
+
+            <Setter Property="Padding"
+                    Value="14,5" />
+
+            <Setter Property="Background"
+                    Value="White" />
+
+            <Setter Property="Foreground"
+                    Value="#334155" />
+
+            <Setter Property="BorderBrush"
+                    Value="{StaticResource BorderBrush}" />
+
+            <Setter Property="BorderThickness"
+                    Value="1" />
+
+            <Setter Property="FontWeight"
+                    Value="SemiBold" />
+
+            <Setter Property="Cursor"
+                    Value="Hand" />
+
+        </Style>
+
+        <Style TargetType="TabControl">
+
+            <Setter Property="Background"
+                    Value="Transparent" />
+
+            <Setter Property="BorderThickness"
+                    Value="0" />
+
+        </Style>
+
+        <!-- TAB STYLE - INDICATOR IS NOW SHARED AND ANIMATED -->
+
+        <Style TargetType="TabItem">
+
+            <Setter Property="FontSize"
+                    Value="13" />
+
+            <Setter Property="FontWeight"
+                    Value="SemiBold" />
+
+            <Setter Property="Foreground"
+                    Value="#64748B" />
+
+            <Setter Property="Background"
+                    Value="Transparent" />
+
+            <Setter Property="Padding"
+                    Value="22,12" />
+
+            <Setter Property="Margin"
+                    Value="0,0,6,0" />
+
+            <Setter Property="Cursor"
+                    Value="Hand" />
+
+            <Setter Property="Template">
+
+                <Setter.Value>
+
+                    <ControlTemplate TargetType="TabItem">
+
+                        <Border x:Name="TabBackground"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="6,6,0,0">
+
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              ContentSource="Header" />
+
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+
+                            <Trigger Property="IsMouseOver"
+                                     Value="True">
+
+                                <Setter TargetName="TabBackground"
+                                        Property="Background"
+                                        Value="#F1F5F9" />
+
+                                <Setter Property="Foreground"
+                                        Value="#334155" />
+
+                            </Trigger>
+
+                            <Trigger Property="IsSelected"
+                                     Value="True">
+
+                                <Setter TargetName="TabBackground"
+                                        Property="Background"
+                                        Value="White" />
+
+                                <Setter Property="Foreground"
+                                        Value="#1D4ED8" />
+
+                            </Trigger>
+
+                        </ControlTemplate.Triggers>
+
+                    </ControlTemplate>
+
+                </Setter.Value>
+
+            </Setter>
+
+        </Style>
+
+        <Style TargetType="DataGrid">
+
+            <Setter Property="Background"
+                    Value="White" />
+
+            <Setter Property="BorderBrush"
+                    Value="{StaticResource BorderBrush}" />
+
+            <Setter Property="BorderThickness"
+                    Value="1" />
+
+            <Setter Property="GridLinesVisibility"
+                    Value="Horizontal" />
+
+            <Setter Property="HorizontalGridLinesBrush"
+                    Value="#E5EAF0" />
+
+            <Setter Property="RowHeight"
+                    Value="30" />
+
+            <Setter Property="ColumnHeaderHeight"
+                    Value="28" />
+
+            <Setter Property="HeadersVisibility"
+                    Value="Column" />
+
+            <Setter Property="CanUserResizeRows"
+                    Value="False" />
+
+        </Style>
+
+        <Style TargetType="DataGridColumnHeader">
+
+            <Setter Property="Background"
+                    Value="#F8FAFC" />
+
+            <Setter Property="Foreground"
+                    Value="#334155" />
+
+            <Setter Property="FontWeight"
+                    Value="SemiBold" />
+
+            <Setter Property="Padding"
+                    Value="8,0" />
+
+            <Setter Property="BorderBrush"
+                    Value="#E2E8F0" />
+
+            <Setter Property="BorderThickness"
+                    Value="0,0,1,1" />
+
+        </Style>
+
+    </Window.Resources>
+
+    <Grid>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="52" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="54" />
+        </Grid.RowDefinitions>
+
+        <!-- HEADER -->
+
+        <Border Grid.Row="0"
+                Background="White"
+                BorderBrush="#E2E8F0"
+                BorderThickness="0,0,0,1">
+
+            <Grid Margin="22,0">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock VerticalAlignment="Center"
+                           FontSize="18"
+                           FontWeight="Bold"
+                           Foreground="#1D4ED8"
+                           Text="PRISM" />
+
+                <TextBlock Grid.Column="2"
+                           VerticalAlignment="Center"
+                           FontSize="15"
+                           FontWeight="SemiBold"
+                           Foreground="#172033"
+                           Text="Settings" />
+
+            </Grid>
+
+        </Border>
+
+        <!-- SETTINGS TABS -->
+
+        <Grid Grid.Row="1"
+              Margin="20">
+
+            <TabControl x:Name="SettingsTabControl"
+                        Margin="0"
+                        SelectedIndex="0"
+                        SelectionChanged="SettingsTabControl_SelectionChanged">
+
+                <!-- CLASSIFICATION CODES -->
+
+                <TabItem Header="Classification Codes">
+
+                    <Border Margin="0,10,0,0"
+                            Padding="16"
+                            Background="White"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="7">
+
+                        <Grid>
+
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="12" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <StackPanel>
+
+                                <StackPanel Orientation="Horizontal">
+
+                                    <TextBlock Style="{StaticResource SectionTitleStyle}"
+                                               Text="Classification codes" />
+
+                                    <Button Style="{StaticResource InformationButtonStyle}"
+                                            Content="i"
+                                            Click="ClassificationCodesInfoButton_Click" />
+
+                                </StackPanel>
+
+                                <TextBlock Margin="0,4,0,0"
+                                           FontSize="12"
+                                           Foreground="{StaticResource SecondaryTextBrush}"
+                                           Text="Configure the selection filters, codes and descriptions used by Prism." />
+
+                            </StackPanel>
+
+                            <DataGrid Grid.Row="2"
+                                      AutoGenerateColumns="False"
+                                      CanUserAddRows="False"
+                                      CanUserDeleteRows="False"
+                                      ItemsSource="{Binding ClassificationCodes}">
+
+                                <DataGrid.Columns>
+
+                                    <DataGridTextColumn Header="Selection filter"
+                                                        Binding="{Binding SelectionFilter, UpdateSourceTrigger=PropertyChanged}"
+                                                        Width="*" />
+
+                                    <DataGridTextColumn Header="Code"
+                                                        Binding="{Binding Code, UpdateSourceTrigger=PropertyChanged}"
+                                                        Width="*" />
+
+                                    <DataGridTextColumn Header="Title"
+                                                        Binding="{Binding Title, UpdateSourceTrigger=PropertyChanged}"
+                                                        Width="2*" />
+
+                                </DataGrid.Columns>
+
+                            </DataGrid>
+
+                        </Grid>
+
+                    </Border>
+
+                </TabItem>
+
+                <!-- PROJECT USERS -->
+
+                <TabItem Header="Project Users">
+
+                    <Border Margin="0,10,0,0"
+                            Padding="16"
+                            Background="White"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="7">
+
+                        <Grid>
+
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="22" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <StackPanel>
+
+                                <TextBlock Style="{StaticResource SectionTitleStyle}"
+                                           Text="Project users" />
+
+                                <TextBlock Margin="0,4,0,0"
+                                           FontSize="12"
+                                           Foreground="{StaticResource SecondaryTextBrush}"
+                                           Text="These users can be included in relevant project correspondence." />
+
+                            </StackPanel>
+
+                            <Grid Grid.Row="2">
+
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="210" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="12" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="12" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="12" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Grid.Row="0"
+                                           Style="{StaticResource FieldLabelStyle}"
+                                           Text="Project Management" />
+
+                                <TextBox Grid.Row="0"
+                                         Grid.Column="1"
+                                         Style="{StaticResource InputStyle}"
+                                         Text="{Binding ProjectManagement, UpdateSourceTrigger=PropertyChanged}" />
+
+                                <TextBlock Grid.Row="2"
+                                           Style="{StaticResource FieldLabelStyle}"
+                                           Text="Drawing Office Management" />
+
+                                <TextBox Grid.Row="2"
+                                         Grid.Column="1"
+                                         Style="{StaticResource InputStyle}"
+                                         Text="{Binding DrawingOfficeManager, UpdateSourceTrigger=PropertyChanged}" />
+
+                                <TextBlock Grid.Row="4"
+                                           Style="{StaticResource FieldLabelStyle}"
+                                           Text="Document Control" />
+
+                                <TextBox Grid.Row="4"
+                                         Grid.Column="1"
+                                         Style="{StaticResource InputStyle}"
+                                         Text="{Binding DocumentControl, UpdateSourceTrigger=PropertyChanged}" />
+
+                                <TextBlock Grid.Row="6"
+                                           Style="{StaticResource FieldLabelStyle}"
+                                           Text="Others" />
+
+                                <TextBox Grid.Row="6"
+                                         Grid.Column="1"
+                                         Style="{StaticResource InputStyle}"
+                                         Text="{Binding OtherProjectUsers, UpdateSourceTrigger=PropertyChanged}" />
+
+                            </Grid>
+
+                        </Grid>
+
+                    </Border>
+
+                </TabItem>
+
+                <!-- RESET PRELIM -->
+
+                <TabItem Header="Reset Prelim">
+
+                    <Border Margin="0,10,0,0"
+                            Padding="16"
+                            Background="White"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="7">
+
+                        <Grid>
+
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="18" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="20" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <StackPanel>
+
+                                <TextBlock Style="{StaticResource SectionTitleStyle}"
+                                           Text="Reset preliminary start number" />
+
+                                <TextBlock Margin="0,4,0,0"
+                                           FontSize="12"
+                                           Foreground="{StaticResource SecondaryTextBrush}"
+                                           Text="Manually change the starting point used for preliminary numbering." />
+
+                            </StackPanel>
+
+                            <Border Grid.Row="2"
+                                    Padding="14"
+                                    Background="#FFF7ED"
+                                    BorderBrush="#FDBA74"
+                                    BorderThickness="1"
+                                    CornerRadius="6">
+
+                                <StackPanel>
+
+                                    <TextBlock FontWeight="SemiBold"
+                                               Foreground="#9A3412"
+                                               Text="Warning" />
+
+                                    <TextBlock Margin="0,5,0,0"
+                                               TextWrapping="Wrap"
+                                               Foreground="#7C2D12"
+                                               Text="This operation may cause preliminary numbers to overlap and cannot be undone. The selected value will become the next preliminary number used by Prism." />
+
+                                </StackPanel>
+
+                            </Border>
+
+                            <Grid Grid.Row="4">
+
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="190" />
+                                    <ColumnDefinition Width="180" />
+                                    <ColumnDefinition Width="12" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="14" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Style="{StaticResource FieldLabelStyle}"
+                                           Text="Current start point" />
+
+                                <TextBlock x:Name="CurrentPrelimStartPointText"
+                                           Grid.Column="1"
+                                           VerticalAlignment="Center"
+                                           FontSize="14"
+                                           FontWeight="SemiBold"
+                                           Text="0" />
+
+                                <Button Grid.Column="3"
+                                        Style="{StaticResource SecondaryButtonStyle}"
+                                        Content="Refresh"
+                                        Click="RefreshPrelimButton_Click" />
+
+                                <TextBlock Grid.Row="2"
+                                           Style="{StaticResource FieldLabelStyle}"
+                                           Text="New prelim start point" />
+
+                                <TextBox x:Name="NewPrelimStartPointTextBox"
+                                         Grid.Row="2"
+                                         Grid.Column="1"
+                                         Style="{StaticResource InputStyle}"
+                                         Text="0" />
+
+                            </Grid>
+
+                            <Button Grid.Row="6"
+                                    HorizontalAlignment="Right"
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    Content="Set Start Point"
+                                    Click="SetNewPrelimStartPointButton_Click" />
+
+                        </Grid>
+
+                    </Border>
+
+                </TabItem>
+
+                <!-- ADVANCED -->
+
+                <TabItem Header="Advanced">
+
+                    <Border Margin="0,10,0,0"
+                            Padding="16"
+                            Background="White"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="7">
+
+                        <Grid>
+
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="20" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <StackPanel>
+
+                                <TextBlock Style="{StaticResource SectionTitleStyle}"
+                                           Text="Advanced settings" />
+
+                                <TextBlock Margin="0,4,0,0"
+                                           FontSize="12"
+                                           Foreground="{StaticResource SecondaryTextBrush}"
+                                           Text="Configure numbering and fabrication package options." />
+
+                            </StackPanel>
+
+                            <Grid Grid.Row="2"
+                                  MaxWidth="560"
+                                  HorizontalAlignment="Left">
+
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="190" />
+                                    <ColumnDefinition Width="260" />
+                                </Grid.ColumnDefinitions>
+
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="12" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="12" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Style="{StaticResource FieldLabelStyle}"
+                                           Text="Prelim mark prefix" />
+
+                                <TextBox Grid.Column="1"
+                                         Style="{StaticResource InputStyle}"
+                                         Text="{Binding PrelimPrefix, UpdateSourceTrigger=PropertyChanged}" />
+
+                                <TextBlock Grid.Row="2"
+                                           Style="{StaticResource FieldLabelStyle}"
+                                           Text="Fab package type" />
+
+                                <ComboBox Grid.Row="2"
+                                          Grid.Column="1"
+                                          Style="{StaticResource InputStyle}"
+                                          SelectedValuePath="Content"
+                                          SelectedValue="{Binding FabPackType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+
+                                    <ComboBoxItem Content="By Phase" />
+                                    <ComboBoxItem Content="By Lot" />
+                                    <ComboBoxItem Content="By Selection" />
+
+                                </ComboBox>
+
+                                <TextBlock Grid.Row="4"
+                                           Style="{StaticResource FieldLabelStyle}"
+                                           Text="Fabsec Green" />
+
+                                <TextBox Grid.Row="4"
+                                         Grid.Column="1"
+                                         Style="{StaticResource InputStyle}"
+                                         Text="{Binding FabsecGreen, UpdateSourceTrigger=PropertyChanged}" />
+
+                            </Grid>
+
+                        </Grid>
+
+                    </Border>
+
+                </TabItem>
+
+                <!-- PACKAGE DIRECTORIES -->
+
+                <TabItem Header="Package Directories">
+
+                    <Border Margin="0,10,0,0"
+                            Padding="16"
+                            Background="White"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="7">
+
+                        <Grid>
+
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="20" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <StackPanel>
+
+                                <TextBlock Style="{StaticResource SectionTitleStyle}"
+                                           Text="Package directories" />
+
+                                <TextBlock Margin="0,4,0,0"
+                                           FontSize="12"
+                                           Foreground="{StaticResource SecondaryTextBrush}"
+                                           Text="Set the output locations used when Prism creates orders, variations and fabrication packages." />
+
+                            </StackPanel>
+
+                            <Grid Grid.Row="2">
+
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="180" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="10" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="10" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="10" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="10" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="10" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Grid.Row="0"
+                                           Style="{StaticResource FieldLabelStyle}"
+                                           Text="Material Orders" />
+
+                                <TextBox Grid.Row="0"
+                                         Grid.Column="1"
+                                         Style="{StaticResource InputStyle}"
+                                         Text="{Binding MaterialDirectory, UpdateSourceTrigger=PropertyChanged}" />
+
+                                <TextBlock Grid.Row="2"
+                                           Style="{StaticResource FieldLabelStyle}"
+                                           Text="Fabsec Carcasses" />
+
+                                <TextBox Grid.Row="2"
+                                         Grid.Column="1"
+                                         Style="{StaticResource InputStyle}"
+                                         Text="{Binding CarcassDirectory, UpdateSourceTrigger=PropertyChanged}" />
+
+                                <TextBlock Grid.Row="4"
+                                           Style="{StaticResource FieldLabelStyle}"
+                                           Text="Bolt Orders" />
+
+                                <TextBox Grid.Row="4"
+                                         Grid.Column="1"
+                                         Style="{StaticResource InputStyle}"
+                                         Text="{Binding BoltDirectory, UpdateSourceTrigger=PropertyChanged}" />
+
+                                <TextBlock Grid.Row="6"
+                                           Style="{StaticResource FieldLabelStyle}"
+                                           Text="Seversafe Orders" />
+
+                                <TextBox Grid.Row="6"
+                                         Grid.Column="1"
+                                         Style="{StaticResource InputStyle}"
+                                         Text="{Binding SeversafeDirectory, UpdateSourceTrigger=PropertyChanged}" />
+
+                                <TextBlock Grid.Row="8"
+                                           Style="{StaticResource FieldLabelStyle}"
+                                           Text="Fabrication Package" />
+
+                                <TextBox Grid.Row="8"
+                                         Grid.Column="1"
+                                         Style="{StaticResource InputStyle}"
+                                         Text="{Binding FabPackDirectory, UpdateSourceTrigger=PropertyChanged}" />
+
+                                <TextBlock Grid.Row="10"
+                                           Style="{StaticResource FieldLabelStyle}"
+                                           Text="Variations" />
+
+                                <TextBox Grid.Row="10"
+                                         Grid.Column="1"
+                                         Style="{StaticResource InputStyle}"
+                                         Text="{Binding VariationDirectory, UpdateSourceTrigger=PropertyChanged}" />
+
+                            </Grid>
+
+                        </Grid>
+
+                    </Border>
+
+                </TabItem>
+
+                <!-- ABOUT -->
+
+                <TabItem Header="About">
+
+                    <Border Margin="0,10,0,0"
+                            Padding="24"
+                            Background="White"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="7">
+
+                        <Grid>
+
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <StackPanel HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Width="470">
+
+                                <TextBlock HorizontalAlignment="Center"
+                                           FontSize="28"
+                                           FontWeight="Bold"
+                                           Foreground="#1D4ED8"
+                                           Text="PRISM" />
+
+                                <TextBlock Margin="0,8,0,0"
+                                           HorizontalAlignment="Center"
+                                           FontSize="14"
+                                           FontWeight="SemiBold"
+                                           Foreground="#334155"
+                                           Text="Severfield Drawing Office Workflow Tool" />
+
+                                <Border Margin="0,24,0,0"
+                                        Padding="18"
+                                        Background="#F8FAFC"
+                                        BorderBrush="{StaticResource BorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="6">
+
+                                    <StackPanel>
+
+                                        <TextBlock HorizontalAlignment="Center"
+                                                   FontSize="12"
+                                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                                   Text="Installed Version" />
+
+                                        <TextBlock Margin="0,4,0,0"
+                                                   HorizontalAlignment="Center"
+                                                   FontSize="18"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="#172033"
+                                                   Text="{Binding PrismVersion}" />
+
+                                    </StackPanel>
+
+                                </Border>
+
+                                <TextBlock Margin="0,22,0,0"
+                                           HorizontalAlignment="Center"
+                                           TextAlignment="Center"
+                                           TextWrapping="Wrap"
+                                           FontSize="12"
+                                           Foreground="{StaticResource SecondaryTextBrush}"
+                                           Text="For assistance with Prism, use the Contact Support button below to create a support email containing your current Prism version." />
+
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="1"
+                                        HorizontalAlignment="Center"
+                                        Orientation="Horizontal">
+
+                                <Button Margin="0,0,10,0"
+                                        Style="{StaticResource PrimaryButtonStyle}"
+                                        Content="Contact Support"
+                                        Click="ContactSupportButton_Click" />
+
+                                <Button Style="{StaticResource SecondaryButtonStyle}"
+                                        Content="Severfield Website"
+                                        Click="SeverfieldWebsiteButton_Click" />
+
+                            </StackPanel>
+
+                        </Grid>
+
+                    </Border>
+
+                </TabItem>
+
+            </TabControl>
+
+            <!-- ONE SHARED INDICATOR WHICH PHYSICALLY MOVES BETWEEN TABS -->
+
+            <Canvas x:Name="SettingsTabIndicatorCanvas"
+                    Panel.ZIndex="100"
+                    IsHitTestVisible="False">
+
+                <Border x:Name="SettingsSlidingTabIndicator"
+                        Width="0"
+                        Height="3"
+                        Background="#2563EB"
+                        CornerRadius="2" />
+
+            </Canvas>
+
+        </Grid>
+
+        <!-- FOOTER -->
+
+        <Border Grid.Row="2"
+                Background="White"
+                BorderBrush="#E2E8F0"
+                BorderThickness="0,1,0,0">
+
+            <Grid Margin="20,0">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock x:Name="SettingsStatusText"
+                           VerticalAlignment="Center"
+                           FontSize="12"
+                           Foreground="{StaticResource SecondaryTextBrush}"
+                           Text="Changes are stored when Apply is selected." />
+
+                <StackPanel Grid.Column="1"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center">
+
+                    <Button x:Name="ApplySettingsButton"
+                            Margin="0,0,10,0"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            Content="Apply"
+                            Click="ApplyAllSettingsButton_Click" />
+
+                    <Button Style="{StaticResource SecondaryButtonStyle}"
+                            Content="Close"
+                            Click="CloseButton_Click" />
+
+                </StackPanel>
+
+            </Grid>
+
+        </Border>
+
+    </Grid>
+
+</Window>

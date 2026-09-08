@@ -1,0 +1,434 @@
+﻿<Window x:Class="PrismNewInterface.PrepareSpecialFittingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Prepare Special Fittings"
+        Width="620"
+        Height="440"
+        MinWidth="580"
+        MinHeight="490"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        Background="#F4F6F8"
+        FontFamily="Segoe UI"
+        Icon="New Logo.ico">
+
+    <Window.Resources>
+
+        <SolidColorBrush x:Key="PrimaryBrush"
+                         Color="#2563EB" />
+
+        <SolidColorBrush x:Key="PrimaryHoverBrush"
+                         Color="#1D4ED8" />
+
+        <SolidColorBrush x:Key="BorderBrush"
+                         Color="#D7DEE8" />
+
+        <SolidColorBrush x:Key="SecondaryTextBrush"
+                         Color="#64748B" />
+
+        <Style x:Key="PrimaryButtonStyle"
+               TargetType="Button">
+
+            <Setter Property="Height"
+                    Value="38" />
+
+            <Setter Property="MinWidth"
+                    Value="170" />
+
+            <Setter Property="Padding"
+                    Value="14,5" />
+
+            <Setter Property="Foreground"
+                    Value="White" />
+
+            <Setter Property="Background"
+                    Value="{StaticResource PrimaryBrush}" />
+
+            <Setter Property="BorderBrush"
+                    Value="{StaticResource PrimaryBrush}" />
+
+            <Setter Property="BorderThickness"
+                    Value="1" />
+
+            <Setter Property="FontWeight"
+                    Value="SemiBold" />
+
+            <Setter Property="Cursor"
+                    Value="Hand" />
+
+            <Setter Property="Template">
+
+                <Setter.Value>
+
+                    <ControlTemplate TargetType="Button">
+
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6">
+
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+
+                            <Trigger Property="IsMouseOver"
+                                     Value="True">
+
+                                <Setter TargetName="ButtonBorder"
+                                        Property="Background"
+                                        Value="{StaticResource PrimaryHoverBrush}" />
+
+                            </Trigger>
+
+                            <Trigger Property="IsPressed"
+                                     Value="True">
+
+                                <Setter TargetName="ButtonBorder"
+                                        Property="Background"
+                                        Value="#1E40AF" />
+
+                            </Trigger>
+
+                        </ControlTemplate.Triggers>
+
+                    </ControlTemplate>
+
+                </Setter.Value>
+
+            </Setter>
+
+        </Style>
+
+        <Style x:Key="SecondaryButtonStyle"
+               TargetType="Button">
+
+            <Setter Property="Height"
+                    Value="34" />
+
+            <Setter Property="MinWidth"
+                    Value="90" />
+
+            <Setter Property="Padding"
+                    Value="14,5" />
+
+            <Setter Property="Background"
+                    Value="White" />
+
+            <Setter Property="Foreground"
+                    Value="#334155" />
+
+            <Setter Property="BorderBrush"
+                    Value="{StaticResource BorderBrush}" />
+
+            <Setter Property="BorderThickness"
+                    Value="1" />
+
+            <Setter Property="FontWeight"
+                    Value="SemiBold" />
+
+            <Setter Property="Cursor"
+                    Value="Hand" />
+
+        </Style>
+
+        <Style x:Key="InformationButtonStyle"
+               TargetType="Button">
+
+            <Setter Property="Width"
+                    Value="24" />
+
+            <Setter Property="Height"
+                    Value="24" />
+
+            <Setter Property="Margin"
+                    Value="7,0,0,0" />
+
+            <Setter Property="Padding"
+                    Value="0" />
+
+            <Setter Property="Background"
+                    Value="White" />
+
+            <Setter Property="Foreground"
+                    Value="#2563EB" />
+
+            <Setter Property="BorderBrush"
+                    Value="#93C5FD" />
+
+            <Setter Property="BorderThickness"
+                    Value="1" />
+
+            <Setter Property="FontSize"
+                    Value="12" />
+
+            <Setter Property="FontWeight"
+                    Value="Bold" />
+
+            <Setter Property="Cursor"
+                    Value="Hand" />
+
+            <Setter Property="ToolTip"
+                    Value="Show information" />
+
+            <Setter Property="Template">
+
+                <Setter.Value>
+
+                    <ControlTemplate TargetType="Button">
+
+                        <Border x:Name="InformationBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12">
+
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+
+                            <Trigger Property="IsMouseOver"
+                                     Value="True">
+
+                                <Setter TargetName="InformationBorder"
+                                        Property="Background"
+                                        Value="#EFF6FF" />
+
+                                <Setter TargetName="InformationBorder"
+                                        Property="BorderBrush"
+                                        Value="#2563EB" />
+
+                            </Trigger>
+
+                        </ControlTemplate.Triggers>
+
+                    </ControlTemplate>
+
+                </Setter.Value>
+
+            </Setter>
+
+        </Style>
+
+    </Window.Resources>
+
+    <Grid>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="64" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="64" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0"
+                Background="White"
+                BorderBrush="#E2E8F0"
+                BorderThickness="0,0,0,1">
+
+            <StackPanel Margin="24,0"
+                        VerticalAlignment="Center">
+
+                <TextBlock FontSize="18"
+                           FontWeight="SemiBold"
+                           Foreground="#172033"
+                           Text="Prepare Special Fittings" />
+
+                <TextBlock Margin="0,2,0,0"
+                           FontSize="11"
+                           Foreground="{StaticResource SecondaryTextBrush}"
+                           Text="Tag and prepare special fittings before material ordering." />
+
+            </StackPanel>
+
+        </Border>
+
+        <!-- Main Content -->
+        <Grid Grid.Row="1"
+              Margin="24,20">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="14" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- Manage Tags -->
+            <Border Grid.Row="0"
+                    Padding="18"
+                    Background="White"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8">
+
+                <Grid>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="4" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="16" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="#172033"
+                               Text="Manage Special Fittings" />
+
+                    <TextBlock Grid.Row="2"
+                               FontSize="11"
+                               Foreground="{StaticResource SecondaryTextBrush}"
+                               Text="Tag fittings so Prism can identify them throughout the special fitting workflow." />
+
+                    <Grid Grid.Row="4">
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0"
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center">
+
+                            <Button Style="{StaticResource PrimaryButtonStyle}"
+                                    Content="Tag Fittings"
+                                    Click="TagFittingsButton_Click" />
+
+                            <Button Style="{StaticResource InformationButtonStyle}"
+                                    Content="i"
+                                    Click="TagFittingsInformationButton_Click" />
+
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2"
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center">
+
+                            <Button Style="{StaticResource PrimaryButtonStyle}"
+                                    Content="Remove Tags"
+                                    Click="RemoveTagsButton_Click" />
+
+                            <Button Style="{StaticResource InformationButtonStyle}"
+                                    Content="i"
+                                    Click="RemoveTagsInformationButton_Click" />
+
+                        </StackPanel>
+
+                    </Grid>
+
+                </Grid>
+
+            </Border>
+
+            <!-- Process Tagged Fittings -->
+            <Border Grid.Row="2"
+                    Padding="18"
+                    Background="White"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8">
+
+                <Grid>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="4" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="16" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="#172033"
+                               Text="Process Tagged Fittings" />
+
+                    <TextBlock Grid.Row="2"
+                               FontSize="11"
+                               Foreground="{StaticResource SecondaryTextBrush}"
+                               Text="Review tagged fittings in the current selection and create their drawings." />
+
+                    <Grid Grid.Row="4">
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0"
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center">
+
+                            <Button Style="{StaticResource PrimaryButtonStyle}"
+                                    Content="Show Tagged in Model"
+                                    Click="ShowTaggedButton_Click" />
+
+                            <Button Style="{StaticResource InformationButtonStyle}"
+                                    Content="i"
+                                    Click="ShowTaggedInformationButton_Click" />
+
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2"
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center">
+
+                            <Button Style="{StaticResource PrimaryButtonStyle}"
+                                    Content="Create Drawings"
+                                    Click="CreateDrawingsButton_Click" />
+
+                            <Button Style="{StaticResource InformationButtonStyle}"
+                                    Content="i"
+                                    Click="CreateDrawingsInformationButton_Click" />
+
+                        </StackPanel>
+
+                    </Grid>
+
+                </Grid>
+
+            </Border>
+
+        </Grid>
+
+        <!-- Footer -->
+        <Border Grid.Row="2"
+                Background="White"
+                BorderBrush="#E2E8F0"
+                BorderThickness="0,1,0,0">
+
+            <Grid Margin="24,0">
+
+                <TextBlock x:Name="StatusTextBlock"
+           VerticalAlignment="Center"
+           FontSize="11"
+           Foreground="{StaticResource SecondaryTextBrush}"
+           Text="Ready." />
+
+                <Button HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Content="Close"
+                        Click="CloseButton_Click" />
+
+            </Grid>
+
+        </Border>
+
+    </Grid>
+
+</Window>

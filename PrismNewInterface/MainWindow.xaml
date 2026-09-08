@@ -1,0 +1,1369 @@
+﻿<Window x:Class="PrismNewInterface.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:infra="clr-namespace:PrismNewInterface.Infrastructure"
+        xmlns:models="clr-namespace:PrismNewInterface.Models"
+        Title="Prism"
+        Width="1000"
+        Height="700"
+        MinWidth="850"
+        MinHeight="620"
+        WindowStartupLocation="CenterScreen"
+        Background="#F4F6F8"
+        FontFamily="Segoe UI"
+        Icon="New Logo.ico">
+
+    <Window.Resources>
+
+        <SolidColorBrush x:Key="PrimaryBrush"
+                         Color="#2563EB" />
+
+        <SolidColorBrush x:Key="PrimaryHoverBrush"
+                         Color="#1D4ED8" />
+
+        <SolidColorBrush x:Key="BorderBrush"
+                         Color="#D7DEE8" />
+
+        <SolidColorBrush x:Key="SecondaryTextBrush"
+                         Color="#64748B" />
+
+        <Style x:Key="SectionTitleStyle"
+               TargetType="TextBlock">
+            <Setter Property="FontSize"
+                    Value="15" />
+            <Setter Property="FontWeight"
+                    Value="SemiBold" />
+            <Setter Property="Foreground"
+                    Value="#172033" />
+        </Style>
+
+        <Style x:Key="FieldLabelStyle"
+               TargetType="TextBlock">
+            <Setter Property="FontSize"
+                    Value="12" />
+            <Setter Property="FontWeight"
+                    Value="SemiBold" />
+            <Setter Property="Foreground"
+                    Value="#334155" />
+            <Setter Property="Margin"
+                    Value="0,0,0,4" />
+        </Style>
+
+        <Style x:Key="InputStyle"
+               TargetType="Control">
+            <Setter Property="Height"
+                    Value="32" />
+            <Setter Property="FontSize"
+                    Value="13" />
+            <Setter Property="Padding"
+                    Value="8,3" />
+        </Style>
+
+        <Style x:Key="PrimaryButtonStyle"
+               TargetType="Button">
+            <Setter Property="Height"
+                    Value="34" />
+            <Setter Property="MinWidth"
+                    Value="120" />
+            <Setter Property="Padding"
+                    Value="14,5" />
+            <Setter Property="Foreground"
+                    Value="White" />
+            <Setter Property="Background"
+                    Value="{StaticResource PrimaryBrush}" />
+            <Setter Property="BorderBrush"
+                    Value="{StaticResource PrimaryBrush}" />
+            <Setter Property="FontWeight"
+                    Value="SemiBold" />
+            <Setter Property="Cursor"
+                    Value="Hand" />
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="5">
+
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+
+                            <Trigger Property="IsMouseOver"
+                                     Value="True">
+                                <Setter TargetName="ButtonBorder"
+                                        Property="Background"
+                                        Value="{StaticResource PrimaryHoverBrush}" />
+                            </Trigger>
+
+                            <Trigger Property="IsEnabled"
+                                     Value="False">
+                                <Setter TargetName="ButtonBorder"
+                                        Property="Background"
+                                        Value="#CBD5E1" />
+                                <Setter TargetName="ButtonBorder"
+                                        Property="BorderBrush"
+                                        Value="#CBD5E1" />
+                                <Setter Property="Foreground"
+                                        Value="#64748B" />
+                                <Setter Property="Cursor"
+                                        Value="Arrow" />
+                            </Trigger>
+
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SecondaryButtonStyle"
+               TargetType="Button">
+            <Setter Property="Height"
+                    Value="34" />
+            <Setter Property="MinWidth"
+                    Value="80" />
+            <Setter Property="Padding"
+                    Value="14,5" />
+            <Setter Property="Background"
+                    Value="White" />
+            <Setter Property="Foreground"
+                    Value="#334155" />
+            <Setter Property="BorderBrush"
+                    Value="{StaticResource BorderBrush}" />
+            <Setter Property="BorderThickness"
+                    Value="1" />
+            <Setter Property="FontWeight"
+                    Value="SemiBold" />
+            <Setter Property="Cursor"
+                    Value="Hand" />
+        </Style>
+
+        <Style x:Key="InformationButtonStyle"
+               TargetType="Button">
+            <Setter Property="Width"
+                    Value="24" />
+            <Setter Property="Height"
+                    Value="24" />
+            <Setter Property="Margin"
+                    Value="7,0,0,0" />
+            <Setter Property="Padding"
+                    Value="0" />
+            <Setter Property="Background"
+                    Value="White" />
+            <Setter Property="Foreground"
+                    Value="#2563EB" />
+            <Setter Property="BorderBrush"
+                    Value="#93C5FD" />
+            <Setter Property="BorderThickness"
+                    Value="1" />
+            <Setter Property="FontSize"
+                    Value="12" />
+            <Setter Property="FontWeight"
+                    Value="Bold" />
+            <Setter Property="Cursor"
+                    Value="Hand" />
+            <Setter Property="ToolTip"
+                    Value="Show information" />
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="InformationBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12">
+
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver"
+                                     Value="True">
+                                <Setter TargetName="InformationBorder"
+                                        Property="Background"
+                                        Value="#EFF6FF" />
+                                <Setter TargetName="InformationBorder"
+                                        Property="BorderBrush"
+                                        Value="#2563EB" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ValidationSummaryStyle"
+               TargetType="TextBlock">
+            <Setter Property="FontSize"
+                    Value="12" />
+            <Setter Property="FontWeight"
+                    Value="SemiBold" />
+            <Setter Property="Foreground"
+                    Value="{StaticResource SecondaryTextBrush}" />
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ValidationState}"
+                             Value="{x:Static models:ValidationState.Checking}">
+                    <Setter Property="Foreground"
+                            Value="#2563EB" />
+                </DataTrigger>
+
+                <DataTrigger Binding="{Binding ValidationState}"
+                             Value="{x:Static models:ValidationState.Failed}">
+                    <Setter Property="Foreground"
+                            Value="#B91C1C" />
+                </DataTrigger>
+
+                <DataTrigger Binding="{Binding ValidationState}"
+                             Value="{x:Static models:ValidationState.Passed}">
+                    <Setter Property="Foreground"
+                            Value="#15803D" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style TargetType="TabControl">
+            <Setter Property="Background"
+                    Value="Transparent" />
+            <Setter Property="BorderThickness"
+                    Value="0" />
+        </Style>
+
+        <Style TargetType="TabItem">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="#64748B" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Padding" Value="22,12" />
+            <Setter Property="Margin" Value="0,0,6,0" />
+            <Setter Property="Cursor" Value="Hand" />
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+
+                        <Border x:Name="TabBackground"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="6,6,0,0">
+
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              ContentSource="Header" />
+
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="TabBackground"
+                                        Property="Background"
+                                        Value="#F1F5F9" />
+
+                                <Setter Property="Foreground"
+                                        Value="#334155" />
+                            </Trigger>
+
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="TabBackground"
+                                        Property="Background"
+                                        Value="White" />
+
+                                <Setter Property="Foreground"
+                                        Value="#1D4ED8" />
+                            </Trigger>
+
+                        </ControlTemplate.Triggers>
+
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="DataGrid">
+            <Setter Property="Background"
+                    Value="White" />
+
+            <Setter Property="BorderBrush"
+                    Value="{StaticResource BorderBrush}" />
+
+            <Setter Property="BorderThickness"
+                    Value="1" />
+
+            <Setter Property="GridLinesVisibility"
+                    Value="Horizontal" />
+
+            <Setter Property="HorizontalGridLinesBrush"
+                    Value="#E5EAF0" />
+
+            <Setter Property="RowBackground"
+                    Value="White" />
+
+            <Setter Property="AlternatingRowBackground"
+                    Value="#F3F7FC" />
+
+            <Setter Property="AlternationCount"
+                    Value="2" />
+
+            <Setter Property="RowHeight"
+                    Value="30" />
+
+            <Setter Property="ColumnHeaderHeight"
+                    Value="28" />
+
+            <Setter Property="HeadersVisibility"
+                    Value="Column" />
+
+            <Setter Property="CanUserAddRows"
+                    Value="False" />
+
+            <Setter Property="CanUserDeleteRows"
+                    Value="False" />
+
+            <Setter Property="CanUserResizeRows"
+                    Value="False" />
+
+            <Setter Property="IsReadOnly"
+                    Value="True" />
+
+            <Setter Property="AutoGenerateColumns"
+                    Value="False" />
+
+            <Setter Property="SelectionMode"
+                    Value="Single" />
+
+            <Setter Property="SelectionUnit"
+                    Value="FullRow" />
+        </Style>
+
+        <Style TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="#F8FAFC" />
+            <Setter Property="Foreground" Value="#334155" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Padding" Value="6,0" />
+            <Setter Property="BorderBrush" Value="#E2E8F0" />
+            <Setter Property="BorderThickness" Value="0,0,1,1" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+
+        <Style TargetType="DataGridCell">
+            <Setter Property="Padding"
+                    Value="6,0" />
+            <Setter Property="BorderThickness"
+                    Value="0" />
+            <Setter Property="VerticalContentAlignment"
+                    Value="Center" />
+        </Style>
+
+        <Style x:Key="AutoCompleteButtonStyle"
+               TargetType="Button">
+            <Setter Property="Width" Value="20" />
+            <Setter Property="Height" Value="20" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="#EFF6FF" />
+            <Setter Property="Foreground" Value="#2563EB" />
+            <Setter Property="BorderBrush" Value="#93C5FD" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="FontFamily" Value="Segoe UI Symbol" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10">
+
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder"
+                                        Property="Background"
+                                        Value="#DBEAFE" />
+                                <Setter TargetName="ButtonBorder"
+                                        Property="BorderBrush"
+                                        Value="#2563EB" />
+                            </Trigger>
+
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder"
+                                        Property="Background"
+                                        Value="#BFDBFE" />
+                            </Trigger>
+
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity"
+                                        Value="0.65" />
+                            </Trigger>
+
+                        </ControlTemplate.Triggers>
+
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </Window.Resources>
+
+    <Grid>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="52" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="54" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+
+        <Border Grid.Row="0"
+                Background="White"
+                BorderBrush="#E2E8F0"
+                BorderThickness="0,0,0,1">
+
+            <Grid Margin="22,0">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="12" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock VerticalAlignment="Center"
+                           FontSize="18"
+                           FontWeight="Bold"
+                           Foreground="#1D4ED8"
+                           Text="PRISM" />
+
+                <Button Grid.Column="5"
+                        Width="86"
+                        Height="30"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Content="Settings"
+                        Click="SettingsButton_Click" />
+
+            </Grid>
+
+        </Border>
+
+        <Grid x:Name="MainContentGrid"
+              Grid.Row="1">
+
+            <Grid Margin="20">
+
+                <TabControl x:Name="MainTabControl"
+                            Margin="0"
+                            SelectedIndex="0"
+                            SelectionChanged="MainTabControl_SelectionChanged">
+
+                    <!-- MATERIAL ORDER -->
+
+                    <TabItem Header="Orders">
+
+                        <Grid Margin="0,10,0,0"
+                              DataContext="{Binding MaterialOrder}">
+
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="12" />
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="12" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <Border Grid.Row="0"
+                                    Padding="16"
+                                    Background="White"
+                                    BorderBrush="{StaticResource BorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="7">
+
+                                <Grid>
+
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="24" />
+                                        <ColumnDefinition Width="95" />
+                                        <ColumnDefinition Width="16" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="18" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="18" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0"
+                                                VerticalAlignment="Center">
+
+                                        <TextBlock Style="{StaticResource SectionTitleStyle}"
+                                                   Text="1. Prepare for order" />
+
+                                        <TextBlock Margin="0,3,0,0"
+                                                   FontSize="12"
+                                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                                   Text="Run preparitory steps for your order." />
+
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="2">
+
+                                        <TextBlock Style="{StaticResource FieldLabelStyle}"
+                                                   Text="Start number" />
+
+                                        <TextBox x:Name="StartNumberTextBox"
+                                                 Style="{StaticResource InputStyle}"
+                                                 VerticalContentAlignment="Center"
+                                                 Text="{Binding StartNumber, UpdateSourceTrigger=PropertyChanged}"
+                                                 PreviewTextInput="StartNumberTextBox_PreviewTextInput" />
+
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="4"
+                                                Margin="0,20,0,0"
+                                                Orientation="Horizontal"
+                                                VerticalAlignment="Top">
+
+                                        <Button Style="{StaticResource PrimaryButtonStyle}"
+                                                Content="Check Selection"
+                                                Command="{Binding CheckSelectionCommand}" />
+
+                                        <Button Style="{StaticResource InformationButtonStyle}"
+                                                Content="i"
+                                                Click="MaterialCheckInformationButton_Click" />
+
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="6"
+                                                Margin="0,20,0,0"
+                                                Orientation="Horizontal"
+                                                VerticalAlignment="Top">
+
+                                        <Button Style="{StaticResource PrimaryButtonStyle}"
+                                                MinWidth="125"
+                                                Content="Prepare Fabsecs"
+                                                Click="PrepareFabsecsButton_Click" />
+
+                                        <Button Style="{StaticResource InformationButtonStyle}"
+                                                Content="i"
+                                                Click="PrepareFabsecsInformationButton_Click" />
+
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="8"
+                                                Margin="0,20,0,0"
+                                                Orientation="Horizontal"
+                                                VerticalAlignment="Top">
+
+                                        <Button Style="{StaticResource PrimaryButtonStyle}"
+                                                MinWidth="165"
+                                                Content="Prepare Special Fittings"
+                                                Click="PrepareSpecialFittingsButton_Click" />
+
+                                        <Button Style="{StaticResource InformationButtonStyle}"
+                                                Content="i"
+                                                Click="PrepareSpecialFittingsInformationButton_Click" />
+
+                                    </StackPanel>
+
+                                </Grid>
+
+                            </Border>
+
+                            <Border Grid.Row="2"
+                                    Padding="14"
+                                    Background="White"
+                                    BorderBrush="{StaticResource BorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="7">
+
+                                <Grid>
+
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="8" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+
+                                    <Grid>
+
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel Orientation="Horizontal">
+
+                                            <TextBlock Style="{StaticResource SectionTitleStyle}"
+                                                       Text="Check results" />
+
+                                            <TextBlock Margin="10,2,0,0"
+                                                       FontSize="12"
+                                                       Foreground="{StaticResource SecondaryTextBrush}"
+                                                       Text="{Binding ResultCount}" />
+
+                                        </StackPanel>
+
+                                        <TextBlock Grid.Column="1"
+                                                   VerticalAlignment="Center"
+                                                   Style="{StaticResource ValidationSummaryStyle}"
+                                                   Text="{Binding ValidationSummary}" />
+
+                                    </Grid>
+
+                                    <DataGrid x:Name="MaterialValidationDataGrid"
+                                              Grid.Row="2"
+                                              ItemsSource="{Binding ValidationResults}"
+                                              SelectionChanged="ValidationDataGrid_SelectionChanged" />
+
+                                </Grid>
+
+                            </Border>
+
+                            <Border Grid.Row="4"
+                                    Padding="16"
+                                    Background="White"
+                                    BorderBrush="{StaticResource BorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="7">
+
+                                <Grid>
+
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="12" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="12" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Style="{StaticResource SectionTitleStyle}"
+                                               Text="2. Create order" />
+
+                                    <Grid Grid.Row="2">
+
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="16" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="16" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="16" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel Grid.Column="0">
+
+                                            <TextBlock Style="{StaticResource FieldLabelStyle}"
+                                                       Text="Order action" />
+
+                                            <ComboBox Style="{StaticResource InputStyle}"
+                                                      ItemsSource="{Binding OrderActions}"
+                                                      SelectedItem="{Binding SelectedOrderAction}" />
+
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="2">
+
+                                            <TextBlock Style="{StaticResource FieldLabelStyle}"
+                                                       Text="Order type" />
+
+                                            <ComboBox Style="{StaticResource InputStyle}"
+                                                      ItemsSource="{Binding OrderTypes}"
+                                                      SelectedItem="{Binding SelectedOrderType}" />
+
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="4">
+
+                                            <TextBlock Style="{StaticResource FieldLabelStyle}"
+                                                       Text="Phase number" />
+
+                                            <TextBox Style="{StaticResource InputStyle}"
+                                                     VerticalContentAlignment="Center"
+                                                     Text="{Binding PhaseNumber, UpdateSourceTrigger=PropertyChanged}" />
+
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="6">
+
+                                            <TextBlock Style="{StaticResource FieldLabelStyle}"
+                                                       Text="Issue number" />
+
+                                            <TextBox Style="{StaticResource InputStyle}"
+                                                     VerticalContentAlignment="Center"
+                                                     Text="{Binding IssueNumber, UpdateSourceTrigger=PropertyChanged}" />
+
+                                        </StackPanel>
+
+                                    </Grid>
+
+                                    <Grid Grid.Row="4">
+
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="16" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="16" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="16" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel Grid.Column="0">
+
+                                            <TextBlock Style="{StaticResource FieldLabelStyle}"
+                                                       Text="Variation type" />
+
+                                            <ComboBox Style="{StaticResource InputStyle}"
+                                                      ItemsSource="{Binding VariationTypes}"
+                                                      SelectedItem="{Binding SelectedVariationType}" />
+
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="2">
+
+                                            <TextBlock Style="{StaticResource FieldLabelStyle}"
+                                                       Text="Variation number" />
+
+                                            <TextBox Style="{StaticResource InputStyle}"
+                                                     VerticalContentAlignment="Center"
+                                                     Text="{Binding VariationNumber, UpdateSourceTrigger=PropertyChanged}" />
+
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="4">
+
+                                            <TextBlock Style="{StaticResource FieldLabelStyle}"
+                                                       Text="Required by" />
+
+                                            <DatePicker Height="32"
+                                                        FontSize="13"
+                                                        Padding="7,2"
+                                                        SelectedDate="{Binding RequiredBy}" />
+
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="6"
+                                                    Margin="0,20,0,0"
+                                                    Orientation="Horizontal">
+
+                                            <Button Margin="0,0,8,0"
+                                                    Style="{StaticResource SecondaryButtonStyle}"
+                                                    Content="Clear"
+                                                    Command="{Binding ClearCommand}" />
+
+                                            <Button Style="{StaticResource PrimaryButtonStyle}"
+                                                    Content="Create Order"
+                                                    Command="{Binding CreateOrderCommand}" />
+
+                                            <Button Style="{StaticResource InformationButtonStyle}"
+                                                    Content="i"
+                                                    Click="CreateOrderInformationButton_Click" />
+
+                                        </StackPanel>
+
+                                    </Grid>
+
+                                </Grid>
+
+                            </Border>
+
+                        </Grid>
+
+                    </TabItem>
+
+                    <!-- DETAILING TO DRAWINGS -->
+
+                    <TabItem Header="Detailing to Drawings">
+
+                        <Grid Margin="0,10,0,0"
+                              DataContext="{Binding Drawing}">
+
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="12" />
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="12" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <Border Grid.Row="0"
+                                    Padding="16"
+                                    Background="White"
+                                    BorderBrush="{StaticResource BorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="7">
+
+                                <Grid>
+
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="14" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <Grid Grid.Row="0">
+
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel Grid.Column="0"
+                                                    VerticalAlignment="Center">
+
+                                            <TextBlock Style="{StaticResource SectionTitleStyle}"
+                                                       Text="1. Check selection" />
+
+                                            <TextBlock Margin="0,3,0,0"
+                                                       FontSize="12"
+                                                       Foreground="{StaticResource SecondaryTextBrush}"
+                                                       Text="Check selected parts before creating drawings." />
+
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="1"
+                                                    Orientation="Horizontal"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center">
+
+                                            <Button Style="{StaticResource PrimaryButtonStyle}"
+                                                    Content="Check Selection"
+                                                    Command="{Binding CheckSelectionCommand}" />
+
+                                            <Button Style="{StaticResource InformationButtonStyle}"
+                                                    Content="i"
+                                                    Click="DrawingCheckInformationButton_Click" />
+
+                                        </StackPanel>
+
+                                    </Grid>
+
+                                    <Grid Grid.Row="2">
+
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="16" />
+                                            <ColumnDefinition Width="150" />
+                                            <ColumnDefinition Width="16" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="8" />
+                                            <ColumnDefinition Width="90" />
+                                            <ColumnDefinition Width="16" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel Grid.Column="0"
+                                                    VerticalAlignment="Center">
+
+                                            <TextBlock FontSize="13"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="#334155"
+                                                       Text="Detail orientation markers" />
+
+                                            <TextBlock Margin="0,2,0,0"
+                                                       FontSize="11"
+                                                       Foreground="{StaticResource SecondaryTextBrush}"
+                                                       Text="Detail orientation markers on the selected members." />
+
+                                        </StackPanel>
+
+                                        <ComboBox Grid.Column="2"
+                                                  Style="{StaticResource InputStyle}"
+                                                  ItemsSource="{Binding OrientationHoleTypes}"
+                                                  SelectedItem="{Binding SelectedOrientationHoleType}" />
+
+                                        <StackPanel Grid.Column="4"
+                                                    Grid.ColumnSpan="3"
+                                                    Orientation="Horizontal"
+                                                    VerticalAlignment="Center">
+
+                                            <StackPanel.Style>
+                                                <Style TargetType="StackPanel">
+                                                    <Setter Property="Visibility"
+                                                            Value="Collapsed" />
+
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding ShowPltOnFlange}"
+                                                                     Value="True">
+                                                            <Setter Property="Visibility"
+                                                                    Value="Visible" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </StackPanel.Style>
+
+                                            <TextBlock VerticalAlignment="Center"
+                                                       Margin="0,0,8,0"
+                                                       FontSize="12"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="#334155"
+                                                       Text="PLT on Flange &gt;" />
+
+                                            <TextBox Width="90"
+                                                     Style="{StaticResource InputStyle}"
+                                                     VerticalContentAlignment="Center"
+                                                     PreviewTextInput="NumbersOnlyTextBox_PreviewTextInput"
+                                                     Text="{Binding LtOnFlange, UpdateSourceTrigger=PropertyChanged}" />
+
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="8"
+                                                    Orientation="Horizontal"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center">
+
+                                            <Button Style="{StaticResource PrimaryButtonStyle}"
+                                                    MinWidth="160"
+                                                    Content="Detail Orientation Holes"
+                                                    Command="{Binding DetailOrientationHolesCommand}" />
+
+                                            <Button Style="{StaticResource InformationButtonStyle}"
+                                                    Content="i"
+                                                    Click="DetailOrientationHolesInformationButton_Click" />
+
+                                        </StackPanel>
+
+                                    </Grid>
+
+                                </Grid>
+
+                            </Border>
+
+                            <Border Grid.Row="2"
+                                    Padding="14"
+                                    Background="White"
+                                    BorderBrush="{StaticResource BorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="7">
+
+                                <Grid>
+
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="8" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+
+                                    <Grid>
+
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel Orientation="Horizontal">
+
+                                            <TextBlock Style="{StaticResource SectionTitleStyle}"
+                                                       Text="Drawing check results" />
+
+                                            <TextBlock Margin="10,2,0,0"
+                                                       FontSize="12"
+                                                       Foreground="{StaticResource SecondaryTextBrush}"
+                                                       Text="{Binding ResultCount}" />
+
+                                        </StackPanel>
+
+                                        <TextBlock Grid.Column="1"
+                                                   VerticalAlignment="Center"
+                                                   Style="{StaticResource ValidationSummaryStyle}"
+                                                   Text="{Binding ValidationSummary}" />
+
+                                    </Grid>
+
+                                    <DataGrid x:Name="DrawingValidationDataGrid"
+                                              Grid.Row="2"
+                                              ItemsSource="{Binding ValidationResults}"
+                                              SelectionChanged="ValidationDataGrid_SelectionChanged"
+                                              AutoGenerateColumns="False" />
+
+                                </Grid>
+
+                            </Border>
+
+                            <Border Grid.Row="4"
+                                    Padding="16"
+                                    Background="White"
+                                    BorderBrush="{StaticResource BorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="7">
+
+                                <Grid>
+
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel>
+
+                                        <TextBlock Style="{StaticResource SectionTitleStyle}"
+                                                   Text="2. Create drawings" />
+
+                                        <TextBlock Margin="0,4,0,0"
+                                                   FontSize="12"
+                                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                                   Text="Check the selection before creating drawings." />
+
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="1"
+                                                Orientation="Horizontal"
+                                                HorizontalAlignment="Right"
+                                                VerticalAlignment="Center">
+
+                                        <Button Margin="0,0,8,0"
+                                                Style="{StaticResource SecondaryButtonStyle}"
+                                                Content="Clear"
+                                                Command="{Binding ClearCommand}" />
+
+                                        <Button Style="{StaticResource PrimaryButtonStyle}"
+                                                Content="Create Drawings"
+                                                Command="{Binding CreateDrawingsCommand}" />
+
+                                        <Button Style="{StaticResource InformationButtonStyle}"
+                                                Content="i"
+                                                Click="CreateDrawingsInformationButton_Click" />
+
+                                    </StackPanel>
+
+                                </Grid>
+
+                            </Border>
+
+                        </Grid>
+
+                    </TabItem>
+
+                    <!-- FAB PACK ISSUING -->
+
+                    <TabItem Header="Fab Pack Issuing">
+
+                        <Grid Margin="0,10,0,0"
+                              DataContext="{Binding FabPack}">
+
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="12" />
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="12" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <Border Grid.Row="0"
+                                    Padding="16"
+                                    Background="White"
+                                    BorderBrush="{StaticResource BorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="7">
+
+                                <Grid>
+
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0"
+                                                VerticalAlignment="Center">
+
+                                        <TextBlock Style="{StaticResource SectionTitleStyle}"
+                                                   Text="1. Check selection" />
+
+                                        <TextBlock Margin="0,3,0,0"
+                                                   FontSize="12"
+                                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                                   Text="Check selected parts before creating the fabrication package." />
+
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="1"
+                                                Orientation="Horizontal"
+                                                HorizontalAlignment="Right"
+                                                VerticalAlignment="Center">
+
+                                        <Button Style="{StaticResource PrimaryButtonStyle}"
+                                                Content="Check Selection"
+                                                Command="{Binding CheckSelectionCommand}" />
+
+                                        <Button Style="{StaticResource InformationButtonStyle}"
+                                                Content="i"
+                                                Click="FabPackCheckInformationButton_Click" />
+
+                                    </StackPanel>
+
+                                </Grid>
+
+                            </Border>
+
+                            <Border Grid.Row="2"
+                                    Padding="14"
+                                    Background="White"
+                                    BorderBrush="{StaticResource BorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="7">
+
+                                <Grid>
+
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="8" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+
+                                    <Grid>
+
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel Orientation="Horizontal">
+
+                                            <TextBlock Style="{StaticResource SectionTitleStyle}"
+                                                       Text="Fab pack check results" />
+
+                                            <TextBlock Margin="10,2,0,0"
+                                                       FontSize="12"
+                                                       Foreground="{StaticResource SecondaryTextBrush}"
+                                                       Text="{Binding ResultCount}" />
+
+                                        </StackPanel>
+
+                                        <TextBlock Grid.Column="1"
+                                                   VerticalAlignment="Center"
+                                                   Style="{StaticResource ValidationSummaryStyle}"
+                                                   Text="{Binding ValidationSummary}" />
+
+                                    </Grid>
+
+                                    <DataGrid x:Name="FabPackValidationDataGrid"
+                                              Grid.Row="2"
+                                              ItemsSource="{Binding ValidationResults}"
+                                              SelectionChanged="ValidationDataGrid_SelectionChanged"
+                                              AutoGenerateColumns="False" />
+
+                                </Grid>
+
+                            </Border>
+
+                            <Border Grid.Row="4"
+                                    Padding="16"
+                                    Background="White"
+                                    BorderBrush="{StaticResource BorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="7">
+
+                                <Grid>
+
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="14" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Style="{StaticResource SectionTitleStyle}"
+                                               Text="2. Create package" />
+
+                                    <Grid Grid.Row="2">
+
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="90" />
+                                            <ColumnDefinition Width="12" />
+                                            <ColumnDefinition Width="90" />
+                                            <ColumnDefinition Width="12" />
+                                            <ColumnDefinition Width="145" />
+                                            <ColumnDefinition Width="12" />
+                                            <ColumnDefinition Width="145" />
+                                            <ColumnDefinition Width="12" />
+                                            <ColumnDefinition Width="105" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel Grid.Column="0">
+
+                                            <TextBlock Style="{StaticResource FieldLabelStyle}"
+                                                       Text="Phase" />
+
+                                            <TextBox Width="90"
+                                                     Style="{StaticResource InputStyle}"
+                                                     VerticalContentAlignment="Center"
+                                                     Text="{Binding PhaseNumber, UpdateSourceTrigger=PropertyChanged}" />
+
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="2">
+
+                                            <TextBlock Style="{StaticResource FieldLabelStyle}"
+                                                       Text="Issue" />
+
+                                            <TextBox Width="90"
+                                                     Style="{StaticResource InputStyle}"
+                                                     VerticalContentAlignment="Center"
+                                                     Text="{Binding IssueNumber, UpdateSourceTrigger=PropertyChanged}" />
+
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="4">
+
+                                            <TextBlock Style="{StaticResource FieldLabelStyle}"
+                                                       Text="Site date" />
+
+                                            <DatePicker Width="145"
+                                                        Height="32"
+                                                        FontSize="13"
+                                                        Padding="7,2"
+                                                        SelectedDate="{Binding SiteDate}" />
+
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="6">
+
+                                            <TextBlock Style="{StaticResource FieldLabelStyle}"
+                                                       Text="Variation type" />
+
+                                            <ComboBox Width="145"
+                                                      Style="{StaticResource InputStyle}"
+                                                      ItemsSource="{Binding VariationTypes}"
+                                                      SelectedItem="{Binding SelectedVariationType}" />
+
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="8">
+
+                                            <TextBlock Style="{StaticResource FieldLabelStyle}"
+                                                       Text="Variation no." />
+
+                                            <TextBox Width="105"
+                                                     Style="{StaticResource InputStyle}"
+                                                     VerticalContentAlignment="Center"
+                                                     Text="{Binding VariationNumber, UpdateSourceTrigger=PropertyChanged}" />
+
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="10"
+                                                    Margin="16,20,0,0"
+                                                    Orientation="Horizontal"
+                                                    VerticalAlignment="Top">
+
+                                            <Button Margin="0,0,8,0"
+                                                    Style="{StaticResource SecondaryButtonStyle}"
+                                                    Content="Clear"
+                                                    Command="{Binding ClearCommand}" />
+
+                                            <Button Style="{StaticResource PrimaryButtonStyle}"
+                                                    Content="Create Package"
+                                                    Command="{Binding CreatePackageCommand}" />
+
+                                            <Button Style="{StaticResource InformationButtonStyle}"
+                                                    Content="i"
+                                                    Click="CreateFabPackInformationButton_Click" />
+
+                                        </StackPanel>
+
+                                    </Grid>
+
+                                </Grid>
+
+                            </Border>
+
+                        </Grid>
+
+                    </TabItem>
+
+                </TabControl>
+
+                <!-- Sliding blue indicator -->
+
+                <Canvas x:Name="TabIndicatorCanvas"
+                        Panel.ZIndex="100"
+                        IsHitTestVisible="False">
+
+                    <Border x:Name="SlidingTabIndicator"
+                            Width="0"
+                            Height="3"
+                            Background="#2563EB"
+                            CornerRadius="2" />
+
+                </Canvas>
+
+            </Grid>
+
+        </Grid>
+
+        <!-- Global progress -->
+
+        <Border Grid.Row="2"
+                Background="White"
+                BorderBrush="#E2E8F0"
+                BorderThickness="0,1,0,0">
+
+            <Grid Margin="20,6,20,6">
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0"
+                           FontSize="12"
+                           Foreground="{StaticResource SecondaryTextBrush}"
+                           Margin="0,0,0,5"
+                           Text="{Binding ProgressMessage, Mode=OneWay}" />
+
+                <Grid Grid.Row="1">
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="45" />
+                    </Grid.ColumnDefinitions>
+
+                    <ProgressBar Grid.Column="0"
+                                 Height="8"
+                                 Minimum="0"
+                                 Maximum="100"
+                                 Value="{Binding ProgressPercentage, Mode=OneWay}"
+                                 VerticalAlignment="Center" />
+
+                    <TextBlock Grid.Column="2"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Right"
+                               FontSize="12"
+                               Foreground="{StaticResource SecondaryTextBrush}"
+                               Text="{Binding ProgressPercentage, Mode=OneWay, StringFormat={}{0}%}" />
+
+                </Grid>
+
+            </Grid>
+
+        </Border>
+
+    </Grid>
+
+</Window>
