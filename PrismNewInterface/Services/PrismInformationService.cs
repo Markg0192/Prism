@@ -370,6 +370,31 @@ namespace PrismNewInterface.Services
 
 				new InformationSection
 				{
+					Title = "Drawing Classification",
+					Summary = "Assigns each piece a drawing classification based on the estimated workload required to complete its fabrication drawing.",
+					Details =
+						"After the drawings are created, Prism assigns a Drawing Classification to each piece and stores it in SEV-UDA-353.\n\n" +
+				
+						"The classification gives an indication of the expected workload required to tidy and complete the fabrication drawing. A higher number represents a drawing that is expected to require more work.\n\n" +
+				
+						"Assembly Drawings\n" +
+						"• ASS1 — Default.\n" +
+						"• ASS2 — Assembly has 1 to 3 fittings.\n" +
+						"• ASS3 — Assembly has 4 to 12 fittings, or has a galvanised finish.\n" +
+						"• ASS4 — Assembly has more than 12 fittings, has an HR part or assembly prefix, has an AS assembly prefix, or has a finish ending in M.\n" +
+						"• ASS5 — The main part has been identified as abnormal.\n\n" +
+				
+						"Fitting Drawings\n" +
+						"• FIT1 — Default.\n" +
+						"• FIT2 — DP, BO, C or PP fitting.\n" +
+						"• FIT3 — H, DMP or MP fitting.\n\n" +
+				
+						"Where more than one assembly rule applies, Prism uses the highest applicable classification."
+				},
+
+
+				new InformationSection
+				{
 					Title = "Next Steps",
 					Summary = "Review and complete the created drawings before continuing with the fabrication process.",
 					Details =

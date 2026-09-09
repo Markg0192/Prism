@@ -63,7 +63,6 @@ namespace Prism
 			if (NumbersOutOfDate && (stageType == StageTypes.FAB || stageType == StageTypes.RocketPacket)) PartErrors.Add(Enums.Error.NumberingNotUpToDate);
 
 			Part = model.SelectModelObject(model.GetIdentifierByGUID(Guid)) as Part;
-
 			
 			if (IsMainPart) Assembly = Part.GetAssembly();
 			ModelObject = Part;
@@ -91,6 +90,10 @@ namespace Prism
 			HasRevision =
 				revisionNotRequired ||
 				(trimmedRevNote != "0" && trimmedRevNote != "");
+
+			AssemblyPrefix = Trim(items[20]);
+			PartPrefix = Trim(items[21]);
+			IsAbnormal = Trim(items[22]) == "Yes";
 		}
 
 		private static string NormaliseFolderName(string value)
@@ -124,8 +127,6 @@ namespace Prism
 			drawingFolder = default(DrawingFolder);
 			return false;
 		}
-
-
 
 		private string Trim(string s)
 		{
@@ -162,8 +163,12 @@ namespace Prism
 		public string LotName { get; set; }
 		public bool IsMainPart { get; set; }
 		public double Weight { get; set; }
+		public bool IsAbnormal { get; set; }
+		public string PartPrefix { get; set;  }
+		public string AssemblyPrefix { get; set; }
 
 		public List<Enums.Error> PartErrors = new List<Enums.Error>();
+		public DrawingClassification DrawingClassification = DrawingClassification.Unclassified;
 
 		private Phase GetPhaseFromString(string phaseNumberString)
 		{

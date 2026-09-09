@@ -228,6 +228,11 @@
 			return "SEV-UDA-352";
 		}
 
+		public static string DrawingClassification()
+		{
+			return "SEV-UDA-353";
+		}
+
 		public static string NextFabsecPrefixNumber() //Hidden UDA
         {
             return "PRISM_PG_NEXT_NUMBER";

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TEP Version="1.0">
 
-	<Product Id="Prism" UpgradeCode="15FF4F3F-9546-4EE1-8DF9-4A1B546A4661" Version="6.0" Language="1033"
+	<Product Id="Prism" UpgradeCode="15FF4F3F-9546-4EE1-8DF9-4A1B546A4661" Version="6.1" Language="1033"
 		Name="Severfield Prism Extension" Manufacturer="Severfield Corporation"  Description= "Detailer Helper"
 		IconPath="%TEPDEFINITIONFILEFOLDER%\Icon.png"
 			 

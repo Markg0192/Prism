@@ -184,6 +184,7 @@ namespace Prism
 				{
 					prismPart.Part.SetUserProperty("SEV-UDA-130", row.Code);
 					prismPart.Part.SetUserProperty("SEV-UDA-131", row.Title);
+
 				}
 
 				if (!prismPart.IsFabsec && prismPart.Part is Beam b)
@@ -197,12 +198,13 @@ namespace Prism
 			if (stageType == StageTypes.Check3)
 			{
 				CheckForAndFixNegativeDftWfts(prismPart);
+				prismPart.Part.SetUserProperty(ModelUDA.DrawingClassification(), prismPart.DrawingClassification.ToString());
 			}
 
 			if (stageType == StageTypes.FAB)
 			{
 				prismPart.Part.SetUserProperty(ModelUDA.PartMarkAtFab(), prismPart.PartMark);
-				prismPart.Part.SetUserProperty(ModelUDA.DrawingRevAtFabIssue(), prismPart.DrawingRevision);
+				prismPart.Part.SetUserProperty(ModelUDA.DrawingRevAtFabIssue(), prismPart.DrawingRevision);				
 			}
 
 			if (stageType == StageTypes.FAB && prismPart.NumbersOutOfDate)
