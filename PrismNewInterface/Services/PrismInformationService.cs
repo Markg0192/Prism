@@ -130,29 +130,101 @@ namespace PrismNewInterface.Services
 				new InformationSection
 				{
 					Title = "Special Fittings",
-					Summary = "Creates an order for special fittings.",
-					Details = ""
+					Summary = "Creates a material order for fittings that have been prepared and tagged as Special Fittings.",
+					Details =
+						"Preparation\n" +
+						"• Special fittings should be prepared before ordering using Prepare Special Fittings.\n" +
+						"• The fittings must be tagged as Special Fittings in the model and the required fitting drawings must already exist.\n\n" +
+
+						"Selection\n" +
+						"• Prism only processes fittings in the current selection that have the Special Fitting tag.\n" +
+						"• If no tagged special fittings are found, the order will not continue.\n\n" +
+
+						"Preliminary Marks and Reports\n" +
+						"• Prism assigns preliminary marks where required without replacing marks that already exist.\n" +
+						"• The standard material reports are created for the special fitting order.\n\n" +
+
+						"Drawings\n" +
+						"• Prism gathers the drawings associated with the selected special fittings.\n" +
+						"• Drawings must be assigned to the correct drawing folder. Unassigned drawings will stop the order.\n" +
+						"• The fitting drawings are printed and included in an SPC folder within the order package.\n\n" +
+
+						"Complete Order\n" +
+						"• Prism updates the relevant workflow attributes on the ordered fittings.\n" +
+						"• The completed order folder is zipped and a material order email is prepared with the order files attached.\n" +
+						"• If a Material directory has been configured in Settings, Prism can move the completed order into the appropriate project phase folder."
 				},
 
 				new InformationSection
 				{
 					Title = "Bolts",
-					Summary = "Creates an order for bolts.",
-					Details = ""
+					Summary = "Creates a bolt order from either selected bolt groups or the bolts associated with the selected assemblies.",
+					Details =
+						"Order Source\n" +
+						"• When the order starts, Prism asks whether the bolts should be taken from Selected Bolts or Selected Assemblies.\n" +
+						"• Selected Bolts creates the order directly from the bolt groups selected in Tekla.\n" +
+						"• Selected Assemblies creates the bolt list from the assemblies in the current selection.\n\n" +
+
+						"Create Order Files\n" +
+						"• Prism creates the bolt order folder and generates the required bolt list report.\n" +
+						"• The completed bolt order folder is zipped automatically.\n\n" +
+
+						"Email\n" +
+						"• Prism prepares the standard bolt order email using the current phase, issue and required-by information.\n" +
+						"• The completed bolt order ZIP is attached to the email for review before sending.\n\n" +
+
+						"Project Directory\n" +
+						"• If a Bolt Orders directory has been configured in Settings, Prism can move the completed order into the appropriate project phase folder."
 				},
 
 				new InformationSection
 				{
 					Title = "Seversafe",
-					Summary = "Creates an order for Seversafe items.",
-					Details = ""
+					Summary = "Builds a Seversafe order from the Seversafe items contained in the current Tekla selection.",
+					Details =
+						"Collate Seversafe Items\n" +
+						"• Prism scans the selected Seversafe parts and totals the components required for the order.\n" +
+						"• This includes standards, extension pieces, handrail, kick flat, panels, sleeve joints, elbow joints, swivel bends and edge trim cradle frames where present.\n" +
+						"• Handrail system lengths are calculated from the model geometry and separated into the appropriate system and phase-break lengths.\n\n" +
+
+						"Stock Length Allowances\n" +
+						"• Handrail and kick-flat quantities are converted into the full stock lengths required for ordering.\n" +
+						"• Prism includes the additional stock allowance built into the Seversafe ordering routine.\n\n" +
+
+						"Order Form\n" +
+						"• Prism copies the standard Seversafe Excel order template from the Firm Folder and fills it with the project, phase, delivery and calculated quantity information.\n" +
+						"• The processed Seversafe items are updated to record their progress through the Prism workflow.\n\n" +
+
+						"Complete Order\n" +
+						"• The completed Seversafe order folder is zipped and the standard Seversafe order email is prepared.\n" +
+						"• If a Seversafe Orders directory has been configured in Settings, Prism can move the completed order into the appropriate project phase folder."
 				},
 
 				new InformationSection
 				{
 					Title = "Fabsec Carcasses",
-					Summary = "Creates an order for prepared Fabsec carcasses.",
-					Details = ""
+					Summary = "Creates the fabrication order for Fabsec carcasses after the Fabsec material and carcass preparation stages are complete.",
+					Details =
+						"Required Preparation\n" +
+						"• The Fabsec raw material must already have been ordered.\n" +
+						"• A Fabsec carcass must already have been created for each selected Fabsec member using Prepare Fabsecs.\n" +
+						"• Prism will not continue if the raw material has not been ordered, the carcass has not been created, or the carcass has already been ordered.\n\n" +
+
+						"Carcass Selection\n" +
+						"• Prism locates the prepared carcasses associated with the selected Fabsec members and uses those carcasses to build the order.\n\n" +
+
+						"Drawings and Fabrication Data\n" +
+						"• Prism gathers the carcass drawings and checks that they are assigned to the correct PGC drawing folder.\n" +
+						"• The PGC drawings are printed and issued into the carcass order package.\n" +
+						"• A G2 assembly report and BSWX fabrication data are also created for the prepared carcasses.\n\n" +
+
+						"Model Updates\n" +
+						"• The original Fabsec members are updated to record the carcass order stage.\n" +
+						"• Prism stores the carcass ordered date so the same carcass cannot be ordered again accidentally.\n\n" +
+
+						"Complete Order\n" +
+						"• The completed carcass order folder is zipped and the standard Fabsec carcass order email is prepared.\n" +
+						"• If a Fabsec Carcasses directory has been configured in Settings, Prism can move the completed order into the appropriate project phase folder."
 				}
 			};
 
