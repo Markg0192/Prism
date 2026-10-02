@@ -320,22 +320,6 @@ namespace Prism
 						return MaterialOrderRunResult.InitialSetupFailed;
 					}
 
-					/*if (!orderType.Contains("Bolts"))
-					{
-						progress?.Invoke(40, "Refreshing selected parts...");
-
-						setupSuccessful = await Task.Run(() => InitialSetup(stageType, true, "x", "x", true, progress));
-
-						if (!setupSuccessful)
-						{
-							return MaterialOrderRunResult.InitialSetupFailed;
-						}
-					}
-					else
-					{
-						ModelChecker.ClearOldLists();
-					}*/
-
 					progress?.Invoke(55, "Creating material order...");
 
 					bool operationSuccessful = await Task.Run(() => _selectedObjects.MaterialButton3op(_projectData, reportManager, _teklaVersion,
@@ -783,6 +767,8 @@ namespace Prism
 		private bool InitialSetup(StageTypes stageType, bool checkForPreviousSteps, string phaseNumber, string issueNumber,
 			bool checkFabsecsHaveBeenPrepped, Action<int, string> progress = null)
 		{
+			ModelModifiers.ResetWorkPlane(_model);
+
 			progress?.Invoke(5, "Preparing selected parts...");
 
 			ModelChecker.ClearOldLists();
@@ -961,12 +947,12 @@ namespace Prism
 
 		#endregion
 
-		public async Task<FabPackRunResult> RunCreateFabPackAsync(string phaseNumber, string issueNumber, DateTime? siteDate, string variationType,
+		public async Task<FabPackRunResult> RunCreateFabPackAsync(string phaseNumber, string issueNumber, string siteDate, string variationType,
 			string variationNumber, Action<int, string> progress)
 		{
 			progress?.Invoke(1, "Preparing Fab Pack...");
 
-			ModelModifiers.VariationCheck(_projectData, variationType, variationNumber);
+			ModelModifiers.VariationCheck(_projectData, variationNumber, variationType);
 
 			progress?.Invoke(3, "Running initial Fab Pack checks...");
 
@@ -999,7 +985,7 @@ namespace Prism
 			Action<int, string> packageProgress = CreateProgressRange(progress, 33, 87);
 
 			var (success, drawingManager) = await _selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber, issueNumber, StageTypes.FAB,
-				siteDate.ToString(), runSeversafe, _teklaVersion, packageProgress);
+				siteDate, runSeversafe, _teklaVersion, packageProgress);
 
 			if (!success)
 			{
@@ -1010,7 +996,7 @@ namespace Prism
 
 			bool boltOrderAdded = false;
 
-			await Task.Run(() => FabMisc.FabMiscOp(_model, siteDate.ToString(), _selectedObjects, myReportManager, runSeversafe,
+			await Task.Run(() => FabMisc.FabMiscOp(_model, siteDate, _selectedObjects, myReportManager, runSeversafe,
 				_projectData, false, out boltOrderAdded));
 
 			progress?.Invoke(93, "Checking NC data...");

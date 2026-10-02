@@ -2,7 +2,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -11,15 +10,12 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
 using Tekla.Structures;
-using Tekla.Structures.Drawing;
 using Tekla.Structures.Drawing.Automation;
 using Tekla.Structures.Geometry3d;
 using Tekla.Structures.Model;
 using Tekla.Structures.Model.Operations;
 using Tekla.Structures.Model.UI;
 using static Prism.Enums;
-using static QRCoder.PayloadGenerator;
-using static Tekla.Structures.Filtering.Categories.TaskFilterExpressions;
 using ModelObject = Tekla.Structures.Model.ModelObject;
 using Part = Tekla.Structures.Model.Part;
 using View = Tekla.Structures.Model.UI.View;
@@ -42,7 +38,7 @@ namespace Prism
 			{
 				// Remove any '.' characters from variationType
 				variationType = variationType.Replace(".", string.Empty);
-				projData.VariationNumber = $"{variationType}{variationNumber}";
+				projData.VariationNumber = $"{variationType} {variationNumber}";
 				projData.IsVariation = true;
 			}
 			else

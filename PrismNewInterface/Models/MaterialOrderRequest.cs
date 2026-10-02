@@ -40,7 +40,7 @@ namespace PrismNewInterface.Models
 			set;
 		}
 
-		public DateTime? RequiredBy
+		public string RequiredBy
 		{
 			get;
 			set;

@@ -19,7 +19,7 @@ namespace PrismNewInterface.ViewModels
 		private string _issueNumber;
 		private string _selectedVariationType;
 		private string _variationNumber;
-		private DateTime? _requiredBy;
+		private string _requiredBy;
 		private string _checkOneHeader = "Check 1";
 		private string _checkTwoHeader = "Check 2";
 		private string _checkThreeHeader = "Check 3";
@@ -229,7 +229,7 @@ namespace PrismNewInterface.ViewModels
 			}
 		}
 
-		public DateTime? RequiredBy
+		public string RequiredBy
 		{
 			get
 			{
@@ -371,7 +371,7 @@ namespace PrismNewInterface.ViewModels
 			PhaseNumber = string.Empty;
 			IssueNumber = string.Empty;
 			VariationNumber = string.Empty;
-			RequiredBy = null;
+			RequiredBy = string.Empty;
 
 			SelectedOrderAction = OrderActions[0];
 

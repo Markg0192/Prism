@@ -8,7 +8,7 @@ namespace PrismNewInterface.Models
 
 		public string IssueNumber { get; set; }
 
-		public DateTime? SiteDate { get; set; }
+		public string SiteDate { get; set; }
 
 		public string VariationType { get; set; }
 

@@ -152,6 +152,50 @@ namespace PrismNewInterface
 			}
 		}
 
+		private void MaterialRequiredByCalendarButton_Click(
+	object sender,
+	RoutedEventArgs e)
+		{
+			MaterialRequiredByPopup.IsOpen = true;
+		}
+
+		private void MaterialRequiredByCalendar_SelectedDatesChanged(
+			object sender,
+			SelectionChangedEventArgs e)
+		{
+			if (!MaterialRequiredByCalendar.SelectedDate.HasValue)
+			{
+				return;
+			}
+
+			MaterialRequiredByTextBox.Text =
+				MaterialRequiredByCalendar.SelectedDate.Value.ToString("dd/MM/yyyy");
+
+			MaterialRequiredByPopup.IsOpen = false;
+		}
+
+		private void FabSiteDateCalendarButton_Click(
+			object sender,
+			RoutedEventArgs e)
+		{
+			FabSiteDatePopup.IsOpen = true;
+		}
+
+		private void FabSiteDateCalendar_SelectedDatesChanged(
+			object sender,
+			SelectionChangedEventArgs e)
+		{
+			if (!FabSiteDateCalendar.SelectedDate.HasValue)
+			{
+				return;
+			}
+
+			FabSiteDateTextBox.Text =
+				FabSiteDateCalendar.SelectedDate.Value.ToString("dd/MM/yyyy");
+
+			FabSiteDatePopup.IsOpen = false;
+		}
+
 		private object CreateAutoCompleteHeader(string checkName, AutoCompleteType autoCompleteType, ValidationContext context)
 		{
 			Grid grid = new Grid

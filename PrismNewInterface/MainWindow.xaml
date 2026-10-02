@@ -760,10 +760,49 @@
                                             <TextBlock Style="{StaticResource FieldLabelStyle}"
                                                        Text="Required by" />
 
-                                            <DatePicker Height="32"
-                                                        FontSize="13"
-                                                        Padding="7,2"
-                                                        SelectedDate="{Binding RequiredBy}" />
+                                            <Grid>
+
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="34" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <TextBox x:Name="MaterialRequiredByTextBox"
+                                                         Grid.Column="0"
+                                                         Style="{StaticResource InputStyle}"
+                                                         VerticalContentAlignment="Center"
+                                                         Text="{Binding RequiredBy, UpdateSourceTrigger=PropertyChanged}" />
+
+                                                <Button Grid.Column="1"
+                                                        Width="32"
+                                                        Height="32"
+                                                        MinWidth="32"
+                                                        Margin="2,0,0,0"
+                                                        Padding="0"
+                                                        Style="{StaticResource SecondaryButtonStyle}"
+                                                        Content="📅"
+                                                        ToolTip="Select date"
+                                                        Click="MaterialRequiredByCalendarButton_Click" />
+
+                                                <Popup x:Name="MaterialRequiredByPopup"
+                                                       Grid.ColumnSpan="2"
+                                                       PlacementTarget="{Binding ElementName=MaterialRequiredByTextBox}"
+                                                       Placement="Bottom"
+                                                       StaysOpen="False">
+
+                                                    <Border Background="White"
+                                                            BorderBrush="{StaticResource BorderBrush}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="4">
+
+                                                        <Calendar x:Name="MaterialRequiredByCalendar"
+                                                                  SelectedDatesChanged="MaterialRequiredByCalendar_SelectedDatesChanged" />
+
+                                                    </Border>
+
+                                                </Popup>
+
+                                            </Grid>
 
                                         </StackPanel>
 
@@ -1234,11 +1273,49 @@
                                             <TextBlock Style="{StaticResource FieldLabelStyle}"
                                                        Text="Site date" />
 
-                                            <DatePicker Width="145"
+                                            <Grid Width="145">
+
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="34" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <TextBox x:Name="FabSiteDateTextBox"
+                                                         Grid.Column="0"
+                                                         Style="{StaticResource InputStyle}"
+                                                         VerticalContentAlignment="Center"
+                                                         Text="{Binding SiteDate, UpdateSourceTrigger=PropertyChanged}" />
+
+                                                <Button Grid.Column="1"
+                                                        Width="32"
                                                         Height="32"
-                                                        FontSize="13"
-                                                        Padding="7,2"
-                                                        SelectedDate="{Binding SiteDate}" />
+                                                        MinWidth="32"
+                                                        Margin="2,0,0,0"
+                                                        Padding="0"
+                                                        Style="{StaticResource SecondaryButtonStyle}"
+                                                        Content="📅"
+                                                        ToolTip="Select date"
+                                                        Click="FabSiteDateCalendarButton_Click" />
+
+                                                <Popup x:Name="FabSiteDatePopup"
+                                                       Grid.ColumnSpan="2"
+                                                       PlacementTarget="{Binding ElementName=FabSiteDateTextBox}"
+                                                       Placement="Bottom"
+                                                       StaysOpen="False">
+
+                                                    <Border Background="White"
+                                                            BorderBrush="{StaticResource BorderBrush}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="4">
+
+                                                        <Calendar x:Name="FabSiteDateCalendar"
+                                                                  SelectedDatesChanged="FabSiteDateCalendar_SelectedDatesChanged" />
+
+                                                    </Border>
+
+                                                </Popup>
+
+                                            </Grid>
 
                                         </StackPanel>
 

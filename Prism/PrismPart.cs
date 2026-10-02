@@ -96,36 +96,32 @@ namespace Prism
 			IsAbnormal = Trim(items[22]) == "Yes";
 		}
 
+		private static bool TryGetDrawingFolder(string value, out DrawingFolder folder)
+		{
+			folder = DrawingFolder.Default;
+
+			if (string.IsNullOrWhiteSpace(value))
+				return false;
+
+			string normalised = NormaliseFolderName(value);
+
+			// Remove common descriptive word
+			if (normalised.EndsWith("Folder", StringComparison.OrdinalIgnoreCase))
+			{
+				normalised = normalised.Substring(0, normalised.Length - "Folder".Length);
+			}
+
+			return System.Enum.TryParse(normalised, true, out folder);
+		}
+
 		private static string NormaliseFolderName(string value)
 		{
 			if (string.IsNullOrWhiteSpace(value))
-			{
 				return string.Empty;
-			}
 
 			return new string(value
 				.Where(char.IsLetterOrDigit)
 				.ToArray());
-		}
-
-		private static bool TryGetDrawingFolder(string value, out DrawingFolder drawingFolder)
-		{
-			string normalisedValue = NormaliseFolderName(value);
-
-			foreach (DrawingFolder folder in System.Enum.GetValues(typeof(DrawingFolder)))
-			{
-				if (string.Equals(
-					normalisedValue,
-					NormaliseFolderName(folder.ToString()),
-					StringComparison.OrdinalIgnoreCase))
-				{
-					drawingFolder = folder;
-					return true;
-				}
-			}
-
-			drawingFolder = default(DrawingFolder);
-			return false;
 		}
 
 		private string Trim(string s)

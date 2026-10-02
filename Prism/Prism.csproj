@@ -86,6 +86,7 @@
     <Compile Include="CustomDialogs\OkWithReportForm.Designer.cs">
       <DependentUpon>OkWithReportForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Emails\FabEmailBuilder.cs" />
     <Compile Include="Managers\ChangeManager\StringIntDictionaryWrapper.cs" />
     <Compile Include="PrismBoltGroup.cs" />
     <Compile Include="Constants.cs" />
@@ -176,7 +177,7 @@
     <Compile Include="CheckFittings.cs" />
     <Compile Include="ColumnOrientation.cs" />
     <Compile Include="Geometry\Distances.cs" />
-    <Compile Include="EmailWriter.cs" />
+    <Compile Include="Emails\EmailWriter.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="CustomDialogs\ExecutionClass.cs">
       <SubType>Form</SubType>
