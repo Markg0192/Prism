@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using Tekla.Structures;
 using Tekla.Structures.Model;
 
@@ -14,13 +15,36 @@ namespace Prism
 			BoltGroup = boltGroup;
 		}
 
-		public PrismBoltGroup(string[] items, string phaseNum, string issueNum, Model model)
+		public PrismBoltGroup(string[] items, string phaseNum, string issueNum, Model model, Action<string, long> recordTiming = null)
 		{
+			long started = Stopwatch.GetTimestamp();
+
 			isShop = Convert.ToInt32(Trim(items[1])) == 1;
 			isShearStud = Trim(items[2]).Contains("SHEAR-STUD");
 			Name = Trim(items[2]);
 			isOrdered = IsBoltOrdered(phaseNum, issueNum, Trim(items[3]), Trim(items[4]), Trim(items[5]));
-			BoltGroup = model.SelectModelObject(new Identifier(Trim(items[6]))) as BoltGroup;
+
+			RecordTiming(recordTiming, "Bolt fields", ref started);
+
+			Identifier identifier = new Identifier(Trim(items[6]));
+
+			RecordTiming(recordTiming, "Bolt identifier", ref started);
+
+			BoltGroup = model.SelectModelObject(identifier) as BoltGroup;
+
+			RecordTiming(recordTiming, "Bolt SelectModelObject", ref started);
+		}
+
+		private static void RecordTiming(Action<string, long> recordTiming, string name, ref long started)
+		{
+			if (recordTiming == null)
+			{
+				return;
+			}
+
+			long now = Stopwatch.GetTimestamp();
+			recordTiming(name, now - started);
+			started = now;
 		}
 
 		public string Name { get; set; }
