@@ -5,6 +5,7 @@ using Prism.ExternalService;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -950,25 +951,49 @@ namespace Prism
 		public async Task<FabPackRunResult> RunCreateFabPackAsync(string phaseNumber, string issueNumber, string siteDate, string variationType,
 			string variationNumber, Action<int, string> progress)
 		{
+			Stopwatch totalTimer = Stopwatch.StartNew();
+			Stopwatch stageTimer = new Stopwatch();
+			Dictionary<string, double> timings = new Dictionary<string, double>();
+
+			Action<string, double> recordTiming = delegate (string name, double milliseconds)
+			{
+				double existing;
+				timings.TryGetValue(name, out existing);
+				timings[name] = existing + milliseconds;
+			};
+
 			progress?.Invoke(1, "Preparing Fab Pack...");
 
+			stageTimer.Restart();
 			ModelModifiers.VariationCheck(_projectData, variationNumber, variationType);
+			stageTimer.Stop();
+			recordTiming("VariationCheck", stageTimer.Elapsed.TotalMilliseconds);
 
 			progress?.Invoke(3, "Running initial Fab Pack checks...");
 
+			stageTimer.Restart();
 			bool setupSuccessful = await Task.Run(() => InitialSetup(StageTypes.FAB, true, phaseNumber, issueNumber, false, progress));
+			stageTimer.Stop();
+			recordTiming("InitialSetup", stageTimer.Elapsed.TotalMilliseconds);
 
 			if (!setupSuccessful)
 			{
+				totalTimer.Stop();
+				WriteFabPackPerformanceLog(phaseNumber, issueNumber, "InitialSetupFailed", timings, totalTimer.Elapsed.TotalMilliseconds);
 				return FabPackRunResult.InitialSetupFailed;
 			}
 
 			progress?.Invoke(25, "Checking drawing information...");
 
+			stageTimer.Restart();
 			bool drawingChecksPassed = await Task.Run(() => RunFabPackDrawingChecks(_selectedObjects));
+			stageTimer.Stop();
+			recordTiming("DrawingChecks", stageTimer.Elapsed.TotalMilliseconds);
 
 			if (!drawingChecksPassed)
 			{
+				totalTimer.Stop();
+				WriteFabPackPerformanceLog(phaseNumber, issueNumber, "DrawingChecksFailed", timings, totalTimer.Elapsed.TotalMilliseconds);
 				return FabPackRunResult.DrawingChecksFailed;
 			}
 
@@ -981,14 +1006,18 @@ namespace Prism
 			await Task.Yield();
 
 			ReportManager myReportManager = new ReportManager(_projectData, phaseNumber, issueNumber);
-
 			Action<int, string> packageProgress = CreateProgressRange(progress, 33, 87);
 
+			stageTimer.Restart();
 			var (success, drawingManager) = await _selectedObjects.CreateFabPackage(_model, _projectData, phaseNumber, issueNumber, StageTypes.FAB,
-				siteDate, runSeversafe, _teklaVersion, packageProgress);
+				siteDate, runSeversafe, _teklaVersion, packageProgress, recordTiming);
+			stageTimer.Stop();
+			recordTiming("CreateFabPackageTotal", stageTimer.Elapsed.TotalMilliseconds);
 
 			if (!success)
 			{
+				totalTimer.Stop();
+				WriteFabPackPerformanceLog(phaseNumber, issueNumber, "OperationFailed", timings, totalTimer.Elapsed.TotalMilliseconds);
 				return FabPackRunResult.OperationFailed;
 			}
 
@@ -996,11 +1025,15 @@ namespace Prism
 
 			bool boltOrderAdded = false;
 
+			stageTimer.Restart();
 			await Task.Run(() => FabMisc.FabMiscOp(_model, siteDate, _selectedObjects, myReportManager, runSeversafe,
 				_projectData, false, out boltOrderAdded));
+			stageTimer.Stop();
+			recordTiming("FabMisc", stageTimer.Elapsed.TotalMilliseconds);
 
 			progress?.Invoke(93, "Checking NC data...");
 
+			stageTimer.Restart();
 			if (!CheckNcCreation(myReportManager, drawingManager.NumberOfNcRequired, out int numberOfFilesCreated, out HashSet<string> uniqueFiles))
 			{
 				HashSet<string> comparisonFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -1018,9 +1051,12 @@ namespace Prism
 				_ = LogNcCreated(_projectData.ProjNumberAndName, phaseNumber, issueNumber, myReportManager.Folders.NcPath,
 					drawingManager.NumberOfNcRequired, numberOfFilesCreated);
 			}
+			stageTimer.Stop();
+			recordTiming("NCValidation", stageTimer.Elapsed.TotalMilliseconds);
 
 			progress?.Invoke(96, "Moving Fab Pack to project directories...");
 
+			stageTimer.Restart();
 			MovePackToDirectory(myReportManager.Folders.FabPath, AdvancedSettingType.DirectoryFabPack, phaseNumber);
 
 			if (boltOrderAdded)
@@ -1028,16 +1064,61 @@ namespace Prism
 				progress?.Invoke(98, "Moving bolt order to project directories...");
 				MovePackToDirectory(myReportManager.Folders.BoltPath, AdvancedSettingType.DirectoryBolts, phaseNumber);
 			}
+			stageTimer.Stop();
+			recordTiming("MovePackages", stageTimer.Elapsed.TotalMilliseconds);
 
 			progress?.Invoke(99, "Finalising Fab Pack...");
 
+			stageTimer.Restart();
 			_ = UpdateFrozenDrawingCount(_projectData.ProjNumberAndGuid, drawingManager.GetFrozenDrawings().Count, drawingManager.GetUnFrozenDrawings().Count);
 			_ = LogProgress(_projectData.ProjNumberAndName, "Fabrication", 0, _selectedObjects.GetMainParts().Count);
 			_ = AddToFabCompleteCount();
+			stageTimer.Stop();
+			recordTiming("FinalLogging", stageTimer.Elapsed.TotalMilliseconds);
 
 			progress?.Invoke(100, "Fab Pack created successfully.");
 
+			totalTimer.Stop();
+			WriteFabPackPerformanceLog(phaseNumber, issueNumber, "Success", timings, totalTimer.Elapsed.TotalMilliseconds);
+
 			return FabPackRunResult.Success;
+		}
+
+		private void WriteFabPackPerformanceLog(string phaseNumber, string issueNumber, string result, Dictionary<string, double> timings, double totalMs)
+		{
+			try
+			{
+				string logPath = Path.Combine(_projectData.ProjPath, "FabPack_Performance.log");
+				string[] orderedStages =
+				{
+					"VariationCheck", "InitialSetup", "DrawingChecks", "Folders", "DrawingManager", "QRPreparation", "Printing", "PdfQR",
+					"BSWX", "ReportsNC", "ModifyAttributes", "IndividualIFC", "RemoveUnusedFolders", "Zip", "Email",
+					"CreateFabPackageTotal", "FabMisc", "NCValidation", "MovePackages", "FinalLogging"
+				};
+
+				string line = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") +
+					" | Phase=" + phaseNumber +
+					" | Issue=" + issueNumber +
+					" | Result=" + result +
+					" | Parts=" + (_selectedObjects == null ? 0 : _selectedObjects.PrismParts.Count) +
+					" | Bolts=" + (_selectedObjects == null ? 0 : _selectedObjects.PrismBoltGroups.Count);
+
+				foreach (string stage in orderedStages)
+				{
+					double milliseconds;
+					if (timings.TryGetValue(stage, out milliseconds))
+					{
+						line += " | " + stage + "=" + milliseconds.ToString("0.0") + "ms";
+					}
+				}
+
+				line += " | Total=" + totalMs.ToString("0.0") + "ms" + Environment.NewLine;
+				File.AppendAllText(logPath, line);
+			}
+			catch
+			{
+				// Performance logging must never interrupt Fab Pack creation.
+			}
 		}
 
 		private bool CheckNcCreation(ReportManager reportManager, int totalNcRequired, out int numberOfFilesCreated, out HashSet<string> uniqueFiles)
