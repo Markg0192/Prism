@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Tekla.Structures.Model;
 using static Prism.Enums;
@@ -42,8 +43,10 @@ namespace Prism
 			Finish = Part.Finish;
 		}
 
-		public PrismPart(string[] items, Model model, StageTypes stageType)
+		public PrismPart(string[] items, Model model, StageTypes stageType, Action<string, long> recordTiming = null)
 		{
+			long started = Stopwatch.GetTimestamp();
+
 			Guid = Trim(items[1]);
 			Prelim = Trim(items[2]);
 			LotName = Trim(items[3]);
@@ -62,9 +65,17 @@ namespace Prism
 			NumbersOutOfDate = PartMark.Contains("?");
 			if (NumbersOutOfDate && (stageType == StageTypes.FAB || stageType == StageTypes.RocketPacket)) PartErrors.Add(Enums.Error.NumberingNotUpToDate);
 
-			Part = model.SelectModelObject(model.GetIdentifierByGUID(Guid)) as Part;
-			
+			RecordTiming(recordTiming, "Core fields", ref started);
+
+			Identifier identifier = model.GetIdentifierByGUID(Guid);
+			RecordTiming(recordTiming, "GetIdentifierByGUID", ref started);
+
+			Part = model.SelectModelObject(identifier) as Part;
+			RecordTiming(recordTiming, "SelectModelObject", ref started);
+
 			if (IsMainPart) Assembly = Part.GetAssembly();
+			RecordTiming(recordTiming, "GetAssembly", ref started);
+
 			ModelObject = Part;
 			DrawingRevision = Trim(items[11]); // redundant now because of items 18 which works for both types of drawings. Keeping it so not to mess to much with items order...
 
@@ -94,6 +105,20 @@ namespace Prism
 			AssemblyPrefix = Trim(items[20]);
 			PartPrefix = Trim(items[21]);
 			IsAbnormal = Trim(items[22]) == "Yes";
+
+			RecordTiming(recordTiming, "Drawing/classification fields", ref started);
+		}
+
+		private static void RecordTiming(Action<string, long> recordTiming, string name, ref long started)
+		{
+			if (recordTiming == null)
+			{
+				return;
+			}
+
+			long now = Stopwatch.GetTimestamp();
+			recordTiming(name, now - started);
+			started = now;
 		}
 
 		private static bool TryGetDrawingFolder(string value, out DrawingFolder folder)
