@@ -8,6 +8,11 @@ using System.Drawing;
 using System;
 using System.Linq;
 using System.Windows.Forms;
+using iText.IO.Font.Constants;
+using iText.Kernel.Font;
+using iText.Kernel.Geom;
+using iText.Kernel.Pdf;
+using iText.Kernel.Pdf.Canvas;
 using Task = System.Threading.Tasks.Task;
 
 namespace Prism
@@ -603,18 +608,74 @@ namespace Prism
 			{
 				if (subFile.EndsWith(".xsr") && !subFile.Contains("G2"))
 				{
+					string reportName = Path.GetFileNameWithoutExtension(subFile);
 					Stopwatch timer = Stopwatch.StartNew();
-					VirtualPrinter(subFile);
-					timer.Stop();
 
-					if (recordTiming != null)
+					try
 					{
-						string reportName = Path.GetFileNameWithoutExtension(subFile);
-						recordTiming("ReportPDFFile_" + reportName, timer.Elapsed.TotalMilliseconds);
+						Stopwatch directTimer = Stopwatch.StartNew();
+						CreatePdfDirect(subFile);
+						directTimer.Stop();
+						recordTiming?.Invoke("ReportPDFDirect_" + reportName, directTimer.Elapsed.TotalMilliseconds);
 					}
+					catch
+					{
+						Stopwatch fallbackTimer = Stopwatch.StartNew();
+						VirtualPrinter(subFile);
+						fallbackTimer.Stop();
+						recordTiming?.Invoke("ReportPDFFallback_" + reportName, fallbackTimer.Elapsed.TotalMilliseconds);
+					}
+
+					timer.Stop();
+					recordTiming?.Invoke("ReportPDFFile_" + reportName, timer.Elapsed.TotalMilliseconds);
 
 					File.Delete(subFile);
 				}
+			}
+		}
+
+		private static void CreatePdfDirect(string filePath)
+		{
+			const int linesPerPage = 74;
+			const float fontSize = 10f;
+			const float leading = 10.5f;
+			const float margin = 28.8f;
+
+			string[] lines = File.ReadAllLines(filePath);
+			string pdfPath = Path.ChangeExtension(filePath, "pdf");
+
+			using (PdfWriter writer = new PdfWriter(pdfPath))
+			{
+				PdfDocument pdfDocument = new PdfDocument(writer);
+				PdfFont font = PdfFontFactory.CreateFont(StandardFonts.COURIER);
+
+				for (int lineIndex = 0; lineIndex < lines.Length; lineIndex += linesPerPage)
+				{
+					var page = pdfDocument.AddNewPage(PageSize.A4);
+					PdfCanvas canvas = new PdfCanvas(page);
+
+					canvas.BeginText();
+					canvas.SetFontAndSize(font, fontSize);
+					canvas.SetLeading(leading);
+					canvas.MoveText(margin, PageSize.A4.GetHeight() - margin - fontSize);
+
+					int endLine = Math.Min(lineIndex + linesPerPage, lines.Length);
+					for (int i = lineIndex; i < endLine; i++)
+					{
+						if (i == lineIndex)
+						{
+							canvas.ShowText(lines[i] ?? string.Empty);
+						}
+						else
+						{
+							canvas.NewlineShowText(lines[i] ?? string.Empty);
+						}
+					}
+
+					canvas.EndText();
+				}
+
+				pdfDocument.Close();
 			}
 		}
 
