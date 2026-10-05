@@ -657,6 +657,8 @@ namespace Prism
 
 					canvas.BeginText();
 					canvas.SetFontAndSize(font, fontSize);
+					canvas.SetTextRenderingMode(PdfCanvasConstants.TextRenderingMode.FILL_STROKE);
+					canvas.SetLineWidth(0.15f);
 					canvas.SetLeading(leading);
 					canvas.MoveText(margin, PageSize.A4.GetHeight() - margin - fontSize);
 
