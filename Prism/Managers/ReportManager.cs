@@ -353,7 +353,7 @@ namespace Prism
 			progress?.Invoke(80, "Converting fabrication reports to PDF...");
 
 			timer.Restart();
-			await Task.Run(() => TextToPDF(Folders.ReportPath));
+			await Task.Run(() => TextToPDF(Folders.ReportPath, recordTiming));
 			timer.Stop();
 			recordTiming?.Invoke("ReportPDF", timer.Elapsed.TotalMilliseconds);
 
@@ -597,13 +597,22 @@ namespace Prism
 			await PrismMacroBuilder.DrawingOperations();
 		}
 
-		private static void TextToPDF(string folderPath)
+		private static void TextToPDF(string folderPath, Action<string, double> recordTiming = null)
 		{
 			foreach (string subFile in Directory.GetFiles(folderPath))
 			{
 				if (subFile.EndsWith(".xsr") && !subFile.Contains("G2"))
 				{
+					Stopwatch timer = Stopwatch.StartNew();
 					VirtualPrinter(subFile);
+					timer.Stop();
+
+					if (recordTiming != null)
+					{
+						string reportName = Path.GetFileNameWithoutExtension(subFile);
+						recordTiming("ReportPDFFile_" + reportName, timer.Elapsed.TotalMilliseconds);
+					}
+
 					File.Delete(subFile);
 				}
 			}
@@ -611,53 +620,36 @@ namespace Prism
 
 		private static void VirtualPrinter(string filePath)
 		{
-			Font font = new Font("Lucida Console", 10, FontStyle.Regular);
+			const int linesPerPage = 74;
 
-			string printerName = "Microsoft Print to PDF"; // name of the printer
-
-			PrintDocument printDocument = new PrintDocument();
-			printDocument.PrinterSettings.PrinterName = printerName;
-
-			printDocument.PrinterSettings.PrintToFile = true;
-			printDocument.PrinterSettings.PrintFileName = Path.ChangeExtension(filePath, "pdf");
-			printDocument.DefaultPageSettings.PaperSize = new PaperSize("A4", 2100, 2970);
-			printDocument.DefaultPageSettings.Margins = new Margins(40, 40, 40, 40); // 0.5 inch margins
-			printDocument.DefaultPageSettings.Landscape = false; // portrait ori0entation
-			printDocument.DefaultPageSettings.Color = false; // black and white output
-
-			printDocument.DocumentName = Path.GetFileNameWithoutExtension(filePath);
-
-			// Variables to keep track of current position in file and number of lines printed
-			int linesPerPage = 74;
+			string text = File.ReadAllText(filePath);
+			string[] lines = text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
 			int lineNumber = 0;
-			int position = 0;
 
-			printDocument.PrintPage += (sender, e) =>
+			using (Font font = new Font("Lucida Console", 10, FontStyle.Regular))
+			using (PrintDocument printDocument = new PrintDocument())
 			{
-				// Read a portion of the file starting from the current position
-				using (StreamReader reader = new StreamReader(filePath))
+				printDocument.PrinterSettings.PrinterName = "Microsoft Print to PDF";
+				printDocument.PrinterSettings.PrintToFile = true;
+				printDocument.PrinterSettings.PrintFileName = Path.ChangeExtension(filePath, "pdf");
+				printDocument.DefaultPageSettings.PaperSize = new PaperSize("A4", 2100, 2970);
+				printDocument.DefaultPageSettings.Margins = new Margins(40, 40, 40, 40);
+				printDocument.DefaultPageSettings.Landscape = false;
+				printDocument.DefaultPageSettings.Color = false;
+				printDocument.DocumentName = Path.GetFileNameWithoutExtension(filePath);
+
+				printDocument.PrintPage += (sender, e) =>
 				{
-					string text = reader.ReadToEnd();
-					string[] lines = text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
 					int linesToPrint = Math.Min(linesPerPage, lines.Length - lineNumber);
 					string portion = string.Join(Environment.NewLine, lines.Skip(lineNumber).Take(linesToPrint));
 					e.Graphics.DrawString(portion, font, Brushes.Black, e.MarginBounds);
 
-					// Update variables for next page
 					lineNumber += linesToPrint;
-					position += portion.Length;
-					if (lineNumber >= lines.Length)
-					{
-						e.HasMorePages = false;
-					}
-					else
-					{
-						e.HasMorePages = true;
-					}
-				}
-			};
+					e.HasMorePages = lineNumber < lines.Length;
+				};
 
-			printDocument.Print();
+				printDocument.Print();
+			}
 		}
 	}
 }
