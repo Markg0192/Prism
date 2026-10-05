@@ -1110,7 +1110,9 @@ namespace Prism
 					"VariationCheck", "InitialSetup", "DrawingChecks", "SeversafeUserWait",
 					"FolderCpuCounter", "FolderReportManager", "FolderFab", "FolderBolt", "FolderSeversafe", "FolderSeversafeSelection", "FolderUserWait", "Folders",
 					"DrawingReport", "DrawingReportRead", "DrawingValidation", "DrawingNcCount", "DrawingUserWait", "DrawingManager",
-					"QRPreparation", "Printing", "PdfQR", "BSWX", "ReportsNC", "ModifyAttributes", "IndividualIFC", "RemoveUnusedFolders", "Zip",
+					"QRPreparation", "Printing", "PdfQR", "BSWX", "ReportPreparation", "TeklaReports", "NCSecondarySelection", "NCSecondaryPlates", "NCSecondaryProfiles",
+					"NCMainSelection", "NCMainHollow", "NCMainProfiles", "NC2021Plates", "NC2021Profiles", "NCWait", "ReportPDF", "RestorePartSelection", "ReportsNC",
+					"ModifyAttributes", "IndividualIFC", "RemoveUnusedFolders", "Zip",
 					"FabPackCompleteUserWait", "EmailBuild", "EmailOutlookStart", "EmailPrepare", "EmailUserWait", "EmailWall",
 					"CreateFabPackageTotal", "FabMisc", "NCValidation", "NCUserWait", "MovePackages", "FinalLogging"
 				};
