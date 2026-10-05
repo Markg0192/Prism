@@ -87,6 +87,7 @@
       <DependentUpon>OkWithReportForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Emails\FabEmailBuilder.cs" />
+    <Compile Include="Emails\OperationalEmailBuilder.cs" />
     <Compile Include="Managers\ChangeManager\StringIntDictionaryWrapper.cs" />
     <Compile Include="PrismBoltGroup.cs" />
     <Compile Include="Constants.cs" />
