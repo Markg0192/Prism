@@ -191,7 +191,8 @@ namespace Prism.ButtonOperations
 				myObjects,
 				myObjects.PrismBoltGroups,
 				teklaVersion,
-				reportProgress);
+				reportProgress,
+				recordTiming);
 
 			stageTimer.Stop();
 			recordTiming?.Invoke("ReportsNC", stageTimer.Elapsed.TotalMilliseconds);
