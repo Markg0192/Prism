@@ -14,6 +14,7 @@ using iText.Kernel.Geom;
 using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Canvas;
 using Task = System.Threading.Tasks.Task;
+using Path = System.IO.Path;
 
 namespace Prism
 {
