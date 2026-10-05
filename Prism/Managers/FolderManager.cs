@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Diagnostics;
 using System.IO.Compression;
 using System.Linq;
 
@@ -84,9 +85,9 @@ namespace Prism
 
         private List<string> DrawingVaultFolders = new List<string>();
 
-        public bool CreateFabFolders()
+        public bool CreateFabFolders(Action<string, double> recordTiming = null)
         {
-            if (!CheckAndDeleteFolder(FabPath)) return false;
+            if (!CheckAndDeleteFolder(FabPath, recordTiming)) return false;
 
             foreach (string folder in _folderNames)
             {
@@ -135,23 +136,23 @@ namespace Prism
             return true;
         }
 
-        public bool CreateBoltFolder()
+        public bool CreateBoltFolder(Action<string, double> recordTiming = null)
         {
-            if (!CheckAndDeleteFolder(BoltPath)) return false;
+            if (!CheckAndDeleteFolder(BoltPath, recordTiming)) return false;
 
             Directory.CreateDirectory(BoltPath);
             return true;
         }
 
-        public bool CreateEpoFolder()
+        public bool CreateEpoFolder(Action<string, double> recordTiming = null)
         {
-            if (!CheckAndDeleteFolder(EpoPath)) return false;
+            if (!CheckAndDeleteFolder(EpoPath, recordTiming)) return false;
 
             Directory.CreateDirectory(EpoPath);
             return true;
         }
 
-        private bool CheckAndDeleteFolder(string folderPath)
+        private bool CheckAndDeleteFolder(string folderPath, Action<string, double> recordTiming = null)
         {
             bool folderExists = Directory.Exists(folderPath);
             string zipFilePath = $"{folderPath}.zip";
@@ -174,7 +175,12 @@ namespace Prism
                                  $"The zipped version of the folder '{folderPath}' exists.";
 
                 // Add this to your existing confirmation method or modify it to handle this case
-                if (PrismWarnings.FolderAlreadyExists(message))
+                Stopwatch userWait = Stopwatch.StartNew();
+                bool deleteExisting = PrismWarnings.FolderAlreadyExists(message);
+                userWait.Stop();
+                recordTiming?.Invoke("FolderUserWait", userWait.Elapsed.TotalMilliseconds);
+
+                if (deleteExisting)
                 {
                     try
                     {
