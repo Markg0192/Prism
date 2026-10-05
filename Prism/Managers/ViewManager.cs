@@ -12,13 +12,13 @@ namespace Prism
         {
             // Creates the filter expressions
             PartFilterExpressions.CustomString PartName = new PartFilterExpressions.CustomString(ModelUDA.FabStampUDA());
-            StringConstantFilterExpression phaseInfo = new StringConstantFilterExpression(ModelUDA.FabViewAndFilterStamp(phaseNum));
+            StringConstantFilterExpression phaseInfo = new StringConstantFilterExpression(ModelUDA.FabStamp(phaseNum, issueNum));
 
             PartFilterExpressions.Name name = new PartFilterExpressions.Name();
             StringConstantFilterExpression seversafeName = new StringConstantFilterExpression("SS*");
 
             // Creates the binary filter expressions
-            BinaryFilterExpression Expression1 = new BinaryFilterExpression(PartName, StringOperatorType.STARTS_WITH, phaseInfo);
+            BinaryFilterExpression Expression1 = new BinaryFilterExpression(PartName, StringOperatorType.IS_EQUAL, phaseInfo);
             BinaryFilterExpression Seversafe = new BinaryFilterExpression(name, StringOperatorType.IS_NOT_EQUAL, seversafeName);
 
             // Creates the binary filter expression collection
@@ -27,7 +27,7 @@ namespace Prism
             ExpressionCollection.Add(new BinaryFilterExpressionItem(Seversafe, BinaryFilterOperatorType.BOOLEAN_AND));
 
             string AttributesPath = Path.Combine(projectData.ProjPath, "attributes");
-            string FilterName = Path.Combine(AttributesPath, ModelUDA.FabViewAndFilterStamp(phaseNum));
+            string FilterName = Path.Combine(AttributesPath, ModelUDA.FabStamp(phaseNum, issueNum));
 
             Filter Filter = new Filter(ExpressionCollection);
             // Generates the filter file
@@ -38,14 +38,14 @@ namespace Prism
         {
             CreateFabViewFilter(phaseNum, issueNum, projectData);
             var view = new View();
-            view.ViewFilter = ModelUDA.FabViewAndFilterStamp(phaseNum);
+            view.ViewFilter = ModelUDA.FabStamp(phaseNum, issueNum);
 
             view.DisplayCoordinateSystem.AxisX = new Vector(1, 0, 0);
             view.DisplayCoordinateSystem.AxisY = new Vector(1, 0, 0);
             view.DisplayCoordinateSystem.Origin = new Vector(0, 0, obj.SmallestZ - 50);
             view.DisplayType = View.DisplayOrientationType.DISPLAY_3D;
 
-            view.Name = ModelUDA.FabViewAndFilterStamp(phaseNum);
+            view.Name = ModelUDA.FabStamp(phaseNum, issueNum);
             view.ViewCoordinateSystem.AxisX = new Vector(1, 0, 0);
             view.ViewCoordinateSystem.AxisY = new Vector(0, 1, 0);
             view.ViewCoordinateSystem.Origin = new Point(0, 0, obj.SmallestZ - 50);
