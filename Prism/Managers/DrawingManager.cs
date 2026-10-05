@@ -47,16 +47,10 @@ namespace Prism
 				}
 
 				// Read the report file and populate the Drawings list
-				Stopwatch readTimer = Stopwatch.StartNew();
 				ReadReportAndPopulateDrawings(reportPath);
-				readTimer.Stop();
-				recordTiming?.Invoke("DrawingReportRead", readTimer.Elapsed.TotalMilliseconds);
 
 				// Validate that all prism parts have an associated drawing
-				Stopwatch validateTimer = Stopwatch.StartNew();
 				List<PrismPart> missingParts = ValidateDrawingSelection.ValidateSelection(Drawings, prismParts);
-				validateTimer.Stop();
-				recordTiming?.Invoke("DrawingValidation", validateTimer.Elapsed.TotalMilliseconds);
 				if (missingParts.Count > 0)
 				{
 					// On the final attempt, show a warning and exit.
@@ -192,13 +186,19 @@ namespace Prism
 
 				await Task.Yield();
 
+				Stopwatch readTimer = Stopwatch.StartNew();
 				ReadReportAndPopulateDrawings(reportPath);
+				readTimer.Stop();
+				recordTiming?.Invoke("DrawingReportRead", readTimer.Elapsed.TotalMilliseconds);
 
 				progress?.Invoke(attemptStart + 15, $"Validating drawings - attempt {attempt} of {maxAttempts}...");
 
 				await Task.Yield();
 
+				Stopwatch validateTimer = Stopwatch.StartNew();
 				List<PrismPart> missingParts = ValidateDrawingSelection.ValidateSelection(Drawings, prismParts);
+				validateTimer.Stop();
+				recordTiming?.Invoke("DrawingValidation", validateTimer.Elapsed.TotalMilliseconds);
 
 				if (missingParts.Count > 0)
 				{
