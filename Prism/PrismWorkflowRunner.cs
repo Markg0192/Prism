@@ -1,6 +1,4 @@
-﻿using iText.Commons.Actions.Data;
-using Org.BouncyCastle.Utilities;
-using Prism.ButtonOperations;
+﻿using Prism.ButtonOperations;
 using Prism.ExternalService;
 using System;
 using System.Collections;
@@ -10,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Tekla.Structures;
+
 using Tekla.Structures.Geometry3d;
 using Tekla.Structures.Model;
 using Tekla.Structures.Model.UI;

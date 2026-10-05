@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Tekla.Structures;
 using Tekla.Structures.Model;
 using static Prism.Enums;
 using ModelObject = Tekla.Structures.Model.ModelObject;

@@ -111,7 +111,7 @@ namespace PrismNewInterface.Services
 					request.IssueNumber,
 					request.VariationNumber,
 					request.VariationType,
-					request.RequiredBy.ToString(),
+					request.RequiredBy,
 					progressCallback);
 
 				if (result == MaterialOrderRunResult.InitialSetupFailed)
