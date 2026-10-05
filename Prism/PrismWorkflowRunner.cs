@@ -1124,13 +1124,21 @@ namespace Prism
 					" | Parts=" + (_selectedObjects == null ? 0 : _selectedObjects.PrismParts.Count) +
 					" | Bolts=" + (_selectedObjects == null ? 0 : _selectedObjects.PrismBoltGroups.Count);
 
+				HashSet<string> writtenStages = new HashSet<string>(StringComparer.Ordinal);
+
 				foreach (string stage in orderedStages)
 				{
 					double milliseconds;
 					if (timings.TryGetValue(stage, out milliseconds))
 					{
 						line += " | " + stage + "=" + milliseconds.ToString("0.0") + "ms";
+						writtenStages.Add(stage);
 					}
+				}
+
+				foreach (KeyValuePair<string, double> timing in timings.Where(item => !writtenStages.Contains(item.Key)).OrderBy(item => item.Key))
+				{
+					line += " | " + timing.Key + "=" + timing.Value.ToString("0.0") + "ms";
 				}
 
 				double userWaitMs = timings.Where(item => item.Key.EndsWith("UserWait", StringComparison.Ordinal)).Sum(item => item.Value);
