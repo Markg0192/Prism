@@ -80,33 +80,21 @@ namespace Prism
 
 		public static void WriteEpoEmail(PrismProjectData projData, string fabPrefix, string issueNumber, string phaseNumber, string siteDate, string fabPath)
 		{
+			string emailBody = OperationalEmailBuilder.BuildEpoOrder(projData, phaseNumber, issueNumber, siteDate);
+
 			ExecuteEmailAction(outlookApp =>
 			{
 				MailItem email = outlookApp.CreateItem(OlItemType.olMailItem) as MailItem;
 
 				email.Subject = $"{fabPrefix} E.P.O. Order{AddVariationNoIfReqd(projData.IsVariation, projData.VariationNumber)}";
-
-				email.Body = $"Hello,{_mailNewLine}" +
-					$"{_mailNewLine}" +
-					$"This is the edge protection order for phase {phaseNumber}, issue {issueNumber}, in {projData.ProjNumber}, {projData.ProjName}.{_mailNewLine}" +
-					$"{IsPartOfAVariation(projData.IsVariation, projData.VariationNumber)}" +
-					$"Please make this order available.{_mailNewLine}" +
-					$"{_mailNewLine}" +
-					$"Site date is {SiteDateNote(siteDate)}{_mailNewLine}" +
-					$"{_mailNewLine}" +
-					$"This order consists of: {_mailNewLine}" +
-					$"{WriteEpoLengths()}{_mailNewLine}" +
-					$"Note, all length values have been rounded to nearest 0.5m.{_mailNewLine}" +
-					$"{_mailNewLine}" +
-					$"Regards,{_mailNewLine}{_mailNewLine}" +
-					$"{projData.Full}";
+				email.BodyFormat = OlBodyFormat.olFormatHTML;
+				email.HTMLBody = emailBody;
 
 				string attachmentPath = $"{fabPath}.zip";
-				Attachment attachment = email.Attachments.Add(attachmentPath);
+				email.Attachments.Add(attachmentPath);
 
 				email.To = _seversafeTeamEmail;
 				email.CC = FormCCString(false, projData.WebService, projData.ProjNumberAndGuid);
-
 				email.Display();
 			});
 		}
@@ -242,55 +230,42 @@ namespace Prism
 
 		public static void WriteBoltOrderEmail(PrismProjectData projData, string fabPrefix, string issueNumber, string phaseNumber, string siteDate, string boltPath)
 		{
+			string emailBody = OperationalEmailBuilder.BuildBoltOrder(projData, phaseNumber, issueNumber, siteDate);
+
 			ExecuteEmailAction(outlookApp =>
 			{
 				MailItem email = outlookApp.CreateItem(OlItemType.olMailItem) as MailItem;
 
 				email.Subject = $"{fabPrefix} Bolt Order{AddVariationNoIfReqd(projData.IsVariation, projData.VariationNumber)}";
-
-				email.Body = $"Hello,{_mailNewLine}" +
-					$"{_mailNewLine}" +
-					$"This is the bolt order for phase {phaseNumber}, issue {issueNumber}, in {projData.ProjNumber}, {projData.ProjName}.{_mailNewLine}" +
-					$"{IsPartOfAVariation(projData.IsVariation, projData.VariationNumber)}" +
-					$"Please order these bolts when possible.{_mailNewLine}{_mailNewLine}" +
-					$"Site date is {SiteDateNote(siteDate)}" +
-					$"{_mailNewLine}{_mailNewLine}" +
-					$"Regards,{_mailNewLine}{_mailNewLine}" +
-					$"{projData.Full}";
+				email.BodyFormat = OlBodyFormat.olFormatHTML;
+				email.HTMLBody = emailBody;
 
 				string attachmentPath = $"{boltPath}.zip";
-				Attachment attachment = email.Attachments.Add(attachmentPath);
+				email.Attachments.Add(attachmentPath);
 
 				email.To = _purchasingEmail;
 				email.CC = FormCCString(false, projData.WebService, projData.ProjNumberAndGuid);
-
 				email.Display();
 			});
 		}
 
 		public static void WriteFabsecCarcassEmail(PrismProjectData projData, string fabPrefix, string issueNumber, string phaseNumber, string siteDate, string boltPath)
 		{
+			string emailBody = OperationalEmailBuilder.BuildFabsecCarcassOrder(projData, phaseNumber, issueNumber, siteDate);
+
 			ExecuteEmailAction(outlookApp =>
 			{
 				MailItem email = outlookApp.CreateItem(OlItemType.olMailItem) as MailItem;
 
 				email.Subject = $"{fabPrefix} Fabsec Carcass Order{AddVariationNoIfReqd(projData.IsVariation, projData.VariationNumber)}";
-
-				email.Body = $"Hello,{_mailNewLine}" +
-					$"{_mailNewLine}" +
-					$"This is the fabsec carcass order for phase {phaseNumber}, issue {issueNumber}, in {projData.ProjNumber}, {projData.ProjName}.{_mailNewLine}" +
-					$"{IsPartOfAVariation(projData.IsVariation, projData.VariationNumber)}" +
-					$"Please process these carcasses when possible.{_mailNewLine}{_mailNewLine}" +
-					$"{DateRequiredNote("These carcasses are required for fab", siteDate)}" +
-					$"Regards,{_mailNewLine}{_mailNewLine}" +
-					$"{projData.Full}";
+				email.BodyFormat = OlBodyFormat.olFormatHTML;
+				email.HTMLBody = emailBody;
 
 				string attachmentPath = $"{boltPath}.zip";
-				Attachment attachment = email.Attachments.Add(attachmentPath);
+				email.Attachments.Add(attachmentPath);
 
 				email.To = _fabsecTeamEmail;
 				email.CC = _purchasingEmail;
-
 				email.Display();
 			});
 		}
@@ -298,32 +273,21 @@ namespace Prism
 		public static void WriteMatEmail(PrismProjectData projData, SelectedObjects objects, string fabPrefix, string issueNumber, string phaseNumber,
 			string orderType, string matPath, bool fabsecPresent, string siteDate)
 		{
+			string emailBody = OperationalEmailBuilder.BuildMaterial(projData, objects, orderType, phaseNumber, issueNumber, siteDate);
+
 			ExecuteEmailAction(outlookApp =>
 			{
 				MailItem email = outlookApp.CreateItem(OlItemType.olMailItem) as MailItem;
 
 				email.Subject = $"{fabPrefix} {IssueType(orderType)}{AddVariationNoIfReqd(projData.IsVariation, projData.VariationNumber)}";
-
-				email.Body = $"Hello,{_mailNewLine}" +
-					$"{_mailNewLine}" +
-					$"{OrderTypeText(orderType)} for phase {phaseNumber}, issue {issueNumber}, in {projData.ProjNumber}, {projData.ProjName}.{_mailNewLine}" +
-					$"{IsPartOfAVariation(projData.IsVariation, projData.VariationNumber)}" +
-					$"{RemoveOrAddText(orderType)} as soon as possible.{_mailNewLine}" +
-					$"{_mailNewLine}" +
-					$"{RemoveOrAddMaterial(orderType)}{_mailNewLine}" +
-					$"{objects.PrismParts.Count} Parts.{_mailNewLine}" +
-					$"{objects.MainPartWeight + objects.FittingWeight}t. {_mailNewLine}" +
-					$"{_mailNewLine}" +
-					$"{DateRequired(orderType, siteDate)}" +
-					$"Regards,{_mailNewLine}{_mailNewLine}" +
-					$"{projData.Full}";
+				email.BodyFormat = OlBodyFormat.olFormatHTML;
+				email.HTMLBody = emailBody;
 
 				string attachmentPath = $"{matPath}.zip";
-				Attachment attachment = email.Attachments.Add(attachmentPath);
+				email.Attachments.Add(attachmentPath);
 
 				email.To = _purchasingEmail;
 				email.CC = FormCCString(fabsecPresent, projData.WebService, projData.ProjNumberAndGuid);
-
 				email.Display();
 			});
 		}
