@@ -1000,7 +1000,14 @@ namespace Prism
 			progress?.Invoke(30, "Preparing Fab Pack options...");
 			await Task.Yield();
 
-			bool runSeversafe = _selectedObjects.SeversafePresent && PrismWarnings.ShowTopmostYesNoMessage("You have Seversafe in your selection, would you like to create an order for this?", "Order Seversafe");
+			bool runSeversafe = false;
+			if (_selectedObjects.SeversafePresent)
+			{
+				stageTimer.Restart();
+				runSeversafe = PrismWarnings.ShowTopmostYesNoMessage("You have Seversafe in your selection, would you like to create an order for this?", "Order Seversafe");
+				stageTimer.Stop();
+				recordTiming("SeversafeUserWait", stageTimer.Elapsed.TotalMilliseconds);
+			}
 
 			progress?.Invoke(33, "Creating Fab Pack...");
 			await Task.Yield();
@@ -1034,14 +1041,25 @@ namespace Prism
 			progress?.Invoke(93, "Checking NC data...");
 
 			stageTimer.Restart();
-			if (!CheckNcCreation(myReportManager, drawingManager.NumberOfNcRequired, out int numberOfFilesCreated, out HashSet<string> uniqueFiles))
+			bool ncCreated = CheckNcCreation(myReportManager, drawingManager.NumberOfNcRequired, out int numberOfFilesCreated, out HashSet<string> uniqueFiles);
+
+			HashSet<string> filesNotInComparisonFolder = null;
+			if (!ncCreated)
 			{
 				HashSet<string> comparisonFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 				AddFilesFromFolder(myReportManager.Folders.NcPath, comparisonFiles);
+				filesNotInComparisonFolder = new HashSet<string>(uniqueFiles.Except(comparisonFiles), StringComparer.OrdinalIgnoreCase);
+			}
 
-				List<string> filesNotInComparisonFolder = uniqueFiles.Except(comparisonFiles).ToList();
+			stageTimer.Stop();
+			recordTiming("NCValidation", stageTimer.Elapsed.TotalMilliseconds);
 
-				PrismWarnings.NcDataCreationFailed(filesNotInComparisonFolder);
+			if (!ncCreated)
+			{
+				stageTimer.Restart();
+				PrismWarnings.NcDataCreationFailed(filesNotInComparisonFolder.ToList());
+				stageTimer.Stop();
+				recordTiming("NCUserWait", stageTimer.Elapsed.TotalMilliseconds);
 
 				_ = LogNcFailed(_projectData.ProjNumberAndName, phaseNumber, issueNumber, myReportManager.Folders.NcPath,
 					drawingManager.NumberOfNcRequired, numberOfFilesCreated);
@@ -1051,8 +1069,6 @@ namespace Prism
 				_ = LogNcCreated(_projectData.ProjNumberAndName, phaseNumber, issueNumber, myReportManager.Folders.NcPath,
 					drawingManager.NumberOfNcRequired, numberOfFilesCreated);
 			}
-			stageTimer.Stop();
-			recordTiming("NCValidation", stageTimer.Elapsed.TotalMilliseconds);
 
 			progress?.Invoke(96, "Moving Fab Pack to project directories...");
 
@@ -1091,9 +1107,12 @@ namespace Prism
 				string logPath = Path.Combine(_projectData.ProjPath, "FabPack_Performance.log");
 				string[] orderedStages =
 				{
-					"VariationCheck", "InitialSetup", "DrawingChecks", "Folders", "DrawingManager", "QRPreparation", "Printing", "PdfQR",
-					"BSWX", "ReportsNC", "ModifyAttributes", "IndividualIFC", "RemoveUnusedFolders", "Zip", "Email",
-					"CreateFabPackageTotal", "FabMisc", "NCValidation", "MovePackages", "FinalLogging"
+					"VariationCheck", "InitialSetup", "DrawingChecks", "SeversafeUserWait",
+					"FolderCpuCounter", "FolderReportManager", "FolderFab", "FolderBolt", "FolderSeversafe", "FolderSeversafeSelection", "FolderUserWait", "Folders",
+					"DrawingReport", "DrawingReportRead", "DrawingValidation", "DrawingNcCount", "DrawingUserWait", "DrawingManager",
+					"QRPreparation", "Printing", "PdfQR", "BSWX", "ReportsNC", "ModifyAttributes", "IndividualIFC", "RemoveUnusedFolders", "Zip",
+					"FabPackCompleteUserWait", "EmailBuild", "EmailOutlookStart", "EmailPrepare", "EmailUserWait", "EmailWall",
+					"CreateFabPackageTotal", "FabMisc", "NCValidation", "NCUserWait", "MovePackages", "FinalLogging"
 				};
 
 				string line = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") +
@@ -1112,7 +1131,13 @@ namespace Prism
 					}
 				}
 
-				line += " | Total=" + totalMs.ToString("0.0") + "ms" + Environment.NewLine;
+				double userWaitMs = timings.Where(item => item.Key.EndsWith("UserWait", StringComparison.Ordinal)).Sum(item => item.Value);
+				double processingMs = Math.Max(0, totalMs - userWaitMs);
+
+				line += " | ProcessingTotal=" + processingMs.ToString("0.0") + "ms" +
+					" | UserWaitTotal=" + userWaitMs.ToString("0.0") + "ms" +
+					" | WallTotal=" + totalMs.ToString("0.0") + "ms" + Environment.NewLine;
+
 				File.AppendAllText(logPath, line);
 			}
 			catch
