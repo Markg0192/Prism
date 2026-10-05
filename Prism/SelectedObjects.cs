@@ -159,7 +159,7 @@ namespace Prism
 				else if (items[0] == " Bolt")
 				{
 					long boltStarted = Stopwatch.GetTimestamp();
-					PrismBoltGroup boltGroup = new PrismBoltGroup(items, phaseNum, issueNum, model);
+					PrismBoltGroup boltGroup = new PrismBoltGroup(items, phaseNum, issueNum, model, recordPrismPartTiming);
 					boltCreationTicks += Stopwatch.GetTimestamp() - boltStarted;
 
 					if (boltGroup != null)
@@ -233,6 +233,9 @@ namespace Prism
 					" | GetAssembly=" + getTimingMs("GetAssembly").ToString("0.0") + "ms" +
 					" | DrawingFields=" + getTimingMs("Drawing/classification fields").ToString("0.0") + "ms" +
 					" | CheckXYZ=" + (checkXyzTicks * 1000.0 / timestampFrequency).ToString("0.0") + "ms" +
+					" | BoltFields=" + getTimingMs("Bolt fields").ToString("0.0") + "ms" +
+					" | BoltIdentifier=" + getTimingMs("Bolt identifier").ToString("0.0") + "ms" +
+					" | BoltSelectModelObject=" + getTimingMs("Bolt SelectModelObject").ToString("0.0") + "ms" +
 					" | BoltCreation=" + (boltCreationTicks * 1000.0 / timestampFrequency).ToString("0.0") + "ms" +
 					" | Total=" + totalMs.ToString("0.0") + "ms" +
 					Environment.NewLine;
