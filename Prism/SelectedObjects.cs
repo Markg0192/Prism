@@ -234,8 +234,7 @@ namespace Prism
 					" | DrawingFields=" + getTimingMs("Drawing/classification fields").ToString("0.0") + "ms" +
 					" | CheckXYZ=" + (checkXyzTicks * 1000.0 / timestampFrequency).ToString("0.0") + "ms" +
 					" | BoltFields=" + getTimingMs("Bolt fields").ToString("0.0") + "ms" +
-					" | BoltIdentifier=" + getTimingMs("Bolt identifier").ToString("0.0") + "ms" +
-					" | BoltSelectModelObject=" + getTimingMs("Bolt SelectModelObject").ToString("0.0") + "ms" +
+					" | BoltLazySetup=" + getTimingMs("Bolt lazy setup").ToString("0.0") + "ms" +
 					" | BoltCreation=" + (boltCreationTicks * 1000.0 / timestampFrequency).ToString("0.0") + "ms" +
 					" | Total=" + totalMs.ToString("0.0") + "ms" +
 					Environment.NewLine;
