@@ -47,10 +47,16 @@ namespace Prism
 				}
 
 				// Read the report file and populate the Drawings list
+				Stopwatch readTimer = Stopwatch.StartNew();
 				ReadReportAndPopulateDrawings(reportPath);
+				readTimer.Stop();
+				recordTiming?.Invoke("DrawingReportRead", readTimer.Elapsed.TotalMilliseconds);
 
 				// Validate that all prism parts have an associated drawing
+				Stopwatch validateTimer = Stopwatch.StartNew();
 				List<PrismPart> missingParts = ValidateDrawingSelection.ValidateSelection(Drawings, prismParts);
+				validateTimer.Stop();
+				recordTiming?.Invoke("DrawingValidation", validateTimer.Elapsed.TotalMilliseconds);
 				if (missingParts.Count > 0)
 				{
 					// On the final attempt, show a warning and exit.
@@ -148,7 +154,7 @@ namespace Prism
 		//	return valid;
 		//}
 
-		public async Task<bool> CreateReportAndGetDrawingInfo(string packagePath, List<PrismPart> prismParts, Action<int, string> progress = null)
+		public async Task<bool> CreateReportAndGetDrawingInfo(string packagePath, List<PrismPart> prismParts, Action<int, string> progress = null, Action<string, double> recordTiming = null)
 		{
 			const int maxAttempts = 3;
 			const string reportFileName = "PrismDrawing_List.xsr";
@@ -172,10 +178,15 @@ namespace Prism
 
 				await Task.Yield();
 
+				Stopwatch reportTimer = Stopwatch.StartNew();
 				if (!await GenerateReport(packagePath, reportPath, fileLockTimeoutSeconds, progress, attemptStart + 5, attemptStart + 10))
 				{
+					reportTimer.Stop();
+					recordTiming?.Invoke("DrawingReport", reportTimer.Elapsed.TotalMilliseconds);
 					return false;
 				}
+				reportTimer.Stop();
+				recordTiming?.Invoke("DrawingReport", reportTimer.Elapsed.TotalMilliseconds);
 
 				progress?.Invoke(attemptStart + 10, $"Reading drawing information - attempt {attempt} of {maxAttempts}...");
 
@@ -222,11 +233,14 @@ namespace Prism
 
 			await Task.Yield();
 
+			Stopwatch ncTimer = Stopwatch.StartNew();
 			NumberOfNcRequired = Drawings
 				.Where(d => d.DrawingFolder == DrawingFolder.ASS || d.DrawingFolder == DrawingFolder.FIT || d.DrawingFolder == DrawingFolder.PRT)
 				.Select(d => d.DrawingNumber)
 				.Distinct()
 				.Count();
+			ncTimer.Stop();
+			recordTiming?.Invoke("DrawingNcCount", ncTimer.Elapsed.TotalMilliseconds);
 
 			progress?.Invoke(100, $"Drawing information complete - {NumberOfNcRequired} NC files required.");
 
@@ -488,7 +502,7 @@ namespace Prism
 
 
 
-		public static async Task<DrawingManager> Create(Model model, PrismProjectData projectData, List<PrismPart> myParts, string phaseNum, string issueNum, string packagePath, Action<int, string> progress)
+		public static async Task<DrawingManager> Create(Model model, PrismProjectData projectData, List<PrismPart> myParts, string phaseNum, string issueNum, string packagePath, Action<int, string> progress, Action<string, double> recordTiming = null)
 		{
 			progress?.Invoke(0, "Preparing drawing manager...");
 
@@ -500,7 +514,7 @@ namespace Prism
 
 			Action<int, string> drawingInfoProgress = CreateProgressRange(progress, 5, 90);
 
-			bool valid = await manager.CreateReportAndGetDrawingInfo(packagePath, myParts, drawingInfoProgress);
+			bool valid = await manager.CreateReportAndGetDrawingInfo(packagePath, myParts, drawingInfoProgress, recordTiming);
 
 			if (!valid)
 			{
@@ -508,7 +522,12 @@ namespace Prism
 
 				await Task.Yield();
 
-				if (!PrismWarnings.MissingDrawingsFound())
+				Stopwatch userWait = Stopwatch.StartNew();
+				bool continueWithMissingDrawings = PrismWarnings.MissingDrawingsFound();
+				userWait.Stop();
+				recordTiming?.Invoke("DrawingUserWait", userWait.Elapsed.TotalMilliseconds);
+
+				if (!continueWithMissingDrawings)
 				{
 					return null;
 				}
