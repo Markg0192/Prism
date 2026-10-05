@@ -12,7 +12,7 @@ namespace Prism
 			isShop = boltGroup.BoltType == BoltGroup.BoltTypeEnum.BOLT_TYPE_WORKSHOP;
 			isShearStud = boltGroup.BoltStandard == "SHEAR-STUD";
 			isOrdered = IsBoltOrdered(boltGroup, phaseNum, issueNum);
-			BoltGroup = boltGroup;
+			_boltGroup = boltGroup;
 		}
 
 		public PrismBoltGroup(string[] items, string phaseNum, string issueNum, Model model, Action<string, long> recordTiming = null)
@@ -26,13 +26,10 @@ namespace Prism
 
 			RecordTiming(recordTiming, "Bolt fields", ref started);
 
-			Identifier identifier = new Identifier(Trim(items[6]));
+			_model = model;
+			_identifier = new Identifier(Trim(items[6]));
 
-			RecordTiming(recordTiming, "Bolt identifier", ref started);
-
-			BoltGroup = model.SelectModelObject(identifier) as BoltGroup;
-
-			RecordTiming(recordTiming, "Bolt SelectModelObject", ref started);
+			RecordTiming(recordTiming, "Bolt lazy setup", ref started);
 		}
 
 		private static void RecordTiming(Action<string, long> recordTiming, string name, ref long started)
@@ -47,8 +44,23 @@ namespace Prism
 			started = now;
 		}
 
+		private readonly Model _model;
+		private readonly Identifier _identifier;
+		private BoltGroup _boltGroup;
+
 		public string Name { get; set; }
-		public BoltGroup BoltGroup { get; set; }
+		public BoltGroup BoltGroup
+		{
+			get
+			{
+				if (_boltGroup == null && _model != null && _identifier != null)
+				{
+					_boltGroup = _model.SelectModelObject(_identifier) as BoltGroup;
+				}
+
+				return _boltGroup;
+			}
+		}
 		public bool isShop { get; set; }
 		public bool isOrdered { get; set; }
 		public bool isShearStud { get; set; }
