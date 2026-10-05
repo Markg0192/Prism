@@ -93,7 +93,7 @@ namespace Prism
 		<td style='padding:14px 22px 7px 22px;'>
 			<table width='100%' cellpadding='0' cellspacing='0' border='0' style='width:100%;table-layout:fixed;border-collapse:collapse;'>
 				<tr>
-					{BuildInfoCell("Phase / Issue", Encode(phaseNumber) + " / " + Encode(issueNumber), "35%", true)}
+					{BuildInfoCell("Phase / Issue", phaseNumber + " / " + issueNumber, "35%", true)}
 					{BuildInfoCell(dateLabel, dateValue, "35%", true)}
 					{BuildInfoCell("Model", projData.ModelName, "30%", false)}
 				</tr>
@@ -150,7 +150,13 @@ namespace Prism
 
 		private static string GetMaterialTitle(string orderType)
 		{
-			if (orderType.Contains("Special Fittings")) return "Special Fittings Order";
+			if (orderType.Contains("Special Fittings"))
+			{
+				if (orderType.Contains("Omit")) return "Special Fittings Omit";
+				if (orderType.Contains("Add")) return "Additional Special Fittings";
+				return "Special Fittings Order";
+			}
+
 			if (orderType.Contains("Omit")) return "Material Omit";
 			if (orderType.Contains("Add")) return "Additional Material Order";
 			return "Material Order";
