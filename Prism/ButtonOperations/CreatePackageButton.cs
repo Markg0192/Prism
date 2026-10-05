@@ -1,6 +1,7 @@
 ﻿using Prism.Managers.ChangeManager;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -75,11 +76,12 @@ namespace Prism.ButtonOperations
 		}
 
 		public static async Task<(bool success, DrawingManager drawingManager)> CreateFabPackage(this SelectedObjects myObjects, Model model, 
-			PrismProjectData projectData, string phaseNumber, string issueNumber, StageTypes stageType, string siteDate, bool runSeversafe, string teklaVersion, Action<int, string> progress)
+			PrismProjectData projectData, string phaseNumber, string issueNumber, StageTypes stageType, string siteDate, bool runSeversafe, string teklaVersion, Action<int, string> progress,
+			Action<string, double> recordTiming = null)
 		{
 			progress?.Invoke(0, "Starting Fab Pack creation...");
 
-			var (success, drawingManager) = await CreateFirstIssue(projectData, phaseNumber, issueNumber, runSeversafe, myObjects, model, stageType, siteDate, teklaVersion, progress);
+			var (success, drawingManager) = await CreateFirstIssue(projectData, phaseNumber, issueNumber, runSeversafe, myObjects, model, stageType, siteDate, teklaVersion, progress, recordTiming);
 
 			if (!success)
 			{
@@ -101,11 +103,14 @@ namespace Prism.ButtonOperations
 	StageTypes stageType,
 	string siteDate,
 	string teklaVersion,
-	Action<int, string> progress)
+	Action<int, string> progress,
+	Action<string, double> recordTiming)
 		{
 			progress?.Invoke(
 				2,
 				"Creating Fab Pack folders...");
+
+			Stopwatch stageTimer = Stopwatch.StartNew();
 
 			if (!InitialisePackageAndCreateFolders(
 				projectData,
@@ -118,6 +123,9 @@ namespace Prism.ButtonOperations
 			{
 				return (false, null);
 			}
+
+			stageTimer.Stop();
+			recordTiming?.Invoke("Folders", stageTimer.Elapsed.TotalMilliseconds);
 
 			progress?.Invoke(
 				5,
@@ -141,7 +149,8 @@ namespace Prism.ButtonOperations
 					reportManager,
 					myObjects.PrismDrawings,
 					teklaVersion,
-					drawingProgress);
+					drawingProgress,
+					recordTiming);
 
 			if (!success)
 			{
@@ -152,6 +161,8 @@ namespace Prism.ButtonOperations
 				55,
 				"Exporting BSWX...");
 
+			stageTimer.Restart();
+
 			await Task.Run(() =>
 				myObjects.ExportBSWX(
 					reportManager.Folders.DspPath,
@@ -159,6 +170,9 @@ namespace Prism.ButtonOperations
 					phaseNumber,
 					issueNumber,
 					stageType));
+
+			stageTimer.Stop();
+			recordTiming?.Invoke("BSWX", stageTimer.Elapsed.TotalMilliseconds);
 
 			progress?.Invoke(
 				60,
@@ -170,11 +184,16 @@ namespace Prism.ButtonOperations
 					60,
 					75);
 
+			stageTimer.Restart();
+
 			await reportManager.CreateFabReports(
 				myObjects,
 				myObjects.PrismBoltGroups,
 				teklaVersion,
 				reportProgress);
+
+			stageTimer.Stop();
+			recordTiming?.Invoke("ReportsNC", stageTimer.Elapsed.TotalMilliseconds);
 
 			progress?.Invoke(
 				75,
@@ -185,6 +204,8 @@ namespace Prism.ButtonOperations
 					progress,
 					75,
 					82);
+
+			stageTimer.Restart();
 
 			if (!myObjects
 				.GetNonSeversafeParts()
@@ -197,6 +218,9 @@ namespace Prism.ButtonOperations
 				return (false, drawingManager);
 			}
 
+			stageTimer.Stop();
+			recordTiming?.Invoke("ModifyAttributes", stageTimer.Elapsed.TotalMilliseconds);
+
 			progress?.Invoke(
 				82,
 				"Exporting individual IFCs...");
@@ -207,24 +231,35 @@ namespace Prism.ButtonOperations
 					82,
 					92);
 
+			stageTimer.Restart();
+
 			await IFCExporter.ExportIndividualIFC(
 				myObjects,
 				reportManager.Folders.IfcPath,
 				ifcProgress);
 
+			stageTimer.Stop();
+			recordTiming?.Invoke("IndividualIFC", stageTimer.Elapsed.TotalMilliseconds);
+
 			progress?.Invoke(
 				92,
 				"Removing unused Fab Pack folders...");
 
+			stageTimer.Restart();
 			reportManager.Folders.RemoveUnusedFolders();
+			stageTimer.Stop();
+			recordTiming?.Invoke("RemoveUnusedFolders", stageTimer.Elapsed.TotalMilliseconds);
 
 			progress?.Invoke(
 				94,
 				"Creating Fab Pack zip file...");
 
+			stageTimer.Restart();
 			bool zipFileCanBeAttached =
 				reportManager.Folders.ZipFolder(
 					reportManager.Folders.FabPath);
+			stageTimer.Stop();
+			recordTiming?.Invoke("Zip", stageTimer.Elapsed.TotalMilliseconds);
 
 			progress?.Invoke(
 				96,
@@ -238,6 +273,8 @@ namespace Prism.ButtonOperations
 				97,
 				"Creating Fab Pack email...");
 
+			stageTimer.Restart();
+
 			EmailWriter.WriteFabEmail(
 				projectData,
 				myObjects,
@@ -248,6 +285,9 @@ namespace Prism.ButtonOperations
 				reportManager.Folders.FabPath,
 				zipFileCanBeAttached,
 				teklaVersion);
+
+			stageTimer.Stop();
+			recordTiming?.Invoke("Email", stageTimer.Elapsed.TotalMilliseconds);
 
 			progress?.Invoke(
 				100,
@@ -273,7 +313,7 @@ namespace Prism.ButtonOperations
 
 		private static async Task<(bool success, DrawingManager drawingManager)> ProcessAndPrintDrawings(SelectedObjects selectedObjects, CpuCounter cpuCounter,
 			List<PrismPart> partsToSelect, Model model, PrismProjectData projectData, string phaseNumber, string issueNumber, ReportManager reportManager,
-			List<PrismDrawing> drawings, string teklaVersion, Action<int, string> progress)
+			List<PrismDrawing> drawings, string teklaVersion, Action<int, string> progress, Action<string, double> recordTiming)
 		{
 			progress?.Invoke(0, "Preparing drawing information...");
 
@@ -283,7 +323,10 @@ namespace Prism.ButtonOperations
 
 			Action<int, string> drawingManagerProgress = CreateProgressRange(progress, 3, 25);
 
+			Stopwatch stageTimer = Stopwatch.StartNew();
 			DrawingManager drawingManager = await Task.Run(() => DrawingManager.Create(model, projectData, partsToSelect, phaseNumber, issueNumber, reportManager.Folders.FabPath, drawingManagerProgress));
+			stageTimer.Stop();
+			recordTiming?.Invoke("DrawingManager", stageTimer.Elapsed.TotalMilliseconds);
 
 			if (drawingManager == null)
 			{
@@ -312,7 +355,10 @@ namespace Prism.ButtonOperations
 
 				Action<int, string> qrPreparationProgress = CreateProgressRange(progress, 30, 38);
 
+				stageTimer.Restart();
 				await QrCodeGenerator.ApplyQrCode(selectedObjects, projectData, reportManager.Folders.QrCodePath, drawingManager, qrPreparationProgress);
+				stageTimer.Stop();
+				recordTiming?.Invoke("QRPreparation", stageTimer.Elapsed.TotalMilliseconds);
 			}
 			else
 			{
@@ -335,13 +381,19 @@ namespace Prism.ButtonOperations
 
 			Action<int, string> printingProgress = CreateProgressRange(progress, 42, 90);
 
+			stageTimer.Restart();
 			await DrawingManager.NewPrintDrawings(reportManager, drawingManager, drawingCount, teklaVersion, printingProgress);
+			stageTimer.Stop();
+			recordTiming?.Invoke("Printing", stageTimer.Elapsed.TotalMilliseconds);
 
 			progress?.Invoke(90, "Adding QR codes to drawing PDFs...");
 
 			Action<int, string> qrPdfProgress = CreateProgressRange(progress, 90, 100);
 
+			stageTimer.Restart();
 			await QrCodeGenerator.ProcessPdfFilesAsync(reportManager.Folders.FabPath + "\\ASS", reportManager.Folders.QrCodePath, qrPdfProgress);
+			stageTimer.Stop();
+			recordTiming?.Invoke("PdfQR", stageTimer.Elapsed.TotalMilliseconds);
 
 			progress?.Invoke(100, "Drawing processing complete.");
 
