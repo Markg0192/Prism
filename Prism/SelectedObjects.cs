@@ -92,6 +92,18 @@ namespace Prism
 
 		private void CreatePartListFromReport(string packagePath, Model model, string phaseNum, string issueNum, StageTypes stageType, Action<int, string> progress = null)
 		{
+			Stopwatch totalStopwatch = Stopwatch.StartNew();
+			Dictionary<string, long> prismPartTimings = new Dictionary<string, long>();
+			Action<string, long> recordPrismPartTiming = delegate (string name, long ticks)
+			{
+				if (!prismPartTimings.ContainsKey(name))
+				{
+					prismPartTimings[name] = 0;
+				}
+
+				prismPartTimings[name] += ticks;
+			};
+
 			string teklaReportLocation = Path.Combine(FirmFolderLoc.ReportTemplates(), "PrismPart_List.rpt");
 			string newReportLocation = Path.Combine(packagePath, "PrismPart_List.xsr");
 
@@ -111,15 +123,22 @@ namespace Prism
 
 			progress?.Invoke(8, "Reading selected objects...");
 
+			Stopwatch readStopwatch = Stopwatch.StartNew();
+
 			List<string[]> reportObjects = File.ReadLines(newReportLocation)
 				.Select(line => line.Split(','))
 				.Where(items => items.Length > 0 && (items[0] == " Part" || items[0] == " Bolt"))
 				.ToList();
+
+			readStopwatch.Stop();
+
 			int totalObjects = reportObjects.Count;
 			int objectCount = 0;
 			int partCount = 0;
 			int boltCount = 0;
 			int lastReportedStep = -1;
+			long checkXyzTicks = 0;
+			long boltCreationTicks = 0;
 
 			foreach (string[] items in reportObjects)
 			{
@@ -127,16 +146,21 @@ namespace Prism
 
 				if (items[0] == " Part")
 				{
-					PrismPart newPart = new PrismPart(items, model, stageType);
+					PrismPart newPart = new PrismPart(items, model, stageType, recordPrismPartTiming);
 
 					PrismParts.Add(newPart);
+
+					long xyzStarted = Stopwatch.GetTimestamp();
 					CheckXYZSize(newPart.Part);
+					checkXyzTicks += Stopwatch.GetTimestamp() - xyzStarted;
 
 					partCount++;
 				}
 				else if (items[0] == " Bolt")
 				{
+					long boltStarted = Stopwatch.GetTimestamp();
 					PrismBoltGroup boltGroup = new PrismBoltGroup(items, phaseNum, issueNum, model);
+					boltCreationTicks += Stopwatch.GetTimestamp() - boltStarted;
 
 					if (boltGroup != null)
 					{
@@ -167,7 +191,58 @@ namespace Prism
 				12,
 				"Selection built - " + partCount + " parts and " + boltCount + " bolt groups.");
 
+			totalStopwatch.Stop();
+
+			WritePrismPartPerformanceLog(
+				packagePath,
+				stageType,
+				partCount,
+				boltCount,
+				readStopwatch.Elapsed.TotalMilliseconds,
+				prismPartTimings,
+				checkXyzTicks,
+				boltCreationTicks,
+				totalStopwatch.Elapsed.TotalMilliseconds);
+
 			File.Delete(newReportLocation);
+		}
+
+		private static void WritePrismPartPerformanceLog(string packagePath, StageTypes stageType, int partCount, int boltCount,
+			double reportReadMs, Dictionary<string, long> prismPartTimings, long checkXyzTicks, long boltCreationTicks, double totalMs)
+		{
+			try
+			{
+				string logPath = Path.Combine(packagePath, "PrismPart_Performance.log");
+				double timestampFrequency = Stopwatch.Frequency;
+
+				Func<string, double> getTimingMs = delegate (string name)
+				{
+					long ticks;
+					return prismPartTimings.TryGetValue(name, out ticks) ? ticks * 1000.0 / timestampFrequency : 0;
+				};
+
+				string line =
+					DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") +
+					" | Stage=" + stageType +
+					" | Parts=" + partCount +
+					" | Bolts=" + boltCount +
+					" | ReportRead=" + reportReadMs.ToString("0.0") + "ms" +
+					" | CoreFields=" + getTimingMs("Core fields").ToString("0.0") + "ms" +
+					" | GetIdentifierByGUID=" + getTimingMs("GetIdentifierByGUID").ToString("0.0") + "ms" +
+					" | SelectModelObject=" + getTimingMs("SelectModelObject").ToString("0.0") + "ms" +
+					" | GetAssembly=" + getTimingMs("GetAssembly").ToString("0.0") + "ms" +
+					" | DrawingFields=" + getTimingMs("Drawing/classification fields").ToString("0.0") + "ms" +
+					" | CheckXYZ=" + (checkXyzTicks * 1000.0 / timestampFrequency).ToString("0.0") + "ms" +
+					" | BoltCreation=" + (boltCreationTicks * 1000.0 / timestampFrequency).ToString("0.0") + "ms" +
+					" | Total=" + totalMs.ToString("0.0") + "ms" +
+					Environment.NewLine;
+
+				File.AppendAllText(logPath, line);
+			}
+			catch
+			{
+				// Performance logging must never interrupt the Prism workflow.
+			}
 		}
 		public Model Model;
 		public double SmallestX = 100000000;
