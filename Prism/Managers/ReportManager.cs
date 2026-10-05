@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using Tekla.Structures.Model.Operations;
 using System.Collections.Generic;
+using System.Diagnostics;
 using static Prism.Enums;
 using System.Drawing.Printing;
 using System.Drawing;
@@ -301,9 +302,11 @@ namespace Prism
 
 		}
 
-		public async Task CreateFabReports(SelectedObjects myObjects, List<PrismBoltGroup> boltList, string teklaVersion, Action<int, string> progress)
+		public async Task CreateFabReports(SelectedObjects myObjects, List<PrismBoltGroup> boltList, string teklaVersion, Action<int, string> progress, Action<string, double> recordTiming = null)
 		{
 			progress?.Invoke(0, "Preparing fabrication reports...");
+
+			Stopwatch timer = Stopwatch.StartNew();
 
 			bool create3Report = false;
 			bool create4Report = false;
@@ -333,21 +336,33 @@ namespace Prism
 				if (isFitting) create4Report = true;
 			}
 
+			timer.Stop();
+			recordTiming?.Invoke("ReportPreparation", timer.Elapsed.TotalMilliseconds);
+
 			progress?.Invoke(10, "Creating fabrication reports...");
 
+			timer.Restart();
 			await Task.Run(() => CreateReports(boltList, create3Report, create4Report, createPgReport, shopBoltsPresent, siteBoltsPresent));
+			timer.Stop();
+			recordTiming?.Invoke("TeklaReports", timer.Elapsed.TotalMilliseconds);
 
 			progress?.Invoke(45, "Creating NC data...");
 
-			await Task.Run(() => CreateNC(teklaVersion, myObjects));
+			await Task.Run(() => CreateNC(teklaVersion, myObjects, recordTiming));
 
 			progress?.Invoke(80, "Converting fabrication reports to PDF...");
 
+			timer.Restart();
 			await Task.Run(() => TextToPDF(Folders.ReportPath));
+			timer.Stop();
+			recordTiming?.Invoke("ReportPDF", timer.Elapsed.TotalMilliseconds);
 
 			progress?.Invoke(95, "Restoring selected fabrication parts...");
 
+			timer.Restart();
 			ModelModifiers.SelectParts(nonSeversafeParts);
+			timer.Stop();
+			recordTiming?.Invoke("RestorePartSelection", timer.Elapsed.TotalMilliseconds);
 
 			progress?.Invoke(100, "Fabrication reports and NC data complete.");
 		}
@@ -499,39 +514,67 @@ namespace Prism
 			}
 		}
 
-		private void CreateNC(string version, SelectedObjects myObjects)
+		private void CreateNC(string version, SelectedObjects myObjects, Action<string, double> recordTiming = null)
 		{
-			//The name of the settings used changed from tekla 2021 -> 2023, so, we set up and run both here,
+			Stopwatch timer = new Stopwatch();
+
 			if (version.Contains("2021"))
 			{
-				//2021 NC
 				string plateSetting2021 = "-SNI-PLATES";
 				string profileSetting2021 = "-SNI-PROFILES";
-				// string shpRolePlates = "DSTV for plates";
-				//  string shpRoleForProfiles = "DSTV for profiles";
+
+				timer.Restart();
 				Operation.CreateNCFilesFromSelected(plateSetting2021, Folders.NcPath + "\\", true);
+				timer.Stop();
+				recordTiming?.Invoke("NC2021Plates", timer.Elapsed.TotalMilliseconds);
+
+				timer.Restart();
 				Operation.CreateNCFilesFromSelected(profileSetting2021, Folders.NcPath + "\\", true);
-				//   Operation.CreateNCFilesFromSelected(shpRolePlates, Folders.NcPath + "\\", false, "", true);
-				//   Operation.CreateNCFilesFromSelected(shpRoleForProfiles, Folders.NcPath + "\\", false, "", true);
+				timer.Stop();
+				recordTiming?.Invoke("NC2021Profiles", timer.Elapsed.TotalMilliseconds);
 			}
 			else
 			{
-				//2023 NC
 				string platesSec2023 = "-SEV-PLATES-SEC";
 				string profilesMain2023 = "-SEV-PROFILES-MAIN";
 				string profilesSec2023 = "-SEV-PROFILES-SEC";
 				string profilesHollow2023 = "-SEV-PROFILES-MAIN-HOLLOW";
 
+				timer.Restart();
 				ModelModifiers.SelectParts(myObjects.GetSecondaryParts());
-				Operation.CreateNCFilesFromSelected(platesSec2023, Folders.NcPath + "\\", false, "", true);
-				Operation.CreateNCFilesFromSelected(profilesSec2023, Folders.NcPath + "\\", false, "", true);
+				timer.Stop();
+				recordTiming?.Invoke("NCSecondarySelection", timer.Elapsed.TotalMilliseconds);
 
+				timer.Restart();
+				Operation.CreateNCFilesFromSelected(platesSec2023, Folders.NcPath + "\\", false, "", true);
+				timer.Stop();
+				recordTiming?.Invoke("NCSecondaryPlates", timer.Elapsed.TotalMilliseconds);
+
+				timer.Restart();
+				Operation.CreateNCFilesFromSelected(profilesSec2023, Folders.NcPath + "\\", false, "", true);
+				timer.Stop();
+				recordTiming?.Invoke("NCSecondaryProfiles", timer.Elapsed.TotalMilliseconds);
+
+				timer.Restart();
 				ModelModifiers.SelectParts(myObjects.GetMainParts());
+				timer.Stop();
+				recordTiming?.Invoke("NCMainSelection", timer.Elapsed.TotalMilliseconds);
+
+				timer.Restart();
 				Operation.CreateNCFilesFromSelected(profilesHollow2023, Folders.NcPath + "\\", true, "", true);
+				timer.Stop();
+				recordTiming?.Invoke("NCMainHollow", timer.Elapsed.TotalMilliseconds);
+
+				timer.Restart();
 				Operation.CreateNCFilesFromSelected(profilesMain2023, Folders.NcPath + "\\", true, "", true);
+				timer.Stop();
+				recordTiming?.Invoke("NCMainProfiles", timer.Elapsed.TotalMilliseconds);
 			}
-			// Wait for the folder to have contents or timeout after 10 seconds
+
+			timer.Restart();
 			WaitForFolderContents(Folders.NcPath, TimeSpan.FromSeconds(30));
+			timer.Stop();
+			recordTiming?.Invoke("NCWait", timer.Elapsed.TotalMilliseconds);
 		}
 
 		private void WaitForFolderContents(string folderPath, TimeSpan timeout)
