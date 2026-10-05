@@ -119,7 +119,8 @@ namespace Prism.ButtonOperations
 				runSeversafe,
 				myObjects,
 				out ReportManager reportManager,
-				out CpuCounter cpuCounter))
+				out CpuCounter cpuCounter,
+				recordTiming))
 			{
 				return (false, null);
 			}
@@ -265,9 +266,12 @@ namespace Prism.ButtonOperations
 				96,
 				"Completing Fab Pack...");
 
+			stageTimer.Restart();
 			PrismWarnings.FabPackComplete(
 				projectData,
 				zipFileCanBeAttached);
+			stageTimer.Stop();
+			recordTiming?.Invoke("FabPackCompleteUserWait", stageTimer.Elapsed.TotalMilliseconds);
 
 			progress?.Invoke(
 				97,
@@ -284,10 +288,11 @@ namespace Prism.ButtonOperations
 				siteDate,
 				reportManager.Folders.FabPath,
 				zipFileCanBeAttached,
-				teklaVersion);
+				teklaVersion,
+				recordTiming);
 
 			stageTimer.Stop();
-			recordTiming?.Invoke("Email", stageTimer.Elapsed.TotalMilliseconds);
+			recordTiming?.Invoke("EmailWall", stageTimer.Elapsed.TotalMilliseconds);
 
 			progress?.Invoke(
 				100,
@@ -324,7 +329,7 @@ namespace Prism.ButtonOperations
 			Action<int, string> drawingManagerProgress = CreateProgressRange(progress, 3, 25);
 
 			Stopwatch stageTimer = Stopwatch.StartNew();
-			DrawingManager drawingManager = await Task.Run(() => DrawingManager.Create(model, projectData, partsToSelect, phaseNumber, issueNumber, reportManager.Folders.FabPath, drawingManagerProgress));
+			DrawingManager drawingManager = await Task.Run(() => DrawingManager.Create(model, projectData, partsToSelect, phaseNumber, issueNumber, reportManager.Folders.FabPath, drawingManagerProgress, recordTiming));
 			stageTimer.Stop();
 			recordTiming?.Invoke("DrawingManager", stageTimer.Elapsed.TotalMilliseconds);
 
@@ -716,16 +721,44 @@ namespace Prism.ButtonOperations
 			return addedItems.Concat(reviseItems).ToList();
 		}
 
-		private static bool InitialisePackageAndCreateFolders(PrismProjectData projectData, string phaseNumber, string issueNumber, bool runSeversafe, SelectedObjects myObjects, out ReportManager reportManager, out CpuCounter cpuCounter)
+		private static bool InitialisePackageAndCreateFolders(PrismProjectData projectData, string phaseNumber, string issueNumber, bool runSeversafe, SelectedObjects myObjects, out ReportManager reportManager, out CpuCounter cpuCounter, Action<string, double> recordTiming = null)
 		{
+			Stopwatch timer = Stopwatch.StartNew();
 			cpuCounter = new CpuCounter();
+			timer.Stop();
+			recordTiming?.Invoke("FolderCpuCounter", timer.Elapsed.TotalMilliseconds);
+
+			timer.Restart();
 			reportManager = new ReportManager(projectData, phaseNumber, issueNumber);
+			timer.Stop();
+			recordTiming?.Invoke("FolderReportManager", timer.Elapsed.TotalMilliseconds);
 
-			if (!reportManager.Folders.CreateFabFolders()) return false;
-			if (!reportManager.Folders.CreateBoltFolder()) return false;
-			if (runSeversafe) { if (!reportManager.Folders.CreateEpoFolder()) return false; }
+			timer.Restart();
+			if (!reportManager.Folders.CreateFabFolders(recordTiming)) return false;
+			timer.Stop();
+			recordTiming?.Invoke("FolderFab", timer.Elapsed.TotalMilliseconds);
 
-			if (myObjects.SeversafePresent) { myObjects.GetNonSeversafeParts().SelectParts(); }
+			timer.Restart();
+			if (!reportManager.Folders.CreateBoltFolder(recordTiming)) return false;
+			timer.Stop();
+			recordTiming?.Invoke("FolderBolt", timer.Elapsed.TotalMilliseconds);
+
+			if (runSeversafe)
+			{
+				timer.Restart();
+				if (!reportManager.Folders.CreateEpoFolder(recordTiming)) return false;
+				timer.Stop();
+				recordTiming?.Invoke("FolderSeversafe", timer.Elapsed.TotalMilliseconds);
+			}
+
+			if (myObjects.SeversafePresent)
+			{
+				timer.Restart();
+				myObjects.GetNonSeversafeParts().SelectParts();
+				timer.Stop();
+				recordTiming?.Invoke("FolderSeversafeSelection", timer.Elapsed.TotalMilliseconds);
+			}
+
 			return true;
 		}
 
