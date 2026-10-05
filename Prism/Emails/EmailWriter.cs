@@ -7,6 +7,7 @@ using System;
 using System.Windows.Forms;
 using System.IO;
 using System.Linq;
+using System.Diagnostics;
 
 namespace Prism
 {
@@ -22,13 +23,16 @@ namespace Prism
 		private const string johnsEmail = "john.gradwell@severfield.com";
 		private static readonly string ApplicationName = "Your Application Name";
 
-		public static void ExecuteEmailAction(Action<Application> emailAction)
+		public static void ExecuteEmailAction(Action<Application> emailAction, Action<string, double> recordTiming = null)
 		{
 			Application outlookApp = null;
 
 			try
 			{
+				Stopwatch timer = Stopwatch.StartNew();
 				outlookApp = new Application();
+				timer.Stop();
+				recordTiming?.Invoke("EmailOutlookStart", timer.Elapsed.TotalMilliseconds);
 				emailAction(outlookApp);
 			}
 			catch (System.Exception ex)
@@ -147,12 +151,16 @@ namespace Prism
 		}
 
 		public static void WriteFabEmail(PrismProjectData projData, SelectedObjects objects, string fabPrefix, string issueNumber, string phaseNumber,
-			string siteDate, string fabPath, bool zipFileCanBeAttached, string teklaVersion)
+			string siteDate, string fabPath, bool zipFileCanBeAttached, string teklaVersion, Action<string, double> recordTiming = null)
 		{
+			Stopwatch timer = Stopwatch.StartNew();
 			string emailBody = FabEmailBuilder.Build(projData, objects, issueNumber, phaseNumber, siteDate, zipFileCanBeAttached, teklaVersion);
+			timer.Stop();
+			recordTiming?.Invoke("EmailBuild", timer.Elapsed.TotalMilliseconds);
 
 			ExecuteEmailAction(outlookApp =>
 			{
+				timer.Restart();
 				MailItem email = outlookApp.CreateItem(OlItemType.olMailItem) as MailItem;
 
 				email.Subject = $"{fabPrefix} Fab Issue{AddVariationNoIfReqd(projData.IsVariation, projData.VariationNumber)}";
@@ -166,8 +174,14 @@ namespace Prism
 				}
 
 				email.CC = FormCCString(false, projData.WebService, projData.ProjNumberAndGuid);
+				timer.Stop();
+				recordTiming?.Invoke("EmailPrepare", timer.Elapsed.TotalMilliseconds);
+
+				timer.Restart();
 				email.Display();
-			});
+				timer.Stop();
+				recordTiming?.Invoke("EmailUserWait", timer.Elapsed.TotalMilliseconds);
+			}, recordTiming);
 		}
 
 		public static void WriteRevisedFabEmail(PrismProjectData projData, string fabPrefix, string issueNumber, string phaseNumber, string siteDate,
