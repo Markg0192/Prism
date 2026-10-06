@@ -458,6 +458,9 @@ namespace Prism
 				return DrawingCheckRunResult.StageTwoFailed;
 			}
 
+			progress?.Invoke(90, "Checking shear stud order status...");
+			ModelChecker.ConfirmShearStudOrder(_projectData.Full, _selectedObjects.PrismBoltGroups, false);
+
 			progress?.Invoke(92, "Creating drawings...");
 
 			await Task.Run(() =>
@@ -633,6 +636,19 @@ namespace Prism
 				return FabPackCheckRunResult.DrawingChecksFailed;
 			}
 
+			progress?.Invoke(75, "Checking shear stud order status...");
+			if (!ModelChecker.ConfirmShearStudOrder(_projectData.Full, _selectedObjects.PrismBoltGroups, true))
+			{
+				return FabPackCheckRunResult.ChecksFailed;
+			}
+
+			progress?.Invoke(90, "Recording Fab Pack check completion...");
+			if (!ModelModifiers.StampFabCheckComplete(_selectedObjects.PrismParts, _projectData))
+			{
+				return FabPackCheckRunResult.ChecksFailed;
+			}
+
+			_model.CommitChanges();
 			_ = LogProgress(_projectData.ModelName, "Fab Checks", 0, _selectedObjects.PrismParts.Count);
 
 			progress?.Invoke(95, "Fab Pack checks complete.");
@@ -979,6 +995,14 @@ namespace Prism
 			{
 				totalTimer.Stop();
 				WriteFabPackPerformanceLog(phaseNumber, issueNumber, "InitialSetupFailed", timings, totalTimer.Elapsed.TotalMilliseconds);
+				return FabPackRunResult.InitialSetupFailed;
+			}
+
+			progress?.Invoke(22, "Checking Fab Pack checks are complete...");
+			if (!ModelChecker.AreFabPackChecksComplete(_selectedObjects))
+			{
+				totalTimer.Stop();
+				WriteFabPackPerformanceLog(phaseNumber, issueNumber, "FabChecksIncomplete", timings, totalTimer.Elapsed.TotalMilliseconds);
 				return FabPackRunResult.InitialSetupFailed;
 			}
 

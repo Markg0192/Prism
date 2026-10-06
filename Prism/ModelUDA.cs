@@ -79,6 +79,16 @@
             return "SEV-UDA-126";
         }
 
+		public static string FabCheckCompleteUser()
+		{
+			return "SEV-UDA-354";
+		}
+
+		public static string FabCheckCompleteDate()
+		{
+			return "SEV-UDA-355";
+		}
+
         public static string Weight()
         {
             return "WEIGHT";

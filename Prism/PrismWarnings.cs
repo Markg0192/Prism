@@ -602,6 +602,22 @@ namespace Prism
 			return IgnoreType.Unspecified;
 		}
 
+		public static bool TagShearStudsAsOrdered()
+		{
+			const string message = "Prism has detected shear studs in your selection that are not tagged as ordered.\r\r" +
+				"Shear studs must be ordered manually before Fab Pack checks can complete. If they are still not ordered at that stage Prism will not allow the Fab Pack checks to pass.\r\r" +
+				"Have these shear studs now been ordered and would you like Prism to tag them as ordered?";
+			const string title = "Shear studs";
+			return CreateYesNoForm(message, title);
+		}
+
+		public static void ShearStudsBlockFabPackChecks()
+		{
+			const string message = "Fab Pack checks cannot complete while shear studs remain untagged. Order the shear studs manually, then run the Fab Pack checks again and tag them as ordered.";
+			const string title = "Shear studs not ordered";
+			CreateOKForm(message, title);
+		}
+
 		public static bool UnorderedShearStuds()
 		{
 			const string notUpToDateMessage = "Prism has detected shear studs in your selection, these should have been manually pre-ordered by now.\r\rClick yes to confirm you have pre-ordered these.";

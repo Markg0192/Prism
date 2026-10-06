@@ -324,8 +324,8 @@ namespace Prism
 
 			if (boltList.Count > 0)
 			{
-				shopBoltsPresent = boltList.Any(pbg => pbg != null && pbg.isShop && !pbg.isShearStud && !pbg.isOrdered);
-				siteBoltsPresent = boltList.Any(pbg => pbg != null && !pbg.isShop && !pbg.isShearStud && !pbg.isOrdered);
+				shopBoltsPresent = boltList.Any(pbg => pbg != null && pbg.isShop);
+				siteBoltsPresent = boltList.Any(pbg => pbg != null && !pbg.isShop);
 			}
 
 			List<PrismPart> nonSeversafeParts = myObjects.GetNonSeversafeParts();
@@ -503,19 +503,30 @@ namespace Prism
 			{
 				Operation.CreateReportFromSelected(hrFittingReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output3Name}"), _title1, _title2, _title3);
 			}
-			if (shopBoltsPresent || siteBoltsPresent) //then create our strumis summary report
+			List<BoltGroup> unorderedNormalBolts = boltList
+				.Where(pbg => pbg != null && !pbg.isOrdered && !pbg.isShearStud && pbg.BoltGroup != null)
+				.Select(pbg => pbg.BoltGroup)
+				.ToList();
+
+			if (unorderedNormalBolts.Any()) //then create our strumis summary report
 			{
-				ModelModifiers.SelectBolts(boltList.Where(pbg => !pbg.isOrdered && !pbg.isShearStud).Select(pbg => pbg.BoltGroup).ToList());
+				ModelModifiers.SelectBolts(unorderedNormalBolts);
 				Operation.CreateReportFromSelected(boltReport, Path.Combine(Folders.DspPath, $"{FabReportPrefix}{_outputSelectedBolts}"), _title1, _title2, _title3);
 			}
+
+			List<BoltGroup> packageBolts = boltList
+				.Where(pbg => pbg != null && pbg.BoltGroup != null)
+				.Select(pbg => pbg.BoltGroup)
+				.ToList();
+
 			if (shopBoltsPresent) //Then create a shop bolts summary
 			{
-				ModelModifiers.SelectBolts(boltList.Where(pbg => !pbg.isOrdered && !pbg.isShearStud && pbg.isShop).Select(pbg => pbg.BoltGroup).ToList());
+				ModelModifiers.SelectBolts(packageBolts);
 				Operation.CreateReportFromSelected(shopBoltReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output4Name}"), _title1, _title2, _title3);
 			}
 			if (siteBoltsPresent) //Then create a site bolts summary
 			{
-				ModelModifiers.SelectBolts(boltList.Where(pbg => !pbg.isOrdered && !pbg.isShearStud && !pbg.isShop).Select(pbg => pbg.BoltGroup).ToList());
+				ModelModifiers.SelectBolts(packageBolts);
 				Operation.CreateReportFromSelected(siteBoltReport, Path.Combine(Folders.ReportPath, $"{FabReportPrefix}{_output5Name}"), _title1, _title2, _title3);
 			}
 		}

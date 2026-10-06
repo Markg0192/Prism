@@ -32,13 +32,13 @@ namespace Prism
             bool runSeversafe, PrismProjectData projData, bool runChangeManager, out bool boltOrderAdded)
 		{
 			boltOrderAdded = false;
-			if (selectedObjects.PrismBoltGroups.Any(b => b.isOrdered == false))
-			{
-				List<BoltGroup> unorderedBoltGroups = selectedObjects.PrismBoltGroups
-										.Where(pbg => !pbg.isOrdered) // Filter PrismBoltGroup objects where IsOrdered is false
-										.Select(pbg => pbg.BoltGroup) // Select the BoltGroup property from those filtered PrismBoltGroup objects
-										.ToList();
+			List<BoltGroup> unorderedBoltGroups = selectedObjects.PrismBoltGroups
+				.Where(pbg => pbg != null && !pbg.isOrdered && !pbg.isShearStud && pbg.BoltGroup != null)
+				.Select(pbg => pbg.BoltGroup)
+				.ToList();
 
+			if (unorderedBoltGroups.Any())
+			{
 				CreateBoltOrder(reportManager, siteDate, unorderedBoltGroups);
 				ModelModifiers.StampBoltUDA(unorderedBoltGroups, reportManager.ProjectData.Full, reportManager.ProjectData.Date,
                     reportManager.PhaseNum, reportManager.IssueNum);

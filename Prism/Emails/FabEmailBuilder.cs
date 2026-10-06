@@ -50,7 +50,7 @@ namespace Prism
 
 			summary.ShopBoltCount = objects.PrismBoltGroups != null
 				? objects.PrismBoltGroups
-					.Where(bolt => bolt != null && bolt.isShop && !bolt.isShearStud && !bolt.isOrdered)
+					.Where(bolt => bolt != null && bolt.isShop && bolt.BoltGroup != null)
 					.Sum(bolt => bolt.BoltGroup.BoltPositions.Count)
 				: 0;
 

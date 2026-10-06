@@ -304,6 +304,12 @@ namespace PrismNewInterface.Services
 					return OperationResult.Failed("Fab pack drawing checks failed.", validationResults);
 				}
 
+				if (result == FabPackCheckRunResult.ChecksFailed)
+				{
+					ReportProgress(progress, 100, "Fab pack checks failed.");
+					return OperationResult.Failed("Fab pack checks failed. Resolve the outstanding checks before creating a Fab Pack.");
+				}
+
 				ReportProgress(progress, 100, "Fab pack checks complete.");
 
 				return OperationResult.Successful("Selected parts are ready for Fab Pack issuing.");

@@ -434,6 +434,67 @@ namespace Prism
 			return true;
 		}
 
+		public static bool AreFabPackChecksComplete(SelectedObjects selectedObjects)
+		{
+			List<PrismPart> incompleteParts = selectedObjects.GetNonSeversafeParts()
+				.Where(part =>
+				{
+					string completedBy = "";
+					part.Part.GetUserProperty(ModelUDA.FabCheckCompleteUser(), ref completedBy);
+					return string.IsNullOrWhiteSpace(completedBy);
+				})
+				.ToList();
+
+			if (!incompleteParts.Any()) return true;
+
+			foreach (PrismPart part in incompleteParts)
+			{
+				if (!part.PartErrors.Contains(Error.PreviousStepIncomplete))
+					part.PartErrors.Add(Error.PreviousStepIncomplete);
+			}
+
+			return false;
+		}
+
+		public static bool ConfirmShearStudOrder(string userName, List<PrismBoltGroup> prismBoltGroups, bool requiredForFabPackChecks)
+		{
+			List<PrismBoltGroup> unorderedShearStuds = prismBoltGroups
+				.Where(pbg => pbg != null && pbg.isShearStud && !ShearStudIsTaggedOrdered(pbg))
+				.ToList();
+
+			if (!unorderedShearStuds.Any()) return true;
+
+			if (PrismWarnings.TagShearStudsAsOrdered())
+			{
+				foreach (PrismBoltGroup prismBoltGroup in unorderedShearStuds)
+				{
+					BoltGroup boltGroup = prismBoltGroup.BoltGroup;
+					if (boltGroup == null) continue;
+
+					boltGroup.SetUserProperty(ModelUDA.BoltOrderedBy(), userName);
+					boltGroup.SetUserProperty(ModelUDA.BoltShearStudTag(), "Ordered");
+					prismBoltGroup.isOrdered = true;
+				}
+
+				return true;
+			}
+
+			if (!requiredForFabPackChecks) return true;
+
+			PrismWarnings.ShearStudsBlockFabPackChecks();
+			return false;
+		}
+
+		private static bool ShearStudIsTaggedOrdered(PrismBoltGroup prismBoltGroup)
+		{
+			BoltGroup boltGroup = prismBoltGroup.BoltGroup;
+			if (boltGroup == null) return false;
+
+			string orderedTag = "";
+			boltGroup.GetReportProperty(ModelUDA.BoltShearStudTag(), ref orderedTag);
+			return string.Equals(orderedTag, "Ordered", StringComparison.OrdinalIgnoreCase);
+		}
+
 		private static bool CheckForAndActionErrors(string userName, List<PrismBoltGroup> prismBoltGroups, SelectedObjects selectedObjects)
 		{
 			if (!OrderErrors()) { return false; }

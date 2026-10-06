@@ -108,6 +108,18 @@ namespace Prism
 			return cleaned;
 		}
 
+		public static bool StampFabCheckComplete(List<PrismPart> selectedObjects, PrismProjectData projectData)
+		{
+			foreach (PrismPart part in selectedObjects)
+			{
+				if (part == null || part.Part == null) continue;
+				if (!part.Part.SetUserProperty(ModelUDA.FabCheckCompleteUser(), projectData.Full)) return false;
+				if (!part.Part.SetUserProperty(ModelUDA.FabCheckCompleteDate(), projectData.Date)) return false;
+			}
+
+			return true;
+		}
+
 		public static bool ModifyAttributes(this List<PrismPart> selectedObjects, StageTypes stageType, PrismProjectData projectData, 
 			Action<int, string> progress, ReportManager reportManager, bool isSpecialFittingOrder = false, bool isSeversafe = false)
 		{
