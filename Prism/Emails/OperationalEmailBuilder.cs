@@ -13,7 +13,7 @@ namespace Prism
 		private const string EpoColour = "#34656D";
 		private const string FabsecColour = "#56516E";
 
-		public static string BuildMaterial(PrismProjectData projData, SelectedObjects objects, string orderType, string phaseNumber, string issueNumber, string siteDate)
+		public static string BuildMaterial(PrismProjectData projData, SelectedObjects objects, string orderType, string phaseNumber, string issueNumber, string siteDate, bool zipFileCanBeAttached = true)
 		{
 			string title = GetMaterialTitle(orderType);
 			string action = GetMaterialAction(orderType);
@@ -27,18 +27,16 @@ namespace Prism
 				new SummaryItem(status, "Order Type")
 			});
 
-			return BuildEmail(projData, title, MaterialColour, action, phaseNumber, issueNumber, "Material Required", dateValue, summary,
-				"Order Information", GetMaterialDescription(orderType));
+			return BuildEmail(projData, title, MaterialColour, action, phaseNumber, issueNumber, "Material Required", dateValue, summary, zipFileCanBeAttached);
 		}
 
-		public static string BuildBoltOrder(PrismProjectData projData, string phaseNumber, string issueNumber, string siteDate)
+		public static string BuildBoltOrder(PrismProjectData projData, string phaseNumber, string issueNumber, string siteDate, bool zipFileCanBeAttached = true)
 		{
 			return BuildEmail(projData, "Bolt Order", BoltColour, "Order these bolts", phaseNumber, issueNumber, "Site Date", FormatDate(siteDate),
-				BuildSummaryRow(new[] { new SummaryItem("BOLTS", "Order") }),
-				"Order Information", "The attached bolt order is ready for purchasing.");
+				BuildSummaryRow(new[] { new SummaryItem("BOLTS", "Order") }), zipFileCanBeAttached);
 		}
 
-		public static string BuildEpoOrder(PrismProjectData projData, string phaseNumber, string issueNumber, string siteDate)
+		public static string BuildEpoOrder(PrismProjectData projData, string phaseNumber, string issueNumber, string siteDate, bool zipFileCanBeAttached = true)
 		{
 			List<SummaryItem> items = new List<SummaryItem>();
 
@@ -54,19 +52,22 @@ namespace Prism
 			string summary = items.Count > 0 ? BuildSummaryRow(items) : BuildSummaryRow(new[] { new SummaryItem("EPO", "Order") });
 
 			return BuildEmail(projData, "Seversafe / EPO Order", EpoColour, "Make this order available", phaseNumber, issueNumber, "Site Date", FormatDate(siteDate),
-				summary, "Order Information", "All edge-protection lengths have been rounded to the nearest 0.5m.");
+				summary, zipFileCanBeAttached);
 		}
 
-		public static string BuildFabsecCarcassOrder(PrismProjectData projData, string phaseNumber, string issueNumber, string siteDate)
+		public static string BuildFabsecCarcassOrder(PrismProjectData projData, string phaseNumber, string issueNumber, string siteDate, bool zipFileCanBeAttached = true)
 		{
 			return BuildEmail(projData, "Fabsec Carcass Order", FabsecColour, "Process these carcasses", phaseNumber, issueNumber, "Required for Fab", FormatDate(siteDate),
-				BuildSummaryRow(new[] { new SummaryItem("FABSEC", "Carcass Order") }),
-				"Order Information", "The attached Fabsec carcass package is ready for processing.");
+				BuildSummaryRow(new[] { new SummaryItem("FABSEC", "Carcass Order") }), zipFileCanBeAttached);
 		}
 
 		private static string BuildEmail(PrismProjectData projData, string title, string colour, string action, string phaseNumber, string issueNumber,
-			string dateLabel, string dateValue, string summaryHtml, string sectionTitle, string sectionText)
+			string dateLabel, string dateValue, string summaryHtml, bool zipFileCanBeAttached)
 		{
+			string attachmentBackground = zipFileCanBeAttached ? "#4A5960" : "#8A5A18";
+			string attachmentText = zipFileCanBeAttached ? "PACKAGE ATTACHED" : "PACKAGE TOO LARGE TO ATTACH";
+			string actionText = zipFileCanBeAttached ? action : "See link in Additional Information";
+
 			return $@"
 <html>
 <body style='margin:0;padding:0;font-family:Segoe UI,Arial,sans-serif;font-size:11pt;color:#333333;background-color:#ffffff;'>
@@ -76,13 +77,13 @@ namespace Prism
 			<table width='100%' cellpadding='0' cellspacing='0' border='0' style='width:100%;border-collapse:collapse;'>
 				<tr>
 					<td width='65%' valign='middle' style='width:65%;'>
-						<div style='font-size:20px;font-weight:600;margin-bottom:4px;'>{Encode(title)}</div>
+						<div style='font-size:20px;font-weight:600;margin-bottom:4px;color:#ffffff;'>{Encode(title)}</div>
 						<div style='font-size:11pt;color:#F0F2F2;'>{Encode(projData.ProjNumber)} &nbsp;|&nbsp; {Encode(projData.ProjName)}</div>
 					</td>
 					<td width='35%' valign='middle' align='right' style='width:35%;'>
 						<table cellpadding='0' cellspacing='0' border='0' align='right' style='border-collapse:collapse;text-align:right;'>
-							<tr><td style='padding:5px 9px;background-color:#ffffff;color:{colour};font-size:9pt;font-weight:600;'>ACTION</td></tr>
-							<tr><td style='padding-top:7px;font-size:9pt;color:#F0F2F2;'>{Encode(action)}</td></tr>
+							<tr><td style='padding:5px 9px;background-color:{attachmentBackground};color:#ffffff;font-size:9pt;font-weight:600;'>{attachmentText}</td></tr>
+							<tr><td style='padding-top:7px;font-size:9pt;color:#F0F2F2;'><span style='font-weight:600;'>ACTION:</span>&nbsp; {Encode(actionText)}</td></tr>
 						</table>
 					</td>
 				</tr>
@@ -102,18 +103,12 @@ namespace Prism
 		</td>
 	</tr>
 	<tr>
-		<td style='padding:15px 22px 8px 22px;'>
-			<div style='font-size:12pt;font-weight:600;margin-bottom:8px;'>{Encode(sectionTitle)}</div>
-			<div style='padding:9px 12px;background-color:#F5F6F7;border-left:4px solid {colour};color:#555555;'>{Encode(sectionText)}</div>
-		</td>
-	</tr>
-	<tr><td style='padding:8px 22px 10px 22px;'>{summaryHtml}</td></tr>
-	<tr>
 		<td style='padding:10px 22px 4px 22px;'>
 			<div style='font-size:12pt;font-weight:600;margin-bottom:6px;'>Additional Information</div>
-			<div style='padding:9px 12px;background-color:#FFFBEA;border-left:4px solid #D6B656;color:#666666;'>[Add any project or order-specific information here.]</div>
+			<div style='padding:9px 12px;background-color:#FFFBEA;border-left:4px solid #D6B656;color:#666666;'>[Add any project, area or order-specific information here.]</div>
 		</td>
 	</tr>
+	<tr><td style='padding:15px 22px 14px 22px;'>{summaryHtml}</td></tr>
 </table>
 </body>
 </html>";

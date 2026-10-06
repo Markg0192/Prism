@@ -82,8 +82,8 @@ namespace Prism
 			if (typeOfOrder == 1) { reportManager.CreateSelectedBoltList(reportManager.BoltReportPrefix, orderType); }
 			else reportManager.CreateBoltList(reportManager.BoltReportPrefix, orderType);
 
-			reportManager.Folders.ZipFolder(reportManager.Folders.BoltPath);
-			EmailWriter.WriteBoltOrderEmail(reportManager.ProjectData, reportManager.BoltReportPrefix, reportManager.IssueNum, reportManager.PhaseNum, siteDate, reportManager.Folders.BoltPath);
+			bool zipFileCanBeAttached = reportManager.Folders.ZipFolder(reportManager.Folders.BoltPath);
+			EmailWriter.WriteBoltOrderEmail(reportManager.ProjectData, reportManager.BoltReportPrefix, reportManager.IssueNum, reportManager.PhaseNum, siteDate, reportManager.Folders.BoltPath, zipFileCanBeAttached);
 			return true;
 		}
 
@@ -115,11 +115,11 @@ namespace Prism
 			}
 			model.CommitChanges();
 
-			myReportManager.Folders.ZipFolder(myReportManager.Folders.CarcassOrderPath);
+			bool zipFileCanBeAttached = myReportManager.Folders.ZipFolder(myReportManager.Folders.CarcassOrderPath);
 
 			PrismWarnings.MaterialOrderComplete(projectData);
 
-			EmailWriter.WriteFabsecCarcassEmail(myReportManager.ProjectData, myReportManager.CarcassReportPrefix, myReportManager.IssueNum, myReportManager.PhaseNum, orderDate, myReportManager.Folders.CarcassOrderPath);
+			EmailWriter.WriteFabsecCarcassEmail(myReportManager.ProjectData, myReportManager.CarcassReportPrefix, myReportManager.IssueNum, myReportManager.PhaseNum, orderDate, myReportManager.Folders.CarcassOrderPath, zipFileCanBeAttached);
 
 			return true;
 		}

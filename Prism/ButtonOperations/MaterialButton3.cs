@@ -197,8 +197,8 @@ namespace Prism.ButtonOperations
 			if (fabsecsPresent && !orderType.Contains("Omit")) FabsecProcessing.RemoveGreenFromFabsecs(myObjects.GetFabsecParts(), projectData);
 			PrismWarnings.MaterialOrderComplete(projectData);
 
-			reportManager.Folders.ZipFolder(reportManager.Folders.MatPath);
-			EmailWriter.WriteMatEmail(projectData, myObjects, matReportPrefix, reportManager.IssueNum, reportManager.PhaseNum, orderType, reportManager.Folders.MatPath, fabsecsPresent, siteDate);
+			bool zipFileCanBeAttached = reportManager.Folders.ZipFolder(reportManager.Folders.MatPath);
+			EmailWriter.WriteMatEmail(projectData, myObjects, matReportPrefix, reportManager.IssueNum, reportManager.PhaseNum, orderType, reportManager.Folders.MatPath, fabsecsPresent, siteDate, zipFileCanBeAttached);
 
 			Logging.LogProgress(projectData.ProjNumberAndName, "Material 3", 0, myObjects.GetMainParts().Count);
 

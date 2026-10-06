@@ -55,9 +55,9 @@ namespace Prism
 
 				CopyRenameAndWrite(reportManager.ProjectData, reportManager.PhaseNum, siteDate, sourcePath, destinationPath, newFileName, divisionNo);
 
-				reportManager.Folders.ZipFolder(reportManager.Folders.EpoPath);
+				bool zipFileCanBeAttached = reportManager.Folders.ZipFolder(reportManager.Folders.EpoPath);
 
-				EmailWriter.WriteEpoEmail(reportManager.ProjectData, reportPrefix, reportManager.IssueNum, reportManager.PhaseNum, siteDate, reportManager.Folders.EpoPath);
+				EmailWriter.WriteEpoEmail(reportManager.ProjectData, reportPrefix, reportManager.IssueNum, reportManager.PhaseNum, siteDate, reportManager.Folders.EpoPath, zipFileCanBeAttached);
 			}
 			catch (Exception ex)
 			{

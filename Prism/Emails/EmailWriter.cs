@@ -78,9 +78,9 @@ namespace Prism
 			});
 		}
 
-		public static void WriteEpoEmail(PrismProjectData projData, string fabPrefix, string issueNumber, string phaseNumber, string siteDate, string fabPath)
+		public static void WriteEpoEmail(PrismProjectData projData, string fabPrefix, string issueNumber, string phaseNumber, string siteDate, string fabPath, bool zipFileCanBeAttached = true)
 		{
-			string emailBody = OperationalEmailBuilder.BuildEpoOrder(projData, phaseNumber, issueNumber, siteDate);
+			string emailBody = OperationalEmailBuilder.BuildEpoOrder(projData, phaseNumber, issueNumber, siteDate, zipFileCanBeAttached);
 
 			ExecuteEmailAction(outlookApp =>
 			{
@@ -90,8 +90,11 @@ namespace Prism
 				email.BodyFormat = OlBodyFormat.olFormatHTML;
 				email.HTMLBody = emailBody;
 
-				string attachmentPath = $"{fabPath}.zip";
-				email.Attachments.Add(attachmentPath);
+				if (zipFileCanBeAttached)
+				{
+					string attachmentPath = $"{fabPath}.zip";
+					email.Attachments.Add(attachmentPath);
+				}
 
 				email.To = _seversafeTeamEmail;
 				email.CC = FormCCString(false, projData.WebService, projData.ProjNumberAndGuid);
@@ -230,7 +233,7 @@ namespace Prism
 
 		public static void WriteBoltOrderEmail(PrismProjectData projData, string fabPrefix, string issueNumber, string phaseNumber, string siteDate, string boltPath)
 		{
-			string emailBody = OperationalEmailBuilder.BuildBoltOrder(projData, phaseNumber, issueNumber, siteDate);
+			string emailBody = OperationalEmailBuilder.BuildBoltOrder(projData, phaseNumber, issueNumber, siteDate, zipFileCanBeAttached);
 
 			ExecuteEmailAction(outlookApp =>
 			{
@@ -249,9 +252,9 @@ namespace Prism
 			});
 		}
 
-		public static void WriteFabsecCarcassEmail(PrismProjectData projData, string fabPrefix, string issueNumber, string phaseNumber, string siteDate, string boltPath)
+		public static void WriteFabsecCarcassEmail(PrismProjectData projData, string fabPrefix, string issueNumber, string phaseNumber, string siteDate, string boltPath, bool zipFileCanBeAttached = true)
 		{
-			string emailBody = OperationalEmailBuilder.BuildFabsecCarcassOrder(projData, phaseNumber, issueNumber, siteDate);
+			string emailBody = OperationalEmailBuilder.BuildFabsecCarcassOrder(projData, phaseNumber, issueNumber, siteDate, zipFileCanBeAttached);
 
 			ExecuteEmailAction(outlookApp =>
 			{
@@ -261,8 +264,11 @@ namespace Prism
 				email.BodyFormat = OlBodyFormat.olFormatHTML;
 				email.HTMLBody = emailBody;
 
-				string attachmentPath = $"{boltPath}.zip";
-				email.Attachments.Add(attachmentPath);
+				if (zipFileCanBeAttached)
+				{
+					string attachmentPath = $"{boltPath}.zip";
+					email.Attachments.Add(attachmentPath);
+				}
 
 				email.To = _fabsecTeamEmail;
 				email.CC = _purchasingEmail;
@@ -271,9 +277,9 @@ namespace Prism
 		}
 
 		public static void WriteMatEmail(PrismProjectData projData, SelectedObjects objects, string fabPrefix, string issueNumber, string phaseNumber,
-			string orderType, string matPath, bool fabsecPresent, string siteDate)
+			string orderType, string matPath, bool fabsecPresent, string siteDate, bool zipFileCanBeAttached = true)
 		{
-			string emailBody = OperationalEmailBuilder.BuildMaterial(projData, objects, orderType, phaseNumber, issueNumber, siteDate);
+			string emailBody = OperationalEmailBuilder.BuildMaterial(projData, objects, orderType, phaseNumber, issueNumber, siteDate, zipFileCanBeAttached);
 
 			ExecuteEmailAction(outlookApp =>
 			{
@@ -283,8 +289,11 @@ namespace Prism
 				email.BodyFormat = OlBodyFormat.olFormatHTML;
 				email.HTMLBody = emailBody;
 
-				string attachmentPath = $"{matPath}.zip";
-				email.Attachments.Add(attachmentPath);
+				if (zipFileCanBeAttached)
+				{
+					string attachmentPath = $"{matPath}.zip";
+					email.Attachments.Add(attachmentPath);
+				}
 
 				email.To = _purchasingEmail;
 				email.CC = FormCCString(fabsecPresent, projData.WebService, projData.ProjNumberAndGuid);

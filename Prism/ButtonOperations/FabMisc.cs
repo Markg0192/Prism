@@ -56,8 +56,8 @@ namespace Prism
         {
             ModelModifiers.SelectBolts(unorderedBoltGroups);
             reportManager.CreateSelectedBoltList(reportManager.FabReportPrefix, "Order Bolts");
-            reportManager.Folders.ZipFolder(reportManager.Folders.BoltPath);
-            EmailWriter.WriteBoltOrderEmail(reportManager.ProjectData, reportManager.FabReportPrefix, reportManager.IssueNum, reportManager.PhaseNum, siteDate, reportManager.Folders.BoltPath);
+            bool zipFileCanBeAttached = reportManager.Folders.ZipFolder(reportManager.Folders.BoltPath);
+            EmailWriter.WriteBoltOrderEmail(reportManager.ProjectData, reportManager.FabReportPrefix, reportManager.IssueNum, reportManager.PhaseNum, siteDate, reportManager.Folders.BoltPath, zipFileCanBeAttached);
         }
     }
 }
