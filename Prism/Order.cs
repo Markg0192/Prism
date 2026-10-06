@@ -132,7 +132,11 @@ namespace Prism
 			DrawingManager dm = await DrawingManager.Create(model, projectData, fabsecCarcasses, myReportManager.PhaseNum, myReportManager.IssueNum, myReportManager.Folders.CarcassOrderPath, progress);
 			if (dm == null) return false;
 
+			if (dm.GetOutOfDateDrawings().Count > 0) { PrismWarnings.DrawingsNotUpToDate(); return false; }
 			if (dm.GetDrawingFolder(Enums.DrawingFolder.Default).Count != 0) { PrismWarnings.IncorrectlyAssignedDrawings(); return false; }
+
+			int drawingsWithoutRevisions = dm.GetDrawingsWithoutRevision().Count;
+			if (drawingsWithoutRevisions > 0) { PrismWarnings.DrawingsWithoutRevisions(drawingsWithoutRevisions); return false; }
 
 			List<int> drawingCount = new List<int> { 0, dm.GetDrawingFolder(Enums.DrawingFolder.PGC).Count };
 			DrawingManager.PrintAndIssueDrawings(myReportManager.Folders.FabsecCarcassFolder, myReportManager.Folders.CarcassOrderPath, drawingCount, "\\PGC", 0, 1, myReportManager, false, teklaVersion);

@@ -548,9 +548,22 @@ namespace Prism
 				return false;
 			}
 
+			if (drawingManager.GetOutOfDateDrawings().Count > 0)
+			{
+				PrismWarnings.DrawingsNotUpToDate();
+				return false;
+			}
+
 			if (drawingManager.GetDrawingFolder(Enums.DrawingFolder.Default).Count != 0)
 			{
 				PrismWarnings.IncorrectlyAssignedDrawings();
+				return false;
+			}
+
+			int drawingsWithoutRevisions = drawingManager.GetDrawingsWithoutRevision().Count;
+			if (drawingsWithoutRevisions > 0)
+			{
+				PrismWarnings.DrawingsWithoutRevisions(drawingsWithoutRevisions);
 				return false;
 			}
 
