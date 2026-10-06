@@ -434,6 +434,26 @@ namespace Prism
 			return true;
 		}
 
+		public static bool AreFabsecCarcassesOrdered(SelectedObjects selectedObjects)
+		{
+			bool allOrdered = true;
+
+			foreach (PrismPart fabsec in selectedObjects.GetFabsecParts())
+			{
+				string carcassOrdered = "";
+				fabsec.Part.GetUserProperty(ModelUDA.FabsecCarcassOrdered(), ref carcassOrdered);
+
+				if (!string.IsNullOrWhiteSpace(carcassOrdered)) continue;
+
+				if (!fabsec.PartErrors.Contains(Error.FabsecCarcassNotOrdered))
+					fabsec.PartErrors.Add(Error.FabsecCarcassNotOrdered);
+
+				allOrdered = false;
+			}
+
+			return allOrdered;
+		}
+
 		public static bool AreFabPackChecksComplete(SelectedObjects selectedObjects)
 		{
 			List<PrismPart> incompleteParts = selectedObjects.GetNonSeversafeParts()

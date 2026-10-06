@@ -458,6 +458,12 @@ namespace Prism
 				return DrawingCheckRunResult.StageTwoFailed;
 			}
 
+			progress?.Invoke(88, "Checking Fabsec carcass order status...");
+			if (!ModelChecker.AreFabsecCarcassesOrdered(_selectedObjects))
+			{
+				return DrawingCheckRunResult.StageTwoFailed;
+			}
+
 			progress?.Invoke(90, "Checking shear stud order status...");
 			ModelChecker.ConfirmShearStudOrder(_projectData.Full, _selectedObjects.PrismBoltGroups, false);
 

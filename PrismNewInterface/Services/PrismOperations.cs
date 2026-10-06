@@ -469,6 +469,7 @@ namespace PrismNewInterface.Services
 			return BuildPartValidationResults(
 				new ValidationDefinition("Finish", Error.FinishMissing),
 				new ValidationDefinition("Intumescent Loading", Error.IntumescentLoadingMissing),
+				new ValidationDefinition("Fabsec Carcass Ordered", Error.FabsecCarcassNotOrdered),
 				new ValidationDefinition("Secondary Numbering", Error.SecondaryNumberingMismatch, AutoCompleteType.SecondaryNumberingMismatch),
 				new ValidationDefinition("Secondary Phasing", Error.SecondaryPhasingMismatch, AutoCompleteType.SecondaryPhasingMismatch));
 		}

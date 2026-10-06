@@ -16,6 +16,7 @@
 			PartLocked,
 			PreviousStepIncomplete,
 			FabsecNotProcessed,
+			FabsecCarcassNotOrdered,
 
 			PartNotOrdered,
 			FinishMissing,
