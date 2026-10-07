@@ -232,7 +232,7 @@ namespace Prism
 		}
 
 		public static void WriteBoltOrderEmail(PrismProjectData projData, string fabPrefix, string issueNumber, string phaseNumber, string siteDate, string boltPath,
-			int shopBoltCount, int siteBoltCount, bool zipFileCanBeAttached = true)
+			int shopBoltCount, int siteBoltCount, bool zipFileCanBeAttached)
 		{
 			string emailBody = OperationalEmailBuilder.BuildBoltOrder(projData, phaseNumber, issueNumber, siteDate, shopBoltCount, siteBoltCount, zipFileCanBeAttached);
 
