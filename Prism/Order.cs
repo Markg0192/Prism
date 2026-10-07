@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static Prism.Enums;
@@ -170,7 +171,7 @@ namespace Prism
 
 			PrismWarnings.MaterialOrderComplete(projectData);
 
-			EmailWriter.WriteFabsecCarcassEmail(myReportManager.ProjectData, originalFabsecs, myReportManager.CarcassReportPrefix, myReportManager.IssueNum, myReportManager.PhaseNum, orderDate, myReportManager.Folders.CarcassOrderPath, zipFileCanBeAttached);
+			EmailWriter.WriteFabsecCarcassEmail(myReportManager.ProjectData, originalFabsecs, myReportManager.CarcassReportPrefix, myReportManager.IssueNum, myReportManager.PhaseNum, orderDate, myReportManager.Folders.CarcassOrderPath);
 
 			return true;
 		}
