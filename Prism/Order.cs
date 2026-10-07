@@ -168,7 +168,7 @@ namespace Prism
 
 			PrismWarnings.MaterialOrderComplete(projectData);
 
-			EmailWriter.WriteFabsecCarcassEmail(myReportManager.ProjectData, myReportManager.CarcassReportPrefix, myReportManager.IssueNum, myReportManager.PhaseNum, orderDate, myReportManager.Folders.CarcassOrderPath);
+			EmailWriter.WriteFabsecCarcassEmail(myReportManager.ProjectData, originalFabsecs, myReportManager.CarcassReportPrefix, myReportManager.IssueNum, myReportManager.PhaseNum, orderDate, myReportManager.Folders.CarcassOrderPath, zipFileCanBeAttached);
 
 			return true;
 		}
