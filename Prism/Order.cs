@@ -11,7 +11,7 @@ namespace Prism
 	{ 
 		public static void ShearStuds(string orderType, ReportManager myReportManager, string siteDate)
 		{
-			OrderBolts(orderType, myReportManager, siteDate);
+			OrderBolts(orderType, myReportManager, siteDate, null);
 		}
 
 		public static bool BoltsSeversafeAndHdBolts(string orderType, ReportManager myReportManager, string siteDate, Model model, SelectedObjects myObjects, PrismProjectData projectData, out bool orderRequired)
@@ -20,7 +20,7 @@ namespace Prism
 			if (orderType.Contains("Bolts"))
 			{
 				orderRequired = true;
-				return OrderBolts(orderType, myReportManager, siteDate);
+				return OrderBolts(orderType, myReportManager, siteDate, myObjects);
 			}
 
 			if (orderType.Contains("Seversafe"))
@@ -73,7 +73,7 @@ namespace Prism
 			return true;
 		}
 
-		private static bool OrderBolts(string orderType, ReportManager reportManager, string siteDate)
+		private static bool OrderBolts(string orderType, ReportManager reportManager, string siteDate, SelectedObjects selectedObjects)
 		{
 			int typeOfOrder = PrismWarnings.BoltOrderType();
 
@@ -82,8 +82,16 @@ namespace Prism
 			if (typeOfOrder == 1) { reportManager.CreateSelectedBoltList(reportManager.BoltReportPrefix, orderType); }
 			else reportManager.CreateBoltList(reportManager.BoltReportPrefix, orderType);
 
+			List<PrismBoltGroup> boltGroups = selectedObjects != null && selectedObjects.PrismBoltGroups != null
+				? selectedObjects.PrismBoltGroups.Where(bolt => bolt != null && !bolt.isShearStud).ToList()
+				: new List<PrismBoltGroup>();
+
+			int shopBoltCount = boltGroups.Where(bolt => bolt.isShop && bolt.BoltGroup != null).Sum(bolt => bolt.BoltGroup.BoltPositions.Count);
+			int siteBoltCount = boltGroups.Where(bolt => !bolt.isShop && bolt.BoltGroup != null).Sum(bolt => bolt.BoltGroup.BoltPositions.Count);
+
 			bool zipFileCanBeAttached = reportManager.Folders.ZipFolder(reportManager.Folders.BoltPath);
-			EmailWriter.WriteBoltOrderEmail(reportManager.ProjectData, reportManager.BoltReportPrefix, reportManager.IssueNum, reportManager.PhaseNum, siteDate, reportManager.Folders.BoltPath, zipFileCanBeAttached);
+			EmailWriter.WriteBoltOrderEmail(reportManager.ProjectData, reportManager.BoltReportPrefix, reportManager.IssueNum, reportManager.PhaseNum, siteDate,
+				reportManager.Folders.BoltPath, shopBoltCount, siteBoltCount, zipFileCanBeAttached);
 			return true;
 		}
 
@@ -119,7 +127,7 @@ namespace Prism
 
 			PrismWarnings.MaterialOrderComplete(projectData);
 
-			EmailWriter.WriteFabsecCarcassEmail(myReportManager.ProjectData, myReportManager.CarcassReportPrefix, myReportManager.IssueNum, myReportManager.PhaseNum, orderDate, myReportManager.Folders.CarcassOrderPath, zipFileCanBeAttached);
+			EmailWriter.WriteFabsecCarcassEmail(myReportManager.ProjectData, originalFabsecs, myReportManager.CarcassReportPrefix, myReportManager.IssueNum, myReportManager.PhaseNum, orderDate, myReportManager.Folders.CarcassOrderPath, zipFileCanBeAttached);
 
 			return true;
 		}

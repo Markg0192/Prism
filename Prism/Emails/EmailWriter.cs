@@ -231,9 +231,10 @@ namespace Prism
 			return myString;
 		}
 
-		public static void WriteBoltOrderEmail(PrismProjectData projData, string fabPrefix, string issueNumber, string phaseNumber, string siteDate, string boltPath)
+		public static void WriteBoltOrderEmail(PrismProjectData projData, string fabPrefix, string issueNumber, string phaseNumber, string siteDate, string boltPath,
+			int shopBoltCount, int siteBoltCount, bool zipFileCanBeAttached = true)
 		{
-			string emailBody = OperationalEmailBuilder.BuildBoltOrder(projData, phaseNumber, issueNumber, siteDate, zipFileCanBeAttached);
+			string emailBody = OperationalEmailBuilder.BuildBoltOrder(projData, phaseNumber, issueNumber, siteDate, shopBoltCount, siteBoltCount, zipFileCanBeAttached);
 
 			ExecuteEmailAction(outlookApp =>
 			{
@@ -243,8 +244,11 @@ namespace Prism
 				email.BodyFormat = OlBodyFormat.olFormatHTML;
 				email.HTMLBody = emailBody;
 
-				string attachmentPath = $"{boltPath}.zip";
-				email.Attachments.Add(attachmentPath);
+				if (zipFileCanBeAttached)
+				{
+					string attachmentPath = $"{boltPath}.zip";
+					email.Attachments.Add(attachmentPath);
+				}
 
 				email.To = _purchasingEmail;
 				email.CC = FormCCString(false, projData.WebService, projData.ProjNumberAndGuid);
@@ -252,9 +256,9 @@ namespace Prism
 			});
 		}
 
-		public static void WriteFabsecCarcassEmail(PrismProjectData projData, string fabPrefix, string issueNumber, string phaseNumber, string siteDate, string boltPath, bool zipFileCanBeAttached = true)
+		public static void WriteFabsecCarcassEmail(PrismProjectData projData, List<PrismPart> fabsecs, string fabPrefix, string issueNumber, string phaseNumber, string siteDate, string boltPath, bool zipFileCanBeAttached = true)
 		{
-			string emailBody = OperationalEmailBuilder.BuildFabsecCarcassOrder(projData, phaseNumber, issueNumber, siteDate, zipFileCanBeAttached);
+			string emailBody = OperationalEmailBuilder.BuildFabsecCarcassOrder(projData, fabsecs, phaseNumber, issueNumber, siteDate, zipFileCanBeAttached);
 
 			ExecuteEmailAction(outlookApp =>
 			{

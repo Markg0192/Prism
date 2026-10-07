@@ -18,53 +18,61 @@ namespace Prism
 			string title = GetMaterialTitle(orderType);
 			string action = GetMaterialAction(orderType);
 			string dateValue = orderType.Contains("Omit") ? "Not applicable" : FormatDate(siteDate);
-			string status = orderType.Contains("Omit") ? "OMIT" : orderType.Contains("Add") ? "ADDITIONAL" : "ORDER";
+			int fabsecCount = objects != null ? objects.GetFabsecParts().Count : 0;
 
 			string summary = BuildSummaryRow(new[]
 			{
 				new SummaryItem(objects != null && objects.PrismParts != null ? objects.PrismParts.Count.ToString() : "0", "Parts"),
 				new SummaryItem(objects != null ? $"{objects.MainPartWeight + objects.FittingWeight:0.###} t" : "0 t", "Total Weight"),
-				new SummaryItem(status, "Order Type")
+				new SummaryItem(fabsecCount.ToString(), "Fabsec Material")
 			});
 
 			return BuildEmail(projData, title, MaterialColour, action, phaseNumber, issueNumber, "Material Required", dateValue, summary, zipFileCanBeAttached);
 		}
 
-		public static string BuildBoltOrder(PrismProjectData projData, string phaseNumber, string issueNumber, string siteDate, bool zipFileCanBeAttached = true)
+		public static string BuildBoltOrder(PrismProjectData projData, string phaseNumber, string issueNumber, string siteDate, int shopBoltCount, int siteBoltCount, bool zipFileCanBeAttached = true)
 		{
 			return BuildEmail(projData, "Bolt Order", BoltColour, "Order these bolts", phaseNumber, issueNumber, "Site Date", FormatDate(siteDate),
-				BuildSummaryRow(new[] { new SummaryItem("BOLTS", "Order") }), zipFileCanBeAttached);
+				BuildSummaryRow(new[]
+				{
+					new SummaryItem(shopBoltCount.ToString(), "Shop Bolts"),
+					new SummaryItem(siteBoltCount.ToString(), "Site Bolts")
+				}), zipFileCanBeAttached);
 		}
 
 		public static string BuildEpoOrder(PrismProjectData projData, string phaseNumber, string issueNumber, string siteDate, bool zipFileCanBeAttached = true)
 		{
-			List<SummaryItem> items = new List<SummaryItem>();
-
-			if (SeversafeOrder.LinMeterRun1mSystem != 0)
-				items.Add(new SummaryItem($"{SeversafeOrder.LinMeterRun1mSystem:0.##} m", "1m Edge"));
-			if (SeversafeOrder.LinMeterRun1_8mSystem != 0)
-				items.Add(new SummaryItem($"{SeversafeOrder.LinMeterRun1_8mSystem:0.##} m", "1.8m Edge"));
-			if (SeversafeOrder.LinMeterRun1mPhaseBreak != 0)
-				items.Add(new SummaryItem($"{SeversafeOrder.LinMeterRun1mPhaseBreak:0.##} m", "1m Phase Break"));
-			if (SeversafeOrder.LinMeterRun1_8mPhaseBreak != 0)
-				items.Add(new SummaryItem($"{SeversafeOrder.LinMeterRun1_8mPhaseBreak:0.##} m", "1.8m Phase Break"));
-
-			string summary = items.Count > 0 ? BuildSummaryRow(items) : BuildSummaryRow(new[] { new SummaryItem("EPO", "Order") });
+			string summary = BuildSummaryRow(new[]
+			{
+				new SummaryItem($"{SeversafeOrder.LinMeterRun1mSystem:0.##} m", "1m Edge"),
+				new SummaryItem($"{SeversafeOrder.LinMeterRun1_8mSystem:0.##} m", "1.8m Edge"),
+				new SummaryItem($"{SeversafeOrder.LinMeterRun1mPhaseBreak:0.##} m", "1m Phase Break"),
+				new SummaryItem($"{SeversafeOrder.LinMeterRun1_8mPhaseBreak:0.##} m", "1.8m Phase Break")
+			});
 
 			return BuildEmail(projData, "Seversafe / EPO Order", EpoColour, "Make this order available", phaseNumber, issueNumber, "Site Date", FormatDate(siteDate),
 				summary, zipFileCanBeAttached);
 		}
 
-		public static string BuildFabsecCarcassOrder(PrismProjectData projData, string phaseNumber, string issueNumber, string siteDate, bool zipFileCanBeAttached = true)
+		public static string BuildFabsecCarcassOrder(PrismProjectData projData, List<PrismPart> fabsecs, string phaseNumber, string issueNumber, string siteDate, bool zipFileCanBeAttached = true)
 		{
+			List<PrismPart> parts = fabsecs ?? new List<PrismPart>();
+			int uniqueFabsecs = parts.Where(part => part != null && !string.IsNullOrWhiteSpace(part.PartMark))
+				.Select(part => part.PartMark.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).Count();
+			double totalWeight = parts.Where(part => part != null).Sum(part => part.Weight);
+
 			return BuildEmail(projData, "Fabsec Carcass Order", FabsecColour, "Process these carcasses", phaseNumber, issueNumber, "Required for Fab", FormatDate(siteDate),
-				BuildSummaryRow(new[] { new SummaryItem("FABSEC", "Carcass Order") }), zipFileCanBeAttached);
+				BuildSummaryRow(new[]
+				{
+					new SummaryItem(parts.Count.ToString(), "Fabsec Parts"),
+					new SummaryItem(uniqueFabsecs.ToString(), "Unique Fabsecs"),
+					new SummaryItem($"{totalWeight:0.###} t", "Total Weight")
+				}), zipFileCanBeAttached);
 		}
 
 		private static string BuildEmail(PrismProjectData projData, string title, string colour, string action, string phaseNumber, string issueNumber,
 			string dateLabel, string dateValue, string summaryHtml, bool zipFileCanBeAttached)
 		{
-			string attachmentBackground = zipFileCanBeAttached ? "#4A5960" : "#8A5A18";
 			string attachmentText = zipFileCanBeAttached ? "PACKAGE ATTACHED" : "PACKAGE TOO LARGE TO ATTACH";
 			string actionText = zipFileCanBeAttached ? action : "See link in Additional Information";
 
@@ -82,7 +90,7 @@ namespace Prism
 					</td>
 					<td width='35%' valign='middle' align='right' style='width:35%;'>
 						<table cellpadding='0' cellspacing='0' border='0' align='right' style='border-collapse:collapse;text-align:right;'>
-							<tr><td style='padding:5px 9px;background-color:{attachmentBackground};color:#ffffff;font-size:9pt;font-weight:600;'>{attachmentText}</td></tr>
+							<tr><td style='padding:5px 0;color:#ffffff;font-size:9pt;font-weight:600;'>{attachmentText}</td></tr>
 							<tr><td style='padding-top:7px;font-size:9pt;color:#F0F2F2;'><span style='font-weight:600;'>ACTION:</span>&nbsp; {Encode(actionText)}</td></tr>
 						</table>
 					</td>
