@@ -69,6 +69,8 @@ namespace Prism
 
 		private static bool OrderSeversafe(Model model, SelectedObjects myObjects, string siteDate, ReportManager myReportManager, PrismProjectData projectData)
 		{
+			if (!myReportManager.Folders.CreateEpoFolder()) return false;
+
 			SeversafeOrder.CreateSeversafeOrder(model, myObjects.GetSeversafeParts(), siteDate, myReportManager, 1, myReportManager.EpoReportPrefix, projectData);
 			return true;
 		}
